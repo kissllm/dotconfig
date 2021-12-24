@@ -1,0 +1,58 @@
+#    if [[ -z $DISPLAY ]] && (( $EUID != 0 )) {
+#    #    [[ ${TTY/tty} != $TTY ]] && (( ${TTY:8:1} <= 3 )) &&
+#        [[ ${TTY/tty} != $TTY ]] && (( ${TTY:8:1} <= 1 )) &&
+#            startx &
+#    }
+#   
+#   for file in "/etc/profile" "${HOME}/.profile" "${HOME}/.zprofile" ; do
+#       if [ -f "${file}" ] ; then
+#           source "${file}"
+#       fi
+#   done
+
+# https://wiki.gentoo.org/wiki/Sway
+# if test -z "${XDG_RUNTIME_DIR}" {
+if [[ -z "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID} ]] {
+    XDG_RUNTIME_DIR=/run/user/${UID}
+    export XDG_RUNTIME_DIR=/run/user/${UID}
+    #    if ! test -d "${XDG_RUNTIME_DIR}" {
+    if ! [[ -d "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID} ]] {
+        doas mkdir "${XDG_RUNTIME_DIR}"
+        doas chmod 0700 "${XDG_RUNTIME_DIR}"
+        doas chown -R ${USER}:users "${XDG_RUNTIME_DIR}"
+    }
+}
+#   doas chmod 0700 "${XDG_RUNTIME_DIR}"
+#   doas chown -R eli:users "${XDG_RUNTIME_DIR}"
+
+# https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
+SWAY_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/sway"
+export SWAY_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/sway"
+
+# sway specific environment
+if [[ -f ${SWAY_CONFIG_HOME}/env ]] {
+    set -a
+    # shellcheck disable=SC1090
+    . "${SWAY_CONFIG_HOME}/env"
+    set +a
+}
+
+
+if [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] {
+    #   XKB_DEFAULT_LAYOUT=us exec sway >\$HOME/.config/sway/.sway_autolauncher.log 2>&1
+    #   export XKB_DEFAULT_LAYOUT=us,cn
+    export XKB_DEFAULT_LAYOUT=us
+    export XKB_DEFAULT_VARIANT=us
+    #   export XKB_DEFAULT_MODEL=pc105
+    export XKB_DEFAULT_MODEL=pc101
+    export XKB_DEFAULT_OPTIONS=grp:win_space_toggle
+    #   WLR_DRM_DEVICES=/dev/dri/card0 XKB_DEFAULT_LAYOUT=us exec sway > ~/.config/sway/.sway_autolauncher.log 2>&1
+    #   export WLR_DRM_DEVICES=/dev/dri/card0 
+
+    # Running sway without xwayland
+    # https://github.com/swaywm/sway/issues/676
+    export WLC_XWAYLAND=0
+
+    #   dbus-launch --sh-syntax --exit-with-session sway > ~/.config/sway/.sway_autolauncher.log 2>&1
+    dbus-run-session sway -d > ~/.config/sway/.sway_autolauncher.log 2>&1
+}
