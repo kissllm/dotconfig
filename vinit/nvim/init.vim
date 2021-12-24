@@ -686,7 +686,7 @@ elseif exists('g:use_setup_reference')
         " call a:packager.add('wincent/command-t',                          { 'type' : 'start' })
         " call a:packager.add('svermeulen/vim-cutlass',                     { 'type' : 'start' })  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
         " call a:packager.add('umaumax/vim-format',                         { 'type' : 'start' })    " file format
-        call a:packager.add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
+        " call a:packager.add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
         " call a:packager.add('rking/ag.vim',                               { 'type' : 'start' })
         " call a:packager.add('romainl/vim-qf',                             { 'type' : 'start' })
         " call a:packager.add('reedes/vim-colors-pencil',                   { 'type' : 'start' })
@@ -887,7 +887,7 @@ elseif exists('g:use_setup_packager')
             " call packager#add('wincent/command-t',                          { 'type' : 'start' })
             " call packager#add('svermeulen/vim-cutlass',                     { 'type' : 'start' })  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
             " call packager#add('umaumax/vim-format',                         { 'type' : 'start' })    " file format
-            call packager#add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
+            " call packager#add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
             " call packager#add('rking/ag.vim',                               { 'type' : 'start' })
             " call packager#add('romainl/vim-qf',                             { 'type' : 'start' })
             " call packager#add('reedes/vim-colors-pencil',                   { 'type' : 'start' })
@@ -1444,32 +1444,49 @@ function! s:delmarks()
 endfunction
 nnoremap <silent> dm :<c-u>call <sid>delmarks()<cr>
 
-" https://github.com/Yggdroot/indentLine
-" For Yggdroot/indentLine
-let g:indentLine_setColors       = 0
-" let g:indentLine_defaultGroup    = 'SpecialKey'
+if exists("g:indentLine_loaded")
+    " https://github.com/Yggdroot/indentLine
+    " For Yggdroot/indentLine
+    let g:indentLine_setColors       = 0
+    " let g:indentLine_defaultGroup    = 'SpecialKey'
 
-" GVim
-let g:indentLine_color_gui       = '#A4E57E'
+    " GVim
+    let g:indentLine_color_gui       = '#A4E57E'
 
-" none X terminal
-let g:indentLine_color_tty_light = 1 " (default: 4)
-let g:indentLine_color_dark      = 1 " (default: 2)
+    " none X terminal
+    let g:indentLine_color_tty_light = 1 " (default: 4)
+    let g:indentLine_color_dark      = 1 " (default: 2)
 
-" Background (Vim, GVim)
-" Vim
-" let g:indentLine_color_term      = 239
-" " let g:indentLine_bgcolor_term    = 202
-" let g:indentLine_bgcolor_gui     = '#4E4E4E'
-" " let g:indentLine_bgcolor_gui     = '#FF5F00'
-let g:indentLine_concealcursor   = 'inc'
-let g:indentLine_conceallevel    = 2
-" let g:indentLine_setConceal      = 0
-let g:indentLine_enabled         = 1
-" let g:indentLine_char            = '▏'
-" let g:indentLine_char            = '▏'
-let g:indentLine_char            = '│' " ctrl-k+vv
-" let g:indentLine_char_list       = ['|', '¦', '┆', '┊']
+    " Background (Vim, GVim)
+    " Vim
+    " let g:indentLine_color_term      = 239
+    " " let g:indentLine_bgcolor_term    = 202
+    " let g:indentLine_bgcolor_gui     = '#4E4E4E'
+    " " let g:indentLine_bgcolor_gui     = '#FF5F00'
+    let g:indentLine_conceallevel    = 2
+    " https://vi.stackexchange.com/questions/7258/how-do-i-prevent-vim-from-hiding-symbols-in-markdown-and-json
+    let g:indentLine_fileTypeExclude = ['json']
+    let g:indentLine_fileTypeExclude = ['markdown']
+
+    " let g:indentLine_setConceal      = 0
+    let g:indentLine_setConceal = 2
+
+    " default ''.
+    " n for Normal mode
+    " v for Visual mode
+    " i for Insert mode
+    " c for Command line editing, for 'incsearch'
+
+    " let g:indentLine_concealcursor   = 'inc'
+    let g:indentLine_concealcursor = ""
+
+    let g:indentLine_enabled         = 1
+
+    " let g:indentLine_char            = '▏'
+    " let g:indentLine_char            = '▏'
+    let g:indentLine_char            = '│' " ctrl-k+vv
+    " let g:indentLine_char_list       = ['|', '¦', '┆', '┊']
+endif
 
 " https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
 set nocursorline
@@ -1835,6 +1852,12 @@ inoremap <expr> <cr> pumvisible() ? "<C-y>" :"<cr>"
 " Cancel the complete menu item like CTRL+e would.
 inoremap <expr> <Left> pumvisible() ? "<C-e>" : "<Left>"
 
+" https://github.com/SidOfc/mkdx
+" :h mkdx-mapping-insert-fenced-code-block
+inoremap <buffer><silent><unique> ~~~ ~~~<Enter>~~~kA
+inoremap <buffer><silent><unique> ``` ```<Enter>```kA
+" :h mkdx-setting-tokens-fence
+let g:mkdx#settings = { 'tokens': { 'fence': '' } }
 
 " "disable arrows key ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 " "disable arrows key ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
