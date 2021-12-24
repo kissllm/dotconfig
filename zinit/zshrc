@@ -617,7 +617,7 @@ alias ln="ln -v"
 alias chmod="chmod -c"
 alias chown="chown -c"
 alias mkdir="mkdir -v"
-alias dotconfig="/usr/bin/git --git-dir=$HOME/dotconfig --work-tree=$HOME"
+# alias dotconfig="doas /usr/bin/git --git-dir=/home/dotconfig --work-tree=/home"
 
 if command -v colordiff > /dev/null 2>&1; then
     alias diff="colordiff -Nuar"
