@@ -928,7 +928,7 @@ elseif exists('g:use_setup_packager')
             call packager#add('preservim/vim-colors-pencil',                { 'type' : 'start' })
             call packager#add('chriskempson/base16-vim',                    { 'type' : 'start' })
             call packager#add('trailblazing/unsuck-flat',                   { 'type' : 'start' })
-            call packager#add('skywind3000/asyncrun.vim',                   { 'type' : 'start' })
+            call packager#add('skywind3000/asyncrun.vim',                   { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'})
             call packager#add('skywind3000/asynctasks.vim',                 { 'type' : 'start' })
             call packager#add('jezcope/vim-align',                          { 'type' : 'start' })
             call packager#add('tpope/vim-rhubarb',                          { 'type' : 'start' }) " Gbrowse
@@ -1055,10 +1055,16 @@ endfunction
 " command! PackagerClean call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#clean()
 " command! PackagerStatus call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#status()
 
+function! s:adjust_attributes(plugin_dir, package_manager)
+    " silent! execute 'find $(pwd) -type f -exec chmod go+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)'
+    let l:packages_path = a:plugin_dir . '/pack/' . a:package_manager
+    silent! execute '!find ' . l:packages_path . ' -type d -name ".git" -prune -o -name ".github" -prune -o -name '*' -print -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users ' . l:packages_path . ' 2>&1 &'
+endfunction
+
 if exists('g:use_setup_packager')
     " These commands are automatically added when using `packager#setup()`  " don't overload it again
-    command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#install(<args>)
-    command! -nargs=* -bar PackagerUpdate  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#update(<args>)
+    command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#install(<args>) | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
+    command! -nargs=* -bar PackagerUpdate  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#update(<args>)  | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
     command! -bar PackagerClean  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#clean()
     command! -bar PackagerStatus call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#status()
 endif

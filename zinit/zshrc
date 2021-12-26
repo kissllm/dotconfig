@@ -690,7 +690,7 @@ function do_sudo
 
 setopt aliases
 # https://github.com/caenrique/nvim-toggle-terminal
-function _nv () {
+function _v () {
     NVIM=`which nvim`
     if test -z $NVIM_LISTEN_ADDRESS; then
         $NVIM $@
@@ -702,8 +702,8 @@ function _nv () {
         fi
     fi
 }
-alias nv=_nv
-export EDITOR=nv
+alias v=_v
+export EDITOR=v
 
 function als() {
     `alias "$@" | cut -d\' -f2`
@@ -711,14 +711,14 @@ function als() {
 
 # v will attach or create an abduco session running neovim and if run
 # in a neovim terminal it will open files in the existing neovim
-function _v () {
+function _nv () {
     if [ -z "$NVIM_LISTEN_ADDRESS" ]; then
         abduco -A nvim nvim
     else
         nvr "$@"
     fi
 }
-alias v=_v
+alias nv=_nv
 # export EDITOR=v
 
 # Keys.
