@@ -1598,7 +1598,7 @@ augroup CLClear
 augroup END
 augroup CLNRSet
     au!
-    autocmd ColorScheme * hi CursorLineNR ctermbg=231 ctermfg=8 guibg=yellow guifg=black cterm=bold gui=bold term=bold
+    autocmd ColorScheme * hi CursorLineNR ctermbg=231 ctermfg=8 guibg=yellow guifg=black cterm=NONE gui=NONE term=NONE
 augroup END
 highlight CursorLineNR ctermbg=8 ctermfg=231 guibg=yellow guifg=black cterm=NONE gui=NONE term=NONE
 
