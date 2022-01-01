@@ -11,7 +11,6 @@ endif
 filetype indent plugin on | syn on
 "   endif
 
-:hi NonText guifg=bg " That command should set the color of non text characters to be the same as the background color.
 
 syntax on   " enable highlight
 syntax enable
@@ -37,11 +36,15 @@ let g:debug_verbose = 1
 let g:debug_keys    = 1
 let g:navi_protect  = 1
 
+let g:fix_tips_width = 40
+
+let g:polyglot_disabled = ['markdown']
 
 " Initialization of the plugin directory of vim
 if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
 
     " truncate the log file
+    silent! execute '!printf "\n\n"' . ' >> ' . g:log_address . ' 2>&1 &'
     silent! execute '!printf "\n\n"' . ' > ' . g:log_address . ' 2>&1 &'
 
     " > /dev/null will hang up the process on vim-huge musl
@@ -52,8 +55,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     " silent! execute '!(printf "date                                    : '
     "             \ . strftime("%c") . '\n")' . ' >> ' . g:log_address . ' 2>&1 & > /dev/null'
 
-    silent! execute '!(printf "date                                    : '
-                \ . strftime("%c") . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"'. g:fix_tips_width . '"s: \%s\n"' . ' date "'
+                \ . strftime("%c") . '")' . ' >> ' . g:log_address . ' 2>&1 &'
     if has("nvim")
         let g:init_file = stdpath('config') . '/init.vim'
     else
@@ -69,8 +72,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         "     echom "Error! Wrong using fuction call"
         " endif
     endif
-    silent! execute '!printf "g:init_file                             : '
-                \ . g:init_file .'\n"' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . ' g:init_file "'
+                \ . g:init_file . '")' . ' >> ' . g:log_address . ' 2>&1 &'
     " silent! execute '!printf "g:init_file_raw: ' . g:init_file_raw .'\n"' . ' >> ' . g:log_address . ' 2>&1 &'
     " call boot#chomped_system("printf \"\ng:init_file\t\t: \"" . g:init_file . " >> " . g:log_address)
 
@@ -79,15 +82,17 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     else
         " let vimrc_base = boot#chomped_system("basename \"". g:init_file . "\"")
         " let g:config_dir  = substitute(g:init_file, "\/".vimrc_base, '', 'g')
-        let g:config_dir = substitute(system("dirname \"". g:init_file ."\" | cat - | xargs realpath"), '\n\+$', '', '')
+
+        " let g:config_dir = substitute(system("dirname \"". g:init_file ."\" | cat - | xargs realpath"), '\n\+$', '', '')
+        let g:config_dir = fnamemodify(g:init_file, ':p:h')
 
         " let vimrc_dir_raw = boot#chomped_system("dirname \"". g:init_file ."\" | cat - | xargs realpath")
         " silent! execute '!(printf "vimrc_dir_raw: ' . vimrc_dir_raw .'\n")' . ' >> ' . g:log_address . ' 2>&1 &'
 
     endif
     " echom 'g:config_dir  =' . g:config_dir
-    silent! execute '!(printf "g:config_dir                            : '
-                \ . g:config_dir . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . ' g:config_dir "'
+                \ . g:config_dir . '")' . ' >> ' . g:log_address . ' 2>&1 &'
 
     let g:plugin_dir = {}
     let g:package_manager = {}
@@ -131,6 +136,7 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     endif
 
     let g:package_manager['vim'] = 'packager'
+
     " if g:package_manager['vim'] != ''
     "     exe 'set runtimepath^='. g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim']
     "     exe 'set runtimepath^='. g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/opt'
@@ -141,14 +147,15 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     "     exe 'set runtimepath^='. g:plugin_dir['nvim'] . '/pack/' . g:package_manager['nvim'] . '/opt'
     "     exe 'set runtimepath^='. g:plugin_dir['nvim'] . '/pack/' . g:package_manager['nvim'] . '/start'
     " endif
-    silent! execute "!(printf \"g:plugin_dir['vim']                     : "
-                \ . g:plugin_dir['vim'] . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute "!(printf \"g:plugin_dir['nvim']                    : "
-                \ . g:plugin_dir['nvim'] . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute "!(printf \"g:package_manager['vim']                : "
-                \ . g:package_manager['vim'] . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute "!(printf \"g:package_manager['nvim']               : "
-                \ . g:package_manager['nvim'] . '\n")' . ' >> ' . g:log_address . ' 2>&1 &'
+
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
+                \ . g:plugin_dir['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['nvim']") . ' "'
+                \ . g:plugin_dir['nvim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
+                \ . g:package_manager['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fix_tips_width . '"s: \%s\n"' . " \"g:package_manager['nvim']\" \""
+                \ . g:package_manager['nvim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
 
 endif
 
@@ -265,18 +272,18 @@ call boot#chomped_system('(printf "\n\n") >> ' . g:log_address . ' 2>&1 & > /dev
 " :LogSilent g:config_dir "\n" ""
 
 " silent! execute '!(printf "' . '\n' . '" ' . > . ' ' . g:log_address . ' 2>&1 &) > /dev/null'
-" call boot#log_silent(g:log_address, '\n', "", g:log_verbose) " "wrong character '\n'" just for testing typoes :)
-" call boot#log_silent(g:log_address, "date", date, g:log_verbose)
+" call boot#log_silent(g:log_address, '\n', "", g:fix_tips_width, g:log_verbose) " "wrong character '\n'" just for testing typoes :)
+" call boot#log_silent(g:log_address, "date", date, g:fix_tips_width, g:log_verbose)
 
-" call boot#log_silent(g:log_address, "g:config_dir", g:config_dir, g:log_verbose)
+" call boot#log_silent(g:log_address, "g:config_dir", g:config_dir, g:fix_tips_width, g:log_verbose)
 "
 " for [key, element] in items(g:plugin_dir)
-"     call boot#log_silent(g:log_address, "g:plugin_dir['" . key . "']", element, g:log_verbose)
+"     call boot#log_silent(g:log_address, "g:plugin_dir['" . key . "']", element, g:fix_tips_width, g:log_verbose)
 " endfor
 
-call boot#log_silent(g:log_address, "argc()", argc(), g:log_verbose)
-call boot#log_silent(g:log_address, "len(argv())", len(argv()), g:log_verbose)
-call boot#log_silent(g:log_address, "len(v:argv)", len(v:argv), g:log_verbose)
+call boot#log_silent(g:log_address, "argc()", argc(), g:fix_tips_width, g:log_verbose)
+call boot#log_silent(g:log_address, "len(argv())", len(argv()), g:fix_tips_width, g:log_verbose)
+call boot#log_silent(g:log_address, "len(v:argv)", len(v:argv), g:fix_tips_width, g:log_verbose)
 
 if 1 == g:debug_verbose
     "   :message
@@ -289,7 +296,7 @@ if 1 == g:debug_verbose
         else
             let header = "argv [ "
         endif
-        call boot#log_silent(g:log_address, "" . header . arg_count." ]", av, g:log_verbose)
+        call boot#log_silent(g:log_address, "" . header . arg_count." ]", av, g:fix_tips_width, g:log_verbose)
     endfor
 endif
 
@@ -303,13 +310,13 @@ if 1 == g:debug_verbose
         else
             let header = "packpath [ "
         endif
-        call boot#log_silent(g:log_address, "" . header . line_count ." ]", path, g:log_verbose)
+        call boot#log_silent(g:log_address, "" . header . line_count ." ]", path, g:fix_tips_width, g:log_verbose)
         let line_count += 1
     endfor
 else
     " " :echo "packpath\t: ".&packpath
     " " call boot#chomped_system("echo \"packpath: \"".&packpath)
-    " call boot#log_silent(g:log_address, "packpath", &packpath, g:log_verbose)
+    " call boot#log_silent(g:log_address, "packpath", &packpath, g:fix_tips_width, g:log_verbose)
 
 endif
 
@@ -322,19 +329,19 @@ if 1 == g:debug_verbose
         else
             let header = "runtimepath [ "
         endif
-        call boot#log_silent(g:log_address, "" . header . line_count ." ]", path, g:log_verbose)
+        call boot#log_silent(g:log_address, "" . header . line_count ." ]", path, g:fix_tips_width, g:log_verbose)
         let line_count += 1
     endfor
 else
     " "   :echo "runtimepath\t: ".&runtimepath
     " "   call boot#chomped_system("echo \"runtimepath: \"".&runtimepath)
-    " call boot#log_silent(g:log_address, "runtimepath", &runtimepath, g:log_verbose)
+    " call boot#log_silent(g:log_address, "runtimepath", &runtimepath, g:fix_tips_width, g:log_verbose)
     " "   silent! execute '!printf "runtimepath: '.&runtimepath.'" >> '. g:log_address . ' 2>&1 &'
 endif
 
 " breakadd here
 
-call boot#log_silent(g:log_address, "\n", "", g:log_verbose)
+call boot#log_silent(g:log_address, "\n", "", g:fix_tips_width, g:log_verbose)
 
 
 let g:file_extensions = ["*.h"]
@@ -447,7 +454,7 @@ if exists('g:use_setup_minpac')
             " call minpac#add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
             " call minpac#add('erig0/cscope_dynamic',                       { 'type' : 'start' })
             " call minpac#add('chrisbra/vim-autoread',                      { 'type' : 'start' })  " auto refresh changes by tail -f. duplicate buffers continually!
-            " call minpac#add('wikitopian/hardmode',                        { 'type' : 'start' })  " disable arrow key
+            " call minpac#add('wikitopian/hardmodn',                        { 'type' : 'start' })  " disable arrow key
             " call minpac#add('yssl/QFEnter',                               { 'type' : 'start' })  " could not resolve host
             " call minpac#add('ervandew/supertab',                          { 'type' : 'start' })  " could not resolve host
             " call minpac#add('Yggdroot/LeaderF',                           { 'type' : 'start' })
@@ -479,7 +486,7 @@ if exists('g:use_setup_minpac')
             " call minpac#add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
             " call minpac#add('google/vim-codefmt',                         { 'type' : 'start' })
             " call minpac#add('google/vim-maktaba',                         { 'type' : 'start' })
-            call minpac#add('jeetsukumaran/vim-buffergator',              { 'type' : 'start' })    " minibufexplorer
+            call minpac#add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
             call minpac#add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
             call minpac#add('tpope/vim-dispatch',                         { 'type' : 'start' })
             call minpac#add('tpope/vim-commentary',                       { 'type' : 'start' })
@@ -703,7 +710,7 @@ elseif exists('g:use_setup_reference')
         " call a:packager.add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
         " call a:packager.add('google/vim-codefmt',                         { 'type' : 'start' })
         " call a:packager.add('google/vim-maktaba',                         { 'type' : 'start' })
-        call a:packager.add('jeetsukumaran/vim-buffergator',              { 'type' : 'start' })    " minibufexplorer
+        call a:packager.add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
         call a:packager.add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
         call a:packager.add('tpope/vim-dispatch',                         { 'type' : 'start' })
         call a:packager.add('tpope/vim-commentary',                       { 'type' : 'start' })
@@ -869,7 +876,6 @@ elseif exists('g:use_setup_packager')
             " call packager#add('vim-scripts/TabBar',                         { 'type' : 'start' })    " minibufexplorer
             " call packager#add('fholgado/minibufexpl.vim',                   { 'type' : 'start' })    " minibufexplorer
             " call packager#add('jlanzarotta/bufexplorer',                    { 'type' : 'start' })    " minibufexplorer
-            " call packager#add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
             " call packager#add('erig0/cscope_dynamic',                       { 'type' : 'start' })
             " call packager#add('chrisbra/vim-autoread',                      { 'type' : 'start' })  " auto refresh changes by tail -f. duplicate buffers continually!
             " call packager#add('wikitopian/hardmode',                        { 'type' : 'start' })  " disable arrow key
@@ -904,7 +910,7 @@ elseif exists('g:use_setup_packager')
             " call packager#add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
             " call packager#add('google/vim-codefmt',                         { 'type' : 'start' })
             " call packager#add('google/vim-maktaba',                         { 'type' : 'start' })
-            call packager#add('jeetsukumaran/vim-buffergator',              { 'type' : 'start' })    " minibufexplorer
+            call packager#add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
             call packager#add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
             call packager#add('tpope/vim-dispatch',                         { 'type' : 'start' })
             call packager#add('tpope/vim-commentary',                       { 'type' : 'start' })
@@ -992,6 +998,7 @@ elseif exists('g:use_setup_packager')
             call packager#add('chrisbra/Recover.vim',                       { 'type' : 'start' })
             call packager#add('preservim/vim-textobj-quote',                { 'type' : 'start' })
             call packager#add('kana/vim-textobj-user',                      { 'type' : 'start' })
+            call packager#add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
             call packager#add('trailblazing/mkdx',                          { 'type' : 'start' })
             call packager#add('trailblazing/cscope_auto',                   { 'type' : 'start' })
             call packager#add('trailblazing/session_auto',                  { 'type' : 'start' })
@@ -999,10 +1006,13 @@ elseif exists('g:use_setup_packager')
             call packager#add('kmonad/kmonad-vim',                          { 'type' : 'start' })
             call packager#add('skywind3000/vim-quickui',                    { 'type' : 'start' })
             call packager#add('itchyny/vim-gitbranch',                      { 'type' : 'start' })
-            call packager#add('mbbill/undotree',                            { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod go+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' })
+            call packager#add('mbbill/undotree',                            { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' })
             call packager#add('prabirshrestha/vim-lsp',                     { 'type' : 'start' })
             call packager#add('mattn/vim-lsp-settings',                     { 'type' : 'start' })
-
+            call packager#add('sheerun/vim-polyglot',                       { 'type' : 'start' })
+            call packager#add('tpope/vim-sleuth',                           { 'type' : 'start' })
+            call packager#add('inkarkat/vim-ShowTrailingWhitespace',        { 'type' : 'start' })
+            call packager#add('inkarkat/vim-ingo-library',                  { 'type' : 'start' })
 
             " Provide full URL; useful if you want to clone from somewhere else than Github.
             " call packager#add('https://my.other.public.git/tpope/vim-fugitive.git')
@@ -1058,13 +1068,23 @@ endfunction
 function! s:adjust_attributes(plugin_dir, package_manager)
     " silent! execute 'find $(pwd) -type f -exec chmod go+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)'
     let l:packages_path = a:plugin_dir . '/pack/' . a:package_manager
-    silent! execute '!find ' . l:packages_path . ' -type d -name ".git" -prune -o -name ".github" -prune -o -name '*' -print -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users ' . l:packages_path . ' 2>&1 &'
+
+    " silent! execute '!find ' . l:packages_path . ' -type d -name ".git" -prune -o -type d -name ".github" -prune -o
+    "             \ -type f -name "*" -print -exec chmod g+r {} + -o -type d -exec chmod go+rx {} +
+    "             \ && chgrp -R users ' . l:packages_path . ' 2>&1 &'
+
+    silent! execute '!find ' . l:packages_path . ' -type d -name ".git" -prune -o -type d -name ".github" -prune -o
+                \ -type f -name "*" -print -exec chmod --quiet g+r {} + -o -type d -print -exec chmod --quiet go+rx {} +
+                \ && chgrp -R --quiet users ' . l:packages_path . ' 2>&1 &' | redraw!
+
 endfunction
 
 if exists('g:use_setup_packager')
     " These commands are automatically added when using `packager#setup()`  " don't overload it again
-    command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#install(<args>) | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
-    command! -nargs=* -bar PackagerUpdate  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#update(<args>)  | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
+    command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+                \ | call packager#install(<args>) | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
+    command! -nargs=* -bar PackagerUpdate  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+                \ | call packager#update(<args>)  | call s:adjust_attributes(g:plugin_dir['vim'], g:package_manager['vim'])
     command! -bar PackagerClean  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#clean()
     command! -bar PackagerStatus call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#status()
 endif
@@ -1108,10 +1128,19 @@ if has('nvim')
     " EOF
 
     function! s:refresh()
-        " " v:lua.require'plugins'.install()
-        lua require'plugins'.install()
-        " " :PackerCompile
-        " redraw!
+        if &filetype !~# '\v(help|txt)'
+            " " v:lua.require'plugins'.install()
+            setlocal list
+            :IndentBlanklineEnable
+            " lua require'plugins'.install()
+            " " :PackerCompile
+            " redraw!
+        else
+            set colorcolumn=""
+            setlocal nolist
+            :IndentBlanklineDisable
+            redraw!
+        endif
     endfunction
 
     function! s:update_init()
@@ -1219,30 +1248,12 @@ if has('termguicolors')
 endif
 
 
-" https://vi.stackexchange.com/questions/22053/how-to-completely-hide-the-seperator-between-windows
-" https://stackoverflow.com/questions/9001337/vim-split-bar-styling
-"   set fillchars=vert:\|
-set fillchars=vert:\|
-set linespace=0
-hi LineNr guibg=fg
 
-
-hi foldcolumn guibg=fg
-hi VertSplit guibg=fg guifg=bg
-
-" hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
-" hi! VertSplit guifg=lightgrey guibg=lightgrey ctermfg=lightgrey ctermbg=lightgrey
 
 " " https://github.com/nathanaelkane/vim-indent-guides/issues/109
 " " Guides not showing up the first time with colorscheme desert #109
 " let g:indent_guides_color_name_guibg_pattern = "guibg='?\zs[0-9A-Za-z]+\ze'?"
 
-
-" must be before setting your colorscheme
-augroup nosplit
-    au!
-    autocmd ColorScheme * hi VertSplit ctermfg=bg guifg=bg
-augroup END
 
 augroup unfold
     au!
@@ -1259,21 +1270,6 @@ if ! has('gui_running')
     set t_Co=256
 endif
 
-" ~/.vimrc
-" Make Vim recognize XTerm escape sequences for Page and Arrow
-" keys combined with modifiers such as Shift, Control, and Alt.
-" See http://www.reddit.com/r/vim/comments/1a29vk/_/c8tze8p
-if &term =~ '^screen'
-    " Page keys https://github.com/tmux/tmux/wiki/FAQ
-    execute "set t_kP=\e[5;*~"
-    execute "set t_kN=\e[6;*~"
-
-    " Arrow keys http://unix.stackexchange.com/a/34723
-    execute "set <xUp>=\e[1;*A"
-    execute "set <xDown>=\e[1;*B"
-    execute "set <xRight>=\e[1;*C"
-    execute "set <xLeft>=\e[1;*D"
-endif
 
 
 " packadd vim-airline
@@ -1475,7 +1471,7 @@ if exists("g:indentLine_loaded")
     let g:indentLine_fileTypeExclude = ['markdown']
 
     " let g:indentLine_setConceal      = 0
-    let g:indentLine_setConceal = 2
+    let g:indentLine_setConceal      = 2
 
     " default ''.
     " n for Normal mode
@@ -1484,7 +1480,7 @@ if exists("g:indentLine_loaded")
     " c for Command line editing, for 'incsearch'
 
     " let g:indentLine_concealcursor   = 'inc'
-    let g:indentLine_concealcursor = ""
+    let g:indentLine_concealcursor   = ""
 
     let g:indentLine_enabled         = 1
 
@@ -1495,21 +1491,28 @@ if exists("g:indentLine_loaded")
 endif
 
 " https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
-set nocursorline
+set cursorline
 set nocursorcolumn
 
-" :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
-:highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
+let g:indent_blankline_disable_with_nolist = v:true
+let g:indent_blankline_show_trailing_blankline_indent = v:false
+let g:indent_blankline_show_first_indent_level = v:false
+let g:indent_blankline_filetype_exclude = ['help']
+let g:indent_blankline_buftype_exclude = ['terminal']
+let g:indent_blankline_show_current_context_start_on_current_line = v:false
+let g:indent_blankline_viewport_buffer = 20
 
+" cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
+" cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
 augroup backgroung_color
     au!
-    au BufEnter * if &filetype != 'help'  |
+    au BufEnter * if &filetype !~# '\v(help|txt)'  |
                 \ set colorcolumn=120  |
                 \ else  |
-                \ wincmd L | set colorcolumn="" | redraw! |
+                \ set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw! |
                 \ endif
     " \ | " let &colorcolumn="80,".join(range(120,999),",") | " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
-    autocmd FileType,WinNew txt wincmd L | set colorcolumn="" | redraw!
+    autocmd FileType,WinNew txt,help wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw!
     " au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
 augroup END
 
@@ -1526,18 +1529,19 @@ noremap <Leader>w :let @w=float2nr(log10(line("$")))+82\|:vertical resize <c-r>w
 
 
 " :nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
-:nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
+nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
 " :nnoremap <silent> <leader>c :execute 'match Search /\%'.virtcol('.').'v/'<cr>
 
+" http://www.pixelbeat.org/docs/terminal_colours/
 
 let g:cursor_guifg_insertenter   = 'DarkYellow'
 let g:cursor_guibg_insertenter   = 'Black'
 
 let g:cursor_guifg_insertleave   = 'NONE'
 if 'linux' == $TERM
-    let g:cursor_guibg_insertleave   = 'Brown'
+    let g:cursor_guibg_insertleave = 'Brown'
 else
-    let g:cursor_guibg_insertleave   = '#000000'
+    let g:cursor_guibg_insertleave = '#000000'
 endif
 
 let g:cursor_ctermfg_insertenter = 'DarkYellow'
@@ -1545,15 +1549,115 @@ let g:cursor_ctermbg_insertenter = 'Black'
 
 let g:cursor_ctermfg_insertleave = 'NONE'
 if 'linux' == $TERM
-    let g:cursor_ctermbg_insertleave = 'Brown'
+    let g:cursor_ctermbg_insertleave = 8
 else
-    let g:cursor_ctermbg_insertleave = 'Brown'
+    let g:cursor_ctermbg_insertleave = 8
 endif
+
+let g:nontext_foreground_cterm = 241
+let g:nontext_foreground_gui = 'gray'
+
+" :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
+" :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
+
+highlight Normal guifg=fg guibg=NONE ctermfg=fg ctermbg=0 gui=NONE cterm=NONE term=NONE
+highlight FileStyleIgnorePattern guibg=bg ctermbg=0
+
+" https://vi.stackexchange.com/questions/6150/a-highlight-command-resets-previously-declared-highlights
+hi NewLineWin ctermfg=248 guifg=#999999
+match NewLineWin /\r\n/
+hi WhiteSpaceChar ctermfg=252 guifg=#999999
+2match WhiteSpaceChar / /
+" https://stackoverflow.com/questions/24232354/vim-set-color-for-listchars-tabs-and-spaces
+hi Whitespace ctermfg=DarkGray guifg=DarkGray
+match Whitespace /\s/
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+
+highlight SpecialKey ctermfg=bg guifg=bg
+
+" vim-ShowTrailingWhitespace. works under pure terminal emulator without window managers
+highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
+
+
+" "~" vertically under the line numbers
+" That command should set the color of non text characters to be the same as the background color.
+" hi NonText guifg=bg
+" highlight NonText ctermfg=7 guifg=gray
+silent! execute 'highlight NonText ctermfg=' . g:nontext_foreground_cterm . ' ctermbg=NONE guifg=' . g:nontext_foreground_gui . ' guibg=NONE'
+
+" hi LineNr guibg=fg
+highlight LineNr ctermbg=0 guibg=NONE
+
+" https://newbedev.com/highlighting-the-current-line-number-in-vim
+hi clear CursorLine
+augroup CLClear
+    au!
+    autocmd ColorScheme * hi clear CursorLine
+    autocmd ColorScheme * highlight CursorLine ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE cterm=NONE gui=NONE term=NONE
+augroup END
+augroup CLNRSet
+    au!
+    autocmd ColorScheme * hi CursorLineNR ctermbg=231 ctermfg=8 guibg=yellow guifg=black cterm=bold gui=bold term=bold
+augroup END
+highlight CursorLineNR ctermbg=8 ctermfg=231 guibg=yellow guifg=black cterm=NONE gui=NONE term=NONE
+
+" https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
+" highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
+highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+augroup end_of_buffer
+    au!
+    autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+                \ | silent! execute 'highlight NonText ctermfg=' . g:nontext_foreground_cterm . ' ctermbg=NONE guifg=' . g:nontext_foreground_gui . ' guibg=NONE'
+augroup end
+
+" https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
+set nuw=7
+set foldcolumn=0
+augroup allways_show_line_number | au!
+    au BufWinEnter * set number relativenumber | set foldcolumn=0
+    " au BufWinEnter * set number | set foldcolumn=0
+augroup END
+" hi foldcolumn guibg=fg
+highlight foldcolumn ctermbg=NONE guibg=NONE
+
+" Vertical split style settings
+" Can the split separator in vim be less than a full column wide?
+" https://vi.stackexchange.com/questions/2938/can-the-split-separator-in-vim-be-less-than-a-full-column-wide/2941#2941
+" https://vi.stackexchange.com/questions/22053/how-to-completely-hide-the-seperator-between-windows
+" set fillchars=vert:\|
+" set fillchars=vert:\│
+" https://stackoverflow.com/questions/9001337/vim-split-bar-styling
+" A space followed \ 
+set fillchars=vert:\ 
+set linespace=0
+
+" hi VertSplit guibg=fg guifg=bg
+highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+
+" hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
+" hi! VertSplit guifg=lightgrey guibg=lightgrey ctermfg=lightgrey ctermbg=lightgrey
+" must be before setting your colorscheme
+augroup nosplit
+    au!
+    autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+augroup END
+
+" vim-gitgutter
+set signcolumn=yes
+let g:gitgutter_sign_allow_clobber   = 1
+let g:gitgutter_sign_allow_clobber   = 1
+let g:gitgutter_set_sign_backgrounds = 1
+highlight link GitGutterChangeLine DiffText
+highlight link GitGutterAddIntraLine DiffAdd
+highlight SignColumn ctermbg=NONE guibg=NONE
 
 " https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
 " https://jonasjacek.github.io/colors/
-:hi Cursor       guifg=bg guibg=NONE ctermfg=bg ctermbg=NONE cterm=NONE gui=NONE term=NONE
-silent! execute ':hi ColorColumn  guifg=' . g:cursor_guifg_insertleave . ' guibg=' . g:cursor_guibg_insertleave
+hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+
+silent! execute ':hi ColorColumn guifg=' . g:cursor_guifg_insertleave . ' guibg=' . g:cursor_guibg_insertleave
             \ . ' ctermfg=' . g:cursor_ctermfg_insertleave . ' ctermbg=' . g:cursor_ctermbg_insertleave . ' cterm=NONE gui=NONE term=NONE'
 
 " silent! execute ':hi CursorLine   guifg=' . g:cursor_guifg_insertleave . ' guibg=' . g:cursor_guibg_insertleave
@@ -1563,12 +1667,19 @@ silent! execute ':hi ColorColumn  guifg=' . g:cursor_guifg_insertleave . ' guibg
 
 augroup cursor_theme
     au!
+    " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
+    " Workaround for creating transparent bg
+    autocmd SourcePost * highlight Normal ctermbg=0 guibg=NONE
+                \ | highlight LineNr ctermbg=0 guibg=NONE
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+
     " " Change Color when entering Insert Mode
     autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-                \ silent! execute ':hi ColorColumn  guifg=' . g:cursor_guifg_insertenter . ' guibg=' . g:cursor_guibg_insertleave
+                \ silent! execute ':hi ColorColumn guifg=' . g:cursor_guifg_insertenter . ' guibg=' . g:cursor_guibg_insertleave
                 \ . ' ctermfg=' . g:cursor_ctermfg_insertenter . ' ctermbg=' . g:cursor_ctermbg_insertleave . ' cterm=NONE gui=NONE term=NONE'
     autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-                \ silent! execute ':hi ColorColumn  guifg=' . g:cursor_guifg_insertleave . ' guibg=' . g:cursor_guibg_insertleave
+                \ silent! execute ':hi ColorColumn guifg=' . g:cursor_guifg_insertleave . ' guibg=' . g:cursor_guibg_insertleave
                 \ . ' ctermfg=' . g:cursor_ctermfg_insertleave . ' ctermbg=' . g:cursor_ctermbg_insertleave . ' cterm=NONE gui=NONE term=NONE'
 
     " autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
@@ -1623,7 +1734,7 @@ if exists('g:use_indent_guides')
     " hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
     " hi IndentGuidesEven guibg=green ctermbg=4
 
-    hi IndentGuidesOdd  guifg=NONE guibg=#333333 gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE
+    hi IndentGuidesOdd guifg=NONE guibg=#333333 gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE
     hi IndentGuidesEven guifg=NONE guibg=#2b2b2b gui=NONE ctermfg=black ctermbg=2 cterm=NONE term=NONE
 
     augroup odd_even
@@ -1632,7 +1743,7 @@ if exists('g:use_indent_guides')
         " au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesOdd  guifg=NONE guibg=#333333 gui=NONE ctermfg=8 ctermbg=3 cterm=NONE
         " au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesEven guifg=NONE guibg=#2b2b2b gui=NONE ctermfg=8 ctermbg=2 cterm=NONE
         " " https://www.titanwolf.org/Network/q/ad9924f3-2db9-4eb0-885f-bc68bffe6e3c/ynonenone
-        au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesOdd  guifg=NONE guibg=#202020 gui=NONE ctermfg=8 ctermbg=2 cterm=NONE term=NONE
+        au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesOdd guifg=NONE guibg=#202020 gui=NONE ctermfg=8 ctermbg=2 cterm=NONE term=NONE
         au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesEven guifg=NONE guibg=#404040 gui=NONE ctermfg=8 ctermbg=4 cterm=NONE term=NONE
     augroup END
 
@@ -1805,10 +1916,12 @@ nmap <F6> :set invrelativenumber<cr>
 "   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
 nnoremap <leader>sp :normal! mz[s1z=`z<cr>
 
-:set list!
+set list
 " :set listchars=tab:>-,space:.
-:set lcs=extends:>,precedes:<,nbsp:%,tab:>~
-" :set list lcs=tab:\|\
+" helper for indent mistake
+" set list listchars=tab:»·,trail:·
+set lcs=extends:>,precedes:<,nbsp:%,tab:>~,eol:↴
+" set list lcs=tab:\|\
 
 " Toggle visually showing all whitespace characters.
 noremap <F7> :set list!<cr>
@@ -1821,11 +1934,6 @@ nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
 " https://vim.fandom.com/wiki/Source_current_file_when_editing_a_script
 noremap <silent><buffer> <F9> :exec 'source '.bufname('%')<CR>
 
-" https://vi.stackexchange.com/questions/6150/a-highlight-command-resets-previously-declared-highlights
-hi NewLineWin ctermfg=248 guifg=#999999
-match NewLineWin /\r\n/
-hi WhiteSpaceChar ctermfg=252 guifg=#999999
-2match WhiteSpaceChar / /
 
 " Toggle quickfix window.
 function! s:quickfix_toggle()
@@ -1858,10 +1966,17 @@ inoremap <expr> <cr> pumvisible() ? "<C-y>" :"<cr>"
 " Cancel the complete menu item like CTRL+e would.
 inoremap <expr> <Left> pumvisible() ? "<C-e>" : "<Left>"
 
-" https://github.com/SidOfc/mkdx
-" :h mkdx-mapping-insert-fenced-code-block
-inoremap <buffer><silent><unique> ~~~ ~~~<Enter>~~~kA
-inoremap <buffer><silent><unique> ``` ```<Enter>```kA
+if maparg('```', 'i', 'false') !~? '```<CR>```<C-o>k<C-o>A'
+" if maparg('```', 'i', 'false') !~? '```<Enter>```kA'
+    " https://github.com/SidOfc/mkdx
+    " :h mkdx-mapping-insert-fenced-code-block
+    inoremap <buffer><silent><unique> ``` ```<Enter>```kA
+endif
+
+if maparg('~~~', 'i', 'false') !~? '\~\~\~<CR>\~\~\~<C-o>k<C-o>A'
+    inoremap <buffer><silent><unique> ~~~ ~~~<Enter>~~~kA
+endif
+
 " :h mkdx-setting-tokens-fence
 let g:mkdx#settings = { 'tokens': { 'fence': '' } }
 
@@ -1897,7 +2012,7 @@ augroup cursor_line
     au!
         " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
         " au WinEnter * setlocal cursorline | setlocal cursorcolumn
-    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
+    au WinLeave * setlocal cursorline | setlocal nocursorcolumn
 augroup END
 
 augroup stop_auto_indenting
@@ -1905,6 +2020,7 @@ augroup stop_auto_indenting
     " https://vim.fandom.com/wiki/How_to_stop_auto_indenting
     autocmd FileType * if 1 == &modifiable | setlocal formatoptions-=c formatoptions-=r formatoptions-=o | endif
 augroup END
+
 
 " For vim-repeat
 " silent! call repeat#set("\<Plug>MyWonderfulMap", v:count)
@@ -1974,7 +2090,7 @@ if 1 == g:navi_protect
 
     function! s:print_key(key)
         echom a:key
-        call boot#log_silent(g:log_address, a:key, " pressed", g:log_verbose)
+        call boot#log_silent(g:log_address, a:key, " pressed", g:fix_tips_width, g:log_verbose)
     endfunction
 
     " " put a new line before or after to this line
@@ -2216,7 +2332,7 @@ nnoremap <silent> <leader>- :exe "resize " . (winheight(0) * 2/3)<cr>
 " function! s:statusline_expr()
 "   let mod = "%{&modified ? '[+] ' : !&modifiable ? '[x] ' : ''}"
 "   let ro  = "%{&readonly ? '[RO] ' : ''}"
-"ction-reload)   let ft  = "%{len(&filetype) ? '['.&filetype.'] ' : ''}"
+"   let ft  = "%{len(&filetype) ? '['.&filetype.'] ' : ''}"
 "   let fug = "%{exists('g:loaded_fugitive') ? fugitivn#statusline() : ''}"
 "   let sep = ' %= '
 "   let pos = ' %-12(%l : %c%V%) '
@@ -2243,8 +2359,6 @@ set showtabline=0 " Always display the tabline, even if there is only one tab
 set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
 set backupdir=$HOME/tmp//,.
 
-" cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
-" cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
 
 " https://github.com/nickjj/dotfiles/blob/0c8abec8c433f7e7394cc2de4a060f3e8e00beb9/.vimrc#L444-L499
 set complete+=kspell
@@ -2269,21 +2383,13 @@ set noerrorbells visualbell t_vb=
 set noshiftround
 set nospell
 set nostartofline
-set number
+" set number
 " set nonumber
-" set number relativenumber
+set number relativenumber
 " set number invrelativenumber
 " set invrelativenumber " rnu
-set nornu  " turn off rnu
+" set nornu  " turn off rnu
 
-" https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
-set foldcolumn=1
-set nuw=7
-
-augroup allways_show_line_number | au!
-    " au BufWinEnter * set number relativenumber | set foldcolumn=1
-    au BufWinEnter * set number | set foldcolumn=1
-augroup END
 
 " set regexpengine=1
 set regexpengine=0
@@ -2308,7 +2414,7 @@ set wildmode=full
 set foldlevel=1
 
 
-" set nopaste
+set nopaste
 " set paste
 
 
@@ -2319,7 +2425,7 @@ set foldlevel=1
 
 " https://dmitryfrank.com/articles/indent_with_tabs_align_with_spaces
 " copy indent from previous line: useful when using tabs for indentation and spaces for alignment
-set copyindent
+" set copyindent
 
 
 runtime! macros/matchit.vim
@@ -2403,6 +2509,7 @@ if &term =~ '256color'
 endif
 
 set ttyfast
+
 
 " ~/.vimrc
 " Make Vim recognize XTerm escape sequences for Page and Arrow
@@ -2494,7 +2601,7 @@ endif
 augroup blink_cursor
     au!
     autocmd VimEnter * silent! exec "! echo -ne '\e[1 q'"
-    autocmd VimLeave * silent! exec "! echo -ne '\e[5 q'"
+    autocmd VimLeave * silent! exec "! echo -ne '\e[3 q'"
 augroup END
 
 
@@ -2552,6 +2659,29 @@ nmap <F11> <Plug>CscopeDBInit
 " endfunction
 " call Cscope_dynamic_update_hook(0)
 
+
+" ALE
+let g:ale_lint_on_save             = 1
+let g:ale_lint_on_enter            = 0
+let g:ale_lint_on_text_changed     = 'never'
+let g:ale_sign_column_always       = 1
+let g:ale_sign_warning             = 'W'
+let g:ale_sign_error               = 'E'
+let g:ale_python_flake8_args       = '--ignore=C,E111,E114,E22,E201,E241,E265,E272,E3,E501,E731'
+let g:ale_python_pylint_executable = ''
+
+
+fun! ALEClearBuffer(buffer)
+    if get(g:, 'ale_enabled') && has_key(get(g:, 'ale_buffer_info', {}), a:buffer)
+        call ale#engine#SetResults(a:buffer, [])
+        call ale#engine#Cleanup(a:buffer)
+    endif
+endfun
+
+augroup UnALE
+    autocmd!
+    autocmd TextChanged,TextChangedI,InsertEnter,InsertLeave * call ALEClearBuffer(bufnr('%'))
+augroup END
 
 " "cscope ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
@@ -3056,10 +3186,14 @@ noremap <F3> :Autoformat<cr>
 "   noremap <F3> :call easy_align#align()<cr>
 noremap <F4> :EasyAlign<cr>
 
-let g:autoformat_autoindent             = 0
-let g:autoformat_retab                  = 0
-let g:autoformat_remove_trailing_spaces = 0
+" let g:autoformat_autoindent             = 0
+" let g:autoformat_retab                  = 0
+" let g:autoformat_remove_trailing_spaces = 0
 
+" augroup auto_format
+"     au!
+"     au BufWrite * silent! :Autoformat<cr>
+" augroup end
 
 " https://github.com/umaumax/vim-format
 " "    call packager#add('umaumax/vim-format',                     { 'type' : 'start' })
@@ -3287,6 +3421,12 @@ imap <expr> <down> mucomplete#extend_fwd("\<down>")
 " " Go to buffer. Conflict with buffergator
 " nnoremap gb :ls<cr>:b<space>
 
+let g:buffergator_autodismiss_on_select = 1
+let g:buffergator_viewport_split_policy = "L"
+let g:buffergator_use_new_keymap = 1
+let g:buffergator_mru_cycle_local_to_window = 0
+" let g:buffergator_split_size=100
+
 " "tab management ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))"
 
 
@@ -3319,7 +3459,6 @@ let g:loaded_matchparen = 1
 " Obsess    " start record session"
 " Obsess!   " delete current session"
 
-" let g:buffergator_split_size=100
 
 
 " Unknown function: airline#extensions#branch#init
@@ -3413,13 +3552,13 @@ let g:asyncrun_rootmarks = ['.git', '.svn', '.root', '.project', '.hg']
 if 1 == g:debug_verbose
     function! s:log() abort
         " silent! execute '!(printf "scriptnames\t\t: ">> '. g:log_address . ' 2>&1 &) > /dev/null'
-        call boot#log_silent(g:log_address, "scriptnames", "", g:log_verbose)
-        " silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | call boot#log_silent("' . g:log_address . '", \'\n\', ' . g:log_verbose . ') | redir END'
-        silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:log_verbose . ')'
-        silent! execute 'redir! > ' . g:log_address . ' | silent verbose map | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:log_verbose . ')'
-        " silent! execute 'redir! > ' . g:log_address . ' | silent map | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:log_verbose . ')'
+        call boot#log_silent(g:log_address, "scriptnames", "", g:fix_tips_width, g:log_verbose)
+        " silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | call boot#log_silent("' . g:log_address . '", \'\n\', ' .  g:fix_tips_width . ', ' . g:log_verbose . ') | redir END'
+        silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:fix_tips_width . ', ' . g:log_verbose . ')'
+        silent! execute 'redir! > ' . g:log_address . ' | silent verbose map | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:fix_tips_width . ', ' . g:log_verbose . ')'
+        " silent! execute 'redir! > ' . g:log_address . ' | silent map | redir END | call boot#log_silent("' . g:log_address . '", "\n", "", ' . g:fix_tips_width . ', ' . g:log_verbose . ')'
         " silent! execute '!(printf \'\n\'>> '. g:log_address . ' 2>&1 &) > /dev/null'
-        " call boot#log_silent(g:log_address, "\n", "", g:log_verbose)
+        " call boot#log_silent(g:log_address, "\n", "", g:fix_tips_width, g:log_verbose)
     endfunction
 
     augroup reload_scriptnames
@@ -3427,6 +3566,13 @@ if 1 == g:debug_verbose
         autocmd! BufReadPost $MYVIMRC ++nested :call s:log()
     augroup END
 endif
+
+
+augroup disable_trailing_white_space_warning
+    autocmd!
+    autocmd! BufReadPost $MYVIMRC ++nested
+                \ if ShowTrailingWhitespace#IsSet() | call ShowTrailingWhitespace#Set(0,0) | endif
+augroup END
 
 let g:reload_on_write = 1
 
@@ -3452,13 +3598,13 @@ let g:reload_on_write = 1
 augroup reload_vimrc
     autocmd!
     autocmd BufEnter * ++nested syntax sync fromstart
-    " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC  | setlocal filetype=vim
+    " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC | setlocal filetype=vim
     " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC
 
     if has('nvim')
-        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | call s:refresh()
+        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
     else
-        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | redraw!
+        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
     endif
 augroup END
 

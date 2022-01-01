@@ -1,4 +1,4 @@
-path=(/usr/bin: /bin: /usr/local/bin: /opt: /usr/share/man: $path)
+path=(/build/toolchain/musl/include: /build/toolchain/musl: /usr/include/c++/v1: /usr/include/c++/10.2/x86_64-linux-musl: /usr/bin: /bin: /usr/local/bin: /opt: /usr/share/man: $path)
 typeset -U path
 
 export LANG="en_US.UTF-8"
@@ -33,7 +33,7 @@ export XDG_SESSION_TYPE=wayland
 # GDK_SCALE allows only Integer values, GDK_DPI_SCALE=x allows decimal values such as . GDK_DPI_SCALE=0.66
 export GDK_SCALE=2.0
 export GDK_DPI_SCALE=0.625
-export GDK_DPI_SCALE=0.75
+# export GDK_DPI_SCALE=0.75
 
 # https://github.com/kutsan/zsh-system-clipboard
 typeset -g ZSH_SYSTEM_CLIPBOARD_USE_WL_CLIPBOARD='true'
@@ -55,6 +55,11 @@ if [[ -z "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID}
     }   # fi
 }   # fi
 
+if [[ -d "${HOME}/.cargo/env" ]] {
+    # source "${HOME}/.cargo/env"
+    . "${HOME}/.cargo/env"
+}
+
 # https://superuser.com/questions/852912/reload-all-running-zsh-instances
 TRAPUSR1() {
     if [[ -o INTERACTIVE ]]; then
@@ -63,7 +68,4 @@ TRAPUSR1() {
     fi
 }
 
-if [[ -d "${HOME}/.cargo/env" ]] {
-    # source "${HOME}/.cargo/env"
-    . "${HOME}/.cargo/env"
-}
+

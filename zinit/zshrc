@@ -181,12 +181,33 @@ function over_ssh() {
     fi
 }
 
-autoload -Uz compinit
-compinit
 
+# This function implements `kubectl view-serviceaccount-kubeconfig **`
+# Function name must be _fzf_complete_(command)_(subcommand)
+_fzf_complete_kubectl_view-serviceaccount-kubeconfig() {
+
+    # Call preprocessors
+    _fzf_complete_kubectl_parse_resource_and_name 2
+    _fzf_complete_kubectl_parse_completing_option
+    _fzf_complete_kubectl_parse_kubectl_arguments
+
+    # Return status code other than 0 to fall back to default
+    if [[ -n $completing_option ]]; then
+        return 1
+    fi
+
+    # Call any one of completion functions; see source code as to their usage
+    resource=serviceaccounts
+    _fzf_complete_kubectl-resource-names '' "$@"
+}
+# Completion.
+# https://stackoverflow.com/questions/58283701/why-cant-zsh-execute-command-compdef
 # K8s auto-complete
 autoload -U +X compinit && compinit
 source <(kubectl completion zsh)
+
+# https://gist.github.com/LukeSmithxyz/e62f26e55ea8b0ed41a65912fbebbe52
+zmodload zsh/complist && compinit
 
 # function reload () {
 #     exec "${SHELL}" "$@"
@@ -211,7 +232,7 @@ function reload() {
 # https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org
 # compdef _functions reload
 # compdef _function  reload
-# compdef _reload    reload
+compdef _reload    reload
 autoload -Uz _reload
 (( ${+_comps} )) && _comps[reload]=_reload
 
@@ -281,83 +302,83 @@ function begin_with() {
 
 }
 
-function termtitle() {
-    case "$TERM" in
-        rxvt*|xterm*|nxterm|gnome|screen|screen-*)
-            local prompt_host="${(%):-%m}"
-            local prompt_user="${(%):-%n}"
-            local prompt_char="${(%):-%~}"
-            case "$1" in
-                precmd)
-                    printf '\e]0;%s@%s: %s\a' "${prompt_user}" "${prompt_host}" "${prompt_char}"
-                    ;;
-                preexec)
-                    printf '\e]0;%s [%s@%s: %s]\a' "$2" "${prompt_user}" "${prompt_host}" "${prompt_char}"
-                    ;;
-            esac
-            ;;
-    esac
-}
-
-function setup_git_prompt() {
-    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        unset git_prompt
-        return 0
-    fi
-
-    local git_status_dirty git_status_stash git_branch
-
-    if [ "$(git --no-optional-locks status --untracked-files='no' --porcelain)" ]; then
-        git_status_dirty='%F{green}*'
-    else
-        unset git_status_dirty
-    fi
-
-    if [ "$(git stash list)" ]; then
-        git_status_stash="%F{yellow}▲"
-    else
-        unset git_status_stash
-    fi
-
-    git_branch="$(git symbolic-ref HEAD 2>/dev/null)"
-    git_branch="${git_branch#refs/heads/}"
-
-    if [ "${#git_branch}" -ge 24 ]; then
-        git_branch="${git_branch:0:21}..."
-    fi
-
-    git_branch="${git_branch:-no branch}"
-
-    git_prompt=" %F{blue}[%F{253}${git_branch}${git_status_dirty}${git_status_stash}%F{blue}]"
-
-}
-
-function precmd() {
-    # Set terminal title.
-    termtitle precmd
-
-    # Set optional git part of prompt.
-    setup_git_prompt
-
-    # Maybe to be used someday, too annoying with vim and other interactive apps.
-    #   # $REPORTTIME is about cpu time, not real time.
-    #   if [ "${executed_on}" ]; then
-    #       local current_timestamp=${(%):-'%D{%s}'}
-    #       local last_cmd_took=$(( current_timestamp - executed_on ))
-    #       if [ "${last_cmd_took}" -gt 60 ]; then
-    #           printf "\n>>> [INFO] Execution took %ss\n\n" "$last_cmd_took"
-    #       fi
-    #       unset executed_on
-    #   fi
-}
-
-function preexec() {
-    # Set terminal title along with current executed command pass as second argument
-    termtitle preexec "${(V)1}"
-
-    # # Save timestamp when we executed this command
-    # executed_on=${(%):-'%D{%s}'}
-}
+# function termtitle() {
+#     case "$TERM" in
+#         rxvt*|xterm*|nxterm|gnome|screen|screen-*)
+#             local prompt_host="${(%):-%m}"
+#             local prompt_user="${(%):-%n}"
+#             local prompt_char="${(%):-%~}"
+#             case "$1" in
+#                 precmd)
+#                     printf '\e]0;%s@%s: %s\a' "${prompt_user}" "${prompt_host}" "${prompt_char}"
+#                     ;;
+#                 preexec)
+#                     printf '\e]0;%s [%s@%s: %s]\a' "$2" "${prompt_user}" "${prompt_host}" "${prompt_char}"
+#                     ;;
+#             esac
+#             ;;
+#     esac
+# }
+# 
+# function setup_git_prompt() {
+#     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+#         unset git_prompt
+#         return 0
+#     fi
+# 
+#     local git_status_dirty git_status_stash git_branch
+# 
+#     if [ "$(git --no-optional-locks status --untracked-files='no' --porcelain)" ]; then
+#         git_status_dirty='%F{green}*'
+#     else
+#         unset git_status_dirty
+#     fi
+# 
+#     if [ "$(git stash list)" ]; then
+#         git_status_stash="%F{yellow}▲"
+#     else
+#         unset git_status_stash
+#     fi
+# 
+#     git_branch="$(git symbolic-ref HEAD 2>/dev/null)"
+#     git_branch="${git_branch#refs/heads/}"
+# 
+#     if [ "${#git_branch}" -ge 24 ]; then
+#         git_branch="${git_branch:0:21}..."
+#     fi
+# 
+#     git_branch="${git_branch:-no branch}"
+# 
+#     git_prompt=" %F{blue}[%F{253}${git_branch}${git_status_dirty}${git_status_stash}%F{blue}]"
+# 
+# }
+# 
+# function precmd() {
+#     # Set terminal title.
+#     termtitle precmd
+# 
+#     # Set optional git part of prompt.
+#     setup_git_prompt
+# 
+#     # Maybe to be used someday, too annoying with vim and other interactive apps.
+#     #   # $REPORTTIME is about cpu time, not real time.
+#     #   if [ "${executed_on}" ]; then
+#     #       local current_timestamp=${(%):-'%D{%s}'}
+#     #       local last_cmd_took=$(( current_timestamp - executed_on ))
+#     #       if [ "${last_cmd_took}" -gt 60 ]; then
+#     #           printf "\n>>> [INFO] Execution took %ss\n\n" "$last_cmd_took"
+#     #       fi
+#     #       unset executed_on
+#     #   fi
+# }
+# 
+# function preexec() {
+#     # Set terminal title along with current executed command pass as second argument
+#     termtitle preexec "${(V)1}"
+# 
+#     # # Save timestamp when we executed this command
+#     # executed_on=${(%):-'%D{%s}'}
+# }
 
 function man() {
     if command -v vimmanpager >/dev/null 2>&1; then
@@ -390,8 +411,8 @@ function dot_progress() {
 # Le features!
 # extended globbing, awesome!
 # https://zsh.sourceforge.io/Doc/Release/Options.html#Options
-# setopt extendedGlob
-setopt extended_glob
+# man 1 zshall
+setopt extendedglob
 setopt auto_cd
 # https://stackoverflow.com/questions/36668910/how-do-i-reload-zsh-config-files-without-replacing-the-current-shell
 setopt inc_append_history
@@ -432,12 +453,6 @@ fi
 for zshd in $(ls -A ${HOME}/.config/zsh.d/^*.(z)sh$); do
     . "${zshd}"
 done
-
-# Completion.
-# https://stackoverflow.com/questions/58283701/why-cant-zsh-execute-command-compdef
-# K8s auto-complete
-autoload -U +X compinit && compinit
-source <(kubectl completion zsh)
 
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' completer _expand _complete _ignored _approximate
@@ -634,61 +649,7 @@ alias lla="ls --color=auto --human-readable --group-directories-first --classify
 alias vim="/usr/bin/nvim"
 alias tmux="tmux -2"
 alias history="history 1 -1"
-# https://superuser.com/questions/749314/how-do-you-set-alias-sudo-nocorrect-sudo-correctly
-# alias doas="doas "
-alias doas='noglob do_doas '
-function do_doas
-{
-    integer glob=1
-    local -a run
-    run=( command sudo )
-    if [[ $# -gt 1 && $1 = -u ]]; then
-        run+=($1 $2)
-        shift ; shift
-    fi
-    (($# == 0)) && 1=/bin/zsh
-    while (($#)); do
-        case "$1" in
-            command|exec|-) shift; break ;;
-            nocorrect) shift ;;
-            noglob) glob=0; shift ;;
-            *) break ;;
-        esac
-    done
-    if ((glob)); then
-        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
-    else
-        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
-    fi
-}
-# alias sudo="sudo "
-alias sudo='noglob do_sudo '
-function do_sudo
-{
-    integer glob=1
-    local -a run
-    run=( command sudo )
-    if [[ $# -gt 1 && $1 = -u ]]; then
-        run+=($1 $2)
-        shift ; shift
-    fi
-    (($# == 0)) && 1=/bin/zsh
-    while (($#)); do
-        case "$1" in
-            command|exec|-) shift; break ;;
-            nocorrect) shift ;;
-            noglob) glob=0; shift ;;
-            *) break ;;
-        esac
-    done
-    if ((glob)); then
-        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
-    else
-        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
-    fi
-}
 
-setopt aliases
 # https://github.com/caenrique/nvim-toggle-terminal
 function _v () {
     NVIM=`which nvim`
@@ -720,6 +681,63 @@ function _nv () {
 }
 alias nv=_nv
 # export EDITOR=v
+setopt aliases
+
+# https://superuser.com/questions/749314/how-do-you-set-alias-sudo-nocorrect-sudo-correctly
+function do_doas
+{
+    integer glob=1
+    local -a run
+    run=( command sudo )
+    if [[ $# -gt 1 && $1 = -u ]]; then
+        run+=($1 $2)
+        shift ; shift
+    fi
+    (($# == 0)) && 1=/bin/zsh
+    while (($#)); do
+        case "$1" in
+            command|exec|-) shift; break ;;
+            nocorrect) shift ;;
+            noglob) glob=0; shift ;;
+            *) break ;;
+        esac
+    done
+    if ((glob)); then
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
+    else
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
+    fi
+}
+alias doas='noglob do_doas '
+# alias doas="doas "
+
+alias sudo='noglob do_sudo '
+function do_sudo
+{
+    integer glob=1
+    local -a run
+    run=( command sudo )
+    if [[ $# -gt 1 && $1 = -u ]]; then
+        run+=($1 $2)
+        shift ; shift
+    fi
+    (($# == 0)) && 1=/bin/zsh
+    while (($#)); do
+        case "$1" in
+            command|exec|-) shift; break ;;
+            nocorrect) shift ;;
+            noglob) glob=0; shift ;;
+            *) break ;;
+        esac
+    done
+    if ((glob)); then
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
+    else
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
+    fi
+}
+# alias sudo="sudo "
+
 
 # Keys.
 case $TERM in
@@ -778,21 +796,13 @@ bindkey "^S" history-incremental-pattern-search-forward
 
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
-# https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
-function _fix_cursor() {
-   echo -ne '\e[5 q'
-}
-
-precmd_functions+=(_fix_cursor)
 
 # # https://stackoverflow.com/questions/54394738/oh-my-zsh-cursor-up-before-program-has-finished-vs-after-how-to-make-them-behav
 # refer to /usr/share/oh-my-zsh/zshrc
 # bindkey "^[[A" up-line-or-beginning-search   # Up
 # bindkey "^[[B" down-line-or-beginning-search # Down
 
-# https://gist.github.com/LukeSmithxyz/e62f26e55ea8b0ed41a65912fbebbe52
-zmodload zsh/complist
-#   compinit
+
 _comp_options+=(globdots)        # Include hidden files.
 
 # vi mode
@@ -806,23 +816,50 @@ export KEYTIMEOUT=1
 # bindkey -M menuselect 'j' vi-down-line-or-history
 # bindkey -v '^?' backward-delete-char
 
+# alacritty.yml
+# blinking: Always
+# https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
+function _fix_cursor() {
+   echo -ne '\e[3 q'
+}
+precmd_functions+=( _fix_cursor )
+# Set cursor style (DECSCUSR), VT520.
+# 0  ⇒  blinking block.
+# 1  ⇒  blinking block (default).
+# 2  ⇒  steady block.
+# 3  ⇒  blinking underline.
+# 4  ⇒  steady underline.
+# 5  ⇒  blinking bar, xterm.
+# 6  ⇒  steady bar, xterm.
 # Change cursor shape for different vi modes.
 function zle-keymap-select() {
 if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
     echo -ne '\e[1 q'
 elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] ||
     [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
-    echo -ne '\e[5 q'
+    echo -ne '\e[3 q'
 fi
 }
 zle -N zle-keymap-select
 function zle-line-init() {
     zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-    echo -ne '\e[5 q'
+    echo -ne '\e[3 q'
 }
 zle -N zle-line-init
-echo -ne '\e[5 q' # Use beam shape cursor on startup.
-# function preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+function preexec() { echo -ne '\e[3 q' ;} # Use beam shape cursor for each new prompt.
+preexec_finctions+=( preexec )
+echo -ne '\e[3 q' # Use beam shape cursor on startup.
+export VI_MODE_SET_CURSOR=true
+function zle-line-finish() { echo -ne '\e[3 q' }
+zle -N zle-line-finish
+
+# TEST=`bindkey -v | awk '/keymap/ {print $NF}'`
+# if [ "$TEST" = 'vi-insert' ]; then
+#    echo -ne "\033]12;Green\007"
+# else
+#    echo -ne "\033]12;Red\007"
+# fi
+
 
 # Use lf to switch directories and bind it to ctrl-o
 function lfcd () {
@@ -848,8 +885,6 @@ if [ -f ~/.alert ]; then echo '>>> Check ~/.alert'; fi
 # # The following lines were added by compinstall
 # zstyle :compinstall filename '$HOME/.zshrc'
 
-# autoload -Uz compinit
-# compinit
 
 # End of lines added by compinstall
 # Lines configured by zsh-newuser-install
@@ -874,7 +909,7 @@ export XBPS_DISTDIR=$HOME/.void-packages
 
 # export PS1='%n@%m %~$ '
 # export PS1='%n@%m %(!.#.$)~$ '
-export PS1='%(!.#.$) '
+# export PS1='%(!.#.$) '
 
 export INPUT_METHOD=fcitx
 export GTK_IM_MODULE=fcitx    # export GTK_IM_MODULE=wayland
@@ -1009,44 +1044,47 @@ if [[ ! -f ${ZINIT[BIN_DIR]}/zinit.zsh ]]; then
     # command doas chmod -R g-w "${ZINIT[HOME_DIR]}"
     # command doas chmod -R o-w "${ZINIT[HOME_DIR]}"
 
-    # doas chmod -R -f --silent --quiet 0755 "/share/zinit"
-    # doas chmod -R -f --silent --quiet 0775 "/share/zinit"
-    # doas chown -R -f --silent --quiet root:zinit "/share/zinit"
+    # doas chmod -R --quiet 0755 "/share/zinit"
+    # doas chmod -R --quiet 0775 "/share/zinit"
+    # doas chown -R --quiet root:zinit "/share/zinit"
 fi
 
 function post_update(){
-    # # doas chmod -R -f --silent --quiet 0755 "/share/zinit"
-    # # doas chmod -R -f --silent --quiet 0755 "/share/vinit"
-    # # doas chmod -R -f --silent --quiet 0755 "/share/tinit"
+    # # doas chmod -R --quiet 0755 "/share/zinit"
+    # # doas chmod -R --quiet 0755 "/share/vinit"
+    # # doas chmod -R --quiet 0755 "/share/tinit"
 
-    # # doas chmod -R -f --silent --quiet 0775 "/share/zinit"
-    # # doas chmod -R -f --silent --quiet 0775 "/share/vinit"
-    # # doas chmod -R -f --silent --quiet 0775 "/share/tinit"
+    # # doas chmod -R --quiet 0775 "/share/zinit"
+    # # doas chmod -R --quiet 0775 "/share/vinit"
+    # # doas chmod -R --quiet 0775 "/share/tinit"
 
-    # # command doas chmod -R -f --silent --quiet g-w "${ZINIT[HOME_DIR]}"
-    # # command doas chmod -R -f --silent --quiet g-w "${VINIT[HOME_DIR]}"
-    # # command doas chmod -R -f --silent --quiet g-w "${TINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet g-w "${ZINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet g-w "${VINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet g-w "${TINIT[HOME_DIR]}"
 
-    # # command doas chmod -R -f --silent --quiet o-w "${ZINIT[HOME_DIR]}"
-    # # command doas chmod -R -f --silent --quiet o-w "${VINIT[HOME_DIR]}"
-    # # command doas chmod -R -f --silent --quiet o-w "${TINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet o-w "${ZINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet o-w "${VINIT[HOME_DIR]}"
+    # # command doas chmod -R --quiet o-w "${TINIT[HOME_DIR]}"
 
-    # command doas chmod -R -f --silent --quiet g+rwX "${ZINIT[HOME_DIR]}"
-    # command doas chmod -R -f --silent --quiet g+rwX "${VINIT[HOME_DIR]}"
-    # command doas chmod -R -f --silent --quiet g+rwX "${TINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet g+rwX "${ZINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet g+rwX "${VINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet g+rwX "${TINIT[HOME_DIR]}"
 
-    # command doas chmod -R -f --silent --quiet o+rX "${ZINIT[HOME_DIR]}"
-    # command doas chmod -R -f --silent --quiet o+rX "${VINIT[HOME_DIR]}"
-    # command doas chmod -R -f --silent --quiet o+rX "${TINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet o+rX "${ZINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet o+rX "${VINIT[HOME_DIR]}"
+    # command doas chmod -R --quiet o+rX "${TINIT[HOME_DIR]}"
 
-    # # doas chown -R -f --silent --quiet root:zinit "${ZINIT[HOME_DIR]}"
-    # # doas chown -R -f --silent --quiet root:vinit "${VINIT[HOME_DIR]}"
-    # # doas chown -R -f --silent --quiet root:tinit "${TINIT[HOME_DIR]}"
+    # # doas chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
+    # # doas chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
+    # # doas chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
 
-    command doas chown -R -f --silent --quiet root:users "${ZINIT[HOME_DIR]}"
-    command doas chown -R -f --silent --quiet root:users "${VINIT[HOME_DIR]}"
-    command doas chown -R -f --silent --quiet root:users "${TINIT[HOME_DIR]}"
-
+    command doas chown -R --quiet root:users "${ZINIT[HOME_DIR]}"
+    command doas chown -R --quiet root:users "${VINIT[HOME_DIR]}"
+    command doas chown -R --quiet root:users "${TINIT[HOME_DIR]}"
+    for packages_path in "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+    do
+        find $packages_path -type d -name ".git" -prune -o -name ".github" -prune -o -name '*' -print -exec chmod g+rx {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $packages_path 2>&1 &
+    done 
 }
 
 autoload -Uz _post_update
@@ -1132,12 +1170,20 @@ zinit snippet OMZP::ruby
 zinit ice svn
 zinit snippet OMZP::macos
 
-zinit ice as"completion"
-# zinit snippet OMZP::docker
-zinit snippet OMZP::docker/_docker
+# For sharing between root and other users, following line does not work
+# zinit wait lucid is-snippet as"completion" for \
+zinit ice as"completion" for \
+    OMZP::fd/_fd \
+    OMZP::docker/_docker \
+    OMZP::docker-compose/_docker-compose \
+    OMZP::rust/_rust \
+    OMZP::cargo \
+    OMZP::rustup
 
-zinit ice as"completion"
-zinit snippet OMZP::fd/_fd
+# zinit ice as"completion"
+# zinit snippet OMZP::docker/_docker
+# zinit ice as"completion"
+# zinit snippet OMZP::fd/_fd
 
 # # Load the pure theme, with zsh-async library that's bundled with it.
 # zinit ice pick"async.zsh" src"pure.zsh"
@@ -1213,6 +1259,14 @@ function zvm_after_lazy_keybindings() {
 zinit ice wait'!'
 zinit light zsh-users/zsh-history-substring-search
 
+
+# zinit wait lucid as"completion" for \
+#     junegunn/fzf \
+#     junegunn/fzf-bin \
+#     jhawthorn/fzy \
+#     Aloxaf/fzf-tab \
+#     chitoku-k/fzf-zsh-completions
+
 # Binary release in archive, from GitHub-releases page.
 # After automatic unpacking it provides program "fzf".
 zinit ice from"gh-r" as"program"
@@ -1221,12 +1275,19 @@ zinit light junegunn/fzf
 # Install fzf
 zinit ice from"gh-r" as"command"
 zinit load junegunn/fzf-bin
+
 # or fzy
 zinit ice as"command" make"\!PREFIX=$ZPFX install" \
     atclone"cp contrib/fzy-* $ZPFX/bin/" \
     pick"$ZPFX/bin/fzy*"
 
 zinit load jhawthorn/fzy
+
+zinit ice wait lucid
+zinit light Aloxaf/fzf-tab
+
+zinit ice wait lucid
+zinit light chitoku-k/fzf-zsh-completions
 
 
 
@@ -1313,30 +1374,6 @@ zinit load zdharma-continuum/zinit-configs
 zinit ice wait lucid
 zinit light zdharma-continuum/null
 
-zinit ice wait lucid
-zinit light Aloxaf/fzf-tab
-
-# This function implements `kubectl view-serviceaccount-kubeconfig **`
-# Function name must be _fzf_complete_(command)_(subcommand)
-_fzf_complete_kubectl_view-serviceaccount-kubeconfig() {
-
-    # Call preprocessors
-    _fzf_complete_kubectl_parse_resource_and_name 2
-    _fzf_complete_kubectl_parse_completing_option
-    _fzf_complete_kubectl_parse_kubectl_arguments
-
-    # Return status code other than 0 to fall back to default
-    if [[ -n $completing_option ]]; then
-        return 1
-    fi
-
-    # Call any one of completion functions; see source code as to their usage
-    resource=serviceaccounts
-    _fzf_complete_kubectl-resource-names '' "$@"
-}
-
-zinit ice wait lucid
-zinit light chitoku-k/fzf-zsh-completions
 
 # fi
 
@@ -1447,6 +1484,9 @@ typeset -U fpath
 # # turn on git stash status
 # zstyle :prompt:pure:git:stash show yes
 
+# https://github.com/reobin/typewritten
+# autoload -U promptinit; promptinit
+# prompt typewritten
 
 # autoload -U promptinit; promptinit
 # prompt restore
@@ -1461,11 +1501,13 @@ fi
 # prompt guezwhoz-zshell
 # prompt powerlevel10k
 
-if [ "$USER" = 'root' ]; then
-# https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
-    zpcompinit
-fi
-# [ -z "$TMUX" ] && exec tmux new -As .
+# if [ "$USER" = 'root' ]; then
+# # https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
+#     # zpcompinit
+#     autoload -Uz compinit && compinit
+# fi
+
+# [ -z "$TMUX" ] && ! [ "$USER" = 'root' ] && ! ( [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] )  && exec tmux new -As .
 
 
 
