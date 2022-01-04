@@ -246,13 +246,6 @@ exe 'set packpath+='. vim_packager_path
 runtime! OPT vim_packager_path
 " packadd vim-packager
 
-" packadd keys
-" Don't do this, keys.vim will not notice vim-tmux-navigator correctly -- even you put it after vim-tmux-navigator
-" if ! exists('g:loaded_keys')
-"     let keys_load_path = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
-"     execute "source " .   keys_load_path
-"     execute "runtime! " . keys_load_path
-" endif
 
 
 " Garbage is spilled to terminal if statusline contains slow system() call #3197
@@ -361,15 +354,36 @@ let g:file_extensions = ["*.h"]
 :call add(g:file_extensions, "*.inl")
 :call add(g:file_extensions, "*.impl")
 :call add(g:file_extensions, "*.vim")
-"   :call add(g:file_extensions, "*.cs")
+" :call add(g:file_extensions, "*.cs")
 
-" vim-which-key is vim port of emacs-which-key that displays available keybindings in popup.
-" https://github.com/liuchengxu/vim-which-key
-nnoremap <silent> <leader> :WhichKey '\' <cr>
-nnoremap <silent> <F11> unlet g:loaded_keys && exec 'runtime! ' . g:plugin_dir['vim'] . '/after/plugin/keys.vim' && redraw!
+" " WhichKey move focused window from current to the right/next one"
+" " vim-which-key is vim port of emacs-which-key that displays available keybindings in popup.
+" " https://github.com/liuchengxu/vim-which-key
+" nnoremap <silent> <leader> :WhichKey '\' <cr>
+" " By default timeoutlen is 1000 ms
+" set timeoutlen=500
 
-" By default timeoutlen is 1000 ms
-set timeoutlen=500
+" User defined key maps
+function! s:keys_reload()
+    " packadd keys
+    " Don't do this manually before all plugins loaded, keys.vim will not notice vim-tmux-navigator correctly -- even you put it after vim-tmux-navigator
+    " if ! exists('g:keys_loaded')
+    "     let keys_load_path = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
+    "     execute "source " .   keys_load_path
+    "     execute "runtime! " . keys_load_path
+    " endif
+
+    if exists('g:keys_loaded')
+        unlet g:keys_loaded
+    endif
+    " let g:debug_keys    = 1
+    let keys_load_path  = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
+    silent! execute "source " . keys_load_path
+    silent! execute "runtime! " . keys_load_path
+endfunction
+
+command! -nargs=0 KL :call s:keys_reload()
+
 
 
 
@@ -392,7 +406,198 @@ filetype off
 " git clone https://github.com/kristijanhusak/vim-packager ~/.vim/pack/packager/opt/vim-packager
 
 
+let g:vim_packages_use = {}
+let g:vim_packages_use['morhetz/gruvbox']                            = {}
+let g:vim_packages_use['kristijanhusak/vim-packager']                = { 'type' : 'opt' }
+let g:vim_packages_use['vimwiki/vimwiki']                            = { 'type' : 'opt' }
+let g:vim_packages_use['Shougo/unite-outline']                       = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-surround']                         = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-repeat']                           = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-scriptease']                       = { 'type' : 'opt' }
+let g:vim_packages_use['junegunn/vader.vim']                         = { 'type' : 'opt' }
+let g:vim_packages_use['kana/vim-vspec']                             = { 'type' : 'opt' }
+let g:vim_packages_use['sjbach/lusty']                               = { 'type' : 'opt' }    " LustyExplorer
+let g:vim_packages_use['drmingdrmer/xptemplate']                     = { 'type' : 'opt' }
+let g:vim_packages_use['jlanzarotta/bufexplorer']                    = { 'type' : 'opt' }
+let g:vim_packages_use['rscarvalho/OpenProject.vim']                 = { 'type' : 'opt' }
+let g:vim_packages_use['kasandell/Code-Pull']                        = { 'type' : 'opt' }
+let g:vim_packages_use['vim-scripts/genutils']                       = { 'type' : 'opt' }
+let g:vim_packages_use['benmills/vimux']                             = { 'type' : 'opt' }
+let g:vim_packages_use['powerline/powerline']                        = { 'type' : 'opt' }
 
+" let g:vim_packages_use['autozimu/LanguageClient-neovim']         = { 'do'   : 'bash install.sh' }
+" let g:vim_packages_use['smintz/vim-sqlutil']                     = { 'type' : 'opt' }
+" let g:vim_packages_use['ycm-core/YouCompleteMe']                 = { 'type' : 'opt' }
+" let g:vim_packages_use['tomtom/tcalc_vim']                       = { 'type' : 'opt' }
+" let g:vim_packages_use['tomtom/tcomment_vim']                    = { 'type' : 'opt' }
+" let g:vim_packages_use['vim-scripts/gtags.vim']                  = { 'type' : 'opt' }
+" let g:vim_packages_use['whatot/gtags-cscope.vim']                = { 'type' : 'opt' }
+" let g:vim_packages_use['inkarkat/vim-ingo-library']              = { 'type' : 'opt' }
+" let g:vim_packages_use['LucHermitte/local_vimrc']                = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-vim-lib']                 = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-brackets']                = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-dev']                     = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-tags']                    = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-cpp']                     = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/mu-template']                = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/lh-style']                   = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/vim-refactor']               = { 'type' : 'start' }
+" let g:vim_packages_use['LucHermitte/vim-build-tools-wrapper']    = { 'type' : 'start' }
+" let g:vim_packages_use['vim-scripts/TabBar']                     = { 'type' : 'start' }  " minibufexplorer
+" let g:vim_packages_use['fholgado/minibufexpl.vim']               = { 'type' : 'start' }  " minibufexplorer
+" let g:vim_packages_use['jlanzarotta/bufexplorer']                = { 'type' : 'start' }  " minibufexplorer
+" let g:vim_packages_use['erig0/cscope_dynamic']                   = { 'type' : 'start' }
+" let g:vim_packages_use['chrisbra/vim-autoread']                  = { 'type' : 'start' }  " auto refresh changes by tail -f. duplicate buffers continually!
+" let g:vim_packages_use['wikitopian/hardmode']                    = { 'type' : 'start' }  " disable arrow key
+" let g:vim_packages_use['yssl/QFEnter']                           = { 'type' : 'start' }  " could not resolve host
+" let g:vim_packages_use['ervandew/supertab']                      = { 'type' : 'start' }  " could not resolve host
+" let g:vim_packages_use['Yggdroot/LeaderF']                       = { 'type' : 'start' }
+" let g:vim_packages_use['preservim/nerdtree']                     = { 'type' : 'start' }
+" let g:vim_packages_use['scrooloose/nerdtree']                    = { 'type' : 'start' }
+" let g:vim_packages_use['wesleyche/Trinity']                      = { 'type' : 'start' }
+" let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim'] = { 'type' : 'start' }
+" let g:vim_packages_use['jistr/vim-nerdtree-tabs']                = { 'type' : 'start' }  " No longer actively maintained
+" let g:vim_packages_use['vim-scripts/taglist.vim']                = { 'type' : 'start' }
+" let g:vim_packages_use['andymass/vim-matchup']                   = { 'type' : 'start' }
+" let g:vim_packages_use['edsono/vim-sessions']                    = { 'type' : 'start' }
+" let g:vim_packages_use['wincent/command-t']                      = { 'type' : 'start' }
+" let g:vim_packages_use['svermeulen/vim-cutlass']                 = { 'type' : 'start' }  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
+" let g:vim_packages_use['umaumax/vim-format']                     = { 'type' : 'start' }  " file format
+" let g:vim_packages_use['Yggdroot/indentLine']                    = { 'type' : 'start' }  " file format
+" let g:vim_packages_use['rking/ag.vim']                           = { 'type' : 'start' }
+" let g:vim_packages_use['romainl/vim-qf']                         = { 'type' : 'start' }
+" let g:vim_packages_use['reedes/vim-colors-pencil']               = { 'type' : 'start' }
+" let g:vim_packages_use['dawikur/base16-vim-airline-themes']      = { 'type' : 'start' }
+" let g:vim_packages_use['ludovicchabant/vim-gutentags']           = { 'type' : 'start' }
+" let g:vim_packages_use['skywind3000/gutentags_plus']             = { 'type' : 'start' }
+" let g:vim_packages_use['jpaulogg/vim-flipdir']                   = { 'type' : 'start' }
+" let g:vim_packages_use['preservim/nerdcommenter']                = { 'type' : 'start' }
+" let g:vim_packages_use['ctrlpvim/ctrlp.vim']                     = { 'type' : 'start' }
+" let g:vim_packages_use['vim-airline/vim-airline']                = { 'type' : 'start' }
+" let g:vim_packages_use['vim-airline/vim-airline-themes']         = { 'type' : 'start' }
+" let g:vim_packages_use['ajh17/VimCompletesMe']                   = { 'type' : 'start' }  " code completion
+" let g:vim_packages_use['Shougo/deoplete.nvim']                   = { 'type' : 'start' }  " code completion
+" let g:vim_packages_use['bfredl/nvim-miniyank']                   = { 'type' : 'start' }
+" let g:vim_packages_use['google/vim-codefmt']                     = { 'type' : 'start' }
+" let g:vim_packages_use['idbrii/AsyncCommand']                    = { 'type' : 'start' }
+" let g:vim_packages_use['jacobdufault/cquery']                    = { 'type' : 'start' }  " code completion
+" " Run Java at background and do not declare it
+" let g:vim_packages_use['mattn/vim-lsp-settings']                 = { 'type' : 'start' }
+" let g:vim_packages_use['neovim/nvim-lspconfig']                  = { 'type' : 'start' }
+" let g:vim_packages_use['nvim-lua/completion-nvim']               = { 'type' : 'start' }
+
+" Insert condition here means telling manager to remove the plugin's local copy
+" if exists('g:use_indent_guides')
+let g:vim_packages_use['nathanaelkane/vim-indent-guides']            = { 'type' : 'start' }    " file format
+" endif
+let g:vim_packages_use['google/vim-maktaba']                         = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/vim-buffergator']               = { 'type' : 'start' }  " minibufexplorer
+let g:vim_packages_use['ronakg/quickr-cscope.vim']                   = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-dispatch']                         = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-commentary']                       = { 'type' : 'start' }
+let g:vim_packages_use['jasonccox/vim-wayland-clipboard']            = { 'type' : 'start' }
+let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                   = { 'type' : 'start' }  " file format
+let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }  " file format
+let g:vim_packages_use['vim-autoformat/vim-autoformat']              = { 'type' : 'start' }  " file format
+let g:vim_packages_use['junegunn/vim-easy-align']                    = { 'type' : 'start' }  " file format
+let g:vim_packages_use['roman/golden-ratio']                         = { 'type' : 'start' }  " file format
+let g:vim_packages_use['godlygeek/tabular']                          = { 'type' : 'start' }  " file format
+let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']            = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/vim-qfedit']                         = { 'type' : 'start' }
+let g:vim_packages_use['lervag/vimtex']                              = { 'type' : 'start' }
+let g:vim_packages_use['jesseleite/vim-agriculture']                 = { 'type' : 'start' }
+let g:vim_packages_use['ggreer/the_silver_searcher']                 = { 'type' : 'start' }
+let g:vim_packages_use['BurntSushi/ripgrep']                         = { 'type' : 'start' }
+let g:vim_packages_use['preservim/vim-colors-pencil']                = { 'type' : 'start' }
+let g:vim_packages_use['chriskempson/base16-vim']                    = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/unsuck-flat']                   = { 'type' : 'start' }
+let g:vim_packages_use['skywind3000/asyncrun.vim']                   = { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'}
+let g:vim_packages_use['skywind3000/asynctasks.vim']                 = { 'type' : 'start' }
+let g:vim_packages_use['jezcope/vim-align']                          = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-rhubarb']                          = { 'type' : 'start' }  " Gbrowse
+let g:vim_packages_use['tpope/vim-fugitive']                         = { 'type' : 'start' }  " Gblame
+let g:vim_packages_use['liuchengxu/vim-which-key']                   = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-hijack.vim']                = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']   = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-git-status.vim']            = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-renderer-nerdfont.vim']     = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-ssh']                       = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-bookmark.vim']              = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']           = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim'] = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']      = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']    = { 'type' : 'start' }
+let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']     = { 'type' : 'start' }
+let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim'] = { 'type' : 'start' }
+let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']     = { 'type' : 'start' }
+let g:vim_packages_use['LumaKernel/fern-mapping-fzf.vim']            = { 'type' : 'start' }
+let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'start' }
+let g:vim_packages_use['hashivim/vim-terraform']                     = { 'type' : 'start' }
+let g:vim_packages_use['terryma/vim-multiple-cursors']               = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-eunuch']                           = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-surround']                         = { 'type' : 'start' }
+let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }
+let g:vim_packages_use['mattn/emmet-vim']                            = { 'type' : 'start' }
+let g:vim_packages_use['w0rp/ale']                                   = { 'type' : 'start' }
+let g:vim_packages_use['airblade/vim-gitgutter']                     = { 'type' : 'start' }
+let g:vim_packages_use['shemerey/vim-project']                       = { 'type' : 'start' }
+let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " debug errors pop-uping
+let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " debug errors pop-uping
+let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
+let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
+let g:vim_packages_use['majutsushi/ctags']                           = { 'type' : 'start' }
+let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
+let g:vim_packages_use['vhdirk/vim-cmake']                           = { 'type' : 'start' }
+let g:vim_packages_use['gilligan/vim-lldb']                          = { 'type' : 'start' }
+let g:vim_packages_use['mileszs/ack.vim']                            = { 'type' : 'start' }
+let g:vim_packages_use['mhinz/vim-grepper']                          = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-unimpaired']                       = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/lightline.vim']                      = { 'type' : 'start' }
+let g:vim_packages_use['LucHermitte/vim-refactor']                   = { 'type' : 'start' }
+let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']         = { 'type' : 'start' }
+let g:vim_packages_use['lifepillar/vim-mucomplete']                  = { 'type' : 'start' }  " code completion
+let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
+let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
+let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' : 'start' }
+let g:vim_packages_use['christoomey/vim-tmux-navigator']             = { 'type' : 'start' }
+let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }
+let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']        = { 'type' : 'start' }
+let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
+let g:vim_packages_use['thinca/vim-themis']                          = { 'type' : 'start' }
+let g:vim_packages_use['mhinz/vim-galore']                           = { 'type' : 'start' }
+let g:vim_packages_use['plasticboy/vim-markdown']                    = { 'type' : 'start' }
+let g:vim_packages_use['jgdavey/tslime.vim']                         = { 'type' : 'start' }
+let g:vim_packages_use['zdharma-continuum/zinit-vim-syntax']         = { 'type' : 'start' }
+let g:vim_packages_use['leafgarland/typescript-vim']                 = { 'type' : 'start' }
+let g:vim_packages_use['chrisbra/Recover.vim']                       = { 'type' : 'start' }
+let g:vim_packages_use['preservim/vim-textobj-quote']                = { 'type' : 'start' }
+let g:vim_packages_use['kana/vim-textobj-user']                      = { 'type' : 'start' }
+let g:vim_packages_use['joe-skb7/cscope-maps']                       = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/mkdx']                          = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/cscope_auto']                   = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/session_auto']                  = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/boot']                          = { 'type' : 'start' }
+let g:vim_packages_use['kmonad/kmonad-vim']                          = { 'type' : 'start' }
+let g:vim_packages_use['skywind3000/vim-quickui']                    = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/vim-gitbranch']                      = { 'type' : 'start' }
+let g:vim_packages_use['mbbill/undotree']                            = { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' }
+let g:vim_packages_use['prabirshrestha/vim-lsp']                     = { 'type' : 'start' }
+let g:vim_packages_use['sheerun/vim-polyglot']                       = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-sleuth']                           = { 'type' : 'start' }
+let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']        = { 'type' : 'start' }
+let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'start' }
+" " Provide full URL; useful if you want to clone from somewhere else than Github.
+" let g:vim_packages_use['https://my.other.public.git/tpope/vim-fugitive.git'] = {}
+" " Provide SSH-based URL; useful if you have write access to a repository and wish to push to it
+" let g:vim_packages_use['git@github.com:mygithubid/myrepo.git'] = {}
+" " Loaded only for specific filetypes on demand. Requires autocommands below.
+let g:vim_packages_use['kristijanhusak/vim-js-file-import']          = { 'type' : 'opt', 'do' : 'npm install' }
+" let g:vim_packages_use['fatih/vim-go'] =                             { 'type' : 'opt', 'do' : ':GoInstallBinaries' }
+" let g:vim_packages_use['neoclide/coc.nvim'] =                        { 'do'   : function('InstallCoc') }    " code completion
+" let g:vim_packages_use['weirongxu/coc-explorer'] =                   { 'do'   : function('InstallCoc') }
+let g:vim_packages_use['sonph/onehalf']                              = { 'rtp'  : 'vim' }
 
 
 
@@ -415,183 +620,9 @@ if exists('g:use_setup_minpac')
             call minpac#init()
             " Additional plugins here.
             "
-            call minpac#add('morhetz/gruvbox')
-            " call minpac#add('autozimu/LanguageClient-neovim',             { 'do'   : 'bash install.sh' })
-            " call minpac#add('smintz/vim-sqlutil',                         { 'type' : 'opt' })
-            " call minpac#add('ycm-core/YouCompleteMe',                     { 'type' : 'opt' })
-            " call minpac#add('tomtom/tcalc_vim',                           { 'type' : 'opt' })
-            " call minpac#add('tomtom/tcomment_vim',                        { 'type' : 'opt' })
-            " call minpac#add('vim-scripts/gtags.vim',                      { 'type' : 'opt' })
-            " call minpac#add('whatot/gtags-cscope.vim',                    { 'type' : 'opt' })
-            call minpac#add('kristijanhusak/vim-packager',                { 'type' : 'opt' })
-            call minpac#add('vimwiki/vimwiki',                            { 'type' : 'opt' })
-            call minpac#add('Shougo/unite-outline',                       { 'type' : 'opt' })
-            call minpac#add('tpope/vim-surround',                         { 'type' : 'opt' })
-            call minpac#add('tpope/vim-repeat',                           { 'type' : 'opt' })
-            call minpac#add('tpope/vim-scriptease',                       { 'type' : 'opt' })
-            call minpac#add('junegunn/vader.vim',                         { 'type' : 'opt' })
-            call minpac#add('kana/vim-vspec',                             { 'type' : 'opt' })
-            call minpac#add('inkarkat/vim-ingo-library',                  { 'type' : 'opt' })
-            call minpac#add('sjbach/lusty',                               { 'type' : 'opt' })    " LustyExplorer
-            call minpac#add('drmingdrmer/xptemplate',                     { 'type' : 'opt' })
-            call minpac#add('jlanzarotta/bufexplorer',                    { 'type' : 'opt' })
-            call minpac#add('rscarvalho/OpenProject.vim',                 { 'type' : 'opt' })
-            call minpac#add('kasandell/Code-Pull',                        { 'type' : 'opt' })
-            call minpac#add('vim-scripts/genutils',                       { 'type' : 'opt' })
-            call minpac#add('benmills/vimux',                             { 'type' : 'opt' })
-            call minpac#add('powerline/powerline',                        { 'type' : 'opt' })
-            " call minpac#add('LucHermitte/local_vimrc',                    { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-vim-lib',                     { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-brackets',                    { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-dev',                         { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-tags',                        { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-cpp',                         { 'type' : 'start' })
-            " call minpac#add('LucHermitte/mu-template',                    { 'type' : 'start' })
-            " call minpac#add('LucHermitte/lh-style',                       { 'type' : 'start' })
-            " call minpac#add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-            " call minpac#add('LucHermitte/vim-build-tools-wrapper',        { 'type' : 'start' })
-            " call minpac#add('vim-scripts/TabBar',                         { 'type' : 'start' })    " minibufexplorer
-            " call minpac#add('fholgado/minibufexpl.vim',                   { 'type' : 'start' })    " minibufexplorer
-            " call minpac#add('jlanzarotta/bufexplorer',                    { 'type' : 'start' })    " minibufexplorer
-            " call minpac#add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
-            " call minpac#add('erig0/cscope_dynamic',                       { 'type' : 'start' })
-            " call minpac#add('chrisbra/vim-autoread',                      { 'type' : 'start' })  " auto refresh changes by tail -f. duplicate buffers continually!
-            " call minpac#add('wikitopian/hardmodn',                        { 'type' : 'start' })  " disable arrow key
-            " call minpac#add('yssl/QFEnter',                               { 'type' : 'start' })  " could not resolve host
-            " call minpac#add('ervandew/supertab',                          { 'type' : 'start' })  " could not resolve host
-            " call minpac#add('Yggdroot/LeaderF',                           { 'type' : 'start' })
-            " call minpac#add('preservim/nerdtree',                         { 'type' : 'start' })
-            " call minpac#add('scrooloose/nerdtree',                        { 'type' : 'start' })
-            " call minpac#add('wesleyche/Trinity',                          { 'type' : 'start' })
-            " call minpac#add('lambdalisue/fern-renderer-devicons.vim',     { 'type' : 'start' })
-            " call minpac#add('jistr/vim-nerdtree-tabs',                    { 'type' : 'start' })  " No longer actively maintained
-            " call minpac#add('vim-scripts/taglist.vim',                    { 'type' : 'start' })
-            " call minpac#add('andymass/vim-matchup',                       { 'type' : 'start' })
-            " call minpac#add('edsono/vim-sessions',                        { 'type' : 'start' })
-            " call minpac#add('wincent/command-t',                          { 'type' : 'start' })
-            " call minpac#add('svermeulen/vim-cutlass',                     { 'type' : 'start' })  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
-            " call minpac#add('umaumax/vim-format',                         { 'type' : 'start' })    " file format
-            " call minpac#add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
-            " call minpac#add('rking/ag.vim',                               { 'type' : 'start' })
-            " call minpac#add('romainl/vim-qf',                             { 'type' : 'start' })
-            " call minpac#add('reedes/vim-colors-pencil',                   { 'type' : 'start' })
-            " call minpac#add('dawikur/base16-vim-airline-themes',          { 'type' : 'start' })
-            " call minpac#add('ludovicchabant/vim-gutentags',               { 'type' : 'start' })
-            " call minpac#add('skywind3000/gutentags_plus',                 { 'type' : 'start' })
-            " call minpac#add('jpaulogg/vim-flipdir',                       { 'type' : 'start' })
-            " call minpac#add('preservim/nerdcommenter',                    { 'type' : 'start' })
-            " call minpac#add('ctrlpvim/ctrlp.vim',                         { 'type' : 'start' })
-            " call minpac#add('vim-airline/vim-airline',                    { 'type' : 'start' })
-            " call minpac#add('vim-airline/vim-airline-themes',             { 'type' : 'start' })
-            " call minpac#add('ajh17/VimCompletesMe',                       { 'type' : 'start' }) " code completion
-            " call minpac#add('Shougo/deoplete.nvim',                       { 'type' : 'start' }) " code completion
-            " call minpac#add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
-            " call minpac#add('google/vim-codefmt',                         { 'type' : 'start' })
-            " call minpac#add('google/vim-maktaba',                         { 'type' : 'start' })
-            call minpac#add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
-            call minpac#add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
-            call minpac#add('tpope/vim-dispatch',                         { 'type' : 'start' })
-            call minpac#add('tpope/vim-commentary',                       { 'type' : 'start' })
-            " call minpac#add('idbrii/AsyncCommand',                        { 'type' : 'start' })
-            call minpac#add('jasonccox/vim-wayland-clipboard',            { 'type' : 'start' })
-
-            " if exists('g:use_indent_guides')
-            call minpac#add('nathanaelkane/vim-indent-guides',            { 'type' : 'start' })    " file format
-            " endif
-            call minpac#add('vim-scripts/RltvNmbr.vim',                   { 'type' : 'start' })    " file format
-            call minpac#add('editorconfig/editorconfig-vim',              { 'type' : 'start' }) " file format
-            call minpac#add('vim-autoformat/vim-autoformat',              { 'type' : 'start' }) " file format
-            call minpac#add('junegunn/vim-easy-align',                    { 'type' : 'start' }) " file format
-            call minpac#add('roman/golden-ratio',                         { 'type' : 'start' }) " file format
-            call minpac#add('godlygeek/tabular',                          { 'type' : 'start' }) " file format
-            call minpac#add('drmingdrmer/vim-toggle-quickfix',            { 'type' : 'start' })
-            call minpac#add('itchyny/vim-qfedit',                         { 'type' : 'start' })
-            call minpac#add('lervag/vimtex',                              { 'type' : 'start' })
-            call minpac#add('jesseleite/vim-agriculture',                 { 'type' : 'start' })
-            call minpac#add('ggreer/the_silver_searcher',                 { 'type' : 'start' })
-            call minpac#add('BurntSushi/ripgrep',                         { 'type' : 'start' })
-            call minpac#add('preservim/vim-colors-pencil',                { 'type' : 'start' })
-            call minpac#add('chriskempson/base16-vim',                    { 'type' : 'start' })
-            call minpac#add('trailblazing/unsuck-flat',                   { 'type' : 'start' })
-            call minpac#add('skywind3000/asyncrun.vim',                   { 'type' : 'start' })
-            call minpac#add('skywind3000/asynctasks.vim',                 { 'type' : 'start' })
-            call minpac#add('jezcope/vim-align',                          { 'type' : 'start' })
-            call minpac#add('tpope/vim-rhubarb',                          { 'type' : 'start' }) " Gbrowse
-            call minpac#add('tpope/vim-fugitive',                         { 'type' : 'start' }) " Gblame
-            call minpac#add('liuchengxu/vim-which-key',                   { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern.vim',                       { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-hijack.vim',                { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-mapping-project-top.vim',   { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-git-status.vim',            { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-renderer-nerdfont.vim',     { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-ssh',                       { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-bookmark.vim',              { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-mapping-git.vim',           { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-mapping-mark-children.vim', { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-mapping-quickfix.vim',      { 'type' : 'start' })
-            call minpac#add('lambdalisue/fern-comparator-lexical.vim',    { 'type' : 'start' })
-            call minpac#add('hrsh7th/fern-mapping-call-function.vim',     { 'type' : 'start' })
-            call minpac#add('hrsh7th/fern-mapping-collapse-or-leave.vim', { 'type' : 'start' })
-            call minpac#add('LumaKernel/fern-mapping-reload-all.vim',     { 'type' : 'start' })
-            call minpac#add('LumaKernel/fern-mapping-fzf.vim',            { 'type' : 'start' })
-            call minpac#add('liquidz/vim-iced-fern-debugger',             { 'type' : 'start' })
-            call minpac#add('hashivim/vim-terraform',                     { 'type' : 'start' })
-            call minpac#add('terryma/vim-multiple-cursors',               { 'type' : 'start' })
-            call minpac#add('tpope/vim-eunuch',                           { 'type' : 'start' })
-            call minpac#add('tpope/vim-surround',                         { 'type' : 'start' })
-            call minpac#add('editorconfig/editorconfig-vim',              { 'type' : 'start' })
-            call minpac#add('mattn/emmet-vim',                            { 'type' : 'start' })
-            call minpac#add('w0rp/ale',                                   { 'type' : 'start' })
-            call minpac#add('airblade/vim-gitgutter',                     { 'type' : 'start' })
-            call minpac#add('shemerey/vim-project',                       { 'type' : 'start' })
-            call minpac#add('xolox/vim-misc',                             { 'type' : 'start' }) " debug errors pop-uping
-            call minpac#add('xolox/vim-reload',                           { 'type' : 'start' }) " debug errors pop-uping
-            call minpac#add('xolox/vim-session',                          { 'type' : 'start' })
-            call minpac#add('tpope/vim-obsession',                        { 'type' : 'start' })
-            call minpac#add('mattolenik/vim-projectrc',                   { 'type' : 'start' })
-            call minpac#add('majutsushi/ctags',                           { 'type' : 'start' })
-            call minpac#add('majutsushi/tagbar',                          { 'type' : 'start' })
-            call minpac#add('vhdirk/vim-cmake',                           { 'type' : 'start' })
-            call minpac#add('gilligan/vim-lldb',                          { 'type' : 'start' })
-            call minpac#add('mileszs/ack.vim',                            { 'type' : 'start' })
-            call minpac#add('mhinz/vim-grepper',                          { 'type' : 'start' })
-            call minpac#add('tpope/vim-unimpaired',                       { 'type' : 'start' })
-            call minpac#add('itchyny/lightline.vim',                      { 'type' : 'start' })
-            call minpac#add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-            call minpac#add('MarcWeber/vim-addon-background-cmd',         { 'type' : 'start' })
-            " call minpac#add('jacobdufault/cquery',                        { 'type' : 'start' }) " code completion
-            call minpac#add('MaskRay/ccls',                               { 'type' : 'start' }) " code completion
-            call minpac#add('lifepillar/vim-mucomplete',                  { 'type' : 'start' }) " code completion
-            call minpac#add('junegunn/fzf',                               { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' })
-            call minpac#add('junegunn/fzf.vim',                           { 'type' : 'start' })
-            call minpac#add('xavierd/clang_complete',                     { 'type' : 'start' })
-            call minpac#add('christoomey/vim-tmux-navigator',             { 'type' : 'start' })
-            call minpac#add('tmux-plugins/vim-tmux-focus-events',         { 'type' : 'start' })
-            call minpac#add('RyanMillerC/better-vim-tmux-resizer',        { 'type' : 'start' })
-            call minpac#add('chrisbra/SudoEdit.vim',                      { 'type' : 'start' })
-            call minpac#add('thinca/vim-themis',                          { 'type' : 'start' })
-            call minpac#add('mhinz/vim-galore',                           { 'type' : 'start' })
-            call minpac#add('plasticboy/vim-markdown',                    { 'type' : 'start' })
-            call minpac#add('jgdavey/tslime.vim',                         { 'type' : 'start' })
-            call minpac#add('zdharma-continuum/zinit-vim-syntax',         { 'type' : 'start' })
-            call minpac#add('leafgarland/typescript-vim',                 { 'type' : 'start' })
-            call minpac#add('chrisbra/Recover.vim',                       { 'type' : 'start' })
-            call minpac#add('trailblazing/mkdx',                          { 'type' : 'start' })
-
-
-            " Provide full URL; useful if you want to clone from somewhere else than Github.
-            " call minpac#add('https://my.other.public.git/tpope/vim-fugitive.git')
-
-            " Provide SSH-based URL; useful if you have write access to a repository and wish to push to it
-            " call minpac#add('git@github.com:mygithubid/myrepo.git')
-
-            " Loaded only for specific filetypes on demand. Requires autocommands below.
-            call minpac#add('kristijanhusak/vim-js-file-import',          { 'type' : 'opt', 'do'   : 'npm install' })
-            " call minpac#add('fatih/vim-go',                               { 'type' : 'opt', 'do'   : ':GoInstallBinaries' })
-            " call minpac#add('neoclide/coc.nvim',                          { 'do'   : function('InstallCoc') })    " code completion
-            " call minpac#add('weirongxu/coc-explorer',                     { 'do'   : function('InstallCoc') })
-            call minpac#add('sonph/onehalf',                              { 'rtp'  : 'vim' })
-
+        for [key, value] in items(g:vim_packages_use)
+            call minpac#add(key, value)
+        endfor
             " call minpac#add('~/my_vim_plugins/my_awesome_plugin')
             " call minpac#add(a:plugin_dir['vim'].'/pack/minpac/start/utilities/scriptnames.vim',            { 'type' : 'start' })
             " call minpac#add(a:plugin_dir['vim'].'/pack/minpac/start/cscope_auto/plugin/cscope_auto.vim',   { 'type' : 'start' })
@@ -639,182 +670,10 @@ elseif exists('g:use_setup_reference')
 
 
     function! s:packager_init_ref(packager) abort
-        call a:packager.add('morhetz/gruvbox')
-        " call a:packager.add('autozimu/LanguageClient-neovim',             { 'do'   : 'bash install.sh' })
-        " call a:packager.add('smintz/vim-sqlutil',                         { 'type' : 'opt' })
-        " call a:packager.add('ycm-core/YouCompleteMe',                     { 'type' : 'opt' })
-        " call a:packager.add('tomtom/tcalc_vim',                           { 'type' : 'opt' })
-        " call a:packager.add('tomtom/tcomment_vim',                        { 'type' : 'opt' })
-        " call a:packager.add('vim-scripts/gtags.vim',                      { 'type' : 'opt' })
-        " call a:packager.add('whatot/gtags-cscope.vim',                    { 'type' : 'opt' })
-        call a:packager.add('kristijanhusak/vim-packager',                { 'type' : 'opt' })
-        call a:packager.add('vimwiki/vimwiki',                            { 'type' : 'opt' })
-        call a:packager.add('Shougo/unite-outline',                       { 'type' : 'opt' })
-        call a:packager.add('tpope/vim-surround',                         { 'type' : 'opt' })
-        call a:packager.add('tpope/vim-repeat',                           { 'type' : 'opt' })
-        call a:packager.add('tpope/vim-scriptease',                       { 'type' : 'opt' })
-        call a:packager.add('junegunn/vader.vim',                         { 'type' : 'opt' })
-        call a:packager.add('kana/vim-vspec',                             { 'type' : 'opt' })
-        call a:packager.add('inkarkat/vim-ingo-library',                  { 'type' : 'opt' })
-        call a:packager.add('sjbach/lusty',                               { 'type' : 'opt' })    " LustyExplorer
-        call a:packager.add('drmingdrmer/xptemplate',                     { 'type' : 'opt' })
-        call a:packager.add('jlanzarotta/bufexplorer',                    { 'type' : 'opt' })
-        call a:packager.add('rscarvalho/OpenProject.vim',                 { 'type' : 'opt' })
-        call a:packager.add('kasandell/Code-Pull',                        { 'type' : 'opt' })
-        call a:packager.add('vim-scripts/genutils',                       { 'type' : 'opt' })
-        call a:packager.add('benmills/vimux',                             { 'type' : 'opt' })
-        call a:packager.add('powerline/powerline',                        { 'type' : 'opt' })
-        " call a:packager.add('LucHermitte/local_vimrc',                    { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-vim-lib',                     { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-brackets',                    { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-dev',                         { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-tags',                        { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-cpp',                         { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/mu-template',                    { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/lh-style',                       { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-        " call a:packager.add('LucHermitte/vim-build-tools-wrapper',        { 'type' : 'start' })
-        " call a:packager.add('vim-scripts/TabBar',                         { 'type' : 'start' })    " minibufexplorer
-        " call a:packager.add('fholgado/minibufexpl.vim',                   { 'type' : 'start' })    " minibufexplorer
-        " call a:packager.add('jlanzarotta/bufexplorer',                    { 'type' : 'start' })    " minibufexplorer
-        " call a:packager.add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
-        " call a:packager.add('erig0/cscope_dynamic',                       { 'type' : 'start' })
-        " call a:packager.add('chrisbra/vim-autoread',                      { 'type' : 'start' })  " auto refresh changes by tail -f. duplicate buffers continually!
-        " call a:packager.add('wikitopian/hardmode',                        { 'type' : 'start' })  " disable arrow key
-        " call a:packager.add('yssl/QFEnter',                               { 'type' : 'start' })  " could not resolve host
-        " call a:packager.add('ervandew/supertab',                          { 'type' : 'start' })  " could not resolve host
-        " call a:packager.add('Yggdroot/LeaderF',                           { 'type' : 'start' })
-        " call a:packager.add('preservim/nerdtree',                         { 'type' : 'start' })
-        " call a:packager.add('scrooloose/nerdtree',                        { 'type' : 'start' })
-        " call a:packager.add('wesleyche/Trinity',                          { 'type' : 'start' })
-        " call a:packager.add('lambdalisue/fern-renderer-devicons.vim',     { 'type' : 'start' })
-        " call a:packager.add('jistr/vim-nerdtree-tabs',                    { 'type' : 'start' })  " No longer actively maintained
-        " call a:packager.add('vim-scripts/taglist.vim',                    { 'type' : 'start' })
-        " call a:packager.add('andymass/vim-matchup',                       { 'type' : 'start' })
-        " call a:packager.add('edsono/vim-sessions',                        { 'type' : 'start' })
-        " call a:packager.add('wincent/command-t',                          { 'type' : 'start' })
-        " call a:packager.add('svermeulen/vim-cutlass',                     { 'type' : 'start' })  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
-        " call a:packager.add('umaumax/vim-format',                         { 'type' : 'start' })    " file format
-        " call a:packager.add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
-        " call a:packager.add('rking/ag.vim',                               { 'type' : 'start' })
-        " call a:packager.add('romainl/vim-qf',                             { 'type' : 'start' })
-        " call a:packager.add('reedes/vim-colors-pencil',                   { 'type' : 'start' })
-        " call a:packager.add('dawikur/base16-vim-airline-themes',          { 'type' : 'start' })
-        " call a:packager.add('ludovicchabant/vim-gutentags',               { 'type' : 'start' })
-        " call a:packager.add('skywind3000/gutentags_plus',                 { 'type' : 'start' })
-        " call a:packager.add('jpaulogg/vim-flipdir',                       { 'type' : 'start' })
-        " call a:packager.add('preservim/nerdcommenter',                    { 'type' : 'start' })
-        " call a:packager.add('ctrlpvim/ctrlp.vim',                         { 'type' : 'start' })
-        " call a:packager.add('vim-airline/vim-airline',                    { 'type' : 'start' })
-        " call a:packager.add('vim-airline/vim-airline-themes',             { 'type' : 'start' })
-        " call a:packager.add('ajh17/VimCompletesMe',                       { 'type' : 'start' }) " code completion
-        " call a:packager.add('Shougo/deoplete.nvim',                       { 'type' : 'start' }) " code completion
-        " call a:packager.add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
-        " call a:packager.add('google/vim-codefmt',                         { 'type' : 'start' })
-        " call a:packager.add('google/vim-maktaba',                         { 'type' : 'start' })
-        call a:packager.add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
-        call a:packager.add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
-        call a:packager.add('tpope/vim-dispatch',                         { 'type' : 'start' })
-        call a:packager.add('tpope/vim-commentary',                       { 'type' : 'start' })
-        " call a:packager.add('idbrii/AsyncCommand',                        { 'type' : 'start' })
-        call a:packager.add('jasonccox/vim-wayland-clipboard',            { 'type' : 'start' })
 
-        " if exists('g:use_indent_guides')
-        call a:packager.add('nathanaelkane/vim-indent-guides',            { 'type' : 'start' })    " file format
-        " endif
-        call a:packager.add('vim-scripts/RltvNmbr.vim',                   { 'type' : 'start' })    " file format
-        call a:packager.add('editorconfig/editorconfig-vim',              { 'type' : 'start' }) " file format
-        call a:packager.add('vim-autoformat/vim-autoformat',              { 'type' : 'start' }) " file format
-        call a:packager.add('junegunn/vim-easy-align',                    { 'type' : 'start' }) " file format
-        call a:packager.add('roman/golden-ratio',                         { 'type' : 'start' }) " file format
-        call a:packager.add('godlygeek/tabular',                          { 'type' : 'start' }) " file format
-        call a:packager.add('drmingdrmer/vim-toggle-quickfix',            { 'type' : 'start' })
-        call a:packager.add('itchyny/vim-qfedit',                         { 'type' : 'start' })
-        call a:packager.add('lervag/vimtex',                              { 'type' : 'start' })
-        call a:packager.add('jesseleite/vim-agriculture',                 { 'type' : 'start' })
-        call a:packager.add('ggreer/the_silver_searcher',                 { 'type' : 'start' })
-        call a:packager.add('BurntSushi/ripgrep',                         { 'type' : 'start' })
-        call a:packager.add('preservim/vim-colors-pencil',                { 'type' : 'start' })
-        call a:packager.add('chriskempson/base16-vim',                    { 'type' : 'start' })
-        call a:packager.add('trailblazing/unsuck-flat',                   { 'type' : 'start' })
-        call a:packager.add('skywind3000/asyncrun.vim',                   { 'type' : 'start' })
-        call a:packager.add('skywind3000/asynctasks.vim',                 { 'type' : 'start' })
-        call a:packager.add('jezcope/vim-align',                          { 'type' : 'start' })
-        call a:packager.add('tpope/vim-rhubarb',                          { 'type' : 'start' }) " Gbrowse
-        call a:packager.add('tpope/vim-fugitive',                         { 'type' : 'start' }) " Gblame
-        call a:packager.add('liuchengxu/vim-which-key',                   { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern.vim',                       { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-hijack.vim',                { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-mapping-project-top.vim',   { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-git-status.vim',            { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-renderer-nerdfont.vim',     { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-ssh',                       { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-bookmark.vim',              { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-mapping-git.vim',           { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-mapping-mark-children.vim', { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-mapping-quickfix.vim',      { 'type' : 'start' })
-        call a:packager.add('lambdalisue/fern-comparator-lexical.vim',    { 'type' : 'start' })
-        call a:packager.add('hrsh7th/fern-mapping-call-function.vim',     { 'type' : 'start' })
-        call a:packager.add('hrsh7th/fern-mapping-collapse-or-leave.vim', { 'type' : 'start' })
-        call a:packager.add('LumaKernel/fern-mapping-reload-all.vim',     { 'type' : 'start' })
-        call a:packager.add('LumaKernel/fern-mapping-fzf.vim',            { 'type' : 'start' })
-        call a:packager.add('liquidz/vim-iced-fern-debugger',             { 'type' : 'start' })
-        call a:packager.add('hashivim/vim-terraform',                     { 'type' : 'start' })
-        call a:packager.add('terryma/vim-multiple-cursors',               { 'type' : 'start' })
-        call a:packager.add('tpope/vim-eunuch',                           { 'type' : 'start' })
-        call a:packager.add('tpope/vim-surround',                         { 'type' : 'start' })
-        call a:packager.add('editorconfig/editorconfig-vim',              { 'type' : 'start' })
-        call a:packager.add('mattn/emmet-vim',                            { 'type' : 'start' })
-        call a:packager.add('w0rp/ale',                                   { 'type' : 'start' })
-        call a:packager.add('airblade/vim-gitgutter',                     { 'type' : 'start' })
-        call a:packager.add('shemerey/vim-project',                       { 'type' : 'start' })
-        call a:packager.add('xolox/vim-misc',                             { 'type' : 'start' }) " debug errors pop-uping
-        call a:packager.add('xolox/vim-reload',                           { 'type' : 'start' }) " debug errors pop-uping
-        call a:packager.add('xolox/vim-session',                          { 'type' : 'start' })
-        call a:packager.add('tpope/vim-obsession',                        { 'type' : 'start' })
-        call a:packager.add('mattolenik/vim-projectrc',                   { 'type' : 'start' })
-        call a:packager.add('majutsushi/ctags',                           { 'type' : 'start' })
-        call a:packager.add('majutsushi/tagbar',                          { 'type' : 'start' })
-        call a:packager.add('vhdirk/vim-cmake',                           { 'type' : 'start' })
-        call a:packager.add('gilligan/vim-lldb',                          { 'type' : 'start' })
-        call a:packager.add('mileszs/ack.vim',                            { 'type' : 'start' })
-        call a:packager.add('mhinz/vim-grepper',                          { 'type' : 'start' })
-        call a:packager.add('tpope/vim-unimpaired',                       { 'type' : 'start' })
-        call a:packager.add('itchyny/lightline.vim',                      { 'type' : 'start' })
-        call a:packager.add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-        call a:packager.add('MarcWeber/vim-addon-background-cmd',         { 'type' : 'start' })
-        " call a:packager.add('jacobdufault/cquery',                        { 'type' : 'start' }) " code completion
-        call a:packager.add('lifepillar/vim-mucomplete',                  { 'type' : 'start' }) " code completion
-        call a:packager.add('junegunn/fzf',                               { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' })
-        call a:packager.add('junegunn/fzf.vim',                           { 'type' : 'start' })
-        call a:packager.add('xavierd/clang_complete',                     { 'type' : 'start' })
-        call a:packager.add('christoomey/vim-tmux-navigator',             { 'type' : 'start' })
-        call a:packager.add('tmux-plugins/vim-tmux-focus-events',         { 'type' : 'start' })
-        call a:packager.add('RyanMillerC/better-vim-tmux-resizer',        { 'type' : 'start' })
-        call a:packager.add('chrisbra/SudoEdit.vim',                      { 'type' : 'start' })
-        call a:packager.add('thinca/vim-themis',                          { 'type' : 'start' })
-        call a:packager.add('mhinz/vim-galore',                           { 'type' : 'start' })
-        call a:packager.add('plasticboy/vim-markdown',                    { 'type' : 'start' })
-        call a:packager.add('jgdavey/tslime.vim',                         { 'type' : 'start' })
-        call a:packager.add('zdharma-continuum/zinit-vim-syntax',         { 'type' : 'start' })
-        call a:packager.add('leafgarland/typescript-vim',                 { 'type' : 'start' })
-        call a:packager.add('chrisbra/Recover.vim',                       { 'type' : 'start' })
-        call a:packager.add('trailblazing/mkdx',                          { 'type' : 'start' })
-        call a:packager.add('kmonad/kmonad-vim',                          { 'type' : 'start' })
-        call a:packager.add('skywind3000/vim-quickui',                    { 'type' : 'start' })
-
-        " Provide full URL; useful if you want to clone from somewhere else than Github.
-        " call a:packager.add('https://my.other.public.git/tpope/vim-fugitive.git')
-
-        " Provide SSH-based URL; useful if you have write access to a repository and wish to push to it
-        " call a:packager.add('git@github.com:mygithubid/myrepo.git')
-
-        " Loaded only for specific filetypes on demand. Requires autocommands below.
-        call a:packager.add('kristijanhusak/vim-js-file-import',          { 'type' : 'opt', 'do'   : 'npm install' })
-        " call a:packager.add('fatih/vim-go',                               { 'type' : 'opt', 'do'   : ':GoInstallBinaries' })
-        " call a:packager.add('neoclide/coc.nvim',                          { 'do'   : function('InstallCoc') })    " code completion
-        " call a:packager.add('weirongxu/coc-explorer',                     { 'do'   : function('InstallCoc') })
-        call a:packager.add('sonph/onehalf',                              { 'rtp'  : 'vim' })
+        for [key, value] in items(g:vim_packages_use)
+            call a:packager.add(key, value)
+        endfor
 
         " call a:packager.local('~/my_vim_plugins/my_awesome_plugin')
         " call a:packager.local(g:plugin_dir['vim'].'/pack/packager/start/utilities/scriptnames.vim',            { 'type' : 'start' })
@@ -840,197 +699,10 @@ elseif exists('g:use_setup_packager')
             let opt.dir = a:plugin_dir
             call packager#new(opt)
 
-            call packager#add('morhetz/gruvbox')
-            " call packager#add('autozimu/LanguageClient-neovim',             { 'do'   : 'bash install.sh' })
-            " call packager#add('smintz/vim-sqlutil',                         { 'type' : 'opt' })
-            " call packager#add('ycm-core/YouCompleteMe',                     { 'type' : 'opt' })
-            " call packager#add('tomtom/tcalc_vim',                           { 'type' : 'opt' })
-            " call packager#add('tomtom/tcomment_vim',                        { 'type' : 'opt' })
-            " call packager#add('vim-scripts/gtags.vim',                      { 'type' : 'opt' })
-            " call packager#add('whatot/gtags-cscope.vim',                    { 'type' : 'opt' })
-            call packager#add('kristijanhusak/vim-packager',                { 'type' : 'opt' })
-            call packager#add('vimwiki/vimwiki',                            { 'type' : 'opt' })
-            call packager#add('Shougo/unite-outline',                       { 'type' : 'opt' })
-            call packager#add('tpope/vim-surround',                         { 'type' : 'opt' })
-            call packager#add('tpope/vim-repeat',                           { 'type' : 'opt' })
-            call packager#add('tpope/vim-scriptease',                       { 'type' : 'opt' })
-            call packager#add('junegunn/vader.vim',                         { 'type' : 'opt' })
-            call packager#add('kana/vim-vspec',                             { 'type' : 'opt' })
-            call packager#add('inkarkat/vim-ingo-library',                  { 'type' : 'opt' })
-            call packager#add('sjbach/lusty',                               { 'type' : 'opt' })    " LustyExplorer
-            call packager#add('drmingdrmer/xptemplate',                     { 'type' : 'opt' })
-            call packager#add('jlanzarotta/bufexplorer',                    { 'type' : 'opt' })
-            call packager#add('rscarvalho/OpenProject.vim',                 { 'type' : 'opt' })
-            call packager#add('kasandell/Code-Pull',                        { 'type' : 'opt' })
-            call packager#add('vim-scripts/genutils',                       { 'type' : 'opt' })
-            call packager#add('benmills/vimux',                             { 'type' : 'opt' })
-            call packager#add('powerline/powerline',                        { 'type' : 'opt' })
-            " call packager#add('LucHermitte/local_vimrc',                    { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-vim-lib',                     { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-brackets',                    { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-dev',                         { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-tags',                        { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-cpp',                         { 'type' : 'start' })
-            " call packager#add('LucHermitte/mu-template',                    { 'type' : 'start' })
-            " call packager#add('LucHermitte/lh-style',                       { 'type' : 'start' })
-            " call packager#add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-            " call packager#add('LucHermitte/vim-build-tools-wrapper',        { 'type' : 'start' })
-            " call packager#add('vim-scripts/TabBar',                         { 'type' : 'start' })    " minibufexplorer
-            " call packager#add('fholgado/minibufexpl.vim',                   { 'type' : 'start' })    " minibufexplorer
-            " call packager#add('jlanzarotta/bufexplorer',                    { 'type' : 'start' })    " minibufexplorer
-            " call packager#add('erig0/cscope_dynamic',                       { 'type' : 'start' })
-            " call packager#add('chrisbra/vim-autoread',                      { 'type' : 'start' })  " auto refresh changes by tail -f. duplicate buffers continually!
-            " call packager#add('wikitopian/hardmode',                        { 'type' : 'start' })  " disable arrow key
-            " call packager#add('yssl/QFEnter',                               { 'type' : 'start' })  " could not resolve host
-            " call packager#add('ervandew/supertab',                          { 'type' : 'start' })  " could not resolve host
-            " call packager#add('Yggdroot/LeaderF',                           { 'type' : 'start' })
-            " call packager#add('preservim/nerdtree',                         { 'type' : 'start' })
-            " call packager#add('scrooloose/nerdtree',                        { 'type' : 'start' })
-            " call packager#add('wesleyche/Trinity',                          { 'type' : 'start' })
-            " call packager#add('lambdalisue/fern-renderer-devicons.vim',     { 'type' : 'start' })
-            " call packager#add('jistr/vim-nerdtree-tabs',                    { 'type' : 'start' })  " No longer actively maintained
-            " call packager#add('vim-scripts/taglist.vim',                    { 'type' : 'start' })
-            " call packager#add('andymass/vim-matchup',                       { 'type' : 'start' })
-            " call packager#add('edsono/vim-sessions',                        { 'type' : 'start' })
-            " call packager#add('wincent/command-t',                          { 'type' : 'start' })
-            " call packager#add('svermeulen/vim-cutlass',                     { 'type' : 'start' })  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
-            " call packager#add('umaumax/vim-format',                         { 'type' : 'start' })    " file format
-            " call packager#add('Yggdroot/indentLine',                        { 'type' : 'start' })    " file format
-            " call packager#add('rking/ag.vim',                               { 'type' : 'start' })
-            " call packager#add('romainl/vim-qf',                             { 'type' : 'start' })
-            " call packager#add('reedes/vim-colors-pencil',                   { 'type' : 'start' })
-            " call packager#add('dawikur/base16-vim-airline-themes',          { 'type' : 'start' })
-            " call packager#add('ludovicchabant/vim-gutentags',               { 'type' : 'start' })
-            " call packager#add('skywind3000/gutentags_plus',                 { 'type' : 'start' })
-            " call packager#add('jpaulogg/vim-flipdir',                       { 'type' : 'start' })
-            " call packager#add('preservim/nerdcommenter',                    { 'type' : 'start' })
-            " call packager#add('ctrlpvim/ctrlp.vim',                         { 'type' : 'start' })
-            " call packager#add('vim-airline/vim-airline',                    { 'type' : 'start' })
-            " call packager#add('vim-airline/vim-airline-themes',             { 'type' : 'start' })
-            " call packager#add('ajh17/VimCompletesMe',                       { 'type' : 'start' }) " code completion
-            " call packager#add('Shougo/deoplete.nvim',                       { 'type' : 'start' }) " code completion
-            " call packager#add('bfredl/nvim-miniyank',                       { 'type' : 'start' })
-            " call packager#add('google/vim-codefmt',                         { 'type' : 'start' })
-            call packager#add('google/vim-maktaba',                         { 'type' : 'start' })
-            call packager#add('trailblazing/vim-buffergator',               { 'type' : 'start' })    " minibufexplorer
-            call packager#add('ronakg/quickr-cscope.vim',                   { 'type' : 'start' })
-            call packager#add('tpope/vim-dispatch',                         { 'type' : 'start' })
-            call packager#add('tpope/vim-commentary',                       { 'type' : 'start' })
-            " call packager#add('idbrii/AsyncCommand',                        { 'type' : 'start' })
-            call packager#add('jasonccox/vim-wayland-clipboard',            { 'type' : 'start' })
-            " if exists('g:use_indent_guides')
-            call packager#add('nathanaelkane/vim-indent-guides',            { 'type' : 'start' })    " file format
-            " endif
-            call packager#add('vim-scripts/RltvNmbr.vim',                   { 'type' : 'start' })    " file format
-            call packager#add('editorconfig/editorconfig-vim',              { 'type' : 'start' }) " file format
-            call packager#add('vim-autoformat/vim-autoformat',              { 'type' : 'start' }) " file format
-            call packager#add('junegunn/vim-easy-align',                    { 'type' : 'start' }) " file format
-            call packager#add('roman/golden-ratio',                         { 'type' : 'start' }) " file format
-            call packager#add('godlygeek/tabular',                          { 'type' : 'start' }) " file format
-            call packager#add('drmingdrmer/vim-toggle-quickfix',            { 'type' : 'start' })
-            call packager#add('itchyny/vim-qfedit',                         { 'type' : 'start' })
-            call packager#add('lervag/vimtex',                              { 'type' : 'start' })
-            call packager#add('jesseleite/vim-agriculture',                 { 'type' : 'start' })
-            call packager#add('ggreer/the_silver_searcher',                 { 'type' : 'start' })
-            call packager#add('BurntSushi/ripgrep',                         { 'type' : 'start' })
-            call packager#add('preservim/vim-colors-pencil',                { 'type' : 'start' })
-            call packager#add('chriskempson/base16-vim',                    { 'type' : 'start' })
-            call packager#add('trailblazing/unsuck-flat',                   { 'type' : 'start' })
-            call packager#add('skywind3000/asyncrun.vim',                   { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'})
-            call packager#add('skywind3000/asynctasks.vim',                 { 'type' : 'start' })
-            call packager#add('jezcope/vim-align',                          { 'type' : 'start' })
-            call packager#add('tpope/vim-rhubarb',                          { 'type' : 'start' }) " Gbrowse
-            call packager#add('tpope/vim-fugitive',                         { 'type' : 'start' }) " Gblame
-            call packager#add('liuchengxu/vim-which-key',                   { 'type' : 'start' })
-            call packager#add('lambdalisue/fern.vim',                       { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-hijack.vim',                { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-mapping-project-top.vim',   { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-git-status.vim',            { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-renderer-nerdfont.vim',     { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-ssh',                       { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-bookmark.vim',              { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-mapping-git.vim',           { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-mapping-mark-children.vim', { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-mapping-quickfix.vim',      { 'type' : 'start' })
-            call packager#add('lambdalisue/fern-comparator-lexical.vim',    { 'type' : 'start' })
-            call packager#add('hrsh7th/fern-mapping-call-function.vim',     { 'type' : 'start' })
-            call packager#add('hrsh7th/fern-mapping-collapse-or-leave.vim', { 'type' : 'start' })
-            call packager#add('LumaKernel/fern-mapping-reload-all.vim',     { 'type' : 'start' })
-            call packager#add('LumaKernel/fern-mapping-fzf.vim',            { 'type' : 'start' })
-            call packager#add('liquidz/vim-iced-fern-debugger',             { 'type' : 'start' })
-            call packager#add('hashivim/vim-terraform',                     { 'type' : 'start' })
-            call packager#add('terryma/vim-multiple-cursors',               { 'type' : 'start' })
-            call packager#add('tpope/vim-eunuch',                           { 'type' : 'start' })
-            call packager#add('tpope/vim-surround',                         { 'type' : 'start' })
-            call packager#add('editorconfig/editorconfig-vim',              { 'type' : 'start' })
-            call packager#add('mattn/emmet-vim',                            { 'type' : 'start' })
-            call packager#add('w0rp/ale',                                   { 'type' : 'start' })
-            call packager#add('airblade/vim-gitgutter',                     { 'type' : 'start' })
-            call packager#add('shemerey/vim-project',                       { 'type' : 'start' })
-            call packager#add('xolox/vim-misc',                             { 'type' : 'start' }) " debug errors pop-uping
-            call packager#add('xolox/vim-reload',                           { 'type' : 'start' }) " debug errors pop-uping
-            call packager#add('xolox/vim-session',                          { 'type' : 'start' })
-            call packager#add('tpope/vim-obsession',                        { 'type' : 'start' })
-            call packager#add('mattolenik/vim-projectrc',                   { 'type' : 'start' })
-            call packager#add('majutsushi/ctags',                           { 'type' : 'start' })
-            call packager#add('majutsushi/tagbar',                          { 'type' : 'start' })
-            call packager#add('vhdirk/vim-cmake',                           { 'type' : 'start' })
-            call packager#add('gilligan/vim-lldb',                          { 'type' : 'start' })
-            call packager#add('mileszs/ack.vim',                            { 'type' : 'start' })
-            call packager#add('mhinz/vim-grepper',                          { 'type' : 'start' })
-            call packager#add('tpope/vim-unimpaired',                       { 'type' : 'start' })
-            call packager#add('itchyny/lightline.vim',                      { 'type' : 'start' })
-            call packager#add('LucHermitte/vim-refactor',                   { 'type' : 'start' })
-            call packager#add('MarcWeber/vim-addon-background-cmd',         { 'type' : 'start' })
-            " call packager#add('jacobdufault/cquery',                        { 'type' : 'start' }) " code completion
-            call packager#add('lifepillar/vim-mucomplete',                  { 'type' : 'start' }) " code completion
-            call packager#add('junegunn/fzf',                               { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' })
-            call packager#add('junegunn/fzf.vim',                           { 'type' : 'start' })
-            call packager#add('xavierd/clang_complete',                     { 'type' : 'start' })
-            call packager#add('christoomey/vim-tmux-navigator',             { 'type' : 'start' })
-            call packager#add('tmux-plugins/vim-tmux-focus-events',         { 'type' : 'start' })
-            call packager#add('RyanMillerC/better-vim-tmux-resizer',        { 'type' : 'start' })
-            call packager#add('chrisbra/SudoEdit.vim',                      { 'type' : 'start' })
-            call packager#add('thinca/vim-themis',                          { 'type' : 'start' })
-            call packager#add('mhinz/vim-galore',                           { 'type' : 'start' })
-            call packager#add('plasticboy/vim-markdown',                    { 'type' : 'start' })
-            call packager#add('jgdavey/tslime.vim',                         { 'type' : 'start' })
-            call packager#add('zdharma-continuum/zinit-vim-syntax',         { 'type' : 'start' })
-            call packager#add('leafgarland/typescript-vim',                 { 'type' : 'start' })
-            call packager#add('chrisbra/Recover.vim',                       { 'type' : 'start' })
-            call packager#add('preservim/vim-textobj-quote',                { 'type' : 'start' })
-            call packager#add('kana/vim-textobj-user',                      { 'type' : 'start' })
-            call packager#add('joe-skb7/cscope-maps',                       { 'type' : 'start' })
-            call packager#add('trailblazing/mkdx',                          { 'type' : 'start' })
-            call packager#add('trailblazing/cscope_auto',                   { 'type' : 'start' })
-            call packager#add('trailblazing/session_auto',                  { 'type' : 'start' })
-            call packager#add('trailblazing/boot',                          { 'type' : 'start' })
-            call packager#add('kmonad/kmonad-vim',                          { 'type' : 'start' })
-            call packager#add('skywind3000/vim-quickui',                    { 'type' : 'start' })
-            call packager#add('itchyny/vim-gitbranch',                      { 'type' : 'start' })
-            call packager#add('mbbill/undotree',                            { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' })
-            call packager#add('prabirshrestha/vim-lsp',                     { 'type' : 'start' })
-            call packager#add('mattn/vim-lsp-settings',                     { 'type' : 'start' })
-            call packager#add('sheerun/vim-polyglot',                       { 'type' : 'start' })
-            call packager#add('tpope/vim-sleuth',                           { 'type' : 'start' })
-            call packager#add('inkarkat/vim-ShowTrailingWhitespace',        { 'type' : 'start' })
-            call packager#add('inkarkat/vim-ingo-library',                  { 'type' : 'start' })
-            call packager#add('neovim/nvim-lspconfig',                      { 'type' : 'start' })
-            " call packager#add('nvim-lua/completion-nvim',                   { 'type' : 'start' })
+            for [key, value] in items(g:vim_packages_use)
+                call packager#add(key, value)
+            endfor
 
-
-            " Provide full URL; useful if you want to clone from somewhere else than Github.
-            " call packager#add('https://my.other.public.git/tpope/vim-fugitive.git')
-
-            " Provide SSH-based URL; useful if you have write access to a repository and wish to push to it
-            " call packager#add('git@github.com:mygithubid/myrepo.git')
-
-            " Loaded only for specific filetypes on demand. Requires autocommands below.
-            call packager#add('kristijanhusak/vim-js-file-import',          { 'type' : 'opt', 'do' : 'npm install' })
-            " call packager#add('fatih/vim-go',                               { 'type' : 'opt', 'do' : ':GoInstallBinaries' })
-            " call packager#add('neoclide/coc.nvim',                          { 'do'   : function('InstallCoc') })    " code completion
-            " call packager#add('weirongxu/coc-explorer',                     { 'do'   : function('InstallCoc') })
-            call packager#add('sonph/onehalf',                              { 'rtp'  : 'vim' })
 
             " call packager#local('~/my_vim_plugins/my_awesome_plugin')
 
@@ -1190,13 +862,7 @@ if has('nvim')
         " v:lua.require'plugins'.install()
         lua require'plugins'.install()
         :PackerCompile
-        if exists('g:loaded_keys')
-            unlet g:loaded_keys
-            let keys_load_path = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
-            execute "source " . keys_load_path
-            execute "runtime! " . keys_load_path
-        endif
-
+        call keys_reload()
         redraw!
     endfunction
 
@@ -1224,11 +890,6 @@ if has('nvim')
     "
     " lua require("status-line")
 
-    augroup completion
-        au!
-        " Use completion-nvim in every buffer
-        autocmd BufEnter * lua require'completion'.on_attach()
-    augroup END
 
     let mucomplete#no_mappings = 1
 
@@ -1236,37 +897,42 @@ if has('nvim')
     inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-    " Set completeopt to have a better completion experience
-    set completeopt=menuone,noinsert,noselect
 
     " Avoid showing message extra message when using completion
     set shortmess+=c
 
-    "map <c-p> to manually trigger completion
-    imap <silent> <c-p> <Plug>(completion_trigger)
-    imap <tab> <Plug>(completion_smart_tab)
-    imap <s-tab> <Plug>(completion_smart_s_tab)
+    " https://github.com/nvim-lua/completion-nvim
+    " completion.nvim is no longer maintained
+    " augroup completion
+    "     au!
+    "     " Use completion-nvim in every buffer
+    "     autocmd BufEnter * lua require'completion'.on_attach()
+    " augroup END
+    " " map <c-p> to manually trigger completion
+    " imap <silent> <c-p> <Plug>(completion_trigger)
+    " imap <tab> <Plug>(completion_smart_tab)
+    " imap <s-tab> <Plug>(completion_smart_s_tab)
 
-    " possible value: 'UltiSnips', 'Neosnippet', 'vim-vsnip', 'snippets.nvim'
-    let g:completion_enable_snippet = 'UltiSnips'
+    " " possible value: 'UltiSnips', 'Neosnippet', 'vim-vsnip', 'snippets.nvim'
+    " let g:completion_enable_snippet = 'UltiSnips'
 
-    let g:completion_confirm_key = "\<C-y>"
-    " let g:completion_confirm_key = ""
-    " imap <expr> <cr>  pumvisible() ? complete_info()["selected"] != "-1" ?
-    "             \ "\<Plug>(completion_confirm_completion)"  : "\<c-e>\<CR>" :  "\<CR>"
+    " let g:completion_confirm_key = "\<C-y>"
+    " " let g:completion_confirm_key = ""
+    " " imap <expr> <cr>  pumvisible() ? complete_info()["selected"] != "-1" ?
+    " "             \ "\<Plug>(completion_confirm_completion)"  : "\<c-e>\<CR>" :  "\<CR>"
 
-    " possible value: "length", "alphabet", "none"
-    let g:completion_sorting = "alphabet"
+    " " possible value: "length", "alphabet", "none"
+    " let g:completion_sorting = "alphabet"
 
-    let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy', 'all']
+    " let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy', 'all']
 
-    let g:completion_trigger_character = ['.', '::']
+    " let g:completion_trigger_character = ['.', '::']
 
-    augroup CompletionTriggerCharacter
-        autocmd!
-        autocmd BufEnter * let g:completion_trigger_character = ['.']
-        autocmd BufEnter *.c,*.cpp,*.cxx,*.hxx,*.inl,*.impl,*.h,*.hpp let g:completion_trigger_character = ['.', '::']
-    augroup end
+    " augroup CompletionTriggerCharacter
+    "     autocmd!
+    "     autocmd BufEnter * let g:completion_trigger_character = ['.']
+    "     autocmd BufEnter *.c,*.cpp,*.cxx,*.hxx,*.inl,*.impl,*.h,*.hpp let g:completion_trigger_character = ['.', '::']
+    " augroup end
 
 
 endif " has('nvim')
@@ -1602,12 +1268,12 @@ augroup backgroung_color
     au BufEnter,WinEnter * if &filetype !~# '\v(help|txt)'  |
                 \ set colorcolumn=120  |
                 \ else  |
-                \ set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw! |
+                \ wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw! |
                 \ endif
     " \ | " let &colorcolumn="80,".join(range(120,999),",") | " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
     autocmd FileType,WinNew txt,help set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw!
     autocmd WinNew txt,help wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw!
-    " au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
+    "ction-reload) au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
 augroup END
 
 " https://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
@@ -1723,8 +1389,15 @@ highlight foldcolumn ctermbg=NONE guibg=NONE
 " set fillchars=vert:\|
 " set fillchars=vert:\│
 " https://stackoverflow.com/questions/9001337/vim-split-bar-styling
-" A space followed \ 
-set fillchars =vert:\ 
+" Set a space followed '\ ' to the fillchars->vert option
+" From this following expressions, you do not neeed tralling spaces exposed to vim
+silent! execute 'set fillchars =vert:\ '
+" let &fillchars = 'vert:\ '
+
+" https://vi.stackexchange.com/questions/28994/can-i-change-the-ugly-indicator-after-eol
+" EndOfBuffer, ugly indicator after EOL tildes (~)
+let &fillchars ..=',eob: '
+" making lines touch each other.
 set linespace =0
 
 " hi VertSplit guibg=fg guifg=bg
@@ -2465,7 +2138,8 @@ endif
 
 " https://github.com/nickjj/dotfiles/blob/0c8abec8c433f7e7394cc2de4a060f3e8e00beb9/.vimrc#L444-L499
 set complete+=kspell
-set completeopt=menuone,longest
+
+
 if ! has('nvim')
     set cryptmethod=blowfish2
 endif
@@ -2746,9 +2420,8 @@ let g:quickr_cscope_use_qf_g = 1
 let g:quickr_cscope_db_file = "cscope_quickr.out"
 
 " https://github.com/erig0/cscope_dynamic
-
-nmap <F11> <Plug>CscopeDBInit
-
+" nmap <F11> <Plug>CscopeDBInit
+nmap <F3> :BuffergatorToggle<cr>
 
 
 " let g:statusline_cscope_flag = ""
@@ -3290,8 +2963,8 @@ let g:loaded_matchit = 1
 
 
 "    call packager#add('Chiel92/vim-autoformat',                    { 'type' : 'start' })
-noremap <F3> :Autoformat<cr>
-"   noremap <F3> :call easy_align#align()<cr>
+" noremap <F3> :Autoformat<cr>
+" noremap <F3> :call easy_align#align()<cr>
 noremap <F4> :EasyAlign<cr>
 
 " let g:autoformat_autoindent             = 0
@@ -3483,14 +3156,17 @@ nnoremap <silent> <C-p>  :call <sid>fzf_open(':Files')<cr>
 " "complition functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 " "complition functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-set completeopt+=menuone
-set completeopt+=noselect
+" Set completeopt to have a better completion experience
+set completeopt=menuone,longest
+set completeopt+=noinsert,noselect
+set completeopt-=preview
+
 set shortmess+=c   " Shut off completion messages
 set belloff+=ctrlg " Add only if Vim beeps during completion
 let g:mucomplete#enable_auto_at_startup = 1
 let g:mucomplete#completion_delay = 1
-set completeopt-=preview
-set completeopt+=longest,menuone,noselect
+
+
 let g:jedi#popup_on_dot = 0  " It may be 1 as well
 let g:mucomplete#user_mappings = { 'sqla' : "\<c-c>a" }
 let g:mucomplete#chains = { 'sql' : ['file', 'sqla', 'keyn'] }
