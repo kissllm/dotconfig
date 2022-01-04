@@ -214,7 +214,7 @@ zmodload zsh/complist && compinit
 # }
 
 # https://gist.github.com/liwh/894109
-# When we create new function or install new bin, the default zsh cant get the new completion for us. So we 
+# When we create new function or install new bin, the default zsh cant get the new completion for us. So we
 # can add a new function for this problem, you can add the below content in your .zshrc file
 function reload() {
     if [[ "$#*" -eq 0 ]]; then
@@ -319,47 +319,47 @@ function begin_with() {
 #             ;;
 #     esac
 # }
-# 
+#
 # function setup_git_prompt() {
 #     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 #         unset git_prompt
 #         return 0
 #     fi
-# 
+#
 #     local git_status_dirty git_status_stash git_branch
-# 
+#
 #     if [ "$(git --no-optional-locks status --untracked-files='no' --porcelain)" ]; then
 #         git_status_dirty='%F{green}*'
 #     else
 #         unset git_status_dirty
 #     fi
-# 
+#
 #     if [ "$(git stash list)" ]; then
 #         git_status_stash="%F{yellow}▲"
 #     else
 #         unset git_status_stash
 #     fi
-# 
+#
 #     git_branch="$(git symbolic-ref HEAD 2>/dev/null)"
 #     git_branch="${git_branch#refs/heads/}"
-# 
+#
 #     if [ "${#git_branch}" -ge 24 ]; then
 #         git_branch="${git_branch:0:21}..."
 #     fi
-# 
+#
 #     git_branch="${git_branch:-no branch}"
-# 
+#
 #     git_prompt=" %F{blue}[%F{253}${git_branch}${git_status_dirty}${git_status_stash}%F{blue}]"
-# 
+#
 # }
-# 
+#
 # function precmd() {
 #     # Set terminal title.
 #     termtitle precmd
-# 
+#
 #     # Set optional git part of prompt.
 #     setup_git_prompt
-# 
+#
 #     # Maybe to be used someday, too annoying with vim and other interactive apps.
 #     #   # $REPORTTIME is about cpu time, not real time.
 #     #   if [ "${executed_on}" ]; then
@@ -371,11 +371,11 @@ function begin_with() {
 #     #       unset executed_on
 #     #   fi
 # }
-# 
+#
 # function preexec() {
 #     # Set terminal title along with current executed command pass as second argument
 #     termtitle preexec "${(V)1}"
-# 
+#
 #     # # Save timestamp when we executed this command
 #     # executed_on=${(%):-'%D{%s}'}
 # }
@@ -392,7 +392,7 @@ function man() {
 function dot_progress() {
     # Fancy progress function from Landley's Aboriginal Linux.
     # Useful for long rm, tar and such.
-    # Usage: 
+    # Usage:
     #     rm -rfv /foo | dot_progress
     local i='0'
     local line=''
@@ -480,7 +480,7 @@ case $USER in
         PROMPT='%B%F{cyan}%m%k %(?..%F{blue}[%F{253}%?%F{blue}] )${prompt_is_ssh}%B%F{blue}%1~${git_prompt}%F{blue} %# %b%f%k'
     ;;
 
-    *)  
+    *)
         PROMPT='%B%F{blue}%n@%m%k %(?..%F{blue}[%F{253}%?%F{blue}] )${prompt_is_ssh}%B%F{cyan}%1~${git_prompt}%F{cyan} %# %b%f%k'
 
     ;;
@@ -491,6 +491,8 @@ DIRSTACKSIZE=16
 setopt auto_pushd
 setopt pushd_ignore_dups
 setopt pushd_minus
+setopt completealiases
+setopt HIST_IGNORE_DUPS
 
 # Ignore lines prefixed with '#'.
 setopt interactivecomments
@@ -548,7 +550,7 @@ function _append_path_to_buffer() {
     if [ "${selected_path}" ]; then
         if [[ "${LBUFFER[-1]}" =~ [[:alnum:]] ]]; then
             # if last character is a word character, insert space.
-            # before inserting selected path. Useful when one's lazy 
+            # before inserting selected path. Useful when one's lazy
             # and use 'vim^F', yet works okay with 'cmd foo=^F'.
             LBUFFER+=" "
         fi
@@ -575,7 +577,7 @@ function _history_search_with_fzy() {
 
     print -nr "${zle_bracketed_paste[2]}" >/dev/tty
     {
-        # The awk is used to filter out duplicates, keeping the most 
+        # The awk is used to filter out duplicates, keeping the most
         # recent entries, while not re-ordering the history list.
         selected_history_entry="$(fc -nrl 1 | awk '!v[$0]++' | fzy)"
     } always {
@@ -739,6 +741,50 @@ function do_sudo
 # alias sudo="sudo "
 
 
+# https://darmawan-salihun.blogspot.com/2015/02/zsh-tmux-configuration-for-arch-linux.html
+# create a zkbd compatible hash;
+# to add other keys to this hash, see: man 5 terminfo
+typeset -A key
+
+key[Home]=${terminfo[khome]}
+key[End]=${terminfo[kend]}
+key[Insert]=${terminfo[kich1]}
+key[Delete]=${terminfo[kdch1]}
+key[Up]=${terminfo[kcuu1]}
+key[Down]=${terminfo[kcud1]}
+key[Left]=${terminfo[kcub1]}
+key[Right]=${terminfo[kcuf1]}
+key[PageUp]=${terminfo[kpp]}
+key[PageDown]=${terminfo[knp]}
+
+# setup key accordingly
+[[ -n "${key[Home]}"     ]]  && bindkey  "${key[Home]}"     beginning-of-line
+[[ -n "${key[End]}"      ]]  && bindkey  "${key[End]}"      end-of-line
+[[ -n "${key[Insert]}"   ]]  && bindkey  "${key[Insert]}"   overwrite-mode
+[[ -n "${key[Delete]}"   ]]  && bindkey  "${key[Delete]}"   delete-char
+[[ -n "${key[Up]}"       ]]  && bindkey  "${key[Up]}"       up-line-or-history
+[[ -n "${key[Down]}"     ]]  && bindkey  "${key[Down]}"     down-line-or-history
+[[ -n "${key[Left]}"     ]]  && bindkey  "${key[Left]}"     backward-char
+[[ -n "${key[Right]}"    ]]  && bindkey  "${key[Right]}"    forward-char
+[[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"   beginning-of-buffer-or-history
+[[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}" end-of-buffer-or-history
+
+
+# Finally, make sure the terminal is in application mode, when zle is
+# active. Only then are the values from $terminfo valid.
+if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
+    function zle-line-init () {
+    printf '%s' "${terminfo[smkx]}"
+}
+
+function zle-line-finish () {
+printf '%s' "${terminfo[rmkx]}"
+}
+zle -N zle-line-init
+zle -N zle-line-finish
+fi
+
+
 # Keys.
 case $TERM in
     rxvt*|xterm*)
@@ -780,7 +826,7 @@ case $TERM in
 esac
 
 # Replaced with _history_search_with_fzy
-bindkey "^R" history-incremental-pattern-search-backward 
+bindkey "^R" history-incremental-pattern-search-backward
 bindkey "^S" history-incremental-pattern-search-forward
 
 # # https://betterprogramming.pub/boost-your-command-line-productivity-with-keyboard-shortcuts-4de2f6cbd069
@@ -919,8 +965,8 @@ export XMODIFIERS="@im=fcitx"
 export XIM_SERVERS=fcitx
 
 export GDK_BACKEND=wayland    # export GDK_BACKEND=x11
-export XDG_SESSION_TYPE=wayland 
-export WINIT_UNIX_BACKEND=wayland   # export WINIT_UNIX_BACKEND=x11   
+export XDG_SESSION_TYPE=wayland
+export WINIT_UNIX_BACKEND=wayland   # export WINIT_UNIX_BACKEND=x11
 export SDL_VIDEODRIVER=wayland
 
 export QT_QPA_PLATFORM=wayland #   export QT_QPA_PLATFORM="wayland;xcb"  #   export QT_QPA_PLATFORM=wayland-egl     #   export QT_QPA_PLATFORM=wayland  # export QT_QPA_PLATFORM=xcb
@@ -953,7 +999,7 @@ export ELM_ENGINE=wayland_egl
 
 if [[ $TERM == xterm ]]; then TERM=xterm-256color; fi
 
-# export TERM=alacritty     
+# export TERM=alacritty
 # export TERM=screen-256color
 # export TERM=xterm-256color
 
@@ -1005,7 +1051,7 @@ setopt interactivecomments
 # https://gitlab.com/alourie/dotfiles/-/blob/master/.zshrc
 # # For now
 # unset SSH_ASKPASS
-# 
+#
 # # If keychain is installed and .ssh exists, load the keys
 # if command -v keychain > /dev/null; then
 #     keychain -l | grep "no identities" 2>&1 > /dev/null
@@ -1083,8 +1129,11 @@ function post_update(){
     command doas chown -R --quiet root:users "${TINIT[HOME_DIR]}"
     for packages_path in "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
     do
-        find $packages_path -type d -name ".git" -prune -o -name ".github" -prune -o -name '*' -print -exec chmod g+rx {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $packages_path 2>&1 &
-    done 
+        find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
+            -o -type f -name '*' -print -exec chmod --quiet g+r {} + \
+            -o -type d -print -exec chmod --quiet go+rx {} + \
+            && chgrp -R --quiet users $packages_path 2>&1 &
+    done
 }
 
 autoload -Uz _post_update
@@ -1189,6 +1238,7 @@ zinit ice as"completion" for \
 # zinit ice pick"async.zsh" src"pure.zsh"
 # zinit light sindresorhus/pure
 
+
 # A glance at the new for-syntax – load all of the above
 # plugins with a single command. For more information see:
 # https://zdharma.github.io/zinit/wiki/For-Syntax/
@@ -1253,11 +1303,15 @@ function zvm_after_lazy_keybindings() {
 }
 
 
-
-
+# source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
 # GitHub Plugins
 zinit ice wait'!'
 zinit light zsh-users/zsh-history-substring-search
+
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+bindkey "$terminfo[kcuu1]" history-substring-search-up
+bindkey "$terminfo[kcud1]" history-substring-search-down
 
 
 # zinit wait lucid as"completion" for \
@@ -1332,10 +1386,10 @@ zinit load zdharma-continuum/zsh-navigation-tools
 
 # zinit ice wait    # wait is same wait"0"
 # zinit load zdharma/history-search-multi-word
-# 
+#
 # zinit ice wait"2" # load after 2 seconds
 # zinit load zdharma/history-search-multi-word
-# 
+#
 # zinit ice wait    # also be used in `light` and `snippet`
 # zinit snippet https://gist.githubusercontent.com/hightemp/5071909/raw/
 zstyle ":history-search-multi-word" page-size "11"
@@ -1343,7 +1397,6 @@ zinit ice wait"1" lucid
 zinit load zdharma-continuum/history-search-multi-word
 
 # # source /opt/evil-registers/evil-registers.zsh 2>/dev/null
-# # source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
 # # https://github.com/zsh-vi-more/evil-registers
 # # Optionally, track the latest development version:
 # zinit ice wait "0" ver"dev"
@@ -1358,7 +1411,7 @@ zinit load kutsan/zsh-system-clipboard
 # Install this repo
 zinit ice wait lucid
 zinit load zdharma-continuum/zinit-configs
-# Run the command, under the repo there is a run.sh. 
+# Run the command, under the repo there is a run.sh.
 # zinit-configs
 
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
@@ -1462,10 +1515,10 @@ typeset -U fpath
 
 # zinit ice compile'(pure|async).zsh' pick'async.zsh' src'pure.zsh'
 # zinit light sindresorhus/pure
-# 
+#
 # # .zshrc
-# 
-# 
+#
+#
 # # optionally define some options
 # PURE_CMD_MAX_EXEC_TIME=10
 # PURE_GIT_UNTRACKED_DIRTY=0
@@ -1473,14 +1526,14 @@ typeset -U fpath
 # PURE_GIT_DELAY_DIRTY_CHECK=1000
 # PURE_PROMPT_SYMBOL=❯
 # PURE_PROMPT_VICMD_SYMBOL=❮
-# 
-# 
+#
+#
 # # change the path color
 # zstyle :prompt:pure:path color white
-# 
+#
 # # change the color for both `prompt:success` and `prompt:error`
 # zstyle ':prompt:pure:prompt:*' color cyan
-# 
+#
 # # turn on git stash status
 # zstyle :prompt:pure:git:stash show yes
 
