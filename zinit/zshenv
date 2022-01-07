@@ -10,15 +10,29 @@ export LC_NUMERIC="en_US.UTF-8"
 export LC_TIME="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+# [Running ncurses program that uses funky glyphs in alacritty freezes sway](https://github.com/swaywm/sway/issues/5417)
+export WLR_DRM_NO_ATOMIC=1
+export WLR_DRM_NO_MODIFIERS=1
+
 XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 # https://github.com/zdharma/zinit/issues/197
 ZSH_CACHE_DIR=${XDG_CACHE_HOME}/zinit
 export ZSH_CACHE_DIR=${XDG_CACHE_HOME}/zinit
 
-export QT_SCALE_FACTOR=0 
-export QT_AUTO_SCREEN_SCALE_FACTOR=0 
-export QT_WAYLAND_FORCE_DPI=0 
+export QT_STYLE_OVERRIDE=gtkexport
+# export QT_GRAPHICSSYSTEM=native
+# export QT_GRAPHICSSYSTEM=raster
+export QT_GRAPHICSSYSTEM=opengl
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+export QT_SCREEN_SCALE_FACTORS=1
+export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME=qt5ct↴
+export QT_SCALE_FACTOR=0
+# True or False
+# export QT_AUTO_SCREEN_SCALE_FACTOR=1
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+export QT_WAYLAND_FORCE_DPI=0
 # export XKB_DEFAULT_LAYOUT=us,cn
 export XKB_DEFAULT_LAYOUT=us
 export XKB_DEFAULT_VARIANT=us
@@ -27,13 +41,13 @@ export XKB_DEFAULT_MODEL=pc101
 export XKB_DEFAULT_OPTIONS=grp:win_space_toggle
 # https://docs.voidlinux.org/config/graphical-session/wayland.html
 export XDG_SESSION_TYPE=wayland
-# export GDK_SCALE=0 
-# export GDK_DPI_SCALE=0 
 
 # GDK_SCALE allows only Integer values, GDK_DPI_SCALE=x allows decimal values such as . GDK_DPI_SCALE=0.66
+# export GDK_SCALE=0
 export GDK_SCALE=2.0
-export GDK_DPI_SCALE=0.625
-# export GDK_DPI_SCALE=0.75
+# export GDK_DPI_SCALE=0
+export GDK_DPI_SCALE=0.60
+
 
 # https://github.com/kutsan/zsh-system-clipboard
 typeset -g ZSH_SYSTEM_CLIPBOARD_USE_WL_CLIPBOARD='true'
