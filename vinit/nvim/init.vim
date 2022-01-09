@@ -100,16 +100,16 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         " let g:lua_plugin_dir = resolve(expand(g:home_dir . '/.local/share/nvim/site'))
 
         " let g:lua_plugin_dir     = resolve(expand($HOME . '/.local/share/nvim/site'))
-        let g:lua_plugin_dir   = resolve(stdpath('data') . '/site')
+        let g:lua_plugin_dir = resolve(stdpath('data') . '/site')
 
-        let runtime_index    = stridx(&runtimepath, g:lua_plugin_dir)
+        let runtime_index = stridx(&runtimepath, g:lua_plugin_dir)
         if -1 == runtime_index
             exe 'set runtimepath^='. g:lua_plugin_dir
         endif
 
         let g:lua_config_dir = expand(g:config_dir, 1) . '/lua'
 
-        let runtime_index    = stridx(&runtimepath, g:lua_config_dir)
+        let runtime_index = stridx(&runtimepath, g:lua_config_dir)
         if -1 == runtime_index
             exe 'set runtimepath^='. g:lua_config_dir
         endif
@@ -121,7 +121,7 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         let g:vim_plugin_dir = resolve(expand(g:config_dir, 1) . '/.vim')
         " let g:vim_plugin_dir = expand(g:config_dir, 1)
 
-        let runtime_index    = stridx(&runtimepath, g:vim_plugin_dir)
+        let runtime_index = stridx(&runtimepath, g:vim_plugin_dir)
         if -1 == runtime_index
             exe 'set runtimepath^='. g:vim_plugin_dir
             " set runtimepath^=g:vim_plugin_dir
@@ -188,7 +188,7 @@ endif
 " endif
 let runtime_index = stridx(&runtimepath, $VIMRUNTIME)
 if -1 == runtime_index
-        exe 'set runtimepath^='. $VIMRUNTIME
+    exe 'set runtimepath^='. $VIMRUNTIME
 endif
 
 let runtime_index = stridx(&runtimepath, g:plugin_dir['vim'])
@@ -214,9 +214,9 @@ endif
 for element in values(g:plugin_dir)
     let pack_index = stridx(&packpath, element)
     if -1 == pack_index
-        " :set &packpath^=element    " Unknown option
+        " set packpath^=element
         " let &packpath^=element
-        " let &packpath=element.','.&packpath    " double inserted
+        " let &packpath=element.','.&packpath    " Double inserted
         " https://superuser.com/questions/806595/why-the-runtimepath-in-vim-cannot-be-set-as-a-variable
         exe 'set runtimepath^='. element
         exe 'set packpath^='. element
@@ -328,10 +328,10 @@ if 1 == g:debug_verbose
         let line_count += 1
     endfor
 else
-    " "   :echo "runtimepath\t: ".&runtimepath
-    " "   call boot#chomped_system("echo \"runtimepath: \"".&runtimepath)
+    " " :echo "runtimepath\t: ".&runtimepath
+    " " call boot#chomped_system("echo \"runtimepath: \"".&runtimepath)
     " call boot#log_silent(g:log_address, "runtimepath", &runtimepath, g:fixed_tips_width, g:log_verbose)
-    " "   silent! execute '!printf "runtimepath: '.&runtimepath.'" >> '. g:log_address . ' 2>&1 &'
+    " " silent! execute '!printf "runtimepath: '.&runtimepath.'" >> '. g:log_address . ' 2>&1 &'
 endif
 
 " debug flag
@@ -346,7 +346,7 @@ if filereadable('.vimrc.local')
     " execute 'source .test.txt'
 
     " source '.vimrc.localfile'  " can't open file
-    " source ".vimrc.localfile"  " infinitly run when re source this container file
+    " source ".vimrc.localfile"  " infinitly run when re source the container file
 
     execute 'source .vimrc.local'
 endif
@@ -412,9 +412,7 @@ let g:vim_packages_use['tpope/vim-repeat']                           = { 'type' 
 let g:vim_packages_use['tpope/vim-scriptease']                       = { 'type' : 'opt' }
 let g:vim_packages_use['junegunn/vader.vim']                         = { 'type' : 'opt' }
 let g:vim_packages_use['kana/vim-vspec']                             = { 'type' : 'opt' }
-let g:vim_packages_use['sjbach/lusty']                               = { 'type' : 'opt' }    " LustyExplorer
 let g:vim_packages_use['drmingdrmer/xptemplate']                     = { 'type' : 'opt' }
-let g:vim_packages_use['jlanzarotta/bufexplorer']                    = { 'type' : 'opt' }
 let g:vim_packages_use['rscarvalho/OpenProject.vim']                 = { 'type' : 'opt' }
 let g:vim_packages_use['kasandell/Code-Pull']                        = { 'type' : 'opt' }
 let g:vim_packages_use['vim-scripts/genutils']                       = { 'type' : 'opt' }
@@ -422,6 +420,7 @@ let g:vim_packages_use['benmills/vimux']                             = { 'type' 
 let g:vim_packages_use['powerline/powerline']                        = { 'type' : 'opt' }
 
 " let g:vim_packages_use['autozimu/LanguageClient-neovim']             = { 'do'   : 'bash install.sh' }
+" let g:vim_packages_use['sjbach/lusty']                               = { 'type' : 'opt' }  " LustyExplorer (ruby requires)
 " let g:vim_packages_use['smintz/vim-sqlutil']                         = { 'type' : 'opt' }
 " let g:vim_packages_use['ycm-core/YouCompleteMe']                     = { 'type' : 'opt' }
 " let g:vim_packages_use['tomtom/tcalc_vim']                           = { 'type' : 'opt' }
@@ -429,6 +428,9 @@ let g:vim_packages_use['powerline/powerline']                        = { 'type' 
 " let g:vim_packages_use['vim-scripts/gtags.vim']                      = { 'type' : 'opt' }
 " let g:vim_packages_use['whatot/gtags-cscope.vim']                    = { 'type' : 'opt' }
 " let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'opt' }
+" let g:vim_packages_use['jlanzarotta/bufexplorer']                    = { 'type' : 'opt' }  " Will open in current window
+" let g:vim_packages_use['vim-scripts/TabBar']                         = { 'type' : 'start' }  " minibufexplorer
+" let g:vim_packages_use['fholgado/minibufexpl.vim']                   = { 'type' : 'start' }  " minibufexplorer
 " let g:vim_packages_use['LucHermitte/local_vimrc']                    = { 'type' : 'start' }
 " let g:vim_packages_use['LucHermitte/lh-vim-lib']                     = { 'type' : 'start' }
 " let g:vim_packages_use['LucHermitte/lh-brackets']                    = { 'type' : 'start' }
@@ -439,26 +441,22 @@ let g:vim_packages_use['powerline/powerline']                        = { 'type' 
 " let g:vim_packages_use['LucHermitte/lh-style']                       = { 'type' : 'start' }
 " let g:vim_packages_use['LucHermitte/vim-refactor']                   = { 'type' : 'start' }
 " let g:vim_packages_use['LucHermitte/vim-build-tools-wrapper']        = { 'type' : 'start' }
-" let g:vim_packages_use['vim-scripts/TabBar']                         = { 'type' : 'start' }  " minibufexplorer
-" let g:vim_packages_use['fholgado/minibufexpl.vim']                   = { 'type' : 'start' }  " minibufexplorer
-" let g:vim_packages_use['jlanzarotta/bufexplorer']                    = { 'type' : 'start' }  " minibufexplorer
 " let g:vim_packages_use['erig0/cscope_dynamic']                       = { 'type' : 'start' }
-" let g:vim_packages_use['chrisbra/vim-autoread']                      = { 'type' : 'start' }  " auto refresh changes by tail -f. duplicate buffers continually!
-" let g:vim_packages_use['wikitopian/hardmode']                        = { 'type' : 'start' }  " disable arrow key
-" let g:vim_packages_use['yssl/QFEnter']                               = { 'type' : 'start' }  " could not resolve host
-" let g:vim_packages_use['ervandew/supertab']                          = { 'type' : 'start' }  " could not resolve host
+" let g:vim_packages_use['chrisbra/vim-autoread']                      = { 'type' : 'start' }  " Auto refresh changes by tail -f. duplicate buffers continually!
+" let g:vim_packages_use['wikitopian/hardmode']                        = { 'type' : 'start' }  " Disable arrow key
+" let g:vim_packages_use['yssl/QFEnter']                               = { 'type' : 'start' }  " Could not resolve host
+" let g:vim_packages_use['ervandew/supertab']                          = { 'type' : 'start' }  " Could not resolve host
 " let g:vim_packages_use['Yggdroot/LeaderF']                           = { 'type' : 'start' }
 " let g:vim_packages_use['preservim/nerdtree']                         = { 'type' : 'start' }
 " let g:vim_packages_use['scrooloose/nerdtree']                        = { 'type' : 'start' }
 " let g:vim_packages_use['wesleyche/Trinity']                          = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'start' }
 " let g:vim_packages_use['jistr/vim-nerdtree-tabs']                    = { 'type' : 'start' }  " No longer actively maintained
 " let g:vim_packages_use['vim-scripts/taglist.vim']                    = { 'type' : 'start' }
 " let g:vim_packages_use['andymass/vim-matchup']                       = { 'type' : 'start' }
 " let g:vim_packages_use['edsono/vim-sessions']                        = { 'type' : 'start' }
 " let g:vim_packages_use['wincent/command-t']                          = { 'type' : 'start' }
-" let g:vim_packages_use['umaumax/vim-format']                         = { 'type' : 'start' }  " file format
-" let g:vim_packages_use['Yggdroot/indentLine']                        = { 'type' : 'start' }  " file format
+" let g:vim_packages_use['umaumax/vim-format']                         = { 'type' : 'start' }  " File format
+" let g:vim_packages_use['Yggdroot/indentLine']                        = { 'type' : 'start' }  " File format
 " let g:vim_packages_use['rking/ag.vim']                               = { 'type' : 'start' }
 " let g:vim_packages_use['romainl/vim-qf']                             = { 'type' : 'start' }
 " let g:vim_packages_use['reedes/vim-colors-pencil']                   = { 'type' : 'start' }
@@ -470,21 +468,22 @@ let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' 
 " let g:vim_packages_use['ctrlpvim/ctrlp.vim']                         = { 'type' : 'start' }
 " let g:vim_packages_use['vim-airline/vim-airline']                    = { 'type' : 'start' }
 " let g:vim_packages_use['vim-airline/vim-airline-themes']             = { 'type' : 'start' }
-" let g:vim_packages_use['ajh17/VimCompletesMe']                       = { 'type' : 'start' }  " code completion
-" let g:vim_packages_use['Shougo/deoplete.nvim']                       = { 'type' : 'start' }  " code completion
+" let g:vim_packages_use['ajh17/VimCompletesMe']                       = { 'type' : 'start' }  " Code completion
+" let g:vim_packages_use['Shougo/deoplete.nvim']                       = { 'type' : 'start' }  " Code completion
 " let g:vim_packages_use['bfredl/nvim-miniyank']                       = { 'type' : 'start' }
 " let g:vim_packages_use['google/vim-codefmt']                         = { 'type' : 'start' }
 " let g:vim_packages_use['idbrii/AsyncCommand']                        = { 'type' : 'start' }
-" let g:vim_packages_use['jacobdufault/cquery']                        = { 'type' : 'start' }  " code completion
+" let g:vim_packages_use['jacobdufault/cquery']                        = { 'type' : 'start' }  " Code completion
 " " Run Java at background and do not declare it
 " let g:vim_packages_use['mattn/vim-lsp-settings']                     = { 'type' : 'start' }
 " let g:vim_packages_use['neovim/nvim-lspconfig']                      = { 'type' : 'start' }
 " let g:vim_packages_use['nvim-lua/completion-nvim']                   = { 'type' : 'start' }
 " let g:vim_packages_use['joe-skb7/cscope-maps']                       = { 'type' : 'start' }
+" let g:vim_packages_use['jezcope/vim-align']                          = { 'type' : 'start' }  " File format. Inactive
 
 " Insert condition here means telling manager to remove the plugin's local copy
 " if exists('g:use_indent_guides')
-let g:vim_packages_use['nathanaelkane/vim-indent-guides']            = { 'type' : 'start' }    " file format
+let g:vim_packages_use['nathanaelkane/vim-indent-guides']            = { 'type' : 'start' }  " File format visible
 " endif
 let g:vim_packages_use['svermeulen/vim-cutlass']                     = { 'type' : 'start' }  " Cutlass overrides the delete operations to actually just delete and not affect the current yank
 let g:vim_packages_use['google/vim-maktaba']                         = { 'type' : 'start' }
@@ -493,13 +492,13 @@ let g:vim_packages_use['ronakg/quickr-cscope.vim']                   = { 'type' 
 let g:vim_packages_use['tpope/vim-dispatch']                         = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-commentary']                       = { 'type' : 'start' }
 let g:vim_packages_use['jasonccox/vim-wayland-clipboard']            = { 'type' : 'start' }
-let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                   = { 'type' : 'start' }  " file format
-let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }  " file format
-let g:vim_packages_use['vim-autoformat/vim-autoformat']              = { 'type' : 'start' }  " file format
-let g:vim_packages_use['junegunn/vim-easy-align']                    = { 'type' : 'start' }  " file format
-let g:vim_packages_use['rhysd/vim-clang-format']                     = { 'type' : 'start' }  " file format
-let g:vim_packages_use['roman/golden-ratio']                         = { 'type' : 'start' }  " file format
-let g:vim_packages_use['godlygeek/tabular']                          = { 'type' : 'start' }  " file format
+let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                   = { 'type' : 'start' }  " File format
+let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }  " File format
+let g:vim_packages_use['vim-autoformat/vim-autoformat']              = { 'type' : 'start' }  " File format
+let g:vim_packages_use['junegunn/vim-easy-align']                    = { 'type' : 'start' }  " File format
+let g:vim_packages_use['rhysd/vim-clang-format']                     = { 'type' : 'start' }  " File format
+let g:vim_packages_use['roman/golden-ratio']                         = { 'type' : 'start' }  " File format
+let g:vim_packages_use['godlygeek/tabular']                          = { 'type' : 'start' }  " File format
 let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']            = { 'type' : 'start' }
 let g:vim_packages_use['itchyny/vim-qfedit']                         = { 'type' : 'start' }
 let g:vim_packages_use['lervag/vimtex']                              = { 'type' : 'start' }
@@ -511,7 +510,6 @@ let g:vim_packages_use['chriskempson/base16-vim']                    = { 'type' 
 let g:vim_packages_use['trailblazing/unsuck-flat']                   = { 'type' : 'start' }
 let g:vim_packages_use['skywind3000/asyncrun.vim']                   = { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'}
 let g:vim_packages_use['skywind3000/asynctasks.vim']                 = { 'type' : 'start' }
-let g:vim_packages_use['jezcope/vim-align']                          = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-rhubarb']                          = { 'type' : 'start' }  " Gbrowse
 let g:vim_packages_use['tpope/vim-fugitive']                         = { 'type' : 'start' }  " Gblame
 let g:vim_packages_use['liuchengxu/vim-which-key']                   = { 'type' : 'start' }
@@ -528,6 +526,7 @@ let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']           = { 'type' 
 let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim'] = { 'type' : 'start' }
 let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']      = { 'type' : 'start' }
 let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']    = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'start' }
 let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']     = { 'type' : 'start' }
 let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim'] = { 'type' : 'start' }
 let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']     = { 'type' : 'start' }
@@ -542,8 +541,8 @@ let g:vim_packages_use['mattn/emmet-vim']                            = { 'type' 
 let g:vim_packages_use['w0rp/ale']                                   = { 'type' : 'start' }
 let g:vim_packages_use['airblade/vim-gitgutter']                     = { 'type' : 'start' }
 let g:vim_packages_use['shemerey/vim-project']                       = { 'type' : 'start' }
-let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " debug errors pop-uping
-let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " debug errors pop-uping
+let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
+let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'start' }
 " let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
 let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
@@ -554,10 +553,10 @@ let g:vim_packages_use['gilligan/vim-lldb']                          = { 'type' 
 let g:vim_packages_use['mileszs/ack.vim']                            = { 'type' : 'start' }
 let g:vim_packages_use['mhinz/vim-grepper']                          = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-unimpaired']                       = { 'type' : 'start' }
-let g:vim_packages_use['itchyny/lightline.vim']                      = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/lightline.vim']                      = { 'type' : 'start' }  " Status line
 let g:vim_packages_use['LucHermitte/vim-refactor']                   = { 'type' : 'start' }
 let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']         = { 'type' : 'start' }
-let g:vim_packages_use['lifepillar/vim-mucomplete']                  = { 'type' : 'start' }  " code completion
+let g:vim_packages_use['lifepillar/vim-mucomplete']                  = { 'type' : 'start' }  " Code completion
 let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
 let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
 let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' : 'start' }
@@ -1746,7 +1745,7 @@ inoremap <expr> <cr> pumvisible() ? "<C-y>" :"<cr>"
 inoremap <expr> <Left> pumvisible() ? "<C-e>" : "<Left>"
 
 if maparg('```', 'i', 'false') !~? '```<CR>```<C-o>k<C-o>A'
-" if maparg('```', 'i', 'false') !~? '```<Enter>```kA'
+    " if maparg('```', 'i', 'false') !~? '```<Enter>```kA'
     " https://github.com/SidOfc/mkdx
     " :h mkdx-mapping-insert-fenced-code-block
     inoremap <buffer><silent><unique> ``` ```<Enter>```kA
@@ -1789,8 +1788,8 @@ augroup END
 " Only show the cursor line in the active buffer.
 augroup cursor_line
     au!
-        " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
-        " au WinEnter * setlocal cursorline | setlocal cursorcolumn
+    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
+    " au WinEnter * setlocal cursorline | setlocal cursorcolumn
     au WinLeave * setlocal cursorline | setlocal nocursorcolumn
 augroup END
 
@@ -2073,16 +2072,16 @@ augroup END
 
 
 if 0 == g:navi_protect
-" https://stackoverflow.com/questions/2490227/how-does-vims-autoread-work/20418591
-function! s:check_update(timer)
-    silent! checktime
-    call timer_start(1000, function('<SID>check_update'))
-endfunction
+    " https://stackoverflow.com/questions/2490227/how-does-vims-autoread-work/20418591
+    function! s:check_update(timer)
+        silent! checktime
+        call timer_start(1000, function('<SID>check_update'))
+    endfunction
 
-if ! exists("g:check_update_started")
-    let g:check_update_started  = 1
-    call timer_start(1, function('s:check_update'))
-endif
+    if ! exists("g:check_update_started")
+        let g:check_update_started  = 1
+        call timer_start(1, function('s:check_update'))
+    endif
 endif
 
 
@@ -2645,8 +2644,35 @@ set tags=./tags,tags
 set switchbuf=useopen,split " make quickfix open in a new split buffer
 let g:qf_bufname_or_text = 1
 
-function! s:switch_to_writeable_fuffer()
+" " map <F2> :call s:execute_on_writable(':call NERDTreeTlist()') <cr>
+" Use this function to prevent CtrlP opening files inside non-writable buffers, e.g. NERDTree
+function! s:execute_on_writable(command)
 
+    " if bufname('#') =~ 'NERD_tree_' && bufname('%') !~ 'NERD_tree_'
+    " \ && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr
+    " \ && &buftype == '' && !exists('g:launching_fzf')
+    "     let bufnum = bufnr('%')
+    "     close
+    "     exe ":NERDTreeClose"
+    "     exe 'b ' . bufnum
+    "     "   NERDTree
+    " endif
+    " " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
+    " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__'  && exists('t:taglist_winnr') && bufwinnr('%') == t:taglist_winnr && &buftype == '' && !exists('g:launching_fzf')
+    "     let bufnum = bufnr('%')
+    "     close
+    "     exe ":TlistClose"
+    "     exe 'b ' . bufnum
+    "     "   TlistToggle
+    " endif
+
+    call s:switch_to_writable_buffer()
+
+    exec a:command
+
+endfunction
+
+function! s:switch_to_writable_buffer()
     let c = 0
     let wincount = winnr('$')
     " Don't open it here if current buffer is not writable (e.g. NERDTree)
@@ -2654,12 +2680,11 @@ function! s:switch_to_writeable_fuffer()
         exec 'wincmd w'
         let c = c + 1
     endwhile
-
 endfunction
 
 augroup protect_readonly_buffer
     au!
-    autocmd BufWinEnter * call s:switch_to_writeable_fuffer()
+    autocmd BufWinEnter * call s:switch_to_writable_buffer()
 augroup END
 
 " "tagbar (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((("
@@ -2669,7 +2694,6 @@ augroup END
 
 " " TlistUpdate will upate the tags
 " " map <F2> :silent! Tlist<cr>
-" " map <F2> :call s:switch_to_writeable_fuffer_and_exec(':call NERDTreeTlist()') <cr>
 " " map <F2> :call NERDTreeTlist() <cr>
 " nnoremap <silent> <F2> :TlistToggle<cr>
 " let Tlist_Ctags_Cmd            = 'ctags'
@@ -3060,40 +3084,9 @@ augroup END
 
 
 " CtrlP
-" Use this function to prevent CtrlP opening files inside non-writeable buffers, e.g. NERDTree
-function! s:switch_to_writeable_fuffer_and_exec(command)
-
-    " if bufname('#') =~ 'NERD_tree_' && bufname('%') !~ 'NERD_tree_'
-    " \ && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr
-    " \ && &buftype == '' && !exists('g:launching_fzf')
-    "     let bufnum = bufnr('%')
-    "     close
-    "     exe ":NERDTreeClose"
-    "     exe 'b ' . bufnum
-    "     "   NERDTree
-    " endif
-    " " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
-    " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__'  && exists('t:taglist_winnr') && bufwinnr('%') == t:taglist_winnr && &buftype == '' && !exists('g:launching_fzf')
-    "     let bufnum = bufnr('%')
-    "     close
-    "     exe ":TlistClose"
-    "     exe 'b ' . bufnum
-    "     "   TlistToggle
-    " endif
-
-    let c = 0
-    let wincount = winnr('$')
-    " Don't open it here if current buffer is not writable (e.g. NERDTree)
-    while !empty(getbufvar(+expand("<abuf>"), "&buftype")) && c < wincount && &buftype == ''
-        exec 'wincmd w'
-        let c = c + 1
-    endwhile
-
-    exec a:command
-
-endfunction
-
 " Disable default mapping since we are overriding it with our command let g:ctrlp_map = ''
+
+
 
 
 
@@ -3394,6 +3387,8 @@ let g:session_directory        = getcwd()
 " :set re=1
 
 map <leader>m <Plug>SessionAuto
+command! -nargs=0 S silent! <Plug>SessionAuto
+
 let g:loaded_matchparen = 1
 
 " Obsess    " start record session"
