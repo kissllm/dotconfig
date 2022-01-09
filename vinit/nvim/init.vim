@@ -451,7 +451,7 @@ let g:vim_packages_use['powerline/powerline']                        = { 'type' 
 " let g:vim_packages_use['preservim/nerdtree']                         = { 'type' : 'start' }
 " let g:vim_packages_use['scrooloose/nerdtree']                        = { 'type' : 'start' }
 " let g:vim_packages_use['wesleyche/Trinity']                          = { 'type' : 'start' }
-" let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'start' }
 " let g:vim_packages_use['jistr/vim-nerdtree-tabs']                    = { 'type' : 'start' }  " No longer actively maintained
 " let g:vim_packages_use['vim-scripts/taglist.vim']                    = { 'type' : 'start' }
 " let g:vim_packages_use['andymass/vim-matchup']                       = { 'type' : 'start' }
@@ -516,6 +516,8 @@ let g:vim_packages_use['tpope/vim-rhubarb']                          = { 'type' 
 let g:vim_packages_use['tpope/vim-fugitive']                         = { 'type' : 'start' }  " Gblame
 let g:vim_packages_use['liuchengxu/vim-which-key']                   = { 'type' : 'start' }
 let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'start' }
+let g:vim_packages_use['liquidz/vim-iced']                           = { 'type' : 'start', 'for' : 'clojure' }
+let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'start', 'for' : 'clojure' }
 let g:vim_packages_use['lambdalisue/fern-hijack.vim']                = { 'type' : 'start' }
 let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']   = { 'type' : 'start' }
 let g:vim_packages_use['lambdalisue/fern-git-status.vim']            = { 'type' : 'start' }
@@ -543,7 +545,7 @@ let g:vim_packages_use['shemerey/vim-project']                       = { 'type' 
 let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " debug errors pop-uping
 let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " debug errors pop-uping
 let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'start' }
-let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
+" let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
 let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
 let g:vim_packages_use['majutsushi/ctags']                           = { 'type' : 'start' }
 let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
@@ -573,8 +575,8 @@ let g:vim_packages_use['chrisbra/Recover.vim']                       = { 'type' 
 let g:vim_packages_use['preservim/vim-textobj-quote']                = { 'type' : 'start' }
 let g:vim_packages_use['kana/vim-textobj-user']                      = { 'type' : 'start' }
 let g:vim_packages_use['trailblazing/mkdx']                          = { 'type' : 'start' }
-let g:vim_packages_use['trailblazing/cscope_auto']                   = { 'type' : 'start' }
-let g:vim_packages_use['trailblazing/session_auto']                  = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/cscope_auto']                   = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
+let g:vim_packages_use['trailblazing/session_auto']                  = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['trailblazing/boot']                          = { 'type' : 'start' }
 let g:vim_packages_use['kmonad/kmonad-vim']                          = { 'type' : 'start' }
 let g:vim_packages_use['skywind3000/vim-quickui']                    = { 'type' : 'start' }
@@ -841,17 +843,17 @@ if has('nvim')
 
     function! s:refresh()
         call s:disable_lightline()
-        if &filetype !~# '\v(help|txt)'
+        if &filetype !~# '\v(help|txt|log)'
             " " v:lua.require'plugins'.install()
             setlocal list
-            :IndentBlanklineEnable
+            :IndentBlanklineEnable!
             " lua require'plugins'.install()
             " " :PackerCompile
             " redraw!
         else
             set colorcolumn=""
             setlocal nolist
-            :IndentBlanklineDisable
+            :IndentBlanklineDisable!
             redraw!
         endif
     endfunction
@@ -1122,7 +1124,7 @@ if ! has('nvim')
         endfunction
 
         function! LightlineReadonly()
-            return &readonly && &filetype !~# '\v(help|vimfiler|unite)' ? 'RO' : ''
+            return &readonly && &filetype !~# '\v(help|log|vimfiler|unite)' ? 'RO' : ''
         endfunction
 
         function! LightlineFileformat()
@@ -1264,7 +1266,7 @@ set nocursorcolumn
 let g:indent_blankline_disable_with_nolist = v:true
 let g:indent_blankline_show_trailing_blankline_indent = v:false
 let g:indent_blankline_show_first_indent_level = v:false
-let g:indent_blankline_filetype_exclude = ['help']
+let g:indent_blankline_filetype_exclude = ['help', 'txt'. 'log']
 let g:indent_blankline_buftype_exclude = ['terminal']
 let g:indent_blankline_show_current_context_start_on_current_line = v:false
 let g:indent_blankline_viewport_buffer = 20
@@ -1273,14 +1275,14 @@ let g:indent_blankline_viewport_buffer = 20
 " cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
 augroup backgroung_color
     au!
-    au BufEnter,WinEnter * if &filetype !~# '\v(help|txt)'  |
+    au BufEnter,WinEnter * if &filetype !~# '\v(help|txt|log)'  |
                 \ set colorcolumn=120  |
                 \ else  |
-                \ wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw! |
+                \ wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable! | redraw! |
                 \ endif
     " \ | " let &colorcolumn="80,".join(range(120,999),",") | " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
-    autocmd FileType,WinNew txt,help set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw!
-    autocmd WinNew txt,help wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable | redraw!
+    autocmd FileType,WinNew txt,help,log set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable! | redraw!
+    autocmd WinNew txt,help,log wincmd L | set colorcolumn="" | setlocal nolist | :IndentBlanklineDisable! | redraw!
     " au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
 augroup END
 
@@ -1384,6 +1386,7 @@ augroup end_of_buffer
                 \ | silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 augroup end
 
+set foldlevel=1
 " https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
 set nuw        =7
 set foldcolumn =0
@@ -1393,6 +1396,7 @@ augroup allways_show_line_number | au!
 augroup END
 " hi foldcolumn guibg=fg
 highlight foldcolumn ctermbg=NONE guibg=NONE
+set nofoldenable    " disable folding
 
 " Vertical split style settings
 " Can the split separator in vim be less than a full column wide?
@@ -1674,15 +1678,6 @@ map <leader><space> :let @/=''<cr>
 " nnoremap <leader>g gqap
 " xnoremap <leader>g gqa
 
-" Prevent x from overriding what's in the clipboard.
-noremap x "_x
-noremap X "_x
-
-" Prevent selecting and pasting from overwriting what you originally copied.
-xnoremap p pgvy
-
-" Keep cursor at the bottom of the visual selection after you yank it.
-vmap y ygv<Esc>
 
 " Edit Vim config file in a new tab.
 map <leader>ev :tabnew $MYVIMRC<cr>
@@ -2004,6 +1999,16 @@ nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v
 " ^D
 
 
+" Prevent x from overriding what's in the clipboard.
+noremap x "_x
+noremap X "_x
+
+" Prevent selecting and pasting from overwriting what you originally copied.
+xnoremap p pgvy
+
+" Keep cursor at the bottom of the visual selection after you yank it.
+vmap y ygv<Esc>
+
 " How do I replace-paste yanked text in vim without yanking the deleted lines?
 " https://superuser.com/questions/321547/how-do-i-replace-paste-yanked-text-in-vim-without-yanking-the-deleted-lines
 " delete without yanking
@@ -2022,7 +2027,6 @@ xnoremap <leader>p "_dP
 " https://github.com/svermeulen/vim-cutlass
 nnoremap x d
 xnoremap x d
-
 nnoremap xx dd
 nnoremap X D
 
@@ -2087,10 +2091,10 @@ endif
 
 " "resizing windows ********************************************************************************************"
 
-" noremap <silent> <C-S-Up>    :resize +1<cr>
-" noremap <silent> <C-S-Down>  :resize -1<cr>
-" noremap <silent> <C-S-Left>  :vertical resize +1<cr>
-" noremap <silent> <C-S-Right> :vertical resize -1<cr>
+noremap <silent> <C-S-Up>    :resize +1<cr>
+noremap <silent> <C-S-Down>  :resize -1<cr>
+noremap <silent> <C-S-Left>  :vertical resize +1<cr>
+noremap <silent> <C-S-Right> :vertical resize -1<cr>
 
 " noremap  <silent> <m-k> :resize +1<cr>
 " noremap  <silent> <m-j> :resize -1<cr>
@@ -2102,10 +2106,10 @@ endif
 " nnoremap <silent> <m-h> :TmuxResizeLeft<CR>
 " nnoremap <silent> <m-l> :TmuxResizeRight<CR>
 
-noremap  <silent> <m-k> :exe "resize +1 && :TmuxResizeUp<cr>"
-noremap  <silent> <m-j> :exe "resize -1 && :TmuxResizeDown<cr>"
-noremap  <silent> <m-h> :exe "vertical resize +1 && :TmuxResizeLeft<cr>"
-noremap  <silent> <m-l> :exe "vertical resize -1 && :TmuxResizeRight<cr>"
+noremap  <silent> <m-k> :exe "resize +1 && :TmuxResizeUp"<cr>
+noremap  <silent> <m-j> :exe "resize -1 && :TmuxResizeDown"<cr>
+noremap  <silent> <m-h> :exe "vertical resize +1 && :TmuxResizeLeft"<cr>
+noremap  <silent> <m-l> :exe "vertical resize -1 && :TmuxResizeRight"<cr>
 
 " https://vim.fandom.com/wiki/Resize_splits_more_quickly
 nnoremap <silent> <leader>= :exe "resize " . (winheight(0) * 3/2)<cr>
@@ -2214,7 +2218,6 @@ set virtualedit=block
 set whichwrap=b,s,<,>
 set wildmenu
 set wildmode=full
-set foldlevel=1
 
 
 set nopaste
@@ -2233,10 +2236,10 @@ set nopaste
 
 runtime! macros/matchit.vim
 
-hi SpellBad cterm=underline ctermfg=9
+hi SpellBad   cterm=underline ctermfg=9
 hi SpellLocal cterm=underline ctermfg=9
-hi SpellRare cterm=underline ctermfg=9
-hi SpellCap cterm=underline
+hi SpellRare  cterm=underline ctermfg=9
+hi SpellCap   cterm=underline
 
 if has("autocmd")
     filetype plugin indent on " indents corresponding to specific file format
@@ -2490,88 +2493,89 @@ augroup END
 
 " "cscope ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
-"   " https://github.com/skywind3000/gutentags_plus
-"   " :GscopeFind {querytype} {name}
-"   " enable gtags module
-"   let g:gutentags_modules = ['ctags', 'gtags_cscope']
+" " https://github.com/skywind3000/gutentags_plus
+" " :GscopeFind {querytype} {name}
+" " enable gtags module
+" let g:gutentags_modules = ['ctags', 'gtags_cscope']
 "
-"   " config project root markers.
-"   let g:gutentags_project_root = ['.root']
+" " config project root markers.
+" let g:gutentags_project_root = ['.root']
 "
-"   " generate datebases in my cache directory, prevent gtags files polluting my project
-"   let g:gutentags_cache_dir = expand('~/.cache/tags')
+" " generate datebases in my cache directory, prevent gtags files polluting my project
+" let g:gutentags_cache_dir = expand('~/.cache/tags')
 "
-"   " change focus to quickfix window after search (optional).
-"   let g:gutentags_plus_switch = 1
+" " change focus to quickfix window after search (optional).
+" let g:gutentags_plus_switch = 1
 "
-"   let g:gutentags_define_advanced_commands = 1
+" let g:gutentags_define_advanced_commands = 1
 
-noremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
-noremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
-noremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
-noremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
-noremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
-noremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
-noremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
-noremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>
+" noremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
+" noremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
+" noremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
+" noremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
+" noremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
+" noremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
+" noremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
+" noremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
+" noremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
+" noremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>
 
-function! s:generate_cstag()
-    let dir = getcwd()
-    if filereadable("tags")
-        if(g:iswindows==1)
-            let tagsdeleted=delete(dir."\\"."tags")
-        else
-            let tagsdeleted=delete("./"."tags")
-        endif
-        if(tagsdeleted!=0)
-            echohl WarningMsg | echo "Fail to do tags! I cannot delete the tags" | echohl None
-            return
-        endif
-    endif
-    if has("cscope")
-        silent! execute "cs kill -1"
-    endif
-    if filereadable("cscope.files")
-        if(g:iswindows==1)
-            let csfilesdeleted=delete(dir."\\"."cscope.files")
-        else
-            let csfilesdeleted=delete("./"."cscope.files")
-        endif
-        if(csfilesdeleted!=0)
-            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.files" | echohl None
-            return
-        endif
-    endif
-    if filereadable("cscope.out")
-        if(g:iswindows==1)
-            let csoutdeleted=delete(dir."\\"."cscope.out")
-        else
-            let csoutdeleted=delete("./"."cscope.out")
-        endif
-        if(csoutdeleted!=0)
-            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.out" | echohl None
-            return
-        endif
-    endif
-    if(executable('ctags'))
-        "silent! execute "!ctags -R --c-types=+p --fields=+S *"
-        silent! execute "!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q ."
-    endif
-    if(executable('cscope') && has("cscope") )
-        if(g:iswindows!=1)
-            silent! execute "!find . -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.hpp' -o -name '*.H' -o -name '*.C' -o -name '*.cxx' -o -name '*.hxx' >> cscope.files"
-        else
-            silent! execute "!dir /s/b *.c,*.cpp,*.h,*.java,*.cs >> cscope.files"
-        endif
-        silent! execute "!cscope -b"
-        execute "normal :"
-        if filereadable("cscope.out")
-            execute "cs add cscope.out"
-        endif
-    endif
-endfunction
+" A reference
+" function! s:generate_cstag()
+"     let dir = getcwd()
+"     if filereadable("tags")
+"         if(g:iswindows==1)
+"             let tagsdeleted=delete(dir."\\"."tags")
+"         else
+"             let tagsdeleted=delete("./"."tags")
+"         endif
+"         if(tagsdeleted!=0)
+"             echohl WarningMsg | echo "Fail to do tags! I cannot delete the tags" | echohl None
+"             return
+"         endif
+"     endif
+"     if has("cscope")
+"         silent! execute "cs kill -1"
+"     endif
+"     if filereadable("cscope.files")
+"         if(g:iswindows==1)
+"             let csfilesdeleted=delete(dir."\\"."cscope.files")
+"         else
+"             let csfilesdeleted=delete("./"."cscope.files")
+"         endif
+"         if(csfilesdeleted!=0)
+"             echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.files" | echohl None
+"             return
+"         endif
+"     endif
+"     if filereadable("cscope.out")
+"         if(g:iswindows==1)
+"             let csoutdeleted=delete(dir."\\"."cscope.out")
+"         else
+"             let csoutdeleted=delete("./"."cscope.out")
+"         endif
+"         if(csoutdeleted!=0)
+"             echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.out" | echohl None
+"             return
+"         endif
+"     endif
+"     if(executable('ctags'))
+"         "silent! execute "!ctags -R --c-types=+p --fields=+S *"
+"         silent! execute "!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q ."
+"     endif
+"     if(executable('cscope') && has("cscope") )
+"         if(g:iswindows!=1)
+"             silent! execute "!find . -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.hpp' -o -name '*.H' -o -name '*.C' -o -name '*.cxx' -o -name '*.hxx' >> cscope.files"
+"         else
+"             silent! execute "!dir /s/b *.c,*.cpp,*.h,*.java,*.cs >> cscope.files"
+"         endif
+"         silent! execute "!cscope -b"
+"         execute "normal :"
+"         if filereadable("cscope.out")
+"             execute "cs add cscope.out"
+"         endif
+"     endif
+" endfunction
 
 
 " map <F12> :call <SID>generate_cstag()<cr>
@@ -2803,12 +2807,29 @@ command! -nargs=0 W silent! w !doas tee > /dev/null %
 noremap  <silent> <C-s> :SudoWrite<CR>
 inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
+" https://github.com/lambdalisue/fern-renderer-devicons.vim
+let g:fern#renderer = "devicons"
 
+" https://github.com/lambdalisue/fern.vim/wiki/Plugins
 let g:fern_renderer_devicons_disable_warning = 1
 let g:fern#disable_default_mappings          = 1
 " let g:fern#disable_drawer_auto_quit          = 1
 let g:fern#disable_drawer_smart_quit         = 1
 " let g:fern#disable_viewer_hide_cursor        = 1
+
+" https://github.com/lambdalisue/fern-git-status.vim
+" Disable the following options one by one if you encounter performance issues.
+" Disable listing ignored files/directories
+let g:fern_git_status#disable_ignored     = 1
+" Disable listing untracked files
+let g:fern_git_status#disable_untracked   = 1
+" Disable listing status of submodules
+let g:fern_git_status#disable_submodules  = 1
+" Disable listing status of directories
+let g:fern_git_status#disable_directories = 1
+
+" https://github.com/lambdalisue/fern-renderer-nerdfont.vim
+let g:fern#renderer = "nerdfont"
 
 noremap <silent> <leader>d :Fern . -drawer -width=35 -toggle<cr><C-w>=
 noremap <silent> <leader>f :Fern . -drawer -reveal=% -width=35<cr><C-w>=
@@ -2817,16 +2838,32 @@ noremap <silent> <leader>. :Fern %:h -drawer -width=35<cr><C-w>=
 " https://github.com/lambdalisue/fern.vim
 function! s:init_fern() abort
     echo "This function is called ON a fern buffer WHEN initialized"
+
+    function s:init_fern_mapping_reload_all()
+        nmap <buffer> R <Plug>(fern-action-reload:all)
+    endfunction
+    augroup action-fern-mapping-reload-all
+        autocmd! *
+        autocmd FileType fern call s:init_fern_mapping_reload_all()
+    augroup END
+
+    " augroup FernTypeGroup
+    "     autocmd! * <buffer>
+    "     autocmd BufEnter <buffer> silent execute "normal \<Plug>(fern-action-reload)"
+    " augroup END
+
+
     " Use 'select' instead of 'edit' for default 'open' action
     nmap <buffer> <Plug>(fern-action-open) <Plug>(fern-action-open:select)
-if 0 == g:navi_protect
-    " Open node with 'o'
-    nmap <buffer> o <Plug>(fern-action-open)
 
-    " Add any code to customize fern buffer
-    " Define NERDTree like mappings
-    nmap <buffer> o  <Plug>(fern-action-open:edit)
-endif
+    if 0 == g:navi_protect
+        " Open node with 'o'
+        nmap <buffer> o <Plug>(fern-action-open)
+
+        " Add any code to customize fern buffer
+        " Define NERDTree like mappings
+        nmap <buffer> o  <Plug>(fern-action-open:edit)
+    endif
     nmap <buffer> go <Plug>(fern-action-open:edit)<C-w>p
     nmap <buffer> t  <Plug>(fern-action-open:tabedit)
     nmap <buffer> T  <Plug>(fern-action-open:tabedit)gT
@@ -2849,67 +2886,67 @@ endif
     nmap <buffer> q :<C-u>quit<cr>
 
     nmap <buffer><expr>
-                \ <Plug>(fern-my-expand-or-collapse)
+                \ <Plug>(fern-action-expand-or-collapse)
                 \ fern#smart#leaf(
                 \   "\<Plug>(fern-action-collapse)",
                 \   "\<Plug>(fern-action-expand)",
                 \   "\<Plug>(fern-action-collapse)",
                 \ )
 
-    nmap <buffer><nowait> l <Plug>(fern-my-expand-or-collapse)
+    nmap <buffer><nowait> l <Plug>(fern-action-expand-or-collapse)
 
     nmap <buffer><expr>
-                \ <Plug>(fern-my-expand-or-enter)
+                \ <Plug>(fern-action-expand-or-enter)
                 \ fern#smart#drawer(
                 \   "\<Plug>(fern-open-or-expand)",
                 \   "\<Plug>(fern-open-or-enter)",
                 \ )
     nmap <buffer><expr>
-                \ <Plug>(fern-my-collapse-or-leave)
+                \ <Plug>(fern-action-collapse-or-leave)
                 \ fern#smart#drawer(
                 \   "\<Plug>(fern-action-collapse)",
                 \   "\<Plug>(fern-action-leave)",
                 \ )
 
-    nmap <buffer><nowait> l <Plug>(fern-my-expand-or-enter)
-    nmap <buffer><nowait> h <Plug>(fern-my-collapse-or-leave)
+    nmap <buffer><nowait> l <Plug>(fern-action-expand-or-enter)
+    nmap <buffer><nowait> h <Plug>(fern-action-collapse-or-leave)
 
-    nmap <buffer> <Plug>(fern-my-enter-and-tcd)
+    nmap <buffer> <Plug>(fern-action-enter-and-tcd)
                 \ <Plug>(fern-action-enter)
                 \ <Plug>(fern-wait)
                 \ <Plug>(fern-action-tcd:root)
 
-    nmap <buffer> <Plug>(fern-my-leave-and-tcd)
+    nmap <buffer> <Plug>(fern-action-leave-and-tcd)
                 \ <Plug>(fern-action-leave)
                 \ <Plug>(fern-wait)
                 \ <Plug>(fern-action-tcd:root)
 
-    augroup my_fern_tcd
+    augroup action_fern_tcd
         autocmd! * <buffer>
         autocmd BufEnter <buffer> call feedkeys("\<Plug>(fern-action-tcd:root)")
     augroup END
 
     " Find and enter project root
     nnoremap <buffer><silent>
-                \ <Plug>(fern-my-enter-project-root)
+                \ <Plug>(fern-action-enter-project-root)
                 \ :<C-u>call fern#helper#call(funcref('<SID>map_enter_project_root'))<cr>
     nmap <buffer><expr><silent>
                 \ ^
                 \ fern#smart#scheme(
                 \   "^",
                 \   {
-                    \     'file': "\<Plug>(fern-my-enter-project-root)",
+                    \     'file': "\<Plug>(fern-action-enter-project-root)",
                     \   }
                     \ )
 
     " Open bookmark:///
     nnoremap <buffer><silent>
-                \ <Plug>(fern-my-enter-bookmark)
+                \ <Plug>(fern-action-enter-bookmark)
                 \ :<C-u>Fern bookmark:///<cr>
     nmap <buffer><expr><silent>
                 \ <C-^>
                 \ fern#smart#scheme(
-                \   "\<Plug>(fern-my-enter-bookmark)",
+                \   "\<Plug>(fern-action-enter-bookmark)",
                 \   {
                     \     'bookmark': "\<C-^>",
                     \   },
@@ -2923,6 +2960,37 @@ endif
     nmap <buffer><silent> <Plug>(fern-action-open-and-close)
                 \ <Plug>(fern-action-open)
                 \ <Plug>(fern-close-drawer)
+
+    " https://github.com/LumaKernel/fern-mapping-fzf.vim
+    function! Fern_mapping_fzf_customize_option(spec)
+        let a:spec.options .= ' --multi'
+        " Note that fzf#vim#with_preview comes from fzf.vim
+        if exists('*fzf#vim#with_preview')
+            return fzf#vim#with_preview(a:spec)
+        else
+            return a:spec
+        endif
+    endfunction
+
+    function! Fern_mapping_fzf_before_all(dict)
+        if !len(a:dict.lines)
+            return
+        endif
+        return a:dict.fern_helper.async.update_marks([])
+    endfunction
+
+    function! s:reveal(dict)
+        execute "FernReveal -wait" a:dict.relative_path
+        execute "normal \<Plug>(fern-action-mark:set)"
+    endfunction
+
+    let g:Fern_mapping_fzf_file_sink = function('s:reveal')
+    let g:Fern_mapping_fzf_dir_sink = function('s:reveal')
+
+    " Map to your custom function.
+    nmap <silent><buffer><Tab> <Plug>(fern-action-call-function:project_top)
+
+    call fern#mapping#call_function#add('project_top', function('s:fern_project_top'))
 
 endfunction
 
@@ -2942,6 +3010,13 @@ function! s:smart_path() abort
     return fnamemodify(expand('%'), ':p:h')
 endfunction
 
+" https://github.com/hrsh7th/fern-mapping-call-function.vim
+" Add your custom function to mapping.
+function! s:fern_project_top(helper) abort
+    let l:node = a:helper.sync.get_current_node()
+    let l:proj = s:detect_project_root(l:node._path)
+    execute printf('Fern %s', fnameescape(l:proj))
+endfunction
 
 function! s:map_enter_project_root(helper) abort
     " NOTE: require 'file' scheme
@@ -2952,20 +3027,28 @@ function! s:map_enter_project_root(helper) abort
 endfunction
 
 function! s:fern_preview_init() abort
+    nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
+    nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
+    nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
+    nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
+
+    nmap <silent> <buffer> <expr> <Plug>(fern-quit-or-close-preview) fern_preview#smart_preview("\<Plug>(fern-action-preview:close)", ":q\<CR>")
+    nmap <silent> <buffer> q <Plug>(fern-quit-or-close-preview)
+
     nmap <buffer><expr>
-                \ <Plug>(fern-my-preview-or-nop)
+                \ <Plug>(fern-action-preview-or-nop)
                 \ fern#smart#leaf(
                 \   "\<Plug>(fern-action-open:edit)\<C-w>p",
                 \   "",
                 \ )
     nmap <buffer><expr> j
                 \ fern#smart#drawer(
-                \   "j\<Plug>(fern-my-preview-or-nop)",
+                \   "j\<Plug>(fern-action-preview-or-nop)",
                 \   "j",
                 \ )
     nmap <buffer><expr> k
                 \ fern#smart#drawer(
-                \   "k\<Plug>(fern-my-preview-or-nop)",
+                \   "k\<Plug>(fern-action-preview-or-nop)",
                 \   "k",
                 \ )
 endfunction
@@ -2973,11 +3056,6 @@ endfunction
 augroup fern_preview
     autocmd! *
     autocmd FileType fern call s:fern_preview_init()
-augroup END
-
-augroup FernTypeGroup
-    autocmd! * <buffer>
-    autocmd BufEnter <buffer> silent execute "normal \<Plug>(fern-action-reload)"
 augroup END
 
 
