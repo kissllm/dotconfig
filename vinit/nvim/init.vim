@@ -480,6 +480,7 @@ let g:vim_packages_use['powerline/powerline']                        = { 'type' 
 " let g:vim_packages_use['nvim-lua/completion-nvim']                   = { 'type' : 'start' }
 " let g:vim_packages_use['joe-skb7/cscope-maps']                       = { 'type' : 'start' }
 " let g:vim_packages_use['jezcope/vim-align']                          = { 'type' : 'start' }  " File format. Inactive
+" let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
 
 " Insert condition here means telling manager to remove the plugin's local copy
 " if exists('g:use_indent_guides')
@@ -544,7 +545,6 @@ let g:vim_packages_use['shemerey/vim-project']                       = { 'type' 
 let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
 let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'start' }
-" let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
 let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
 let g:vim_packages_use['majutsushi/ctags']                           = { 'type' : 'start' }
 let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
@@ -945,6 +945,15 @@ if has('nvim')
     "     autocmd BufEnter *.c,*.cpp,*.cxx,*.hxx,*.inl,*.impl,*.h,*.hpp let g:completion_trigger_character = ['.', '::']
     " augroup end
 
+    " https://github.com/antoinemadec/FixCursorHold.nvim
+    " in millisecond, used for both CursorHold and CursorHoldI,
+    " use updatetime instead if not defined
+    let g:cursorhold_updatetime = 100
+
+    let g:lens#height_resize_min = 5
+    let g:lens#width_resize_min = 20
+
+    let g:golden_ratio_exclude_nonmodifiable = 1
 
 endif " has('nvim')
 
@@ -2919,6 +2928,21 @@ let g:fern_git_status#disable_directories = 1
 " https://github.com/lambdalisue/fern-renderer-nerdfont.vim
 let g:fern#renderer = "nerdfont"
 
+let g:fern#renderer#default#leading = "│"
+let g:fern#renderer#default#root_symbol = "┬ "
+let g:fern#renderer#default#leaf_symbol = "├─ "
+let g:fern#renderer#default#collapsed_symbol = "├─ "
+let g:fern#renderer#default#expanded_symbol = "├┬ "
+
+let g:fern#mark_symbol                       = '●'
+let g:fern#renderer#default#collapsed_symbol = '▷ '
+let g:fern#renderer#default#expanded_symbol  = '▼ '
+let g:fern#renderer#default#leading          = ' '
+let g:fern#renderer#default#leaf_symbol      = ' '
+let g:fern#renderer#default#root_symbol      = '~ '
+
+" https://github.com/Allaman/dotfiles/blob/master/vimrc
+noremap <silent> <Leader>p :Fern . -drawer -width=35 -toggle<CR><C-w>=
 noremap <silent> <leader>d :Fern . -drawer -width=35 -toggle<cr><C-w>=
 noremap <silent> <leader>f :Fern . -drawer -reveal=% -width=35<cr><C-w>=
 noremap <silent> <leader>. :Fern %:h -drawer -width=35<cr><C-w>=
@@ -2952,26 +2976,41 @@ function! s:init_fern() abort
         " Define NERDTree like mappings
         nmap <buffer> o  <Plug>(fern-action-open:edit)
     endif
+
+    nmap <buffer> <CR> <Plug>(fern-my-open-expand-collapse)
+    nmap <buffer> n <Plug>(fern-action-new-path)
+    " nmap <buffer> ma <Plug>(fern-action-new-path)
+    nmap <buffer> D <Plug>(fern-action-trash)
+    nmap <buffer> m <Plug>(fern-action-move)
+    nmap <buffer> M <Plug>(fern-action-rename)
+    nmap <buffer> c <Plug>(fern-action-copy)
+    nmap <buffer> r <Plug>(fern-action-reload)
+    nmap <buffer> t <Plug>(fern-action-mark:toggle)
+    nmap <buffer> s <Plug>(fern-action-open:split)
+    " nmap <buffer> i  <Plug>(fern-action-open:split)
+    " nmap <buffer> gi <Plug>(fern-action-open:split)<C-w>p
+    nmap <buffer> v <Plug>(fern-action-open:vsplit)
+    " nmap <buffer> s  <Plug>(fern-action-open:vsplit)
+    " nmap <buffer> gs <Plug>(fern-action-open:vsplit)<C-w>p
+    nmap <buffer><nowait> i <Plug>(fern-action-hidden:toggle)
+    " nmap <buffer> I <Plug>(fern-action-hide-toggle)
+    nmap <buffer><nowait> u <Plug>(fern-action-leave)
+    nmap <buffer><nowait> e <Plug>(fern-action-enter)
+    nmap <buffer> q :<C-u>quit<CR>
+
+
     nmap <buffer> go <Plug>(fern-action-open:edit)<C-w>p
-    nmap <buffer> t  <Plug>(fern-action-open:tabedit)
-    nmap <buffer> T  <Plug>(fern-action-open:tabedit)gT
-    nmap <buffer> i  <Plug>(fern-action-open:split)
-    nmap <buffer> gi <Plug>(fern-action-open:split)<C-w>p
-    nmap <buffer> s  <Plug>(fern-action-open:vsplit)
-    nmap <buffer> gs <Plug>(fern-action-open:vsplit)<C-w>p
-    nmap <buffer> ma <Plug>(fern-action-new-path)
+    " nmap <buffer> t  <Plug>(fern-action-open:tabedit)
+    " nmap <buffer> T  <Plug>(fern-action-open:tabedit)gT
+    nmap <buffer> gv <Plug>(fern-action-open:vsplit)<C-w>p
     nmap <buffer> P gg
 
     nmap <buffer> C  <Plug>(fern-action-enter)
-    nmap <buffer> u  <Plug>(fern-action-leave)
-    nmap <buffer> r  <Plug>(fern-action-reload)
     nmap <buffer> cd <Plug>(fern-action-cd)
     nmap <buffer> R  gg<Plug>(fern-action-reload)<C-o>
     nmap <buffer> CD gg<Plug>(fern-action-cd)<C-o>
 
-    nmap <buffer> I <Plug>(fern-action-hide-toggle)
 
-    nmap <buffer> q :<C-u>quit<cr>
 
     nmap <buffer><expr>
                 \ <Plug>(fern-action-expand-or-collapse)
@@ -3454,6 +3493,21 @@ let g:session_directory        = getcwd()
 
 map <leader>m <Plug>SessionAuto
 command! -nargs=0 S silent! <Plug>SessionAuto
+
+command! -nargs=0 L silent! :call lens#run()
+
+
+" " Don't resize automatically.
+" let g:golden_ratio_autocommand = 0
+
+" https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
+" Mnemonic: - is next to =, but instead of resizing equally, all windows are
+" resized to focus on the current.
+nmap <C-w>- <Plug>(golden_ratio_resize)
+nmap <C-W>- <Plug>(golden_ratio_resize)
+" Fill screen with current window.
+nnoremap <C-w>+ <C-w><Bar><C-w>_
+nnoremap <C-w>= <C-w><Bar><C-w>_
 
 let g:loaded_matchparen = 1
 
