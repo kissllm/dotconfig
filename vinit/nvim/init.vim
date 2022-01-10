@@ -845,7 +845,7 @@ if has('nvim')
         if &filetype !~# '\v(help|txt|log)'
             " " v:lua.require'plugins'.install()
             setlocal list
-            :IndentBlanklineEnable!
+            " :IndentBlanklineEnable!
             " lua require'plugins'.install()
             " " :PackerCompile
             " redraw!
@@ -902,10 +902,12 @@ if has('nvim')
 
     let mucomplete#no_mappings = 1
 
+    " https://www.reddit.com/r/vim/comments/oywg54/how_to_remap_tab_without_affecting_ctrli/
+    nnoremap <c-i> i
     " Use <Tab> and <S-Tab> to navigate through popup menu
     inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
+    unmap <c-i>
 
     " Avoid showing message extra message when using completion
     set shortmess+=c
@@ -1671,7 +1673,8 @@ nnoremap <silent> s* :let @/='\<'.expand('<cword>').'\>'<cr>cgn
 xnoremap <silent> s* "sy:let @/=@s<cr>cgn
 
 " Clear search highlights.
-map <leader><space> :let @/=''<cr>
+" map <leader><space> :let @/=''<cr>
+map <leader>c :let @/=''<cr>
 
 " " Format paragraph (selected or not) to 80 character lines.
 " nnoremap <leader>g gqap
@@ -1725,7 +1728,8 @@ function! s:quickfix_toggle()
 
     copen
 endfunction
-nnoremap <silent> <leader>c :call <sid>quickfix_toggle()<cr>
+
+" nnoremap <silent> <leader>c :call <sid>quickfix_toggle()<cr>
 " nnoremap <F10> :call asyncrun#quickfix_toggle(6)<cr>
 nnoremap <F10> :call <sid>quickfix_toggle()<cr>
 
@@ -2641,7 +2645,8 @@ let g:tagbar_expand                        = 1
 nmap <F2> :TagbarToggle<cr>
 set tags=./tags,tags
 " set autochdir
-set switchbuf=useopen,split " make quickfix open in a new split buffer
+" set switchbuf=useopen,split " make quickfix open in a new split buffer
+set switchbuf=uselast " make quickfix open in a new split buffer
 let g:qf_bufname_or_text = 1
 
 " " map <F2> :call s:execute_on_writable(':call NERDTreeTlist()') <cr>
@@ -2673,19 +2678,78 @@ function! s:execute_on_writable(command)
 endfunction
 
 function! s:switch_to_writable_buffer()
+    let avalible_win_nr = 0
     let c = 0
-    let wincount = winnr('$')
+    let win_count = winnr('$')
     " Don't open it here if current buffer is not writable (e.g. NERDTree)
-    while !empty(getbufvar(+expand("<abuf>"), "&buftype")) && c < wincount && &buftype == ''
-        exec 'wincmd w'
+    " while !empty(getbufvar(+expand("<abuf>"), "&buftype")) && c < win_count && &buftype != ''
+    while winbufnr(c) != -1 && !empty(getbufvar(winbufnr(c), "&buftype")) && c < win_count
         let c = c + 1
     endwhile
+    exec c . 'wincmd w'
+    " let i = 1
+    " while i <= winnr("$")
+    "     let bnum = winbufnr(i)
+    "     if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
+    "                 \ && !getwinvar(i, '&previewwindow')
+    "                 \ && (!getbufvar(bnum, '&modified') || &hidden)
+    "         " return i
+    "         let avalible_win_nr = i
+    "     endif
+
+    "     let i += 1
+    " endwhile
+    " echo "avalible_win_nr = " . avalible_win_nr
+    " exec avalible_win_nr . 'wincmd w'
 endfunction
 
-augroup protect_readonly_buffer
-    au!
-    autocmd BufWinEnter * call s:switch_to_writable_buffer()
-augroup END
+" Retrieve previous/next window number
+function! s:windows_jump_retrieve(dir)
+    let c = 0
+    let wincount = winnr('$')
+    " Find a writable buffer
+    while !empty(getbufvar(winbufnr(c + 1), "&buftype")) && c < wincount && &buftype != ''
+        let c = c + 1
+    endwhile
+    " set c as default buffer number
+    let buf_num = c
+    let jl = getjumplist()
+    let jumplist = jl[0]
+    let curjump  = jl[1]
+    let searchrange = a:dir > 0 ? range(curjump + 1, len(jumplist)) : range(curjump - 1, 0, -1)
+    for i in searchrange
+        if jumplist[i]["bufnr"] != bufnr('%')
+            let buf_num = jumplist[i]["bufnr"]
+            break
+        endif
+    endfor
+    let result = bufwinnr(buf_num)
+    if -1 == result
+        let result = bufwinnr(bufnr('%'))
+    endif
+    return result
+endfunction
+
+" https://superuser.com/questions/575910/how-do-i-use-the-jumplist-to-jump-once-per-file
+function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
+    let jl = getjumplist() | let jumplist = jl[0] | let curjump = jl[1]
+    let jumpcmdstr = a:dir > 0 ? '<C-O>' : '<C-I>'
+    " let jumpcmdchr = a:dir > 0 ? '' : '	'    " <C-I> or <C-O>
+    let searchrange = a:dir > 0 ? range(curjump + 1, len(jumplist))
+                              \ : range(curjump - 1, 0, -1)
+    for i in searchrange
+        if jumplist[i]["bufnr"] != bufnr('%')
+            let n = (i - curjump) * a:dir
+            echo "Executing " . jumpcmdstr . " " . n . " times."
+            " execute "silent normal! " . n . jumpcmdchr
+            echo "jumplist[" . i . "][\"bufnr\"] = " . jumplist[i]["bufnr"]
+            echo "window number = " . bufwinnr(jumplist[i]["bufnr"])
+            break
+        endif
+    endfor
+endfunction
+nnoremap <leader><C-O> :call JumpToNextBufferInJumplist(-1)<CR>
+nnoremap <leader><C-I> :call JumpToNextBufferInJumplist( 1)<CR>
 
 " "tagbar (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((("
 
@@ -3011,8 +3075,10 @@ function! s:init_fern() abort
     let g:Fern_mapping_fzf_file_sink = function('s:reveal')
     let g:Fern_mapping_fzf_dir_sink = function('s:reveal')
 
+    nnoremap <c-i> i
     " Map to your custom function.
     nmap <silent><buffer><Tab> <Plug>(fern-action-call-function:project_top)
+    unmap <c-i>
 
     call fern#mapping#call_function#add('project_top', function('s:fern_project_top'))
 
@@ -3635,6 +3701,8 @@ let regs = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-"' |
 
 " set exrc
 set secure
+
+
 
 
 
