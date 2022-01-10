@@ -845,7 +845,7 @@ if has('nvim')
         if &filetype !~# '\v(help|txt|log)'
             " " v:lua.require'plugins'.install()
             setlocal list
-            " :IndentBlanklineEnable!
+            :IndentBlanklineEnable!
             " lua require'plugins'.install()
             " " :PackerCompile
             " redraw!
