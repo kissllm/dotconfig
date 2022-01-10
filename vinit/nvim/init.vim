@@ -950,8 +950,10 @@ if has('nvim')
     " use updatetime instead if not defined
     let g:cursorhold_updatetime = 100
 
-    let g:lens#height_resize_min = 5
+    let g:lens#width_resize_max = 160
     let g:lens#width_resize_min = 20
+    let g:lens#height_resize_max = 120
+    let g:lens#height_resize_min = 5
 
     let g:golden_ratio_exclude_nonmodifiable = 1
 
@@ -3497,10 +3499,9 @@ command! -nargs=0 S silent! <Plug>SessionAuto
 command! -nargs=0 L silent! :call lens#run()
 
 
-" " Don't resize automatically.
-" let g:golden_ratio_autocommand = 0
-
 " https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
+" Don't resize automatically.
+let g:golden_ratio_autocommand = 0
 " Mnemonic: - is next to =, but instead of resizing equally, all windows are
 " resized to focus on the current.
 nmap <C-w>- <Plug>(golden_ratio_resize)
