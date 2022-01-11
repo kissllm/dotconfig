@@ -114,8 +114,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
             exe 'set runtimepath^='. g:lua_config_dir
         endif
         let g:plugin_dir['vim'] = resolve($HOME . '/.vim')
-        let g:plugin_dir['nvim'] = g:lua_plugin_dir
-        let g:package_manager['nvim'] = 'packer'
+        let g:plugin_dir['lua'] = g:lua_plugin_dir
+        let g:package_manager['lua']  = 'packer'
 
     else " if ! has('vim')
         let g:vim_plugin_dir = resolve(expand(g:config_dir, 1) . '/.vim')
@@ -126,10 +126,26 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
             exe 'set runtimepath^='. g:vim_plugin_dir
             " set runtimepath^=g:vim_plugin_dir
         endif
-
         let g:plugin_dir['vim'] = g:vim_plugin_dir
-        let g:plugin_dir['nvim'] = ''
-        let g:package_manager['nvim'] = ''
+        " if has('lua')
+        "     let g:plugin_dir['lua'] = $XDG_DATA_HOME . "/nvim/site"
+        "     let g:package_manager['lua']  = 'packer'
+
+        "     let runtime_index = stridx(&runtimepath, g:plugin_dir['lua'])
+        "     if -1 == runtime_index
+        "         exe 'set runtimepath^='. g:plugin_dir['lua']
+        "     endif
+
+        "     let g:lua_config_dir = $XDG_DATA_HOME . "/nvim/lua"
+
+        "     let runtime_index = stridx(&runtimepath, g:lua_config_dir)
+        "     if -1 == runtime_index
+        "         exe 'set runtimepath^='. g:lua_config_dir
+        "     endif
+        " else
+            let g:plugin_dir['lua'] = ''
+            let g:package_manager['lua']  = ''
+        " endif
     endif
 
     let g:config_root = fnamemodify(g:plugin_dir['vim'], ':h')
@@ -144,20 +160,20 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     "     exe 'set runtimepath^='. g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/opt'
     "     exe 'set runtimepath^='. g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/start'
     " endif
-    " if g:package_manager['nvim'] != ''
-    "     exe 'set runtimepath^='. g:plugin_dir['nvim'] . '/pack/' . g:package_manager['nvim']
-    "     exe 'set runtimepath^='. g:plugin_dir['nvim'] . '/pack/' . g:package_manager['nvim'] . '/opt'
-    "     exe 'set runtimepath^='. g:plugin_dir['nvim'] . '/pack/' . g:package_manager['nvim'] . '/start'
+    " if g:package_manager['lua']  != ''
+    "     exe 'set runtimepath^='. g:plugin_dir['lua'] . '/pack/' . g:package_manager['lua'] 
+    "     exe 'set runtimepath^='. g:plugin_dir['lua'] . '/pack/' . g:package_manager['lua']  . '/opt'
+    "     exe 'set runtimepath^='. g:plugin_dir['lua'] . '/pack/' . g:package_manager['lua']  . '/start'
     " endif
 
     silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
                 \ . g:plugin_dir['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['nvim']") . ' "'
-                \ . g:plugin_dir['nvim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['lua']") . ' "'
+                \ . g:plugin_dir['lua'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
     silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
                 \ . g:package_manager['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['nvim']\" \""
-                \ . g:package_manager['nvim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['lua'] \" \""
+                \ . g:package_manager['lua']  . '")' . ' >> ' . g:log_address . ' 2>&1 &'
 
 endif
 
@@ -176,15 +192,15 @@ endif
 
 " let runtime_index = stridx(&runtimepath, "/usr/share/vim/vimfiles")
 " if -1 == runtime_index
-"         exe 'set runtimepath^='. "/usr/share/vim/vimfiles"
+"       exe 'set runtimepath^='. "/usr/share/vim/vimfiles"
 " endif
 " let runtime_index = stridx(&runtimepath, "/usr/share/vim/vimfiles/colors")
 " if -1 == runtime_index
-"         exe 'set runtimepath^='. "/usr/share/vim/vimfiles/colors"
+"       exe 'set runtimepath^='. "/usr/share/vim/vimfiles/colors"
 " endif
 " let runtime_index = stridx(&runtimepath, "/usr/share/color")
 " if -1 == runtime_index
-"         exe 'set runtimepath^='. "/usr/share/color"
+"       exe 'set runtimepath^='. "/usr/share/color"
 " endif
 let runtime_index = stridx(&runtimepath, $VIMRUNTIME)
 if -1 == runtime_index
@@ -281,8 +297,8 @@ call boot#log_silent(g:log_address, "len(argv())", len(argv()), g:fixed_tips_wid
 call boot#log_silent(g:log_address, "len(v:argv)", len(v:argv), g:fixed_tips_width, g:log_verbose)
 
 if 1 == g:debug_verbose
-    "   :message
-    "   silent! execute '!printf "v:argv: '.v:argv.'" >> '. g:log_address . ' 2>&1 &'
+    " :message
+    " silent! execute '!printf "v:argv: '.v:argv.'" >> '. g:log_address . ' 2>&1 &'
     let arg_count     = 0
     for av in argv()
         let arg_count   += 1
@@ -586,7 +602,8 @@ let g:vim_packages_use['sheerun/vim-polyglot']                       = { 'type' 
 let g:vim_packages_use['tpope/vim-sleuth']                           = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']        = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'start' }
-
+" let g:vim_packages_use['moll/vim-bbye']                              = { 'type' : 'start' }
+let g:vim_packages_use['marklcrns/vim-smartq']                       = { 'type' : 'start' }
 
 
 " " Provide full URL; useful if you want to clone from somewhere else than Github.
@@ -1047,7 +1064,7 @@ silent! execute '!export TERM=xterm-256color'
 
 if ! has('gui_running')
     " https://github.com/tmux/tmux/issues/699
-    set t_Co=256
+    set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
 endif
 
 
@@ -1705,7 +1722,7 @@ map <F5> :setlocal spell!<cr>
 nmap <F6> :set invrelativenumber<cr>
 
 " Automatically fix the last misspelled word and jump back to where you were.
-"   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
+" Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
 nnoremap <leader>sp :normal! mz[s1z=`z<cr>
 
 set list
@@ -1745,7 +1762,7 @@ endfunction
 nnoremap <F10> :call <sid>quickfix_toggle()<cr>
 
 " Convert the selected text's title case using the external tcc script.
-"   Requires: https://github.com/nickjj/title-case-converter
+" Requires: https://github.com/nickjj/title-case-converter
 vnoremap <leader>tc c<C-r>=system('tcc', getreg('"'))[:-2]<cr>
 
 " Navigate the complete menu items like CTRL+n / CTRL+p would.
@@ -1993,7 +2010,7 @@ if !empty($WAYLAND_DISPLAY)
                 \   'cache_enabled': 1,
                 \ }
 endif
-"   set clipboard+=unnamed
+" set clipboard+=unnamed
 set clipboard+=unnamedplus
 
 " https://alex.dzyoba.com/blog/vim-revamp/
@@ -2060,8 +2077,8 @@ nnoremap X D
 " " Triger `autoread` when files changes on disk
 " " https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
 " " https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
-"     autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
-"             \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
+"   autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
+"           \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
 "
 " " Notification after file change
 " " https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
@@ -2079,11 +2096,11 @@ augroup auto_read
     au FocusGained,BufEnter * :silent! !
 augroup END
 
-"   augroup auto_read
-"       autocmd!
-"       autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
-"                   \ if mode() == 'n' && getcmdwintype() == '' | checktime | endif
-"   augroup END
+" augroup auto_read
+"     autocmd!
+"     autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
+"                 \ if mode() == 'n' && getcmdwintype() == '' | checktime | endif
+" augroup END
 
 
 if 0 == g:navi_protect
@@ -2222,6 +2239,8 @@ set splitright
 set textwidth=0
 set ttimeout
 set ttyfast
+" $XDG_DATA_HOME/nvim == stdpath('data')
+" Because stdpath('data') was shared between root and ordinary users
 if has('nvim')
     silent! execute 'set undodir=' . stdpath('cache') . '/undo//'
 else
@@ -2370,14 +2389,13 @@ if ! has('nvim')
     else
         set ttymouse=xterm2
     end
-    "   :set ttymouse=xterm2    "   :set ttymouse=sgr
 endif
 if ! has('nvim')
-    :set term=xterm-256color    "   :set term=alacritty
+    :set term=xterm-256color    " :set term=alacritty
 endif
 if has('mouse')
-    "   :set mouse=n            "   :se mouse=a
-    set mouse=a             "   :se mouse=a
+    " :set mouse=n
+    set mouse=a
 endif
 
 
@@ -2391,17 +2409,17 @@ nnoremap <LeftMouse> ma<LeftMouse>`a
 
 " "cursor shape and blinking |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
-"   " https://vim.fandom.com/wiki/Configuring_the_cursor
-"   if &term =~ "xterm\\|rxvt\\|alacritty"
-"       " use an orange cursor in insert mode
-"       let &t_SI = "\<Esc>]12;orange\x7"
-"       " use a red cursor otherwise
-"       let &t_EI = "\<Esc>]12;red\x7"
-"       silent !echo -ne "\033]12;red\007"
-"       " reset cursor when vim exits
-"       autocmd VimLeave * silent !echo -ne "\033]112\007"
-"       " use \003]12;gray\007 for gnome-terminal and rxvt up to version 9.21
-"   endif
+" " https://vim.fandom.com/wiki/Configuring_the_cursor
+" if &term =~ "xterm\\|rxvt\\|alacritty"
+"     " use an orange cursor in insert mode
+"     let &t_SI = "\<Esc>]12;orange\x7"
+"     " use a red cursor otherwise
+"     let &t_EI = "\<Esc>]12;red\x7"
+"     silent !echo -ne "\033]12;red\007"
+"     " reset cursor when vim exits
+"     autocmd VimLeave * silent !echo -ne "\033]112\007"
+"     " use \003]12;gray\007 for gnome-terminal and rxvt up to version 9.21
+" endif
 
 " https://vimrcfu.com/snippet/15
 " Change cursor style when entering INSERT mode (works in tmux!)
@@ -2415,8 +2433,8 @@ endif
 
 " following code will mess your vim
 " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
-"   au InsertEnter * silent! execute "! echo -en \<esc>[5 q"
-"   au InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+" au InsertEnter * silent! execute "! echo -en \<esc>[5 q"
+" au InsertLeave * silent! execute "! echo -en \<esc>[2 q"
 
 " https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
 augroup blink_cursor
@@ -2606,7 +2624,7 @@ augroup END
 " 8 or i: Find files #including this file
 " 9 or a: Find places where this symbol is assigned a value
 
-"   nmap <C-\>s :cs find s <C-R>=expand("<cword>")<cr><cr>:copen<cr>
+" nmap <C-\>s :cs find s <C-R>=expand("<cword>")<cr><cr>:copen<cr>
 nmap <silent> <c-\>s :cs find s <C-R>=expand("<cword>")<cr><cr>
 nmap <silent> <c-\>g :cs find g <C-R>=expand("<cword>")<cr><cr>
 nmap <silent> <c-\>c :cs find c <C-R>=expand("<cword>")<cr><cr>
@@ -2671,7 +2689,7 @@ function! s:execute_on_writable(command)
     "     close
     "     exe ":NERDTreeClose"
     "     exe 'b ' . bufnum
-    "     "   NERDTree
+    "     " NERDTree
     " endif
     " " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
     " if bufname('#') =~ '__Tag_List__' && bufname('%') !~ '__Tag_List__'  && exists('t:taglist_winnr') && bufwinnr('%') == t:taglist_winnr && &buftype == '' && !exists('g:launching_fzf')
@@ -2679,7 +2697,7 @@ function! s:execute_on_writable(command)
     "     close
     "     exe ":TlistClose"
     "     exe 'b ' . bufnum
-    "     "   TlistToggle
+    "     " TlistToggle
     " endif
 
     call s:switch_to_writable_buffer()
@@ -3218,7 +3236,7 @@ augroup cxx_auto_format | au!
     autocmd FileType c,cxx,cpp ClangFormatAutoEnable
 augroup END
 
-"    call packager#add('Chiel92/vim-autoformat',                    { 'type' : 'start' })
+"  call packager#add('Chiel92/vim-autoformat',                    { 'type' : 'start' })
 " noremap <F3> :Autoformat<cr>
 " noremap <F3> :call easy_align#align()<cr>
 noremap <F4> :EasyAlign<cr>
@@ -3233,7 +3251,7 @@ noremap <F4> :EasyAlign<cr>
 " augroup end
 
 " https://github.com/umaumax/vim-format
-" "    call packager#add('umaumax/vim-format',                     { 'type' : 'start' })
+" "  call packager#add('umaumax/vim-format',                     { 'type' : 'start' })
 "
 " " auto format
 " let g:vim_format_fmt_on_save = 1
@@ -3364,7 +3382,7 @@ set wildmenu
 " " popup mode
 " let g:Lf_WindowPosition = 'popup'
 " let g:Lf_PreviewInPopup = 1
-" "   let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
+" " let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
 " let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "Noto Sans Mono ExtraLight" }
 " let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 "
@@ -3442,7 +3460,7 @@ imap <expr> <down> mucomplete#extend_fwd("\<down>")
 
 
 " "tab management ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))"
-"   :set modifiable
+" :set modifiable
 
 " " ~/.vim/vim-addons/lh-brackets/doc/lh-map-tools.txt
 " :let g:marker_define_jump_mappings = 0
@@ -3556,6 +3574,8 @@ let g:skipview_files = [
 " https://github.com/mbbill/undotree
 nnoremap <F8> :UndotreeToggle<CR>
 if has("persistent_undo")
+    " $XDG_DATA_HOME/nvim == stdpath('data')
+    " Because stdpath('data') was shared between root and ordinary users
     if has('nvim')
         let target_path = expand(stdpath('cache') . '/undo')
     else
@@ -3567,8 +3587,9 @@ if has("persistent_undo")
     if !isdirectory(target_path)
         call mkdir(target_path, "p", 0700)
     endif
-
-    let &undodir = target_path
+    if &undodir != target_path
+        let &undodir = target_path
+    endif
     set undofile
 endif
 " debug undotree
@@ -3579,8 +3600,8 @@ endif
 
 " "build tools ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
-"   " https://github.com/Shougo/deoplete.nvim
-"   let g:deoplete#enable_at_startup = 1
+" " https://github.com/Shougo/deoplete.nvim
+" let g:deoplete#enable_at_startup = 1
 
 
 " https://www.quora.com/How-do-I-compile-a-program-C++-or-Java-in-Vim-like-Sublime-Text-Ctrl+B/answer/Lin-Wei-31
@@ -3603,11 +3624,11 @@ let g:asyncrun_rootmarks = ['.git', '.svn', '.root', '.project', '.hg']
 " :Cfilter DPUST
 
 
-"   if has('win32') || has('win64')
-"       noremap <silent><F2> :AsyncRun! -cwd=<root> findstr /n /s /C:"<C-R><C-W>" "\%CD\%\*.h*" --include='*.i*' "\%cd\%\*.c*" <cr>
-"   else
-"       noremap <silent><F2> :AsyncRun! -cwd=<root> grep -n -s -R <C-R><C-W> --include='*.h*' --include='*.i*' --include='*.c*' '<root>' <cr>
-"   endif
+" if has('win32') || has('win64')
+"     noremap <silent><F2> :AsyncRun! -cwd=<root> findstr /n /s /C:"<C-R><C-W>" "\%CD\%\*.h*" --include='*.i*' "\%cd\%\*.c*" <cr>
+" else
+"     noremap <silent><F2> :AsyncRun! -cwd=<root> grep -n -s -R <C-R><C-W> --include='*.h*' --include='*.i*' --include='*.c*' '<root>' <cr>
+" endif
 
 if 1 == g:debug_verbose
     function! s:log() abort
@@ -3645,12 +3666,12 @@ let g:reload_on_write = 1
 " "auto reload .vimrc __________________________________________________________________________________________"
 
 " auto reload vimrc once changed
-"   if has("autocmd")
-"       autocmd! BufWritePost .vimrc source $MYVIMRC
+" if has("autocmd")
+"     autocmd! BufWritePost .vimrc source $MYVIMRC
 "
-"       " This fixes the color changes and things not working :D
-"       autocmd! BufWritePost .vimrc filetype plugin indent on
-"   endif
+"     " This fixes the color changes and things not working :D
+"     autocmd! BufWritePost .vimrc filetype plugin indent on
+" endif
 " autocmd BufWritePost *vimrc,*exrc :call feedkeys(":source %\<cr>")
 
 " autocmd BufEnter * ++nested syntax sync fromstart
@@ -3756,6 +3777,8 @@ let regs = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-"' |
 
 " set exrc
 set secure
+
+
 
 
 

@@ -13,7 +13,7 @@
 # Are we running under grsecurity's RBAC?
 function rbac_auth() {
     local auth_to_role='admin'
-    if [ "${USER}" = 'root' ]; then
+    if [ "${USER}" = "root" ]; then
         if ! grep -qE '^RBAC:' "/proc/self/status" && command -v gradm > /dev/null 2>&1; then
             echo -e "\n${BLUE}*${NC} ${GREEN}RBAC${NC} Authorize to '${auth_to_role}' RBAC role."
             gradm -a "${auth_to_role}" && exec "${SHELL}" "$@"
@@ -24,10 +24,10 @@ rbac_auth
 
 # Basic zsh config.
 umask 077
-ZDOTDIR=${ZDOTDIR:-${HOME}}
+ZDOTDIR="${ZDOTDIR:-${HOME}}"
 ZSHDDIR="${HOME}/.config/zsh.d"
 HISTFILE="${ZDOTDIR}/.zsh_history"
-HISTSIZE='640000'
+HISTSIZE="640000"
 SAVEHIST="${HISTSIZE}"
 # tmux will query the real editor name from this:
 # export EDITOR="/usr/bin/vim-huge"
@@ -265,7 +265,7 @@ function confirm_wrapper() {
 
     local prefix=''
 
-    if [ "${as_root}" = 'true' ] && [ "${USER}" != 'root' ]; then
+    if [ "${as_root}" = 'true' ] && [ "${USER}" != "root" ]; then
         prefix="sudo"
     fi
     confirm ${prefix} "$@"
@@ -462,7 +462,7 @@ zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*:descriptions' format '%U%F{cyan}%d%f%u'
 
 # If running as root and nice >0, renice to 0.
-if [ "$USER" = 'root' ] && [ "$(cut -d ' ' -f 19 /proc/$$/stat)" -gt 0 ]; then
+if [ "$USER" = "root" ] && [ "$(cut -d ' ' -f 19 /proc/$$/stat)" -gt 0 ]; then
     renice -n 0 -p "$$" && echo "# Adjusted nice level for current shell to 0."
 fi
 
@@ -648,7 +648,8 @@ alias ls="ls --color=auto --human-readable --group-directories-first --classify"
 alias ll="ls --color=auto --human-readable --group-directories-first --classify -l"
 alias lla="ls --color=auto --human-readable --group-directories-first --classify -la"
 # alias vim="/usr/bin/vim-huge"
-alias vim="/usr/bin/nvim"
+alias nv="/usr/bin/nvim"
+alias vi="/usr/bin/vim-huge"
 alias tmux="tmux -2"
 alias history="history 1 -1"
 
@@ -667,6 +668,11 @@ function _v () {
 }
 alias v=_v
 export EDITOR=v
+# alias sv="doas -EH env XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR WAYLAND_SOCKET=$WAYLAND_SOCKET WAYLAND_DISPLAY=$WAYLAND_DISPLAY DISPLAY= nvim"
+# https://bugzilla.redhat.com/show_bug.cgi?id=1274451
+# alias sv="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY nvim"
+alias sn="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY nvim"
+alias sv="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY vim-huge"
 
 function als() {
     `alias "$@" | cut -d\' -f2`
@@ -1139,7 +1145,7 @@ function post_update(){
 autoload -Uz _post_update
 (( ${+_comps} )) && _comps[post_update]=_post_update
 
-# if [ "$USER" = 'root' ]; then
+# if [ "$USER" = "root" ]; then
     source "${ZINIT[BIN_DIR]}/zinit.zsh"
 # fi
 
@@ -1155,7 +1161,7 @@ for file in "$HOME/.zsh/includes/"(N/^F) ; do
 done
 
 
-# if [ "$USER" = 'root' ]; then
+# if [ "$USER" = "root" ]; then
 
 # # Load a few important annexes, without Turbo
 # # (this is currently required for annexes)
@@ -1547,7 +1553,7 @@ typeset -U fpath
 # prompt restore
 # prompt grml
 # prompt clint2 blue yellow cyan magenta white red white
-if [ "${USER}" = 'root' ]; then
+if [ "${USER}" = "root" ]; then
     prompt clint2 magenta red yellow cyan green
 else
     prompt clint2 yellow green cyan darkgray red
@@ -1556,13 +1562,13 @@ fi
 # prompt guezwhoz-zshell
 # prompt powerlevel10k
 
-# if [ "$USER" = 'root' ]; then
+# if [ "$USER" = "root" ]; then
 # # https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
 #     # zpcompinit
 #     autoload -Uz compinit && compinit
 # fi
 
-# [ -z "$TMUX" ] && ! [ "$USER" = 'root' ] && ! ( [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] )  && exec tmux new -As .
+# [ -z "$TMUX" ] && ! [ "$USER" = "root" ] && ! ( [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] )  && exec tmux new -As .
 
 
 
