@@ -70,7 +70,7 @@ if [[ "$USER" != "root" ]] {
             doas chmod 0700 "${XDG_RUNTIME_DIR}"
             doas chown -R ${USER}:users "${XDG_RUNTIME_DIR}"
         }
-}
+    }
 }
 
 if [[ -f "${HOME}/.cargo/env" ]] {
