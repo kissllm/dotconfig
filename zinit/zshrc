@@ -645,8 +645,9 @@ fi
 alias grep="grep --colour=auto"
 alias egrep="egrep --colour=auto"
 alias ls="ls --color=auto --human-readable --group-directories-first --classify"
-alias ll="ls --color=auto --human-readable --group-directories-first --classify -l"
-alias lla="ls --color=auto --human-readable --group-directories-first --classify -la"
+# alias ll="ls --color=auto --human-readable --group-directories-first --classify -l"
+alias ll="ls --color=auto --human-readable --group-directories-first --classify -la"
+alias la="ls --color=auto --human-readable --group-directories-first --classify -lathr"
 # alias vim="/usr/bin/vim-huge"
 alias nv="/usr/bin/nvim"
 alias vi="/usr/bin/vim-huge"
@@ -1027,8 +1028,19 @@ export VOIDNSUNDO_BIN=/usr/local/bin/voidnsundo
 # [[ ! -f /bedrock/run/profile ]] || source /bedrock/run/profile
 [ -f /bedrock/run/profile ] && source /bedrock/run/profile
 
+# Set commands or paths to LLVM-provided tools outside the script via 'export ...'
+# or before these lines
+export AR=${AR:=llvm-ar}
+export NM=${NM:=llvm-nm}
 export CC=/usr/bin/clang
 export CXX=/usr/bin/clang++
+# You may also set CFLAGS, CPPFLAGS, CXXFLAGS, and LDFLAGS
+# See build/toolchain/linux/unbundle/ in the Chromium source for more details.
+#
+# # Hack to allow clang to find the default cfi_blacklist.txt
+# export CXXFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
+# export CPPFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
+# export CFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
 
 export QT_AUTO_SCREEN_SCALE_FACTOR=0
 export QT_SCALE_FACTOR=1

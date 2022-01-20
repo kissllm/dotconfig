@@ -497,6 +497,8 @@ let g:vim_packages_use['powerline/powerline']                        = { 'type' 
 " let g:vim_packages_use['joe-skb7/cscope-maps']                       = { 'type' : 'start' }
 " let g:vim_packages_use['jezcope/vim-align']                          = { 'type' : 'start' }  " File format. Inactive
 " let g:vim_packages_use['tpope/vim-obsession']                        = { 'type' : 'start' }
+" let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
+" let g:vim_packages_use['moll/vim-bbye']                              = { 'type' : 'start' }
 
 " Insert condition here means telling manager to remove the plugin's local copy
 " if exists('g:use_indent_guides')
@@ -579,7 +581,6 @@ let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' 
 let g:vim_packages_use['christoomey/vim-tmux-navigator']             = { 'type' : 'start' }
 let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }
 let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']        = { 'type' : 'start' }
-let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
 let g:vim_packages_use['thinca/vim-themis']                          = { 'type' : 'start' }
 let g:vim_packages_use['mhinz/vim-galore']                           = { 'type' : 'start' }
 let g:vim_packages_use['plasticboy/vim-markdown']                    = { 'type' : 'start' }
@@ -602,7 +603,6 @@ let g:vim_packages_use['sheerun/vim-polyglot']                       = { 'type' 
 let g:vim_packages_use['tpope/vim-sleuth']                           = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']        = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'start' }
-" let g:vim_packages_use['moll/vim-bbye']                              = { 'type' : 'start' }
 let g:vim_packages_use['marklcrns/vim-smartq']                       = { 'type' : 'start' }
 
 
@@ -2013,10 +2013,10 @@ endif
 " set clipboard+=unnamed
 set clipboard+=unnamedplus
 
-" https://alex.dzyoba.com/blog/vim-revamp/
-" C-c and C-v - Copy/Paste to global clipboard
-vmap <C-c> "+yi
-imap <C-v> <esc>"+gpi
+" " https://alex.dzyoba.com/blog/vim-revamp/
+" " C-c and C-v - Copy/Paste to global clipboard
+" vmap <C-c> "+yi
+" imap <C-v> <esc>"+gpi
 
 " https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
 xnoremap "+y y:call system("wl-copy", @")<cr>
@@ -2847,6 +2847,7 @@ vmap <C-c><C-c> <Plug>SendSelectionToTmux
 nmap <C-c><C-c> <Plug>NormalModeSendToTmux
 nmap <C-c>r <Plug>SetTmuxVars
 
+" :Redir map
 command! -nargs=+ -complete=command Redir let s:reg = @@  <bar> redir @">  <bar> silent execute <q-args>  <bar> redir END  <bar> new  <bar> pu  <bar> 1,2d_  <bar> let @@ = s:reg
 
 let g:tmux_navigator_no_mappings    = 1
@@ -2899,21 +2900,53 @@ let g:tmux_navigator_disable_when_zoomed = 1
 let g:tmux_resizer_no_mappings = 1
 
 let g:sudo_no_gui = 1
+
+" https://github.com/quanhengzhuang/vim-sudowriter/blob/master/plugin/sudowriter.vim
+" " Will erase the current buffer completely!
+" function! s:sudowrite()
+"     let current = getpos('.')
+"     execute '!sudo tee %'
+"     edit
+"     call setpos('.', current)
+" endfunction
+
+set autowriteall
+
 " https://vi.stackexchange.com/questions/3561/settings-and-plugins-when-root-sudo-vim
-" command! -nargs=0 SW silent! w !doas tee > /dev/null % <CR>:e!<CR><CR>
-" Needs comfirmation
-command! -nargs=0 W silent! w !doas tee > /dev/null %
+" command! -nargs=0 W silent! w !doas tee > /dev/null %  feedkeys("l", 't') :e
+" command! -nargs=0 W silent! w !doas tee > /dev/null %
+" command! -nargs=0 W :call <sid>sudowrite()<cr>
+" command! -nargs=0 W :call <sid>save_file_via_doas()<cr>
+
 " Won't work
 " command! -nargs=0 W silent! :SudoWrite<CR>
 
-
 " cmap w!! %!sudo tee > /dev/null %
 " Allow saving of files as sudo when I forgot to start vim using sudo.
+" Doesn't need comfirmation
 " cmap w!! w !sudo tee > /dev/null %
-" cnoremap w!! execute 'silent! write !sudo /usr/bin/tee "%" >/dev/null' <bar> edit!
-" cnoremap w!! execute 'silent! write !doas tee "%" >/dev/null' <bar> edit!
+
+" cnoremap w!! execute 'silent! write !sudo /usr/bin/tee "%" >/dev/null' <CR> <bar> call feedkeys('l', 't') <CR> <bar> :edit <CR>
+
+" cnoremap w!! write !doas tee > /dev/null % <CR> :edit<CR>
+
+" cnoremap w!! exec 'w !sudo dd of=' . shellescape(expand('%')) <CR> :edit<CR>
+
+" https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
+cnoremap w!! call <sid>save_file_via_sudo()
+
+function! s:save_file_via_sudo() abort
+    execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null'
+    " execute (has('gui_running') ? '' : 'silent') 'write !env DOAS_EDITOR=tee doas -e ' . shellescape(expand('%')) . ' >/dev/null'
+    let &modified = v:shell_error
+endfunction
+
+
+" cnoremap w!! w !sudo sh -c "cat > %" <CR> feedkeys('l', 't') <CR> :edit<CR>
 " cnoremap w!! execute 'silent! write !SUDO_ASKPASS=`which ssh-askpass` sudo tee % >/dev/null' <bar> edit!
-" cmap w!! %!sudo tee > /dev/null %<CR>:e!<CR><CR>
+" cmap w!! let current = getpos('.') <bar> %!sudo tee > /dev/null %<CR>:edit!<CR> <bar> call setpos('.', current) <CR>
+
+" cnoremap w!! :call <sid>sudowrite()<cr>
 
 " cmap w!! w !doas tee > /dev/null %
 " cmap w!! w !sudo sh -c "cat > %"
@@ -2921,8 +2954,9 @@ command! -nargs=0 W silent! w !doas tee > /dev/null %
 " Won't work
 " cmap w!! silent! :SudoWrite<CR>
 
-noremap  <silent> <C-s> :SudoWrite<CR>
-inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
+" " Will erase buffers (not just current one) automatically if you don't have write permission
+" noremap  <silent> <C-s> :SudoWrite<CR>
+" inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
 " https://github.com/lambdalisue/fern-renderer-devicons.vim
 let g:fern#renderer = "devicons"
@@ -2971,7 +3005,7 @@ noremap <silent> <leader>. :Fern %:h -drawer -width=35<cr><C-w>=
 function! s:init_fern() abort
     echo "This function is called ON a fern buffer WHEN initialized"
 
-    function s:init_fern_mapping_reload_all()
+    function! s:init_fern_mapping_reload_all()
         nmap <buffer> R <Plug>(fern-action-reload:all)
     endfunction
     augroup action-fern-mapping-reload-all

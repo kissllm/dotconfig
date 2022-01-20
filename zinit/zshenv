@@ -1,4 +1,4 @@
-path=(/build/toolchain/musl/include: /build/toolchain/musl: /usr/include/c++/v1: /usr/include/c++/10.2/x86_64-linux-musl: /usr/bin: /bin: /usr/local/bin: /opt: /usr/share/man: $path)
+path=(/working/toolchain /build/toolchain/musl/include: /build/toolchain/musl: /usr/include/c++/v1: /usr/include/c++/10.2/x86_64-linux-musl: /usr/bin: /bin: /usr/local/bin: /opt: /usr/share/man: $path)
 typeset -U path
 
 export LANG="en_US.UTF-8"
@@ -73,7 +73,7 @@ if [[ "$USER" != "root" ]] {
 }
 }
 
-if [[ -d "${HOME}/.cargo/env" ]] {
+if [[ -f "${HOME}/.cargo/env" ]] {
     # source "${HOME}/.cargo/env"
     . "${HOME}/.cargo/env"
 }
