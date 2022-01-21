@@ -1098,59 +1098,60 @@ export PATH=${ZINIT[HOME_DIR]}:${ZINIT[BIN_DIR]}:$PATH
 ### Added by Zinit's installer
 if [[ ! -f ${ZINIT[BIN_DIR]}/zinit.zsh ]]; then
     print -P "%F{33}▓▒░ %F{220}Installing %F{33}DHARMA%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
-    # command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas chmod g-rwX "${ZINIT[HOME_DIR]}"
-    command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas chmod g+rX "${ZINIT[HOME_DIR]}" && command doas chmod o+rX "${ZINIT[HOME_DIR]}"
+    # command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas \chmod g-rwX "${ZINIT[HOME_DIR]}"
+    command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas \chmod g+rX "${ZINIT[HOME_DIR]}" >/dev/null 2>&1 \
+        && command doas \chmod o+rX "${ZINIT[HOME_DIR]}" >/dev/null 2>&1
     # command doas git clone https://github.com/zdharma/zinit "${ZINIT[BIN_DIR]}" && \
     command doas git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}" && \
         print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
         print -P "%F{160}▓▒░ The clone has failed.%f%b"
 
-    # command doas chmod -R g-w "${ZINIT[HOME_DIR]}"
-    # command doas chmod -R o-w "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R g-w "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R o-w "${ZINIT[HOME_DIR]}"
 
-    # doas chmod -R --quiet 0755 "/share/zinit"
-    # doas chmod -R --quiet 0775 "/share/zinit"
-    # doas chown -R --quiet root:zinit "/share/zinit"
+    # doas \chmod -R --quiet 0755 "/share/zinit"
+    # doas \chmod -R --quiet 0775 "/share/zinit"
+    # doas \chown -R --quiet root:zinit "/share/zinit"
 fi
 
 function post_update(){
-    # # doas chmod -R --quiet 0755 "/share/zinit"
-    # # doas chmod -R --quiet 0755 "/share/vinit"
-    # # doas chmod -R --quiet 0755 "/share/tinit"
+    # # doas \chmod -R --quiet 0755 "/share/zinit"
+    # # doas \chmod -R --quiet 0755 "/share/vinit"
+    # # doas \chmod -R --quiet 0755 "/share/tinit"
 
-    # # doas chmod -R --quiet 0775 "/share/zinit"
-    # # doas chmod -R --quiet 0775 "/share/vinit"
-    # # doas chmod -R --quiet 0775 "/share/tinit"
+    # # doas \chmod -R --quiet 0775 "/share/zinit"
+    # # doas \chmod -R --quiet 0775 "/share/vinit"
+    # # doas \chmod -R --quiet 0775 "/share/tinit"
 
-    # # command doas chmod -R --quiet g-w "${ZINIT[HOME_DIR]}"
-    # # command doas chmod -R --quiet g-w "${VINIT[HOME_DIR]}"
-    # # command doas chmod -R --quiet g-w "${TINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet g-w "${ZINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet g-w "${VINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet g-w "${TINIT[HOME_DIR]}"
 
-    # # command doas chmod -R --quiet o-w "${ZINIT[HOME_DIR]}"
-    # # command doas chmod -R --quiet o-w "${VINIT[HOME_DIR]}"
-    # # command doas chmod -R --quiet o-w "${TINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet o-w "${ZINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet o-w "${VINIT[HOME_DIR]}"
+    # # command doas \chmod -R --quiet o-w "${TINIT[HOME_DIR]}"
 
-    # command doas chmod -R --quiet g+rwX "${ZINIT[HOME_DIR]}"
-    # command doas chmod -R --quiet g+rwX "${VINIT[HOME_DIR]}"
-    # command doas chmod -R --quiet g+rwX "${TINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet g+rwX "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet g+rwX "${VINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet g+rwX "${TINIT[HOME_DIR]}"
 
-    # command doas chmod -R --quiet o+rX "${ZINIT[HOME_DIR]}"
-    # command doas chmod -R --quiet o+rX "${VINIT[HOME_DIR]}"
-    # command doas chmod -R --quiet o+rX "${TINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet o+rX "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet o+rX "${VINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet o+rX "${TINIT[HOME_DIR]}"
 
-    # # doas chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
-    # # doas chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
-    # # doas chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
+    # # doas \chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
+    # # doas \chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
+    # # doas \chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
 
-    command doas chown -R --quiet root:users "${ZINIT[HOME_DIR]}"
-    command doas chown -R --quiet root:users "${VINIT[HOME_DIR]}"
-    command doas chown -R --quiet root:users "${TINIT[HOME_DIR]}"
+    command doas \chown -R --quiet root:users "${ZINIT[HOME_DIR]}"
+    command doas \chown -R --quiet root:users "${VINIT[HOME_DIR]}"
+    command doas \chown -R --quiet root:users "${TINIT[HOME_DIR]}"
     for packages_path in "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
     do
         find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
-            -o -type f -name '*' -print -exec chmod --quiet g+r {} + \
-            -o -type d -print -exec chmod --quiet go+rx {} + \
-            && chgrp -R --quiet users $packages_path 2>&1 &
+            -o -type f -name '*' -print -exec \chmod --quiet g+r {} >/dev/null 2>&1 + \
+            -o -type d -print -exec \chmod --quiet go+rx {} >/dev/null 2>&1 + \
+            && \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
     done
 }
 
