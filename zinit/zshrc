@@ -23,7 +23,9 @@ function rbac_auth() {
 rbac_auth
 
 # Basic zsh config.
-umask 077
+# umask 077
+umask 037
+
 ZDOTDIR="${ZDOTDIR:-${HOME}}"
 ZSHDDIR="${HOME}/.config/zsh.d"
 HISTFILE="${ZDOTDIR}/.zsh_history"
@@ -40,14 +42,107 @@ export TMPPREFIX="${TMPDIR}/zsh"
 XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 
-SHARE_DIR="/home"
+
+
+
+# USE_SHELDON=1
+
+if ! [ -z ${USE_SHELDON} ]; then
+    # sheldon initilization
+    # --color <WHEN>           Output coloring: always, auto, or never [default: auto]
+    # --config-dir <PATH>      The configuration directory [env: SHELDON_CONFIG_DIR=]
+    # --data-dir <PATH>        The data directory [env: SHELDON_DATA_DIR=]
+    # --config-file <PATH>     The config file [env: SHELDON_CONFIG_FILE=]
+    # --lock-file <PATH>       The lock file [env: SHELDON_LOCK_FILE=]
+    # --clone-dir <PATH>       The directory where git sources are cloned to [env: SHELDON_CLONE_DIR=]
+    # --download-dir <PATH>    The directory where remote sources are downloaded to [env: SHELDON_DOWNLOAD_DIR=]
+
+    SHELDON_CONFIG_DIR=/opt/zinit/sheldon
+    SHELDON_DATA_DIR=${SHELDON_CONFIG_DIR}
+    SHELDON_CONFIG_FILE=${SHELDON_CONFIG_DIR}/plugins.toml
+    SHELDON_LOCK_FILE=${SHELDON_DATA_DIR}/plugins.lock
+    SHELDON_CLONE_DIR=${SHELDON_DATA_DIR}/repos
+    SHELDON_DOWNLOAD_DIR=${SHELDON_DATA_DIR}/downloads
+
+
+    export SHELDON_CONFIG_DIR=${SHELDON_CONFIG_DIR}
+    export SHELDON_DATA_DIR=${SHELDON_DATA_DIR}
+    export SHELDON_CONFIG_FILE=${SHELDON_CONFIG_FILE}
+    export SHELDON_LOCK_FILE=${SHELDON_LOCK_FILE}
+    export SHELDON_CLONE_DIR=${SHELDON_CLONE_DIR}
+    export SHELDON_DOWNLOAD_DIR=${SHELDON_DOWNLOAD_DIR}
+
+
+    export ZSH="${SHELDON_CLONE_DIR}/github.com/ohmyzsh/ohmyzsh"
+
+    # https://github.com/denysdovhan/dotfiles/blob/master/home/.zshrc
+    plugins=(
+        history-substring-search
+        clipboard
+        termsupport
+        git
+        gitfast
+        dotenv
+        rake
+        rbenv
+        ruby
+        macos
+        colorize
+        command-not-found
+        mvn
+        completion
+        key-bindings
+        fd/_fd
+        docker/_docker
+        docker-compose/_docker-compose
+        rust/_rust
+        cargo
+        rustup
+        npm
+        yarn
+        nvm
+        sudo
+        extract
+        ssh-agent
+        gpg-agent
+        osx
+        gh
+        vscode
+        common-aliases
+        command-not-found
+        docker
+    )
+
+    eval "$(sheldon source)"
+fi
+
+# zinit initialization
+SHARE_PREFIX="/opt"
+SRC_PREFIX="/working"
+BUILD_PREFIX="/build"
+
+declare -A CMLFS
+CMLFS[BIN_DIR]=${SHARE_PREFIX}/cmlfs
+export CMLFS[BIN_DIR]=${SHARE_PREFIX}/cmlfs
+if [ ! -z ${CMLFS[BIN_DIR]} ]; then
+    mkdir -p ${CMLFS[BIN_DIR]}
+fi
+
+CMLFS[BUILD_DIR]=${BUILD_PREFIX}/toolchain/cmlfs
+export CMLFS[BUILD_DIR]=${BUILD_PREFIX}/toolchain/cmlfs
+if [ ! -z ${CMLFS[BUILD_DIR]} ]; then
+    mkdir -p ${CMLFS[BUILD_DIR]}
+fi
+CMLFS[SRC_DIR]=${SRC_PREFIX}/toolchain/cmlfs
+export CMLFS[SRC_DIR]=${SRC_PREFIX}/toolchain/cmlfs
+
 # https://github.com/zdharma/zinit/issues/197
 ZSH_CACHE_DIR="${XDG_CACHE_HOME}/zinit"
 export ZSH_CACHE_DIR="${XDG_CACHE_HOME}/zinit"
 
 # zinit
 declare -A ZINIT
-ZINIT[HOME_DIR]="${SHARE_DIR}/zinit"
+ZINIT[HOME_DIR]="${SHARE_PREFIX}/zinit"
 ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/bin"
 ZINIT[PLUGINS_DIR]="${ZINIT[HOME_DIR]}/plugins"
 ZINIT[COMPLETIONS_DIR]="${ZINIT[HOME_DIR]}/completions"
@@ -60,25 +155,25 @@ ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]="1"
 ZINIT_HOME="${ZINIT[HOME_DIR]}/bin"
 # vinit
 declare -A VINIT
-VINIT[HOME_DIR]="${SHARE_DIR}/vinit"
+VINIT[HOME_DIR]="${SHARE_PREFIX}/vinit"
 # tinit
 declare -A TINIT
-TINIT[HOME_DIR]="${SHARE_DIR}/tinit"
+TINIT[HOME_DIR]="${SHARE_PREFIX}/tinit"
 
-export SHARE_DIR="/home"
-export ZINIT[HOME_DIR]="${SHARE_DIR}/zinit"
-export ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/bin"
-export ZINIT[PLUGINS_DIR]="${ZINIT[HOME_DIR]}/plugins"
-export ZINIT[COMPLETIONS_DIR]="${ZINIT[HOME_DIR]}/completions"
-export ZINIT[SNIPPETS_DIR]="${ZINIT[HOME_DIR]}/snippets"
-export ZINIT[ZCOMPDUMP_PATH]="$XDG_CACHE_HOME/zcompdump"
-export ZPFX="${ZINIT[HOME_DIR]}/polaris"
-export ZINIT[COMPINIT_OPTS]="-C"
-export ZINIT[MUTE_WARNINGS]="1"
-export ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]="1"
-export ZINIT_HOME="${ZINIT[HOME_DIR]}/bin"
-export VINIT[HOME_DIR]="${SHARE_DIR}/vinit"
-export TINIT[HOME_DIR]="${SHARE_DIR}/tinit"
+export SHARE_PREFIX=${SHARE_PREFIX}
+export ZINIT[HOME_DIR]=${ZINIT[HOME_DIR]}
+export ZINIT[BIN_DIR]=${ZINIT[BIN_DIR]}
+export ZINIT[PLUGINS_DIR]=${ZINIT[PLUGINS_DIR]}
+export ZINIT[COMPLETIONS_DIR]=${ZINIT[COMPLETIONS_DIR]}
+export ZINIT[SNIPPETS_DIR]=${ZINIT[SNIPPETS_DIR]}
+export ZINIT[ZCOMPDUMP_PATH]=${ZINIT[ZCOMPDUMP_PATH]}
+export ZPFX=${ZPFX}
+export ZINIT[COMPINIT_OPTS]=${ZINIT[COMPINIT_OPTS]}
+export ZINIT[MUTE_WARNINGS]=${ZINIT[MUTE_WARNINGS]}
+export ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]=${ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]}
+export ZINIT_HOME=${ZINIT_HOME}
+export VINIT[HOME_DIR]=${VINIT[HOME_DIR]}
+export TINIT[HOME_DIR]=${TINIT[HOME_DIR]}
 
 if [ ! -d "${TMP}" ]; then mkdir "${TMP}"; fi
 
@@ -412,7 +507,8 @@ function dot_progress() {
 # extended globbing, awesome!
 # https://zsh.sourceforge.io/Doc/Release/Options.html#Options
 # man 1 zshall
-setopt extendedglob
+# man zshoptions
+setopt extended_glob
 setopt auto_cd
 # https://stackoverflow.com/questions/36668910/how-do-i-reload-zsh-config-files-without-replacing-the-current-shell
 setopt inc_append_history
@@ -492,10 +588,9 @@ setopt auto_pushd
 setopt pushd_ignore_dups
 setopt pushd_minus
 setopt completealiases
-setopt HIST_IGNORE_DUPS
 
 # Ignore lines prefixed with '#'.
-setopt interactivecomments
+setopt interactive_comments
 
 # Ignore duplicate in history.
 setopt hist_ignore_dups
@@ -510,8 +605,8 @@ setopt noflowcontrol
 # Ensure that / is added after tab complation to directories.
 # without disabling it, $LBUFFER does not have the slash at the end
 # and it's required for _append_path_to_buffer thing..
-#setopt AUTO_PARAM_SLASH
-#unsetopt AUTO_REMOVE_SLASH
+# setopt auto_param_slash
+# unsetopt auto_remove_slash
 
 function _select_path_with_fzy() {
     (
@@ -669,6 +764,12 @@ function _v () {
 }
 alias v=_v
 export EDITOR=v
+
+# Not so usefull. Don't recommend
+# SUDO_EDITOR=/usr/bin/nvim
+SUDO_EDITOR=${SHARE_PREFIX}/zinit/v
+export SUDO_EDITOR
+
 # alias sv="doas -EH env XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR WAYLAND_SOCKET=$WAYLAND_SOCKET WAYLAND_DISPLAY=$WAYLAND_DISPLAY DISPLAY= nvim"
 # https://bugzilla.redhat.com/show_bug.cgi?id=1274451
 # alias sv="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY nvim"
@@ -975,8 +1076,8 @@ export GDK_BACKEND=wayland    # export GDK_BACKEND=x11
 export XDG_SESSION_TYPE=wayland
 export WINIT_UNIX_BACKEND=wayland   # export WINIT_UNIX_BACKEND=x11
 export SDL_VIDEODRIVER=wayland
-
-export QT_QPA_PLATFORM=wayland #   export QT_QPA_PLATFORM="wayland;xcb"  #   export QT_QPA_PLATFORM=wayland-egl     #   export QT_QPA_PLATFORM=wayland  # export QT_QPA_PLATFORM=xcb
+# https://doc.qt.io/qt-6/qtwaylandcompositor-index.html
+export QT_QPA_PLATFORM=wayland-egl #   export QT_QPA_PLATFORM="wayland;xcb"  #   export QT_QPA_PLATFORM=wayland-egl     #   export QT_QPA_PLATFORM=wayland  # export QT_QPA_PLATFORM=xcb
 
 export QT_QPA_PLATFORMTHEME=qt5ct
 export QT_PLATFORM_PLUGIN=qt5ct
@@ -991,7 +1092,11 @@ export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${UID}/bus
 export KWIN_DRM_USE_EGL_STREAMS=1
 
 # https://docs.voidlinux.org/config/graphical-session/wayland.html
+# https://news.ycombinator.com/item?id=24236003
 export MOZ_ENABLE_WAYLAND=1
+export MOZ_WEBRENDER=1
+export MOZ_USE_XINPUT2=1
+
 export ELM_DISPLAY=wl
 export ECORE_EVAS_ENGINE=wayland_egl
 export ELM_ENGINE=wayland_egl
@@ -1051,7 +1156,7 @@ export GDK_DPI_SCALE=0.75
 # bindkey -v
 
 # export TMUX_DIR=$HOME/.tmux
-export TMUX_DIR=${SHARE_DIR}/tinit/.tmux
+export TMUX_DIR=${SHARE_PREFIX}/tinit/.tmux
 
 alias bmux='pgrep -vx tmux > /dev/null && \
     tmux new -d -s delete-me && \
@@ -1064,7 +1169,7 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 # This allows putting # to comment out the command
-setopt interactivecomments
+setopt interactive_comments
 
 # https://gitlab.com/alourie/dotfiles/-/blob/master/.zshrc
 # # For now
@@ -1094,6 +1199,62 @@ bindkey -a '^Y' vi-yank-x-selection
 
 export PATH=${ZINIT[HOME_DIR]}:${ZINIT[BIN_DIR]}:$PATH
 
+# USE_ZPM=1
+
+if [ ! -z "${USE_ZPM}" ]; then
+    declare -A ZPM
+    ZPM[HOME_DIR]="${ZINIT[HOME_DIR]}/zpm"
+    export ZPM[HOME_DIR]="${ZINIT[HOME_DIR]}/zpm"
+
+    if [ "$USER" = "root" ] && [[ ! -f "${ZPM[HOME_DIR]}/zpm.zsh" ]]; then
+        git clone --recursive https://github.com/zpm-zsh/zpm ${ZPM[HOME_DIR]}
+    fi
+    source ${ZPM[HOME_DIR]}/zpm.zsh
+
+    ### OpenWrt
+    zpm if openwrt load zpm-zsh/openwrt
+
+    ### Termux
+    zpm if termux load zpm-zsh/termux
+
+    ### Tmux
+    zpm if ssh load zpm-zsh/tmux
+    zpm if-not ssh load zpm-zsh/tmux,apply:path
+
+    ### VTE
+    zpm if vte load zpm-zsh/vte
+
+    ### 3party plugins
+    zpm load                         \
+        zpm-zsh/core-config          \
+        zpm-zsh/ignored-users,async  \
+        zpm-zsh/check-deps,async     \
+        zpm-zsh/minimal-theme        \
+        zpm-zsh/ls,async             \
+        zpm-zsh/colorize,async       \
+        zpm-zsh/ssh,async            \
+        zpm-zsh/dot,async            \
+        zpm-zsh/undollar,async
+
+    ### Plugins for local host
+    zpm if-not ssh load                             \
+        zpm-zsh/dropbox,apply:path:fpath            \
+        zpm-zsh/zsh-better-npm-completion,async     \
+                                                    \
+        zpm-zsh/clipboard                           \
+        zpm-zsh/mysql-colorize,async                \
+        zpm-zsh/bookmarks,async                     \
+        voronkovich/gitignore.plugin.zsh,async      \
+        zpm-zsh/autoenv,async                       \
+                                                    \
+        mdumitru/fancy-ctrl-z,async                 \
+        zpm-zsh/zsh-history-substring-search,async  \
+        zpm-zsh/zsh-autosuggestions,async           \
+        zpm-zsh/fast-syntax-highlighting,async      \
+        zpm-zsh/history-search-multi-word,async
+
+    source ~/.zshrc.local 2>/dev/null
+fi
 
 ### Added by Zinit's installer
 if [[ ! -f ${ZINIT[BIN_DIR]}/zinit.zsh ]]; then
@@ -1106,61 +1267,133 @@ if [[ ! -f ${ZINIT[BIN_DIR]}/zinit.zsh ]]; then
         print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
         print -P "%F{160}▓▒░ The clone has failed.%f%b"
 
-    # command doas \chmod -R g-w "${ZINIT[HOME_DIR]}"
-    # command doas \chmod -R o-w "${ZINIT[HOME_DIR]}"
-
-    # doas \chmod -R --quiet 0755 "/share/zinit"
-    # doas \chmod -R --quiet 0775 "/share/zinit"
-    # doas \chown -R --quiet root:zinit "/share/zinit"
 fi
 
+function group_permission_fix(){
+    # echo "Entered group_permission_fix" > /dev/stderr
+    perm="$(stat -L -c '%A' "$1")"
+    needs_ra=
+    [ "r" != "$(expr substr "$perm" 5 1)" ] && needs_ra="r"
+    needs_ea=
+    [ "$(expr substr "$perm" 4 1)" = "x" ] && [ "$(expr substr "$perm" 7 1)" != "x" ] && needs_ea="x"
+    [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$1"
+}
+autoload -Uz _group_permission_fix
+(( ${+_comps} )) && _comps[post_update]=_group_permission_fix
+# typeset -f group_permission_fix
+# export -f group_permission_fix
 function post_update(){
-    # # doas \chmod -R --quiet 0755 "/share/zinit"
-    # # doas \chmod -R --quiet 0755 "/share/vinit"
-    # # doas \chmod -R --quiet 0755 "/share/tinit"
 
-    # # doas \chmod -R --quiet 0775 "/share/zinit"
-    # # doas \chmod -R --quiet 0775 "/share/vinit"
-    # # doas \chmod -R --quiet 0775 "/share/tinit"
+    find "${ZINIT[COMPLETIONS_DIR]}" -mindepth 1 -delete
 
-    # # command doas \chmod -R --quiet g-w "${ZINIT[HOME_DIR]}"
-    # # command doas \chmod -R --quiet g-w "${VINIT[HOME_DIR]}"
-    # # command doas \chmod -R --quiet g-w "${TINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet go+rX "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet go+rX "${VINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet go+rX "${TINIT[HOME_DIR]}"
 
-    # # command doas \chmod -R --quiet o-w "${ZINIT[HOME_DIR]}"
-    # # command doas \chmod -R --quiet o-w "${VINIT[HOME_DIR]}"
-    # # command doas \chmod -R --quiet o-w "${TINIT[HOME_DIR]}"
+    # # command doas \chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
+    # # command doas \chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
+    # # command doas \chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
 
-    # command doas \chmod -R --quiet g+rwX "${ZINIT[HOME_DIR]}"
-    # command doas \chmod -R --quiet g+rwX "${VINIT[HOME_DIR]}"
-    # command doas \chmod -R --quiet g+rwX "${TINIT[HOME_DIR]}"
+    # find "${SHARE_PREFIX}/.git" -type f -name "*" -print -exec \chmod --quiet g+r {} +
 
-    # command doas \chmod -R --quiet o+rX "${ZINIT[HOME_DIR]}"
-    # command doas \chmod -R --quiet o+rX "${VINIT[HOME_DIR]}"
-    # command doas \chmod -R --quiet o+rX "${TINIT[HOME_DIR]}"
+    command doas chmod -R go+rx "${ZPFX}/bin"
 
-    # # doas \chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
-    # # doas \chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
-    # # doas \chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
-
-    command doas \chown -R --quiet root:users "${ZINIT[HOME_DIR]}"
-    command doas \chown -R --quiet root:users "${VINIT[HOME_DIR]}"
-    command doas \chown -R --quiet root:users "${TINIT[HOME_DIR]}"
-    for packages_path in "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+    for packages_path in "${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
     do
-        find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
-            -o -type f -name '*' -print -exec \chmod --quiet g+r {} >/dev/null 2>&1 + \
-            -o -type d -print -exec \chmod --quiet go+rx {} >/dev/null 2>&1 + \
-            && \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+        # command doas find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
+        #     -o -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + \
+        #     && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+
+        command doas chmod --quiet go+rx "$packages_path" >/dev/null 2>&1 &
+
+        # command doas find "$packages_path" -type d -exec sh -c 'for d; do command doas chmod --quiet go+rx "$d"; done' _ {} 2>&1 + &
+        command doas find "$packages_path" -type d -exec doas \chmod --quiet go+rx '{}' 2>&1 + &
+
+        # command doas \chown -R --quiet root:users "$packages_path"
+        command doas chgrp -R --quiet users "$packages_path" >/dev/null 2>&1 &
+
+        # command doas find "$packages_path" \
+        #     -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + &
+
+        # # && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+        # # Extremely slow
+        # command doas find "$packages_path" -type f -name '*' -exec sh -c ' [ \
+        #     "$(expr substr $(stat -L -c %A "$1") 4 1)" = "x" ] \
+        #     && command doas \chmod --quiet g+rx "$1" || command doas \chmod --quiet g+r "$1" ' sh '{}' >/dev/null 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # command doas find "$packages_path" -type f -name '*' -exec sh -c 'perm="$(stat -L -c '%A' "$1")"; \
+        #     needs_ra=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"; needs_ea=; \
+        #     [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"; \
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$1";' \
+        #     sh '{}' >/dev/null 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # # Doesn't work
+        # command doas find "$packages_path" -type f -name '*' -exec group_permission_fix '{}' 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # Wroks
+        command doas find "$packages_path" -type f -name '*' -exec sh -c ' \
+            for f; \
+            do \
+                if [ -f "$f" ]; then \
+                    perm="$(stat -L -c '%A' "$f")"; \
+                    needs_ra=; \
+                    [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"; \
+                    needs_ea=; \
+                    [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"; \
+                    [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$f" 2>&1 &  \
+                else \
+                    IFS{# echo "Error" "$f" > /dev/stderr}; \
+                    command doas rm -f "$f" 2>&1 &  \
+                fi \
+            done' _ "{}" 2>&1 + &
+
+        # # Won't work
+        # # a=()
+        # while IFS='' read -r -u"$FD" -d $'\0' file; do
+        #     # note that $IFS is having the default value here
+        #     # a+=("$file") # or however you want to process each file
+        #     perm="$(stat -L -c '%A' "$file")";
+        #     needs_ra=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r";
+        #     needs_ea=; [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x";
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$file";
+        # done {FD}< <(command doas find "$packages_path" -type f -print0)
+        # exec {FD}<&-   # close the file descriptor
+
+        # # # Extremely slow
+        # # https://www.reddit.com/r/linux/comments/2xgpcf/handy_bash_feature_process_substitution/
+        # while read line; do
+        #     # echo ${line}
+        #     # short=${line##*/}
+        #     # ln -s ${line} $HOME/bin/${short%.sh}
+        #     perm=$(echo "obase=2; ibase=8; $(stat -L -c '%a' "$line")" | bc)
+        #     # perm="$(stat -L -c '%A' "$line")"
+        #     needs_ra=
+        #     # [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"
+        #     # group_readable=$((((2#$perm&2#000100000))>>5))
+        #     [ 0 = $((((2#$perm & 2#000100000))>>5)) ] && needs_ra="r"
+        #     needs_ea=
+        #     # user_executable=$((((2#$perm & 2#001000000))>>6))
+        #     # group_executable=$((((2#$perm & 2#000001000))>>3))
+        #     # [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"
+        #     [ 1 = $((((2#$perm & 2#001000000))>>6)) ] && [ 0 = $((((2#$perm & 2#000001000))>>3)) ] && needs_ea="x"
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$line" 2>&1 &;
+        # done < <(command doas find "$packages_path" -type f)
+        # # done < <(find "$packages_path" -type f -name \*.sh)
+
     done
 }
 
 autoload -Uz _post_update
 (( ${+_comps} )) && _comps[post_update]=_post_update
 
-# if [ "$USER" = "root" ]; then
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
     source "${ZINIT[BIN_DIR]}/zinit.zsh"
-# fi
+fi
 
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
@@ -1188,114 +1421,142 @@ done
 
 # https://zdharma.github.io/zinit/wiki/GALLERY/
 
-zinit snippet OMZL::clipboard.zsh
-zinit snippet OMZL::termsupport.zsh
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    zinit snippet OMZL::clipboard.zsh
+    zinit snippet OMZL::termsupport.zsh
 
-# # Oh My Zsh Only Setting
-# ZSH_THEME="alpharized"
+    # # Oh My Zsh Only Setting
+    # ZSH_THEME="alpharized"
 
-## Zinit Setting
-# Must Load OMZ Git library
-zinit snippet OMZL::git.zsh
-
-
-# # Load Prompt
-# zinit light NicoSantangelo/Alpharized
-
-# ## Oh-My-Zsh Setting
-# plugins=(
-#     git
-#     dotenv
-#     rake
-#     rbenv
-#     ruby
-#     zsh-system-clipboard
-#     zsh-completions
-#     zsh-history-substring-search
-#     zsh-autosuggestions
-#     docker
-#     zsh-syntax-highlighting
-#     zsh-vi-mode
-# )
-
-# plugins+=(zsh-system-clipboard zsh-completions zsh-history-substring-search zsh-autosuggestions docker zsh-syntax-highlighting zsh-vi-mode)
-
-## Zinit Setting
-# Load Git plugin from OMZ
-zinit snippet OMZP::git
-zinit cdclear -q # <- forget completions provided up to this moment
-zinit snippet OMZP::git
-
-zinit ice svn
-zinit snippet OMZP::gitfast
-
-zinit snippet OMZP::dotenv
-zinit snippet OMZP::rake
-zinit snippet OMZP::rbenv
-zinit snippet OMZP::ruby
+    ## Zinit Setting
+    # Must Load OMZ Git library
+    zinit snippet OMZL::git.zsh
 
 
-zinit ice svn
-zinit snippet OMZP::macos
+    # # Load Prompt
+    # zinit light NicoSantangelo/Alpharized
 
-# For sharing between root and other users, following line does not work
-# zinit wait lucid is-snippet as"completion" for \
-zinit ice as"completion" for \
-    OMZP::fd/_fd \
-    OMZP::docker/_docker \
-    OMZP::docker-compose/_docker-compose \
-    OMZP::rust/_rust \
-    OMZP::cargo \
-    OMZP::rustup
+    # ## Oh-My-Zsh Setting
+    # plugins=(
+    #     git
+    #     dotenv
+    #     rake
+    #     rbenv
+    #     ruby
+    #     zsh-system-clipboard
+    #     zsh-completions
+    #     zsh-history-substring-search
+    #     zsh-autosuggestions
+    #     docker
+    #     zsh-syntax-highlighting
+    #     zsh-vi-mode
+    # )
 
-# zinit ice as"completion"
-# zinit snippet OMZP::docker/_docker
-# zinit ice as"completion"
-# zinit snippet OMZP::fd/_fd
+    # plugins+=(zsh-system-clipboard zsh-completions zsh-history-substring-search zsh-autosuggestions docker zsh-syntax-highlighting zsh-vi-mode)
 
-# # Load the pure theme, with zsh-async library that's bundled with it.
-# zinit ice pick"async.zsh" src"pure.zsh"
-# zinit light sindresorhus/pure
+    ## Zinit Setting
+    # Load Git plugin from OMZ
+
+    zinit snippet OMZP::git
+    zinit cdclear -q # <- forget completions provided up to this moment
+    zinit snippet OMZP::git
+
+    zinit ice svn
+    zinit snippet OMZP::gitfast
+
+    zinit snippet OMZP::dotenv
+    zinit snippet OMZP::rake
+    zinit snippet OMZP::rbenv
+    zinit snippet OMZP::ruby
 
 
-# A glance at the new for-syntax – load all of the above
-# plugins with a single command. For more information see:
-# https://zdharma.github.io/zinit/wiki/For-Syntax/
-zinit for \
-    atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
-    atload"!_zsh_autosuggest_start" \
-    light-mode zsh-users/zsh-autosuggestions \
-    light-mode zdharma-continuum/fast-syntax-highlighting zdharma-continuum/history-search-multi-word \
-    light-mode agkozak/zsh-z \
-    light-mode OMZL::history.zsh \
-    blockf zsh-users/zsh-completions
+    zinit ice svn
+    zinit snippet OMZP::macos
 
-#     light-mode pick"async.zsh" src"pure.zsh" sindresorhus/pure \
+    # For sharing between root and other users, following line does not work
+    # zinit wait lucid is-snippet as"completion" for \
+    zinit ice as"completion" for \
+        OMZP::fd/_fd \
+        OMZP::docker/_docker \
+        OMZP::docker-compose/_docker-compose \
+        OMZP::rust/_rust \
+        OMZP::cargo \
+        OMZP::rustup
 
-# # xclip dependent
-# zinit wait'!' lucid for \
-#     light-mode PZT::modules/utility/init.zsh
 
-zinit wait'!' lucid for \
-    light-mode OMZP::colorize \
-    light-mode OMZP::command-not-found \
-    light-mode OMZP::mvn
+    # zinit ice as"completion"
+    # zinit snippet OMZP::docker/_docker
+    # zinit ice as"completion"
+    # zinit snippet OMZP::fd/_fd
 
-# light-mode OMZP::colored-man-pages
+    # # Load the pure theme, with zsh-async library that's bundled with it.
+    # zinit ice pick"async.zsh" src"pure.zsh"
+    # zinit light sindresorhus/pure
 
-zinit wait'!' lucid atload"zicompinit; zicdreplay" for \
-    light-mode OMZL::completion.zsh
 
-zinit lucid for \
-    light-mode OMZL::key-bindings.zsh
+    # A glance at the new for-syntax – load all of the above
+    # plugins with a single command. For more information see:
+    # https://zdharma.github.io/zinit/wiki/For-Syntax/
+    zinit for \
+        atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
+        atload"!_zsh_autosuggest_start" \
+        light-mode zsh-users/zsh-autosuggestions \
+        light-mode zdharma-continuum/fast-syntax-highlighting zdharma-continuum/history-search-multi-word \
+        light-mode agkozak/zsh-z \
+        light-mode OMZL::history.zsh \
+        blockf zsh-users/zsh-completions
 
-# GIT
-zinit wait lucid for \
-    light-mode davidde/git
+    #     light-mode pick"async.zsh" src"pure.zsh" sindresorhus/pure \
 
-# https://github.com/softmoth/zsh-vim-mode
-zinit ice lucid depth=1
-zinit light softmoth/zsh-vim-mode
+    # # xclip dependent
+    # zinit wait'!' lucid for \
+    #     light-mode PZT::modules/utility/init.zsh
+
+    zinit wait'!' lucid for \
+        light-mode OMZP::colorize \
+        light-mode OMZP::command-not-found \
+        light-mode OMZP::mvn
+
+    # light-mode OMZP::colored-man-pages
+
+    zinit wait'!' lucid atload"zicompinit; zicdreplay" for \
+        light-mode OMZL::completion.zsh
+
+    zinit lucid for \
+        light-mode OMZL::key-bindings.zsh
+
+    # GIT
+    zinit wait lucid for \
+        light-mode davidde/git
+
+    # https://github.com/softmoth/zsh-vim-mode
+    zinit ice lucid depth=1
+    zinit light softmoth/zsh-vim-mode
+
+fi
+
+
+if [ ! -z "${USE_ZPM}" ]; then
+    zpm load @omz
+    zpm load @omz-lib/clipboard.zsh
+    zpm load @omz-lib/termsupport.zsh
+    zpm load @omz-lib/git.zsh
+    zpm load @omz-lib/git
+    zpm load @omz-lib/gitfast
+    zpm load @omz-lib/dotenv
+    zpm load @omz-lib/rake
+    zpm load @omz-lib/rbenv
+    zpm load @omz-lib/ruby
+    zpm load @omz-lib/macos
+    zpm load @omz-lib/fd/_fd
+    zpm load @omz-lib/docker/_docker
+    zpm load @omz-lib/docker-compose/_docker-compose
+    zpm load @omz-lib/rust/_rust
+    zpm load @omz-lib/cargo
+    zpm load @omz-lib/rustup
+    zpm load jhawthorn/fzy
+fi
+
 # Put this in .zshrc, before this plugin is loaded
 # Enable <Esc>-prefixed bindings that should rarely conflict with NORMAL mode
 VIM_MODE_ESC_PREFIXED_WANTED='^?^Hbdfhul.g'  # Default is '^?^Hbdf.g'
@@ -1305,10 +1566,12 @@ bindkey -rpM viins '^[^['
 # Use Control-D instead of Escape to switch to NORMAL mode
 VIM_MODE_VICMD_KEY='^D'
 
-# https://github.com/jeffreytse/zsh-vi-mode
-# VIM mode ....probably needs to be last here
-zinit ice lucid depth=1
-zinit light jeffreytse/zsh-vi-mode
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # https://github.com/jeffreytse/zsh-vi-mode
+    # VIM mode ....probably needs to be last here
+    zinit ice lucid depth=1
+    zinit light jeffreytse/zsh-vi-mode
+fi
 ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
 export ZVM_KEYTIMEOUT=0.2
 # The plugin will auto execute this zvm_after_lazy_keybindings function
@@ -1323,10 +1586,12 @@ function zvm_after_lazy_keybindings() {
 }
 
 
-# source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
-# GitHub Plugins
-zinit ice wait'!'
-zinit light zsh-users/zsh-history-substring-search
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
+    # GitHub Plugins
+    zinit ice wait'!'
+    zinit light zsh-users/zsh-history-substring-search
+fi
 
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
@@ -1334,106 +1599,109 @@ bindkey "$terminfo[kcuu1]" history-substring-search-up
 bindkey "$terminfo[kcud1]" history-substring-search-down
 
 
-# zinit wait lucid as"completion" for \
-#     junegunn/fzf \
-#     junegunn/fzf-bin \
-#     jhawthorn/fzy \
-#     Aloxaf/fzf-tab \
-#     chitoku-k/fzf-zsh-completions
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # zinit wait lucid as"completion" for \
+    #     junegunn/fzf \
+    #     junegunn/fzf-bin \
+    #     jhawthorn/fzy \
+    #     Aloxaf/fzf-tab \
+    #     chitoku-k/fzf-zsh-completions
 
-# Binary release in archive, from GitHub-releases page.
-# After automatic unpacking it provides program "fzf".
-zinit ice from"gh-r" as"program"
-zinit light junegunn/fzf
+    # Binary release in archive, from GitHub-releases page.
+    # After automatic unpacking it provides program "fzf".
+    zinit ice from"gh-r" as"program"
+    zinit light junegunn/fzf
 
-# Install fzf
-zinit ice from"gh-r" as"command"
-zinit load junegunn/fzf-bin
+    # Install fzf
+    zinit ice from"gh-r" as"command"
+    zinit load junegunn/fzf-bin
 
-# or fzy
-zinit ice as"command" make"\!PREFIX=$ZPFX install" \
-    atclone"cp contrib/fzy-* $ZPFX/bin/" \
-    pick"$ZPFX/bin/fzy*"
+    # or fzy
+    zinit ice as"command" make"\!PREFIX=$ZPFX install" \
+        atclone"cp contrib/fzy-* $ZPFX/bin/" \
+        pick"$ZPFX/bin/fzy*"
 
-zinit load jhawthorn/fzy
+    zinit load jhawthorn/fzy
 
-zinit ice wait lucid
-zinit light Aloxaf/fzf-tab
+    zinit ice wait lucid
+    zinit light Aloxaf/fzf-tab
 
-zinit ice wait lucid
-zinit light chitoku-k/fzf-zsh-completions
+    zinit ice wait lucid
+    zinit light chitoku-k/fzf-zsh-completions
 
 
 
-# One other binary release, it needs renaming from `docker-compose-Linux-x86_64`.
-# This is done by ice-mod `mv'{from} -> {to}'. There are multiple packages per
-# single version, for OS X, Linux and Windows – so ice-mod `bpick' is used to
-# select Linux package – in this case this is actually not needed, Zinit will
-# grep operating system name and architecture automatically when there's no `bpick'.
-zinit ice from"gh-r" as"program" mv"docker* -> docker-compose" bpick"*linux*"
-zinit load docker/compose
+    # One other binary release, it needs renaming from `docker-compose-Linux-x86_64`.
+    # This is done by ice-mod `mv'{from} -> {to}'. There are multiple packages per
+    # single version, for OS X, Linux and Windows – so ice-mod `bpick' is used to
+    # select Linux package – in this case this is actually not needed, Zinit will
+    # grep operating system name and architecture automatically when there's no `bpick'.
+    zinit ice from"gh-r" as"program" mv"docker* -> docker-compose" bpick"*linux*"
+    zinit load docker/compose
 
-# # Vim repository on GitHub – a typical source code that needs compilation – Zinit
-# # can manage it for you if you like, run `./configure` and other `make`, etc. stuff.
-# # Ice-mod `pick` selects a binary program to add to $PATH. You could also install the
-# # package under the path $ZPFX, see: http://zdharma.github.io/zinit/wiki/Compiling-programs
-# zinit ice as"program" atclone"rm -f src/auto/config.cache; ./configure" \
-#     atpull"%atclone" make pick"src/vim"
-# zinit light vim/vim
+    # # Vim repository on GitHub – a typical source code that needs compilation – Zinit
+    # # can manage it for you if you like, run `./configure` and other `make`, etc. stuff.
+    # # Ice-mod `pick` selects a binary program to add to $PATH. You could also install the
+    # # package under the path $ZPFX, see: http://zdharma.github.io/zinit/wiki/Compiling-programs
+    # zinit ice as"program" atclone"rm -f src/auto/config.cache; ./configure" \
+    #     atpull"%atclone" make pick"src/vim"
+    # zinit light vim/vim
 
-# Scripts that are built at install (there's single default make target, "install",
-# and it constructs scripts by `cat'ing a few files). The make'' ice could also be:
-# `make"install PREFIX=$ZPFX"`, if "install" wouldn't be the only, default target.
-zinit ice as"program" pick"$ZPFX/bin/git-*" make"PREFIX=$ZPFX"
-zinit light tj/git-extras
+    # Scripts that are built at install (there's single default make target, "install",
+    # and it constructs scripts by `cat'ing a few files). The make'' ice could also be:
+    # `make"install PREFIX=$ZPFX"`, if "install" wouldn't be the only, default target.
+    zinit ice as"program" pick"$ZPFX/bin/git-*" make"PREFIX=$ZPFX"
+    zinit light tj/git-extras
+    # zpm load tj/git-extras
 
-# # Handle completions without loading any plugin, see "clist" command.
-# # This one is to be ran just once, in interactive session.
-# zinit creinstall %HOME/my_completions
+    # # Handle completions without loading any plugin, see "clist" command.
+    # # This one is to be ran just once, in interactive session.
+    # zinit creinstall %HOME/my_completions
 
-# For GNU ls (the binaries can be gls, gdircolors, e.g. on OS X when installing the
-# coreutils package from Homebrew; you can also use https://github.com/ogham/exa)
-zinit ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh" nocompile'!'
-zinit light trapd00r/LS_COLORS
+    # For GNU ls (the binaries can be gls, gdircolors, e.g. on OS X when installing the
+    # coreutils package from Homebrew; you can also use https://github.com/ogham/exa)
+    zinit ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh" nocompile'!'
+    zinit light trapd00r/LS_COLORS
 
-# Hooks won't work under system wide zinit
-# # make'!...' -> run make before atclone & atpull
-# zinit ice as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' src"zhook.zsh"
-# zinit light direnv/direnv
+    # Hooks won't work under system wide zinit
+    # # make'!...' -> run make before atclone & atpull
+    # zinit ice as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' src"zhook.zsh"
+    # zinit light direnv/direnv
 
-# https://github.com/zdharma-continuum/zsh-navigation-tools
-zinit ice wait"1" lucid
-zinit load zdharma-continuum/zsh-navigation-tools
+    # https://github.com/zdharma-continuum/zsh-navigation-tools
+    zinit ice wait"1" lucid
+    zinit load zdharma-continuum/zsh-navigation-tools
 
-# zinit ice wait    # wait is same wait"0"
-# zinit load zdharma/history-search-multi-word
-#
-# zinit ice wait"2" # load after 2 seconds
-# zinit load zdharma/history-search-multi-word
-#
-# zinit ice wait    # also be used in `light` and `snippet`
-# zinit snippet https://gist.githubusercontent.com/hightemp/5071909/raw/
-zstyle ":history-search-multi-word" page-size "11"
-zinit ice wait"1" lucid
-zinit load zdharma-continuum/history-search-multi-word
+    # zinit ice wait    # wait is same wait"0"
+    # zinit load zdharma/history-search-multi-word
+    #
+    # zinit ice wait"2" # load after 2 seconds
+    # zinit load zdharma/history-search-multi-word
+    #
+    # zinit ice wait    # also be used in `light` and `snippet`
+    # zinit snippet https://gist.githubusercontent.com/hightemp/5071909/raw/
+    zstyle ":history-search-multi-word" page-size "11"
+    zinit ice wait"1" lucid
+    zinit load zdharma-continuum/history-search-multi-word
 
-# # source /opt/evil-registers/evil-registers.zsh 2>/dev/null
-# # https://github.com/zsh-vi-more/evil-registers
-# # Optionally, track the latest development version:
-# zinit ice wait "0" ver"dev"
-# # zinit ice wait "0"
-# zinit light zsh-vi-more/evil-registers
+    # # source /opt/evil-registers/evil-registers.zsh 2>/dev/null
+    # # https://github.com/zsh-vi-more/evil-registers
+    # # Optionally, track the latest development version:
+    # zinit ice wait "0" ver"dev"
+    # # zinit ice wait "0"
+    # zinit light zsh-vi-more/evil-registers
 
-zinit ice wait lucid
-zinit load kutsan/zsh-system-clipboard
+    zinit ice wait lucid
+    zinit load kutsan/zsh-system-clipboard
 
-# https://github.com/zdharma/zinit-configs
-# For docker configration
-# Install this repo
-zinit ice wait lucid
-zinit load zdharma-continuum/zinit-configs
-# Run the command, under the repo there is a run.sh.
-# zinit-configs
+    # https://github.com/zdharma/zinit-configs
+    # For docker configration
+    # Install this repo
+    zinit ice wait lucid
+    zinit load zdharma-continuum/zinit-configs
+    # Run the command, under the repo there is a run.sh.
+    # zinit-configs
+fi
 
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
 
@@ -1445,11 +1713,10 @@ zinit load zdharma-continuum/zinit-configs
 #         zdharma-continuum/null
 
 
-zinit ice wait lucid
-zinit light zdharma-continuum/null
-
-
-# fi
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    zinit ice wait lucid
+    zinit light zdharma-continuum/null
+fi
 
 # .zshrc
 typeset -U PATH
@@ -1480,8 +1747,7 @@ colors
 
 # https://github.com/sindresorhus/pure/issues/401
 # Turn on command substitution in the prompt (and parameter expansion and arithmetic expansion).
-setopt promptsubst
-# setopt prompt_subst
+setopt prompt_subst
 
 # https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
 autoload -Uz vcs_info

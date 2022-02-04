@@ -11,6 +11,8 @@
 #   done
 
 # https://wiki.gentoo.org/wiki/Sway
+
+# if [[ "$USER" != "root" ]] {
 # if test -z "${XDG_RUNTIME_DIR}" {
 if [[ -z "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID} ]] {
     XDG_RUNTIME_DIR=/run/user/${UID}
@@ -18,10 +20,11 @@ if [[ -z "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID}
     # if ! test -d "${XDG_RUNTIME_DIR}" {
     if ! [[ -d "${XDG_RUNTIME_DIR}" ]] || ! [[ "${XDG_RUNTIME_DIR}" = /run/user/${UID} ]] {
         doas mkdir "${XDG_RUNTIME_DIR}"
-        doas chmod 0700 "${XDG_RUNTIME_DIR}"
+        doas chmod 0755 "${XDG_RUNTIME_DIR}"
         doas chown -R ${USER}:users "${XDG_RUNTIME_DIR}"
     }
 }
+# }
 # doas chmod 0700 "${XDG_RUNTIME_DIR}"
 # doas chown -R eli:users "${XDG_RUNTIME_DIR}"
 
@@ -55,4 +58,5 @@ if [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] {
 
     # dbus-launch --sh-syntax --exit-with-session sway > ~/.config/sway/.sway_autolauncher.log 2>&1
     dbus-run-session sway -d > ~/.config/sway/.sway_autolauncher.log 2>&1
+    # sway -d > ~/.config/sway/.sway_autolauncher.log 2>&1
 }
