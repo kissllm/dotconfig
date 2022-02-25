@@ -44,8 +44,9 @@ export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 
 
 
-
+USE_SHELDON=
 # USE_SHELDON=1
+export USE_SHELDON=${USE_SHELDON}
 
 if ! [ -z ${USE_SHELDON} ]; then
     # sheldon initilization
@@ -178,8 +179,9 @@ export TINIT[HOME_DIR]=${TINIT[HOME_DIR]}
 if [ ! -d "${TMP}" ]; then mkdir "${TMP}"; fi
 
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
-export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
+TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
 if [ ! -d "${TMUX_TMPDIR}" ]; then mkdir -p "${TMUX_TMPDIR}"; fi
+export TMUX_TMPDIR=${TMUX_TMPDIR}
 
 if ! [[ "${PATH}" =~ "^${HOME}/bin" ]]; then
     export PATH="${HOME}/bin:${PATH}"
@@ -247,7 +249,8 @@ function run_under_tmux() {
     # There is a bug in linux's libevent...
     # export EVENT_NOEPOLL=1
 
-    command -v tmux >/dev/null 2>&1 || return 1
+    # command -v tmux >/dev/null 2>&1 || return 1
+    command -v tmux >${TMUX_TMPDIR}/.tmux.log 2>&1 || return 1
 
     if [ -z "$1" ]; then return 1; fi
     local name="$1"
@@ -300,6 +303,12 @@ _fzf_complete_kubectl_view-serviceaccount-kubeconfig() {
 # K8s auto-complete
 autoload -U +X compinit && compinit
 source <(kubectl completion zsh)
+
+# https://unix.stackexchange.com/questions/534942/auto-trigger-history-search-in-terminal-using-fzf-fuzzy-finder
+# zstyle ':autocomplete:*' default-context history-incremental-search-backward
+# zinit ice wait lucid
+# zinit light marlonrichert/zsh-autocomplete
+
 
 # https://gist.github.com/LukeSmithxyz/e62f26e55ea8b0ed41a65912fbebbe52
 zmodload zsh/complist && compinit
@@ -746,7 +755,7 @@ alias la="ls --color=auto --human-readable --group-directories-first --classify 
 # alias vim="/usr/bin/vim-huge"
 alias nv="/usr/bin/nvim"
 alias vi="/usr/bin/vim-huge"
-alias tmux="tmux -2"
+alias tmux="tmux -2 2>&1 > ${TMUX_TMPDIR}/.tmux.log"
 alias history="history 1 -1"
 
 # https://github.com/caenrique/nvim-toggle-terminal
@@ -941,8 +950,8 @@ bindkey "^S" history-incremental-pattern-search-forward
 # bindkey "^M"       accept-line                # unter
 # # bindkey "^[M"      autosuggest-execute        # ctrl + return
 # # bindkey '^\n'      autosuggest-execute        # ctrl + return
-# bindkey "^[[13;5u" self-insert-unmeta         # ctrl + return
-# bindkey "^[[13;2u" down-line                  # shift + return
+bindkey '^[[13;5u' self-insert-unmeta         # ctrl + return
+bindkey '^[[13;2u' down-line                  # shift + return
 # bindkey "^[^M"     self-insert-unmeta           # alt + return
 # # bindkey "^[^M"     accept-and-hold            # esc-enter
 # bindkey '^[[[SE'     accept-and-hold            # does not work
@@ -1101,6 +1110,9 @@ export ELM_DISPLAY=wl
 export ECORE_EVAS_ENGINE=wayland_egl
 export ELM_ENGINE=wayland_egl
 
+export DENO_INSTALL="${SHARE_PREFIX}/deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
+
 # # Set font when running in console. For hidpi screen
 # if [ $TERM = linux ]; then
 #     # terminus-font
@@ -1200,6 +1212,8 @@ bindkey -a '^Y' vi-yank-x-selection
 export PATH=${ZINIT[HOME_DIR]}:${ZINIT[BIN_DIR]}:$PATH
 
 # USE_ZPM=1
+USE_ZPM=
+export USE_ZPM=${USE_ZPM}
 
 if [ ! -z "${USE_ZPM}" ]; then
     declare -A ZPM
@@ -1284,7 +1298,7 @@ autoload -Uz _group_permission_fix
 # export -f group_permission_fix
 function post_update(){
 
-    find "${ZINIT[COMPLETIONS_DIR]}" -mindepth 1 -delete
+    command doas find "${ZINIT[COMPLETIONS_DIR]}" -mindepth 1 -delete
 
     # command doas \chmod -R --quiet go+rX "${ZINIT[HOME_DIR]}"
     # command doas \chmod -R --quiet go+rX "${VINIT[HOME_DIR]}"
@@ -1308,7 +1322,7 @@ function post_update(){
         command doas chmod --quiet go+rx "$packages_path" >/dev/null 2>&1 &
 
         # command doas find "$packages_path" -type d -exec sh -c 'for d; do command doas chmod --quiet go+rx "$d"; done' _ {} 2>&1 + &
-        command doas find "$packages_path" -type d -exec doas \chmod --quiet go+rx '{}' 2>&1 + &
+        command doas find "$packages_path" -type d -exec doas \chmod --quiet g+s,go+rx '{}' 2>&1 + &
 
         # command doas \chown -R --quiet root:users "$packages_path"
         command doas chgrp -R --quiet users "$packages_path" >/dev/null 2>&1 &
@@ -1337,17 +1351,27 @@ function post_update(){
 
         # Wroks
         command doas find "$packages_path" -type f -name '*' -exec sh -c ' \
-            for f; \
+            for f ; \
             do \
-                if [ -f "$f" ]; then \
-                    perm="$(stat -L -c '%A' "$f")"; \
-                    needs_ra=; \
-                    [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"; \
-                    needs_ea=; \
-                    [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"; \
-                    [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$f" 2>&1 &  \
+                if [ -f "$f" ] ; then \
+                    perm="$(stat -L -c '%A' "$f")" ; \
+                    needs_operation= ; \
+                    needs_ra= ; \
+                    user_read="$(expr substr $perm 2 1)" ; \
+                    group_read="$(expr substr $perm 5 1)" ; \
+                    [ "r" = "$user_read" ] && [ "r" != "$group_read" ] && { needs_ra="r" ; needs_operation="1" ; } ; \
+                    needs_ea= ; \
+                    user_run="$(expr substr $perm 4 1)" ; \
+                    group_run="$(expr substr $perm 7 1)" ; \
+                    [ "x" = "$user_run" ] && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "x" != "$user_run" ] && [ "x" = "$group_run" ] && needs_operation="1" ; \
+                    [ "r" = "$user_read" ] && [ "" != "$needs_operation" ] && needs_ra="r" ; \
+                    [ "x" = "$user_run" ] && [ "" != "$needs_operation" ] && needs_ea="x" ; \
+                    perm_group=$needs_ra$needs_ea ; \
+                    [ "" != "$perm_group" ] && printf "should no be empty: %s\n" "$perm_group" >> $HOME/.vim.log 2>&1 ; \
+                    [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o= "$f" 2>&1 &  \
                 else \
-                    IFS{# echo "Error" "$f" > /dev/stderr}; \
+                    IFS{# echo "Error" "$f" > /dev/stderr} ; \
                     command doas rm -f "$f" 2>&1 &  \
                 fi \
             done' _ "{}" 2>&1 + &
@@ -1652,7 +1676,6 @@ if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
     # `make"install PREFIX=$ZPFX"`, if "install" wouldn't be the only, default target.
     zinit ice as"program" pick"$ZPFX/bin/git-*" make"PREFIX=$ZPFX"
     zinit light tj/git-extras
-    # zpm load tj/git-extras
 
     # # Handle completions without loading any plugin, see "clist" command.
     # # This one is to be ran just once, in interactive session.
