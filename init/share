@@ -1,0 +1,171 @@
+# #!/usr/bin/env sh
+
+# How to use
+# share -s /opt -h $HOME
+
+# set -eu
+
+# # shellcheck disable=SC2034
+# VERSION="0.1"
+
+# parser_definition() {
+#   setup   REST help:usage -- "Usage: example.sh [options]... [arguments]..." ''
+#   msg -- 'Options:'
+#   flag    FLAG      -f --flag                  -- "takes no arguments"
+#   param   SHARE_PREFIX -s --share_root            -- "share shell scripts root"
+#   param   HOME  -h --home                  -- "should be applied user home"
+#   option  OPTION    -o --option on:"default"   -- "takes one optional argument"
+#   disp    :usage    -h --help
+#   disp    VERSION   --version
+# }
+#
+# [ "${GETOPTIONS:-}" ] && return 0
+#
+# case ${MODE:-command} in
+#   command | library)
+#     if [ "${MODE:-}" = "library" ]; then
+#       # shellcheck disable=SC1091
+#       . ./getoptions-library.sh
+#     fi
+#     eval "$(getoptions parser_definition -) exit 1" ;;
+#   parser)
+#     # shellcheck disable=SC1091
+#     . ./getoptions-parser.sh ;;
+# esac
+#
+# echo "FLAG: $FLAG, SHARE_PREFIX: $SHARE_PREFIX, HOME: $HOME, OPTION: $OPTION"
+# printf '%s\n' "$@"
+
+# if [ -d "/opt/init" ]; then
+#     export SHARE_PREFIX="/opt"
+# elif [ -d "/mnt/init" ]; then
+[ -d "/mnt/init" ] && export SHARE_PREFIX="/mnt"
+
+# if ! [ -z "${USE_SHELDON}" ]; then
+#   if ! [ -d ${SHELDON_CONFIG_DIR} ]; then
+#     mkdir -p ${SHELDON_CONFIG_DIR}
+#   fi
+#
+#   if ! [ -d ${SHELDON_DATA_DIR} ]; then
+#     mkdir -p ${SHELDON_DATA_DIR}
+#
+#     if ! [ -d ${SHELDON_DATA_DIR}/repos ]; then
+#       mkdir -p ${SHELDON_DATA_DIR}/repos
+#     fi
+#
+#     if ! [ -d ${SHELDON_DATA_DIR}/downloads ]; then
+#       mkdir -p ${SHELDON_DATA_DIR}/downloads
+#     fi
+#   fi
+# fi
+
+# if [ "$SHELL" = "zsh" ]; then
+#   ln -sf ${SHARE_PREFIX}/zinit ${HOME}/.zinit
+#   ln -sf ${SHARE_PREFIX}/zinit/zshrc ${HOME}/.zshrc
+#   ln -sf ${SHARE_PREFIX}/zinit/zshenv ${HOME}/.zshenv
+#   ln -sf ${SHARE_PREFIX}/zinit/zlogin ${HOME}/.zlogin
+#   ln -sf ${SHARE_PREFIX}/zinit/zprofile ${HOME}/.zprofile
+# fi
+
+[ -f ${HOME}/.profile ] && \rm -f ${HOME}/.profile
+[ "$(readlink ${HOME}/.profile)" != "${SHARE_PREFIX}/init/profile" ] && {
+    \rm -f ${HOME}/.profile
+    \ln -sf "${SHARE_PREFIX}/init/profile" "${HOME}/.profile"
+}
+
+[ -f ${HOME}/.ashrc ] && \rm -f ${HOME}/.ashrc
+[ "$(readlink ${HOME}/.ashrc)" != "${SHARE_PREFIX}/init/ashrc" ] && {
+    \rm -f ${HOME}/.ashrc
+    \ln -sf "${SHARE_PREFIX}/init/ashrc" "${HOME}/.ashrc"
+}
+
+[ -f ${HOME}/.tmux.conf ] && \rm -f ${HOME}/.tmux.conf
+
+[ "$(readlink ${HOME}/.tmux.conf)" != "${SHARE_PREFIX}/tinit/tmux.conf" ] && {
+    \rm -f ${HOME}/.tmux.conf
+    \ln -sf "${SHARE_PREFIX}/tinit/tmux.conf" "${HOME}/.tmux.conf"
+}
+
+[ -d ${HOME}/.tmux ] && \rm -rf ${HOME}/.tmux
+
+[ "$(readlink ${HOME}/.tmux)" != "${SHARE_PREFIX}/tinit/tmux" ] && {
+    \rm -f ${HOME}/.tmux
+    \ln -sf ${SHARE_PREFIX}/tinit/tmux ${HOME}/.tmux
+}
+
+# if [ ! -d ${HOME}/.tmux ]; then
+#     cp -rf ${SHARE_PREFIX}/tinit/tmux ${HOME}/.tmux
+# fi
+
+[ -f ${HOME}/.vimrc ] && \rm -f ${HOME}/.vimrc
+
+[ "$(readlink ${HOME}/.vimrc)" != "${SHARE_PREFIX}/vinit/nvim/init.vim" ] && {
+    \rm -f ${HOME}/.vimrc
+    \ln -sf ${SHARE_PREFIX}/vinit/nvim/init.vim ${HOME}/.vimrc
+}
+
+[ -d ${HOME}/.vim ]  && \rm -rf ${HOME}/.vim
+
+[ "$(readlink ${HOME}/.vim)" != "${SHARE_PREFIX}/vinit/vim" ] && {
+    \rm -f ${HOME}/.vim
+    \ln -sf ${SHARE_PREFIX}/vinit/vim ${HOME}/.vim
+}
+
+# if [ ! -d ${HOME}/.vim ]; then
+#     cp -rf ${SHARE_PREFIX}/vinit/vim ${HOME}/.vim
+# fi
+
+. /etc/profile.d/xdg_runtime_dir.sh
+
+[ -d ${XDG_CONFIG_HOME}/nvim ] && \rm -rf ${XDG_CONFIG_HOME}/nvim
+
+if [ -f ${XDG_CONFIG_HOME}/nvim ]; then
+    [ "$(readlink ${XDG_CONFIG_HOME}/nvim)" != "${SHARE_PREFIX}/vinit/nvim" ] && {
+        \rm -f ${XDG_CONFIG_HOME}/nvim
+        \ln -sf ${SHARE_PREFIX}/vinit/nvim ${XDG_CONFIG_HOME}/nvim
+    }
+else
+    \ln -sf ${SHARE_PREFIX}/vinit/nvim ${XDG_CONFIG_HOME}/nvim
+fi
+
+[ -L ${XDG_DATA_HOME}/nvim ] && \rm -f ${XDG_DATA_HOME}/nvim
+
+[ ! -d ${XDG_DATA_HOME}/nvim ] && mkdir -p ${XDG_DATA_HOME}/nvim
+
+[ -L ${XDG_DATA_HOME}/nvim/site ] && \rm -f ${XDG_DATA_HOME}/nvim/site
+
+# if [ -d ${XDG_DATA_HOME}/nvim/site ]; then
+#     rm -rf ${XDG_DATA_HOME}/nvim/site
+# fi
+# ln -sf ${SHARE_PREFIX}/vinit/nvim/site ${XDG_DATA_HOME}/nvim/site
+
+[ ! -d ${XDG_DATA_HOME}/nvim/site ] && mkdir -p ${XDG_DATA_HOME}/nvim/site
+
+[ -d ${XDG_DATA_HOME}/nvim/site/pack ] && \rm -rf ${XDG_DATA_HOME}/nvim/site/pack
+
+if [ 1 = ${HAS_LIBCXX} ]; then
+    [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" != "${SHARE_PREFIX}/vinit/nvim/site/pack-clang" ] && {
+        \rm -f ${XDG_DATA_HOME}/nvim/site/pack
+        \ln -sf ${SHARE_PREFIX}/vinit/nvim/site/pack-clang ${XDG_DATA_HOME}/nvim/site/pack
+    }
+else
+    [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" != "${SHARE_PREFIX}/vinit/nvim/site/pack" ] && {
+        \rm -f ${XDG_DATA_HOME}/nvim/site/pack
+        \ln -sf ${SHARE_PREFIX}/vinit/nvim/site/pack ${XDG_DATA_HOME}/nvim/site/pack
+    }
+fi
+
+# if ! [ -d ${XDG_DATA_HOME}/nvim/site/pack ]; then
+#     if [ -d ${SHARE_PREFIX}/nvim/site/pack ]; then
+#         cp -rf ${SHARE_PREFIX}/nvim/site/pack ${XDG_DATA_HOME}/nvim/site/
+#     fi
+# fi
+
+[ -L ${XDG_DATA_HOME}/nvim/site/parser ] && \rm -f ${XDG_DATA_HOME}/nvim/site/parser
+
+[ ! -d ${XDG_DATA_HOME}/nvim/site/parser ] && \mkdir -p ${XDG_DATA_HOME}/nvim/site/parser
+
+# if [ -L ${XDG_CONFIG_HOME}/coc ]; then
+#     rm -f ${XDG_CONFIG_HOME}/coc
+# fi
+# ln -sf ${SHARE_PREFIX}/vinit/coc ${XDG_CONFIG_HOME}/coc

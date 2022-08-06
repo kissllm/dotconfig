@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+
+# How to use:
+# Query
+# q mesa*
+# Apply one selected item in the query results
+# q mesa* 3
+# env USE_GMAKE=1 q wld 0
+# If you use it with doas/sudo, alias will not work. Under this circumstance, you should use it this way:
+# q "*mesa*"
+
+# do not use single quotes for $1 in []
+if [ -z "${1}" ]; then
+    printf "Input target pls\n"; exit 1;
+else
+    index=0
+    target="${1}"
+    selected=
+    packages="$(find "/var/db/kiss" \( -type d -o -type l \) -name "${target}")"
+    for pack in $packages
+    do
+        [ -d "$pack" ] && [ -f "$pack/version" ] && {
+            printf "%-4d %-10s %-75s\n" $((index)) "$(cat "$pack/version")" "$pack"
+            if [ -n "$2" ] && [ $index = $2 ]; then
+                selected="$pack"
+            fi
+            index=$(($index + 1))
+        }
+    done
+    if [ -n "$selected" ]; then
+        if [ -n "${USE_GMAKE}" ]; then
+            printf "\n%s\n\n" "GNU make used"
+            mkdir -p bin
+            ln -sf /usr/bin/pigz  "$PWD/bin/gunzip"
+            ln -sf /usr/bin/gmake "$PWD/bin/make"
+            export PATH="$PWD/bin:$PATH"
+        else
+            printf "\n%s\n\n" "BSD make used"
+        fi
+        printf "\n%s\n%-4d %-10s %-75s\n\n" "Selected package:" $2 "$(cat "$selected/version")" "$selected"
+        dir="$(dirname "$selected")"
+        base="$(basename "$selected")"
+        eval "KISS_PATH=$dir kiss c $base"
+        eval "KISS_PATH=$dir kiss b $base"
+        eval "KISS_PATH=$dir kiss i $base"
+    fi
+fi

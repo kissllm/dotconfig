@@ -7,11 +7,17 @@ endif
 
 
 " set nocompatible | filetype indent plugin on | syn on
-filetype indent plugin on | syn on
-syntax enable
-syntax on   " enable highlight
+" filetype indent plugin on | syn on
+filetype indent plugin on
+" syntax enable
+" syntax on   " enable highlight
 
-
+" if 1 == $HAS_LIBCXX
+"     let $XDG_DATA_HOME = "$HOME/.local/share/clang"
+"     if filewritable("$HOME/.local/share/clang") != 2
+"         mkdir("$HOME/.local/share/clang", "p")
+"     endif
+" endif
 
 " Disable search highlight
 " :noh
@@ -27,30 +33,30 @@ noremap <Space> <Nop>
 map     <Space> <Leader>
 " let mapleader       = ','
 
-let s:_init_develop        = 0
+let s:_init_develop         = 0
 
-let g:_log_address         = $HOME . '/.vim.log'
-let g:_log_verbose         = 1
-let g:_script_develop      = 0
-let g:_boot_develop        = 1
-let g:_keys_develop        = 0
-let g:_cscope_auto_develop = 1
+let g:_log_address          = $HOME . '/.vim.log'
+let g:_log_verbose          = 1
+let g:_script_develop       = 0
+" let g:_boot_develop        = 1
+let g:_keys_develop         = 0
+let g:_cscope_auto_develop  = 1
 let g:_session_auto_develop = 1
-let g:_fixed_tips_width    = 27
-let g:_buffergator_develop = 1
+let g:_fixed_tips_width     = 27
+" let g:_buffergator_develop = 1
 " let g:_log_func_name = 'boot#log_silent'
-let g:_log_one_line        = 0
-let g:_job_start           = has('nvim') ? 'jobstart' : 'job_start'
+let g:_log_one_line         = 0
+let g:_job_start            = has('nvim') ? 'jobstart' : 'job_start'
 
-let g:debug                = 1
-let g:navi_protect         = 1
-let g:polyglot_disabled    = ['markdown']
+let g:debug             = 1
+let g:navi_protect      = 1
+let g:polyglot_disabled = ['markdown']
 
 
 
 " truncate the log file
-silent! execute '!printf "\n\n"' . ' >> ' . g:_log_address . ' 2>&1 &'
-silent! execute '!printf "\n\n"' . ' > '  . g:_log_address . ' 2>&1 &'
+silent! execute '!printf "\n\n"' . ' >> ' . g:_log_address . ' 2>&1 & > /dev/null'
+silent! execute '!printf "\n\n"' . ' > '  . g:_log_address . ' 2>&1 & > /dev/null'
 
 if has("win32") || has("win95") || has("win64") || has("win16") " check operating system
     let g:_is_windows  = 1
@@ -66,6 +72,7 @@ function! s:environment.new(
     \, _fixed_tips_width = 27
     \, _is_windows       = 0
     \, _script_develop   = 0
+    \, _job_start        = has('nvim') ? 'jobstart' : 'job_start'
     \ ) dict
     let object = copy(self)
     if exists('g:_log_address')
@@ -92,6 +99,12 @@ function! s:environment.new(
         let object._script_develop = g:_script_develop
     else
         let object._script_develop = a:_script_develop
+    endif
+
+    if exists('g:_job_start')
+        let object._job_start = g:_job_start
+    else
+        let object._job_start = a:_job_start
     endif
 
     " let file_name = execute('echon bufname("%")')
@@ -138,10 +151,10 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     " Included patches: 1-3565
     " Compiled by void-buildslave@a-hel-fi
     " silent! execute '!(printf "date                                    : '
-    "             \ . strftime("%c") . '\n")' . ' >> ' . g:log_address . ' 2>&1 & > /dev/null'
+    "             \ . strftime("%c") . '\n")' . ' >> ' . g:_log_address . ' 2>&1 & > /dev/null'
 
-    silent! execute '!(printf ' . '"\%-"'. g:fixed_tips_width . '"s: \%s\n"' . ' date "'
-        \ . strftime("%c") . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"'. g:_fixed_tips_width . '"s: \%s\n"' . ' date "'
+        \ . strftime("%c") . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
     if has("nvim")
         let g:init_file = resolve(stdpath('config') . '/init.vim')
     else
@@ -157,10 +170,11 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         "     echom "Error! Wrong using fuction call"
         " endif
     endif
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' g:init_file "'
-        \ . g:init_file . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    " silent! execute '!printf "g:init_file_raw: ' . g:init_file_raw .'\n"' . ' >> ' . g:log_address . ' 2>&1 &'
-    " call boot#chomped_system("printf \"\ng:init_file\t\t: \"" . g:init_file . " >> " . g:log_address)
+
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:init_file "'
+        \ . g:init_file . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
+    " silent! execute '!printf "g:init_file_raw: ' . g:init_file_raw .'\n"' . ' >> ' . g:_log_address . ' 2>&1 &'
+    " call boot#chomped_system("printf \"\ng:init_file\t\t: \"" . g:init_file . " >> " . g:_log_address)
 
     if has("nvim")
         let g:config_dir = resolve(stdpath('config'))
@@ -172,12 +186,13 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         let g:config_dir = fnamemodify(g:init_file, ':p:h')
         "
         " let vimrc_dir_raw = boot#chomped_system("dirname \"". g:init_file ."\" | cat - | xargs realpath")
-        " silent! execute '!(printf "vimrc_dir_raw: ' . vimrc_dir_raw .'\n")' . ' >> ' . g:log_address . ' 2>&1 &'
+        " silent! execute '!(printf "vimrc_dir_raw: ' . vimrc_dir_raw .'\n")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
     endif
+
     " echom 'g:config_dir  =' . g:config_dir
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' g:config_dir "'
-        \ . g:config_dir . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:config_dir "'
+        \ . g:config_dir . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
     let g:plugin_dir = {}
     let g:package_manager = {}
@@ -238,8 +253,14 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
 
     let g:config_root = fnamemodify(g:plugin_dir['vim'], ':h')
 
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' g:config_root "'
-        \ . g:config_root . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    if has('nvim')
+        let g:cache_root = expand(stdpath('cache'))
+    else
+        let g:cache_root = expand($HOME . '/.cache/vim')
+    endif
+
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:config_root "'
+        \ . g:config_root . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
     let g:package_manager['vim'] = 'packager'
 
@@ -254,14 +275,14 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     "     exe 'set runtimepath^='. g:plugin_dir['lua'] . '/pack/' . g:package_manager['lua']  . '/start'
     " endif
 
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
-        \ . g:plugin_dir['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['lua']") . ' "'
-        \ . g:plugin_dir['lua'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
-        \ . g:package_manager['vim'] . '")' . ' >> ' . g:log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['lua'] \" \""
-        \ . g:package_manager['lua']  . '")' . ' >> ' . g:log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
+        \ . g:plugin_dir['vim'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['lua']") . ' "'
+        \ . g:plugin_dir['lua'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
+        \ . g:package_manager['vim'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['lua'] \" \""
+        \ . g:package_manager['lua']  . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
 endif
 
@@ -332,7 +353,7 @@ if ! exists('g:boot_loaded')
     exe 'set runtimepath+='. boot_load_path
     exe 'set packpath+='. boot_load_path
     execute "source " .   boot_load_file
-    execute "runtime! " . boot_load_file
+    execute "runtime! " . 'autoload/boot.vim'
 endif
 
 let packager_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim']
@@ -342,7 +363,7 @@ exe 'set packpath+='. packager_path
 let vim_packager_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/opt/vim-packager'
 exe 'set runtimepath+='. vim_packager_path
 exe 'set packpath+='. vim_packager_path
-runtime! OPT vim_packager_path
+execute "runtime! OPT " . 'plugin/packager.vim'
 " packadd vim-packager
 
 
@@ -356,16 +377,17 @@ runtime! OPT vim_packager_path
 " set t_RB= t_RF= t_RV= t_u7= t_u7= t_8f= t_8b=
 " :h terminal-output-codes
 
-call boot#chomped_system('(printf "\n\n" >> ' . g:_log_address . ' 2>&1 &) > /dev/null')
-
+" call boot#chomped_system('(printf "\n\n" >> ' . g:_log_address . ' 2>&1 &) > /dev/null')
+" call boot#chomp(system(['printf', "\n\n", '>>', g:_log_address, '2>&1', '&', '> /dev/null']))
+silent! execute('!printf "\n\n" >> ' . g:_log_address . ' 2>&1 & > /dev/null')
 
 " :echo "date: ". date
 " call boot#chomped_system("echo \"date: \"". date)
-" silent! execute '!printf "date: ' . date . '" >> '. g:log_address . ' 2>&1 &'
-" silent! execute '!(printf "date: "' . date . ' > ' . g:log_address . ' 2>&1 &) > /dev/null'
+" silent! execute '!printf "date: ' . date . '" >> '. g:_log_address . ' 2>&1 &'
+" silent! execute '!(printf "date: "' . date . ' > ' . g:_log_address . ' 2>&1 &) > /dev/null'
 " :LogSilent g:config_dir "\n" ""
 
-" silent! execute '!(printf "' . '\n' . '" ' . > . ' ' . g:log_address . ' 2>&1 &) > /dev/null'
+" silent! execute '!(printf "' . '\n' . '" ' . > . ' ' . g:_log_address . ' 2>&1 &) > /dev/null'
 " call s:log_silent('\n', "", g:_environment) " "wrong character '\n'" just for testing typoes :)
 " call s:log_silent("date", date, g:_environment)
 
@@ -381,7 +403,7 @@ call s:log_silent("len(v:argv)", len(v:argv), g:_environment)
 
 if exists('s:_init_develop') && 1 == s:_init_develop
     " :message
-    " silent! execute '!printf "v:argv: '.v:argv.'" >> '. g:log_address . ' 2>&1 &'
+    " silent! execute '!printf "v:argv: '.v:argv.'" >> '. g:_log_address . ' 2>&1 &'
     let arg_count     = 0
     for av in argv()
         let arg_count   += 1
@@ -430,7 +452,7 @@ else
     " " :echo "runtimepath\t: ".&runtimepath
     " " call boot#chomped_system("echo \"runtimepath: \"".&runtimepath)
     " call s:log_silent("runtimepath", &runtimepath, g:_environment)
-    " " silent! execute '!printf "runtimepath: '.&runtimepath.'" >> '. g:log_address . ' 2>&1 &'
+    " " silent! execute '!printf "runtimepath: '.&runtimepath.'" >> '. g:_log_address . ' 2>&1 &'
 endif
 
 " debug flag
@@ -473,7 +495,7 @@ function! s:keys_reload()
         unlet g:keys_loaded
     endif
     " let g:debug_keys    = 1
-    let keys_load_path  = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
+    let keys_load_path  = g:plugin_dir['vim'] . '/pack/packager/start/keys/after/keys.vim'
     silent! execute "source " . keys_load_path
     silent! execute "runtime! " . keys_load_path
 endfunction
@@ -494,8 +516,8 @@ command! -nargs=0 KL :call s:keys_reload()
 function! s:lightline_disable()
     let runtime_index = stridx(&runtimepath, 'lightline')
     if -1 != runtime_index
-        let rtp_list = maktaba#rtp#split()
-        exe 'set runtimepath-='. rtp_list[runtime_index]
+        let rtp_list = maktaba#rtp#Split()
+        exe 'set runtimepath-='. get(rtp_list, runtime_index)
         let runtime_index = stridx(&runtimepath, 'lightline')
         if -1 == runtime_index
             echom "Remove lightline succeed"
@@ -509,8 +531,11 @@ function! s:lightline_disable()
         " E121: Undefined variable: s:lightline
         call lightline#disable()
     endif
-    set laststatus =2
-
+    if exists('$TMUX')
+        set laststatus=0
+    else
+        set laststatus=2 " Always display the statusline in all windows
+    endif
 endfunction
 
 filetype off
@@ -532,13 +557,11 @@ let g:vim_packages_use['tpope/vim-surround']                         = { 'type' 
 let g:vim_packages_use['tpope/vim-repeat']                           = { 'type' : 'opt' }
 let g:vim_packages_use['tpope/vim-scriptease']                       = { 'type' : 'opt' }
 let g:vim_packages_use['junegunn/vader.vim']                         = { 'type' : 'opt' }
-let g:vim_packages_use['kana/vim-vspec']                             = { 'type' : 'opt' }
 let g:vim_packages_use['drmingdrmer/xptemplate']                     = { 'type' : 'opt' }
 " let g:vim_packages_use['rscarvalho/OpenProject.vim']                 = { 'type' : 'opt' }  " "cd" to that directory
 let g:vim_packages_use['kasandell/Code-Pull']                        = { 'type' : 'opt' }
 let g:vim_packages_use['vim-scripts/genutils']                       = { 'type' : 'opt' }
 let g:vim_packages_use['benmills/vimux']                             = { 'type' : 'opt' }
-let g:vim_packages_use['powerline/powerline']                        = { 'type' : 'opt' }
 let g:vim_packages_use['itchyny/lightline.vim']                      = { 'type' : 'opt' }  " Status line
 let g:vim_packages_use['Yggdroot/indentLine']                        = { 'type' : 'opt' }  " File format
 " Coflicts with buffergator
@@ -552,14 +575,40 @@ let g:vim_packages_use['nathanaelkane/vim-indent-guides']            = { 'type' 
 let g:vim_packages_use['janlazo/vim-bang-terminal']                  = { 'type' : 'opt' }
 " can't deal with writable permission issues
 " The sessions directory '/opt/vinit/vim/pack/packager/start/' isn't writable!
-let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
+" let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
+
+let g:vim_packages_use['ronakg/quickr-cscope.vim']                   = { 'type' : 'opt' }
 let g:vim_packages_use['trailblazing/cscope_auto']                   = { 'type' : 'opt', 'requires' : { 'name' : 'trailblazing/session_auto',
 \ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
+
 let g:vim_packages_use['airblade/vim-gitgutter']                     = { 'type' : 'opt' }
 let g:vim_packages_use['lifepillar/vim-mucomplete']                  = { 'type' : 'opt' }  " Code completion
 let g:vim_packages_use['Shougo/ddc.vim']                             = { 'type' : 'opt' }
 let g:vim_packages_use['vim-denops/denops.vim']                      = { 'type' : 'opt' }
 
+" Tons of errors with something not found
+let g:vim_packages_use['trailblazing/mkdx']                          = { 'type' : 'opt' }
+
+if exists('g:_use_fern')
+    let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'opt' }
+    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'opt', 'for' : 'clojure' }
+    let g:vim_packages_use['lambdalisue/fern-hijack.vim']                = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']   = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-git-status.vim']            = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-renderer-nerdfont.vim']     = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-ssh']                       = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-bookmark.vim']              = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']           = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim'] = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']      = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']    = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'opt' }
+    let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']     = { 'type' : 'opt' }
+    let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim'] = { 'type' : 'opt' }
+    let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']     = { 'type' : 'opt' }
+    let g:vim_packages_use['LumaKernel/fern-mapping-fzf.vim']            = { 'type' : 'opt' }
+    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'opt' }
+endif
 
 " let g:vim_packages_use['autozimu/LanguageClient-neovim']             = { 'do'   : 'bash install.sh' }
 " let g:vim_packages_use['sjbach/lusty']                               = { 'type' : 'opt' }  " LustyExplorer (ruby requires)
@@ -628,7 +677,6 @@ let g:vim_packages_use['vim-denops/denops.vim']                      = { 'type' 
 " Cutlass overrides the delete operations to actually just delete and not affect the current yank
 let g:vim_packages_use['svermeulen/vim-cutlass']                     = { 'type' : 'start' }
 let g:vim_packages_use['google/vim-maktaba']                         = { 'type' : 'start' }
-let g:vim_packages_use['ronakg/quickr-cscope.vim']                   = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-dispatch']                         = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-commentary']                       = { 'type' : 'start' }
 let g:vim_packages_use['jasonccox/vim-wayland-clipboard']            = { 'type' : 'start' }
@@ -648,47 +696,34 @@ let g:vim_packages_use['BurntSushi/ripgrep']                         = { 'type' 
 let g:vim_packages_use['preservim/vim-colors-pencil']                = { 'type' : 'start' }
 let g:vim_packages_use['chriskempson/base16-vim']                    = { 'type' : 'start' }
 let g:vim_packages_use['trailblazing/unsuck-flat']                   = { 'type' : 'start' }
-let g:vim_packages_use['skywind3000/asyncrun.vim']                   = { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'}
-let g:vim_packages_use['skywind3000/asynctasks.vim']                 = { 'type' : 'start' }
+" let g:vim_packages_use['skywind3000/asyncrun.vim']                   = { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'}
 let g:vim_packages_use['tpope/vim-rhubarb']                          = { 'type' : 'start' }  " Gbrowse
 let g:vim_packages_use['tpope/vim-fugitive']                         = { 'type' : 'start' }  " Gblame
 let g:vim_packages_use['liuchengxu/vim-which-key']                   = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'start' }
-let g:vim_packages_use['liquidz/vim-iced']                           = { 'type' : 'start', 'for' : 'clojure' }
-let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'start', 'for' : 'clojure' }
-let g:vim_packages_use['lambdalisue/fern-hijack.vim']                = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']   = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-git-status.vim']            = { 'type' : 'start' }
+
 let g:vim_packages_use['lambdalisue/nerdfont.vim']                   = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-renderer-nerdfont.vim']     = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-ssh']                       = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-bookmark.vim']              = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']           = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim'] = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']      = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']    = { 'type' : 'start' }
-let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'start' }
-let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']     = { 'type' : 'start' }
-let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim'] = { 'type' : 'start' }
-let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']     = { 'type' : 'start' }
-let g:vim_packages_use['LumaKernel/fern-mapping-fzf.vim']            = { 'type' : 'start' }
-let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'start' }
-let g:vim_packages_use['hashivim/vim-terraform']                     = { 'type' : 'start' }
+
+
 " let g:vim_packages_use['terryma/vim-multiple-cursors']               = { 'type' : 'start' }  " obsoleted
+
+let g:vim_packages_use['hashivim/vim-terraform']                     = { 'type' : 'start' }
 let g:vim_packages_use['mg979/vim-visual-multi']                     = { 'type' : 'start' }
 
 let g:vim_packages_use['tpope/vim-eunuch']                           = { 'type' : 'start' }
-let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
+" let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-surround']                         = { 'type' : 'start' }
 let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }
 let g:vim_packages_use['mattn/emmet-vim']                            = { 'type' : 'start' }
-let g:vim_packages_use['dense-analysis/ale']                         = { 'type' : 'start' }
+
 " let g:vim_packages_use['shemerey/vim-project']                       = { 'type' : 'start' }
-let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
-let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
+" let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
+" let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
+
 let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
 let g:vim_packages_use['majutsushi/ctags']                           = { 'type' : 'start' }
+
 " let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
+
 let g:vim_packages_use['preservim/tagbar']                           = { 'type' : 'start' }
 let g:vim_packages_use['vhdirk/vim-cmake']                           = { 'type' : 'start' }
 let g:vim_packages_use['gilligan/vim-lldb']                          = { 'type' : 'start' }
@@ -696,13 +731,18 @@ let g:vim_packages_use['mileszs/ack.vim']                            = { 'type' 
 let g:vim_packages_use['mhinz/vim-grepper']                          = { 'type' : 'start' }
 let g:vim_packages_use['LucHermitte/vim-refactor']                   = { 'type' : 'start' }
 let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']         = { 'type' : 'start' }
-let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
-let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
-let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' : 'start' }
+
+" # # https://github.com/christoomey/vim-tmux-navigator
+" # /mnt/vinit/vim/pack/packager/start/keys/after/plugin/keys.vim
+" # "     silent! execute(a:navigate[a:direction])
+" # /mnt/tinit/tmux.conf
+" # set -g @plugin 'christoomey/vim-tmux-navigator'
+" # /mnt/vinit/nvim/init.vim
 let g:vim_packages_use['christoomey/vim-tmux-navigator']             = { 'type' : 'start' }
+
 " let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }  " obsoleted
+
 let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']        = { 'type' : 'start' }
-let g:vim_packages_use['thinca/vim-themis']                          = { 'type' : 'start' }
 let g:vim_packages_use['mhinz/vim-galore']                           = { 'type' : 'start' }
 let g:vim_packages_use['plasticboy/vim-markdown']                    = { 'type' : 'start' }
 let g:vim_packages_use['jgdavey/tslime.vim']                         = { 'type' : 'start' }
@@ -711,7 +751,6 @@ let g:vim_packages_use['leafgarland/typescript-vim']                 = { 'type' 
 let g:vim_packages_use['chrisbra/Recover.vim']                       = { 'type' : 'start' }
 let g:vim_packages_use['preservim/vim-textobj-quote']                = { 'type' : 'start' }
 let g:vim_packages_use['kana/vim-textobj-user']                      = { 'type' : 'start' }
-let g:vim_packages_use['trailblazing/mkdx']                          = { 'type' : 'start' }
 
 let g:vim_packages_use['trailblazing/session_auto']                  = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['trailblazing/boot']                          = { 'type' : 'start' }
@@ -726,34 +765,51 @@ let g:vim_packages_use['sheerun/vim-polyglot']                       = { 'type' 
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']        = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'start' }
 let g:vim_packages_use['marklcrns/vim-smartq']                       = { 'type' : 'start' }
-let g:vim_packages_use['sbdchd/neoformat']                           = { 'type' : 'start' }
-let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
+" let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-unimpaired']                       = { 'type' : 'start' }
 let g:vim_packages_use['justinmk/vim-dirvish']                       = { 'type' : 'start' }
 let g:vim_packages_use['vim-scripts/a.vim']                          = { 'type' : 'start' }
 let g:vim_packages_use['rickhowe/diffchar.vim']                      = { 'type' : 'start' }
 let g:vim_packages_use['rickhowe/spotdiff.vim']                      = { 'type' : 'start' }
 let g:vim_packages_use['rafi/awesome-vim-colorschemes']              = { 'type' : 'start' }
-let g:vim_packages_use['prettier/prettier']                          = { 'type' : 'start' }
-let g:vim_packages_use['neoclide/coc.nvim']                          = { 'type' : 'start', 'branch': 'release' }
-let g:vim_packages_use['elixir-lsp/coc-elixir']                      = { 'type' : 'start', 'do': 'yarn install && yarn prepack'}
+" Huge
+" let g:vim_packages_use['neoclide/coc.nvim']                          = { 'type' : 'start', 'branch': 'release' }
+" let g:vim_packages_use['elixir-lsp/coc-elixir']                      = { 'type' : 'start', 'do': 'yarn install && yarn prepack'}
 let g:vim_packages_use['stefandtw/quickfix-reflector.vim']           = { 'type' : 'start' }
 let g:vim_packages_use['rakr/vim-two-firewatch']                     = { 'type' : 'start' }
 " let g:vim_packages_use['ms-jpq/chadtree']                            = { 'type' : 'start', 'branch': 'chad', 'do': 'python3 -m chadtree deps'}
+let g:vim_packages_use['tmux-plugins/vim-tmux']                       = { 'type' : 'start' }
+
 
 " " Provide full URL; useful if you want to clone from somewhere else than Github.
 " let g:vim_packages_use['https://my.other.public.git/tpope/vim-fugitive.git'] = {}
 " " Provide SSH-based URL; useful if you have write access to a repository and wish to push to it
 " let g:vim_packages_use['git@github.com:mygithubid/myrepo.git']               = {}
 
-" Loaded only for specific filetypes on demand. Requires autocommands below.
-let g:vim_packages_use['kristijanhusak/vim-js-file-import']           = { 'type' : 'opt', 'do' : 'npm install' }
 
 " let g:vim_packages_use['fatih/vim-go']                                = { 'type' : 'opt', 'do' : ':GoInstallBinaries' }
 " let g:vim_packages_use['neoclide/coc.nvim']                           = { 'do'   : function('InstallCoc') }  " code completion
 " let g:vim_packages_use['weirongxu/coc-explorer']                      = { 'do'   : function('InstallCoc') }
 
 let g:vim_packages_use['sonph/onehalf']                               = { 'rtp'  : 'vim' }
+
+" " have binarys
+" " Loaded only for specific filetypes on demand. Requires autocommands below.
+" let g:vim_packages_use['kristijanhusak/vim-js-file-import']           = { 'type' : 'opt', 'do' : 'npm install' }
+"
+" let g:vim_packages_use['thinca/vim-themis']                          = { 'type' : 'start' }
+" let g:vim_packages_use['powerline/powerline']                        = { 'type' : 'opt' }
+" let g:vim_packages_use['kana/vim-vspec']                             = { 'type' : 'opt' }
+" let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' : 'start' }
+" let g:vim_packages_use['skywind3000/asynctasks.vim']                 = { 'type' : 'start' }
+" let g:vim_packages_use['sbdchd/neoformat']                           = { 'type' : 'start' }
+" let g:vim_packages_use['liquidz/vim-iced']                           = { 'type' : 'start', 'for' : 'clojure' }
+" " let g:vim_packages_use['dense-analysis/ale']                         = { 'type' : 'start' }
+" " Huge
+" let g:vim_packages_use['prettier/prettier']                          = { 'type' : 'start' }
+" let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
+" let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
+
 
 function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environment)
     let l:func_name = boot#function_name(expand('<SID>'), expand('<sfile>'))
@@ -844,7 +900,11 @@ function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environm
     silent! execute command
     redraw!
     function! s:result(packages_path)
-        return boot#chomped_system('stat -L -c "%A %a %U %G" ' . a:packages_path)
+        if has('nvim')
+            return boot#chomp(system(['stat', '-L -c "%A %a %U %G"', a:packages_path]))
+        else
+            return boot#chomp(system('stat -L -c "%A %a %U %G" '. a:packages_path))
+        endif
     endfunction
     for item in l:packages_path_list
         call s:log_silent(l:func_name, s:result(item) . ' ' . item, a:environment)
@@ -860,6 +920,9 @@ endfunction
 " let g:use_setup_minpac = 1
 " let g:use_setup_reference = 1
 let g:use_setup_packager = 1
+
+" syntax disable
+syntax off
 
 if exists('g:use_setup_minpac')
 
@@ -957,11 +1020,11 @@ elseif exists('g:use_setup_packager')
                 "     " let value['do'] = value['do'] . " && call <sid>adjust_init_helper(\"" . domain_removed . "\")"
                 "     let value['do'] = { domain_removed -> exec value['do'] && a:function_adjust_init_helper(domain_removed) }
                 "     " let value['do'] = value['do'] . " && call <sid>adjust_attributes(\"" . domain_removed . "\", \"" . a:plugin_dir . "\", \"" .
-                "     "             \ a:package_manager . "\", \"" . g:log_address . "\", " . g:fixed_tips_width . ", " . g:log_verbose . ")"
+                "     "             \ a:package_manager . "\", \"" . g:_log_address . "\", " . g:_fixed_tips_width . ", " . g:log_verbose . ")"
                 " else
                 "     let value['do'] = a:function_adjust_init_helper
                 "     " let value['do'] = "call <sid>adjust_attributes(\"" . domain_removed . "\", \"" . a:plugin_dir . "\", \"" . a:package_manager .
-                "     "             \ "\", \"" . g:log_address . "\", " . g:fixed_tips_width . ", " . g:log_verbose . ")"
+                "     "             \ "\", \"" . g:_log_address . "\", " . g:_fixed_tips_width . ", " . g:log_verbose . ")"
                 " endif
                 call packager#add(key, value)
             endfor
@@ -987,10 +1050,11 @@ elseif exists('g:use_setup_packager')
 
     " call s:packager_init(function('s:adjust_init_helper'), g:plugin_dir['vim'], g:package_manager['vim'])
     call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
-    if ! has('nvim')
+    if has('nvim') || exists($TMUX)
         call s:lightline_disable()
     endif
 endif
+
 
 " run PackagerInstall or PackagerUpdate
 " run :PackagerInstall to install all the plugins and it's hooks
@@ -1170,11 +1234,25 @@ nnoremap <silent><leader>ww :unmap <leader>ww<BAR>packadd vimwiki<BAR>VimwikiInd
 filetype indent plugin on | syn on
 " :set verbose=9    " debug pugins
 
+" syntax enable
+" syntax on
+
 if has('nvim')
+
+    function! LuaFormat()
+        if &filetype =~# '\v(lua)'
+            call function(g:_environment._job_start)("!doas stylua --indent-type spaces --indent-width 4 %")
+        endif
+    endfunction
+
 
     " https://www.reddit.com/r/vim/comments/8mqs7t/how_to_really_turn_off_autoindent/
     augroup lua_no_indent
         au!
+        autocmd FileType lua nnoremap <buffer> <F4> :normal! LuaFormat()<cr>
+        " autocmd FileType lua nnoremap <buffer> <F4> silent! execute "!doas stylua --indent-type spaces %"<cr>
+        autocmd BufWrite *.lua call LuaFormat()
+        " autocmd BufWrite *.lua silent! execute "!doas stylua --indent-type spaces %"
         autocmd FileType lua setlocal nocindent nosmartindent noautoindent
     augroup end
 
@@ -1187,7 +1265,10 @@ if has('nvim')
     " lua require('plugins'):requireRel("slanted-gaps")
     " lua require("slanted")
 
-    " lua lualine = require('lualine')
+    " lua basic_line = require('evil_line')
+    " lua basic_line = require('wlsample.basic')
+    lua cool = require('cool')
+
     " lua lualine.setup{options = {icons_enabled = true, theme = 'slanted'}}
 
     " format will demage EOF from inserting spaces before it
@@ -1200,7 +1281,12 @@ if has('nvim')
     " end
     " EOF
 
+    " lua cmp = require('nvim-cmp')
 
+    lua navigator = require'navigator'
+    lua if vim.fn.empty(vim.inspect(navigator)) > 0 then navigator.setup() end
+
+    " E117: Unknown function: <SNR>3_refresh
     function! s:refresh()
         " call s:lightline_disable()
         if &filetype !~# '\v(help|txt|log)'
@@ -1219,15 +1305,16 @@ if has('nvim')
             " execute ':IndentBlanklineDisable!'
             redraw!
         endif
+        " lua windline = require('cool')
     endfunction
 
     function! s:lua_update()
-        if $USER ==# 'root'
+        " if $USER ==# 'root'
             lua require'plugins'.install()
             :PackerCompile
-        else
-            lua require'plugins'.startup()
-        endif
+        " else
+        "     lua require'plugins'.startup()
+        " endif
     endfunction
 
     function! s:update_init()
@@ -1235,11 +1322,11 @@ if has('nvim')
         " v:lua.require'plugins'.install()
         lua require'plugins'.install()
         :PackerCompile
-        call keys_reload()
+        call s:keys_reload()
         redraw!
     endfunction
 
-    call s:lua_update()
+    " call s:lua_update()
 
     nnoremap <leader>j :call <sid>lua_update()<cr>
 
@@ -1273,8 +1360,6 @@ if has('nvim')
     inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
     unmap <c-i>
 
-    " Avoid showing message extra message when using completion
-    set shortmess+=c
 
     " https://github.com/nvim-lua/completion-nvim
     " completion.nvim is no longer maintained
@@ -1339,7 +1424,8 @@ endif " has('nvim')
 " packadd vim-colors-pencil
 " packadd vim-mucomplete
 " packadd base16-vim
-if ! has('nvim')
+if ! has('nvim') && empty($TMUX)
+    " pack/*/opt/{name}/plugin/**/*.vim
     packadd lightline.vim
     packadd indentLine
     " packadd vim-indent-guides
@@ -1420,8 +1506,9 @@ endif
 " packadd vim-airline
 " packadd vim-airline-themes
 
-let schemes = boot#chomped_system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
-    \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]"))
+" CPU busy on busybox
+" let schemes = boot#chomp(system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
+"     \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]")))
 
 
 " https://github.com/preservim/vim-colors-pencil
@@ -1754,10 +1841,11 @@ endif
 let g:nontext_fg_cterm = 241
 let g:nontext_fg_gui = 'gray'
 
+" :help highlight-groups
 " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
 " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
 
-highlight Normal guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
+highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
 highlight FileStyleIgnorePattern guibg=bg ctermbg=0
 " highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
 " https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
@@ -1868,7 +1956,11 @@ augroup END
 
 " vim-gitgutter
 set signcolumn=yes
-let g:gitgutter_git_executable = boot#chomped_system('which git')
+if has('nvim')
+    let g:gitgutter_git_executable = boot#chomp(system(['which', 'git']))
+else
+    let g:gitgutter_git_executable = boot#chomp(system('which git'))
+endif
 let g:gitgutter_sign_allow_clobber   = 1
 let g:gitgutter_sign_allow_clobber   = 1
 let g:gitgutter_set_sign_backgrounds = 1
@@ -2051,19 +2143,19 @@ endif
 " inoremap <C-l> <Right>
 " inoremap <C-j> <C-o>gj
 
+if exists('g:_disable_direction_key')
+    " Remove newbie crutches in Normal Mode
+    nnoremap <Down> <Nop>
+    nnoremap <Left> <Nop>
+    nnoremap <Right> <Nop>
+    nnoremap <Up> <Nop>
 
-" Remove newbie crutches in Normal Mode
-nnoremap <Down> <Nop>
-nnoremap <Left> <Nop>
-nnoremap <Right> <Nop>
-nnoremap <Up> <Nop>
-
-" Remove newbie crutches in Visual Mode
-vnoremap <Down> <Nop>
-vnoremap <Left> <Nop>
-vnoremap <Right> <Nop>
-vnoremap <Up> <Nop>
-
+    " Remove newbie crutches in Visual Mode
+    vnoremap <Down> <Nop>
+    vnoremap <Left> <Nop>
+    vnoremap <Right> <Nop>
+    vnoremap <Up> <Nop>
+endif
 
 " " Seamlessly treat visual lines as actual lines when moving around.
 " noremap j gj
@@ -2139,7 +2231,8 @@ set list
 " :set listchars=tab:>-,space:.
 " helper for indent mistake
 " set list listchars=tab:»·,trail:·
-set lcs=extends:>,precedes:<,nbsp:%,tab:>~,eol:↴
+" set lcs=extends:>,precedes:<,nbsp:%,tab:>~,eol:↴
+set lcs=extends:>,precedes:<,nbsp:%,tab:>~
 " set list lcs=tab:\|\
 
 " Toggle visually showing all whitespace characters.
@@ -2149,6 +2242,7 @@ cnoremap <F7> <C-c>:set list!<cr>
 " https://vi.stackexchange.com/questions/454/whats-the-simplest-way-to-strip-trailing-whitespace-from-all-lines-in-a-file
 " Remove all trailing whitespace by pressing F5
 nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+cnoremap s!! let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
 
 " https://vim.fandom.com/wiki/Source_current_file_when_editing_a_script
 noremap <silent><buffer> <F9> :exec 'source '.bufname('%')<CR>
@@ -2250,7 +2344,8 @@ augroup END
 " silent! call repeat#set("\<Plug>MyWonderfulMap", v:count)
 
 if has('nvim')
-    set shell=zsh\ --login
+    " set shell=ash\ --login
+    silent! execute 'set shell=' . boot#chomp(system('which $SHELL')) . '\ --login'
     tnoremap <esc> <C-\><C-N>
     augroup term_open
         au!
@@ -2341,6 +2436,7 @@ if 1 == g:navi_protect
     " " m' or m`: Set the previous context mark. This mark could be retrieved with the "''" or "``" command
     " (does not move the cursor, this is not a motion command).
     " This map will break vim user mappings and restore to the default mappings of ^H/^J/^K/^L
+
     if has('nvim')
         nnoremap <S-CR> m`O<Esc>``
         nnoremap <leader>[ m`O<Esc>``
@@ -2419,19 +2515,72 @@ endif " g:navi_protect
 
 " https://www.reddit.com/r/vim/comments/hge0qw/for_those_who_are_still_struggling_with_waylands/
 if !empty($WAYLAND_DISPLAY)
-    let g:clipboard =
-        \ { 'name': 'wayland-strip-carriage',
-        \   'copy':
-        \ {     '+': 'wl-copy --foreground --type text/plain',
-        \       '*': 'wl-copy --foreground --type text/plain --primary',
-        \ },
-        \   'paste':
-        \ {     '+': {-> systemlist('wl-paste --no-newline | tr -d "\r"')},
-        \       '*': {-> systemlist('wl-paste --no-newline --primary | tr -d "\r"')},
-        \ },
-        \   'cache_enabled': 1,
-        \ }
+    if has('nvim')
+        " function! s:paste_list_plus()
+        "     let l:result_list = []
+        "     let l:list_src = systemlist(['wl-paste', '--no-newline'])
+        "     for item in l:list_src
+        "         " https://stackoverflow.com/questions/42326732/get-rid-of-in-vim-output-from-system
+        "         " let l:tr_item = strtrans(substitute(item, "\n\\+$", "", ""))
+        "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"'. item . '"', ')'])
+        "         let l:tr_item = boot#chomp(item)
+        "         call add(l:result_list, l:tr_item)
+        "     endfor
+        "     return l:result_list
+        " endfunction
+        " function! s:paste_list_asterisk()
+        "     let l:result_list = []
+        "     let l:list_src = systemlist(['wl-paste', '--no-newline', '--primary'])
+        "     for item in l:list_src
+        "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"' . item . '"', ')'])
+        "         let l:tr_item = boot#chomp(item)
+        "         call add(l:result_list, l:tr_item)
+        "     endfor
+        "     return l:result_list
+        " endfunction
+        " let g:clipboard =
+        "     \ { 'name': 'wayland-strip-carriage',
+        "     \   'copy':
+        "     \ {     '+': 'wl-copy --foreground --type text/plain',
+        "     \       '*': 'wl-copy --foreground --type text/plain --primary',
+        "     \ },
+        "     \   'paste':
+        "     \ {     '+': {-> s:paste_list_plus()},
+        "     \       '*': {-> s:paste_list_asterisk()},
+        "     \ },
+        "     \   'cache_enabled': 1,
+        "     \ }
+        let g:clipboard =
+            \ { 'name': 'wayland-strip-carriage',
+            \   'copy':
+            \ {     '+': 'wl-copy --foreground --type text/plain',
+            \       '*': 'wl-copy --foreground --type text/plain --primary',
+            \ },
+            \   'paste':
+            \ {     '+': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline']))},
+            \       '*': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline', '--primary']))},
+            \ },
+            \   'cache_enabled': 1,
+            \ }
+    else
+        let g:clipboard =
+            \ { 'name': 'wayland-strip-carriage',
+            \   'copy':
+            \ {     '+': 'wl-copy --foreground --type text/plain',
+            \       '*': 'wl-copy --foreground --type text/plain --primary',
+            \ },
+            \   'paste':
+            \ {     '+': {-> systemlist('wl-paste --no-newline \| tr -d "\r"')},
+            \       '*': {-> systemlist('wl-paste --no-newline --primary \| tr -d "\r"')},
+            \ },
+            \   'cache_enabled': 1,
+            \ }
+    endif
 endif
+
+" https://stackoverflow.com/questions/14635295/vim-takes-a-very-long-time-to-start-up
+" nvim posts error on this:
+" set clipboard=exclude:.*
 " set clipboard+=unnamed
 set clipboard+=unnamedplus
 
@@ -2440,11 +2589,16 @@ set clipboard+=unnamedplus
 " vmap <C-c> "+yi
 " imap <C-v> <esc>"+gpi
 
-" https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
-xnoremap "+y y:call system("wl-copy", @")<cr>
-nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
-nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v><C-m>', '', 'g')<cr>p
-
+if has('nvim')
+    xnoremap "+y y:call system(['wl-copy', '@"'])<cr>
+    nnoremap "+p :let @"=substitute(system(['wl-paste', '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
+    nnoremap "*p :let @"=substitute(system(['wl-paste', '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
+else
+    " https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
+    xnoremap "+y y:call system("wl-copy", @")<cr>
+    nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
+    nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v><C-m>', '', 'g')<cr>p
+endif
 
 " https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118
 " :r!cat
@@ -2513,8 +2667,9 @@ augroup auto_read
     au!
     " Update a buffer's contents on focus if it changed outside of Vim.
     " https://vi.stackexchange.com/questions/14315/how-can-i-tell-if-im-in-the-command-window
-    au FocusGained,BufEnter * " :checktime
-        \ if mode() == 'n' && getcmdwintype() == '' <bar> checktime <bar> endif
+    " :checktime
+    au FocusGained,BufEnter *
+        \ if mode() == 'n' && getcmdwintype() == '' | checktime | endif
     au FocusGained,BufEnter * :silent! !
 augroup END
 
@@ -2545,25 +2700,26 @@ endif
 
 " "resizing windows ********************************************************************************************"
 
-noremap <silent> <C-S-Up>    :resize +1<cr>
-noremap <silent> <C-S-Down>  :resize -1<cr>
-noremap <silent> <C-S-Left>  :vertical resize +1<cr>
-noremap <silent> <C-S-Right> :vertical resize -1<cr>
+" noremap <silent> <C-S-Up>    :resize +1<cr>
+" noremap <silent> <C-S-Down>  :resize -1<cr>
+" noremap <silent> <C-S-Left>  :vertical resize +1<cr>
+" noremap <silent> <C-S-Right> :vertical resize -1<cr>
 
-" noremap  <silent> <m-k> :resize +1<cr>
-" noremap  <silent> <m-j> :resize -1<cr>
-" noremap  <silent> <m-h> :vertical resize +1<cr>
-" noremap  <silent> <m-l> :vertical resize -1<cr>
-
-" nnoremap <silent> <m-k> :TmuxResizeUp<CR>
-" nnoremap <silent> <m-j> :TmuxResizeDown<CR>
-" nnoremap <silent> <m-h> :TmuxResizeLeft<CR>
-" nnoremap <silent> <m-l> :TmuxResizeRight<CR>
-
-noremap  <silent> <m-k> :exe "resize +1 && :TmuxResizeUp"<cr>
-noremap  <silent> <m-j> :exe "resize -1 && :TmuxResizeDown"<cr>
-noremap  <silent> <m-h> :exe "vertical resize +1 && :TmuxResizeLeft"<cr>
-noremap  <silent> <m-l> :exe "vertical resize -1 && :TmuxResizeRight"<cr>
+if exists('$TMUX')
+    nnoremap <silent> <m-k> :TmuxResizeUp<CR>
+    nnoremap <silent> <m-j> :TmuxResizeDown<CR>
+    nnoremap <silent> <m-h> :TmuxResizeLeft<CR>
+    nnoremap <silent> <m-l> :TmuxResizeRight<CR>
+else
+    noremap  <silent> <m-k> :resize +1<cr>
+    noremap  <silent> <m-j> :resize -1<cr>
+    noremap  <silent> <m-h> :vertical resize +1<cr>
+    noremap  <silent> <m-l> :vertical resize -1<cr>
+endif
+" noremap  <silent> <m-k> :resize +1 <bar> :TmuxResizeUp<cr>
+" noremap  <silent> <m-j> :resize -1 <bar> :TmuxResizeDown<cr>
+" noremap  <silent> <m-h> :vertical resize +1 <bar> :TmuxResizeLeft<cr>
+" noremap  <silent> <m-l> :vertical resize -1 <bar> :TmuxResizeRight<cr>
 
 " https://vim.fandom.com/wiki/Resize_splits_more_quickly
 nnoremap <silent> <leader>= :exe "resize " . (winheight(0) * 3/2)<cr>
@@ -2594,16 +2750,32 @@ nnoremap <silent> <leader>- :exe "resize " . (winheight(0) * 2/3)<cr>
 
 " https://github.com/spf13/spf13-vim/issues/540
 set syntax=on
-set shortmess=a
 
 set nomore
+
+" https://unix.stackexchange.com/questions/250770/press-enter-or-type-command-to-continue-why-am-i-seeing-this
+" set cmdheight=2
 set cmdheight=1
+" " Give more space for displaying messages.
+
 " set shortmess+=O
-set shortmess=at
-set shm+=F
+" set shortmess=a
+" https://vim.fandom.com/wiki/Avoiding_the_%22Hit_ENTER_to_continue%22_prompts
+set shortmess=atWAOFS
+" Avoid showing message extra message when using completion
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
+set shortmess+=F
 
 set noruler
-set laststatus=2 " Always display the statusline in all windows
+
+if exists('$TMUX')
+    set laststatus=0
+else
+    set laststatus=2 " Always display the statusline in all windows
+endif
+
 " set showtabline=2 " Always display the tabline, even if there is only one tab
 set showtabline=0 " Always display the tabline, even if there is only one tab
 set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
@@ -2665,7 +2837,6 @@ set sidescrolloff=30   " keep 30 columns visible left and right of the cursor at
 set scrollopt-=ver
 set showcmd
 set showmatch
-set shortmess+=c
 set spelllang=en_us
 set splitbelow
 set splitright
@@ -2690,8 +2861,9 @@ set title
 " copy indent from previous line: useful when using tabs for indentation and spaces for alignment
 " set copyindent
 
-
-runtime! macros/matchit.vim
+" https://stackoverflow.com/questions/7281459/matchit-not-working
+packadd! matchit
+" runtime! macros/matchit.vim
 
 hi SpellBad   cterm=underline ctermfg=9
 hi SpellLocal cterm=underline ctermfg=9
@@ -2751,10 +2923,11 @@ let g:vim_indent_cont = &sw
 " https://vi.stackexchange.com/questions/26184/is-it-possible-to-configure-vim-to-indent-line-continuation-differently-from-ind
 setl cino=e-2
 
+" https://stackoverflow.com/questions/69339050/how-to-stop-vim-pane-from-blinking-in-tmux
 set vb t_vb=
 
 set hlsearch   " highlight research result
-set ignorecase " search patter
+" set ignorecase " search patter
 set smartcase
 set incsearch  " incrementally match search result
 set backspace=indent,eol,start whichwrap+=<,>,[,] " enable backspace key
@@ -2946,6 +3119,9 @@ augroup END
 if exists('$TMUX')
     let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
     let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    " https://github.com/vimpostor/vim-tpipeline
+    let &t_fe = "\<Esc>[?1004h"
+    let &t_fd = "\<Esc>[?1004l"
 else
     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
@@ -3018,45 +3194,48 @@ endfunction
 
 function! s:session_state(updating)
     if a:updating
-        packadd cscope_auto
-        augroup cscope_auto | au!
-            autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
-        augroup END
+        " packadd cscope_auto
+        " augroup cscope_auto | au!
+        "     autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
+        " augroup END
         let g:statusline_session_flag = "S"
     else
-        augroup cscope_auto | au!
-        augroup END
+        " augroup cscope_auto | au!
+        " augroup END
         let g:statusline_session_flag = ""
     endif
     execute "redrawstatus!"
 endfunction
+
 augroup session_auto
     au!
     autocmd VimEnter * :call session_auto#setup(function("s:session_state"))
 augroup END
 
-" ALE
-let g:ale_lint_on_save             = 1
-let g:ale_lint_on_enter            = 0
-let g:ale_lint_on_text_changed     = 'never'
-let g:ale_sign_column_always       = 1
-let g:ale_sign_warning             = 'W'
-let g:ale_sign_error               = 'E'
-let g:ale_python_flake8_args       = '--ignore=C,E111,E114,E22,E201,E241,E265,E272,E3,E501,E731'
-let g:ale_python_pylint_executable = ''
+if exists('g:use_ale')
+    " ALE
+    let g:ale_lint_on_save             = 1
+    let g:ale_lint_on_enter            = 0
+    let g:ale_lint_on_text_changed     = 'never'
+    let g:ale_sign_column_always       = 1
+    let g:ale_sign_warning             = 'W'
+    let g:ale_sign_error               = 'E'
+    let g:ale_python_flake8_args       = '--ignore=C,E111,E114,E22,E201,E241,E265,E272,E3,E501,E731'
+    let g:ale_python_pylint_executable = ''
 
 
-fun! ALEClearBuffer(buffer)
-    if get(g:, 'ale_enabled') && has_key(get(g:, 'ale_buffer_info', {}), a:buffer)
-        call ale#engine#SetResults(a:buffer, [])
-        call ale#engine#Cleanup(a:buffer)
-    endif
-endfun
+    fun! ALEClearBuffer(buffer)
+        if get(g:, 'ale_enabled') && has_key(get(g:, 'ale_buffer_info', {}), a:buffer)
+            call ale#engine#SetResults(a:buffer, [])
+            call ale#engine#Cleanup(a:buffer)
+        endif
+    endfun
 
-augroup UnALE
-    autocmd!
-    autocmd TextChanged,TextChangedI,InsertEnter,InsertLeave * call ALEClearBuffer(bufnr('%'))
-augroup END
+    augroup UnALE
+        autocmd!
+        autocmd TextChanged,TextChangedI,InsertEnter,InsertLeave * call ALEClearBuffer(bufnr('%'))
+    augroup END
+endif
 
 " "cscope ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
@@ -3184,11 +3363,6 @@ set cscopequickfix=s-,c-,d-,i-,t-,e-
 " https://bugzilla.redhat.com/show_bug.cgi?id=877955
 " refer to cscopr_auto
 
-" https://subvisual.com/blog/posts/vim-elixir-ide
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gr <Plug>(coc-references)
-nnoremap <silent> <leader>co  :<C-u>CocList outline<CR>
-nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 let g:qf_modifiable    = 1
 let g:qf_join_changes  = 1
@@ -3198,8 +3372,6 @@ augroup quickfix_reflector | au!
     autocmd User QfReplacementBufWritePost doautocmd BufWritePost
 augroup END
 
-" https://github.com/neoclide/coc.nvim
-" Set internal encoding of vim, not needed on neovim, since coc.nvim using some
 " unicode characters in the file autoload/float.vim
 set encoding=utf-8
 
@@ -3210,15 +3382,11 @@ set hidden
 set nobackup
 set nowritebackup
 
-" " Give more space for displaying messages.
-" set cmdheight=2
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " delays and poor user experience.
 set updatetime=100
 
-" Don't pass messages to |ins-completion-menu|.
-set shortmess+=c
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
@@ -3229,145 +3397,157 @@ else
     set signcolumn=yes
 endif
 
-" Use tab for trigger completion with characters ahead and navigate.
-" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
-inoremap <silent><expr> <TAB>
-    \ pumvisible() ? "\<C-n>" :
-    \ <SID>check_back_space() ? "\<TAB>" :
-    \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+if exists('g:use_coc')
 
-function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
+    " https://github.com/neoclide/coc.nvim
+    " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
+    " https://subvisual.com/blog/posts/vim-elixir-ide
+    nnoremap <silent> <leader>co  :<C-u>CocList outline<CR>
+    nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-" Use <c-space> to trigger completion.
-if has('nvim')
-    inoremap <silent><expr> <c-space> coc#refresh()
-else
-    inoremap <silent><expr> <c-@> coc#refresh()
-endif
+    " Use tab for trigger completion with characters ahead and navigate.
+    " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+    " other plugin before putting this into your config.
+    inoremap <silent><expr> <TAB>
+        \ pumvisible() ? "\<C-n>" :
+        \ <SID>check_back_space() ? "\<TAB>" :
+        \ coc#refresh()
+    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-" " Make <CR> auto-select the first completion item and notify coc.nvim to
-" " format on enter, <cr> could be remapped by other vim plugin
-" inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-"     \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+    function! s:check_back_space() abort
+        let col = col('.') - 1
+        return !col || getline('.')[col - 1]  =~# '\s'
+    endfunction
 
-" Use `[g` and `]g` to navigate diagnostics
-" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-
-" GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-    if (index(['vim','help'], &filetype) >= 0)
-        execute 'h '.expand('<cword>')
-    elseif (coc#rpc#ready())
-        call CocActionAsync('doHover')
+    " Use <c-space> to trigger completion.
+    if has('nvim')
+        inoremap <silent><expr> <c-space> coc#refresh()
     else
-        execute '!' . &keywordprg . " " . expand('<cword>')
+        inoremap <silent><expr> <c-@> coc#refresh()
     endif
-endfunction
 
-" Highlight the symbol and its references when holding the cursor.
-autocmd CursorHold * silent call CocActionAsync('highlight')
+    " " Make <CR> auto-select the first completion item and notify coc.nvim to
+    " " format on enter, <cr> could be remapped by other vim plugin
+    " inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+    "     \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
-" Symbol renaming.
-nmap <leader>rn <Plug>(coc-rename)
+    " Use `[g` and `]g` to navigate diagnostics
+    " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+    nmap <silent> [g <Plug>(coc-diagnostic-prev)
+    nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
-" Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
+    " GoTo code navigation.
+    nmap <silent> gd <Plug>(coc-definition)
+    nmap <silent> gy <Plug>(coc-type-definition)
+    nmap <silent> gi <Plug>(coc-implementation)
+    nmap <silent> gr <Plug>(coc-references)
 
-augroup coc
-    autocmd!
-    " Setup formatexpr specified filetype(s).
-    autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-    " Update signature help on jump placeholder.
-    autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
+    " Use K to show documentation in preview window.
+    nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-" Applying codeAction to the selected region.
-" Example: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
+    function! s:show_documentation()
+        if (index(['vim','help'], &filetype) >= 0)
+            execute 'h '.expand('<cword>')
+        elseif (coc#rpc#ready())
+            call CocActionAsync('doHover')
+        else
+            execute '!' . &keywordprg . " " . expand('<cword>')
+        endif
+    endfunction
 
-" Remap keys for applying codeAction to the current buffer.
-nmap <leader>ac  <Plug>(coc-codeaction)
-" Apply AutoFix to problem on the current line.
-nmap <leader>qf  <Plug>(coc-fix-current)
+    " Highlight the symbol and its references when holding the cursor.
+    " autocmd CursorHold * silent call CocActionAsync('highlight')
 
-" Run the Code Lens action on the current line.
-nmap <leader>cl  <Plug>(coc-codelens-action)
+    " Symbol renaming.
+    nmap <leader>rn <Plug>(coc-rename)
 
-" Map function and class text objects
-" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
-xmap if <Plug>(coc-funcobj-i)
-omap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap af <Plug>(coc-funcobj-a)
-xmap ic <Plug>(coc-classobj-i)
-omap ic <Plug>(coc-classobj-i)
-xmap ac <Plug>(coc-classobj-a)
-omap ac <Plug>(coc-classobj-a)
+    " Formatting selected code.
+    xmap <leader>f  <Plug>(coc-format-selected)
+    nmap <leader>f  <Plug>(coc-format-selected)
 
-" Remap <C-f> and <C-b> for scroll float windows/popups.
-if has('nvim-0.4.0') || has('patch-8.2.0750')
-    nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-    nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-    inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-    inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-    vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-    vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+    augroup coc
+        autocmd!
+        " Setup formatexpr specified filetype(s).
+        autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+        " Update signature help on jump placeholder.
+        autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+    augroup end
+
+    " Applying codeAction to the selected region.
+    " Example: `<leader>aap` for current paragraph
+    xmap <leader>a  <Plug>(coc-codeaction-selected)
+    nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+    " Remap keys for applying codeAction to the current buffer.
+    nmap <leader>ac  <Plug>(coc-codeaction)
+    " Apply AutoFix to problem on the current line.
+    nmap <leader>qf  <Plug>(coc-fix-current)
+
+    " Run the Code Lens action on the current line.
+    nmap <leader>cl  <Plug>(coc-codelens-action)
+
+    " Map function and class text objects
+    " NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+    xmap if <Plug>(coc-funcobj-i)
+    omap if <Plug>(coc-funcobj-i)
+    xmap af <Plug>(coc-funcobj-a)
+    omap af <Plug>(coc-funcobj-a)
+    xmap ic <Plug>(coc-classobj-i)
+    omap ic <Plug>(coc-classobj-i)
+    xmap ac <Plug>(coc-classobj-a)
+    omap ac <Plug>(coc-classobj-a)
+
+    " Remap <C-f> and <C-b> for scroll float windows/popups.
+    if has('nvim-0.4.0') || has('patch-8.2.0750')
+        nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+        nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+        inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+        inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+        vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+        vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+    endif
+
+    " Use CTRL-S for selections ranges.
+    " Requires 'textDocument/selectionRange' support of language server.
+    nmap <silent> <C-s> <Plug>(coc-range-select)
+    xmap <silent> <C-s> <Plug>(coc-range-select)
+
+    " Add `:Format` command to format current buffer.
+    command! -nargs=0 Format :call CocActionAsync('format')
+
+    " Add `:Fold` command to fold current buffer.
+    command! -nargs=? Fold :call CocAction('fold', <f-args>)
+
+    " Add `:OR` command for organize imports of the current buffer.
+    command! -nargs=0 OR   :call CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+    " " Add (Neo)Vim's native statusline support.
+    " " NOTE: Please see `:h coc-status` for integrations with external plugins that
+    " " provide custom statusline: lightline.vim, vim-airline.
+    " set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+    " Mappings for CoCList
+    " Show all diagnostics.
+    nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+    " Manage extensions.
+    nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+    " Show commands.
+    nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+    " Find symbol of current document.
+    nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+    " Search workspace symbols.
+    nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+    " Do default action for next item.
+    nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+    " Do default action for previous item.
+    nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+    " Resume latest coc list.
+    nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+    " coc explorer
+    " nnoremap <leader>e <Cmd>CocCommand explorer<CR>
+
 endif
-
-" Use CTRL-S for selections ranges.
-" Requires 'textDocument/selectionRange' support of language server.
-nmap <silent> <C-s> <Plug>(coc-range-select)
-xmap <silent> <C-s> <Plug>(coc-range-select)
-
-" Add `:Format` command to format current buffer.
-command! -nargs=0 Format :call CocActionAsync('format')
-
-" Add `:Fold` command to fold current buffer.
-command! -nargs=? Fold :call CocAction('fold', <f-args>)
-
-" Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR   :call CocActionAsync('runCommand', 'editor.action.organizeImport')
-
-" " Add (Neo)Vim's native statusline support.
-" " NOTE: Please see `:h coc-status` for integrations with external plugins that
-" " provide custom statusline: lightline.vim, vim-airline.
-" set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Mappings for CoCList
-" Show all diagnostics.
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-" Manage extensions.
-nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
-" Show commands.
-nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
-" Find symbol of current document.
-nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
-" Search workspace symbols.
-nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
-" Resume latest coc list.
-nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
-
 
 " "tags generation _____________________________________________________________________________________________"
 " "tags generation _____________________________________________________________________________________________"
@@ -3377,7 +3557,13 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 
 let g:vim_tags_auto_generate               = 1
-let g:vim_tags_ctags_binary                = system("${which ctags}")
+
+if has('nvim')
+    let g:vim_tags_ctags_binary                = boot#chomp(system(['which', 'ctags']))
+else
+    let g:vim_tags_ctags_binary                = boot#chomp(system('which ctags'))
+endif
+
 let g:vim_tags_project_tags_command        = "{CTAGS} -R {OPTIONS} {DIRECTORY} 2>/dev/null"
 let g:vim_tags_gems_tags_command           = "{CTAGS} -R {OPTIONS} `bundle show --paths` 2>/dev/null"
 let g:vim_tags_use_vim_dispatch            = 0
@@ -3388,7 +3574,7 @@ let g:vim_tags_directories                 = [".git", ".hg", ".svn", ".bzr", "_d
 let g:vim_tags_main_file                   = 'tags'
 let g:vim_tags_extension                   = '.tags'
 " let g:vim_tags_cache_dir                   = expand($HOME)
-let g:vim_tags_cache_dir                   = g:config_root
+let g:vim_tags_cache_dir                   = g:cache_root
 let g:tagbar_left                          = 1
 let g:tagbar_expand                        = 1
 nmap <F2> :TagbarToggle<cr>
@@ -3510,63 +3696,105 @@ let g:tslime_always_current_session = 1
 let g:tslime_always_current_window  = 1
 let g:tslime_autoset_pane           = 1
 
-vmap <C-c><C-c> <Plug>SendSelectionToTmux
-nmap <C-c><C-c> <Plug>NormalModeSendToTmux
-nmap <C-c>r <Plug>SetTmuxVars
 
 " [Redir.vim](https://gist.github.com/intuited/362802)
 " :Redir map
 command! -nargs=+ -complete=command Redir let s:reg = @@  <bar> redir @">  <bar> silent execute <q-args>
     \  <bar> redir END  <bar> new  <bar> pu  <bar> 1,2d_  <bar> let @@ = s:reg
 
-let g:tmux_navigator_no_mappings    = 1
-" Write all buffers before navigating from Vim to tmux pane
-let g:tmux_navigator_save_on_switch = 2
+if exists('$TMUX')
 
-" function! s:tmux_move(direction)
-"     let wnr = winnr()
-"     silent! execute 'wincmd ' . a:direction
-"     " If the winnr is still the same after we moved, it is the last pane
-"     if wnr == winnr()
-"         call system('tmux select-pane -' . tr(a:direction, 'phjkl', 'lLDUR'))
-"     end
-" endfunction
-"
-" nnoremap <unique> <silent> <c-h> :call <sid>tmux_move('h')<cr>
-" nnoremap <unique> <silent> <c-j> :call <sid>tmux_move('j')<cr>
-" nnoremap <unique> <silent> <c-k> :call <sid>tmux_move('k')<cr>
-" nnoremap <unique> <silent> <c-l> :call <sid>tmux_move('l')<cr>
+    vmap <C-c><C-c> <Plug>SendSelectionToTmux
+    nmap <C-c><C-c> <Plug>NormalModeSendToTmux
+    nmap <C-c>r <Plug>SetTmuxVars
+
+    let g:tmux_navigator_no_mappings    = 1
+    " Readonly buffers will prompt errors
+    " Write all buffers before navigating from Vim to tmux pane
+    let g:tmux_navigator_save_on_switch = 2
+
+    " function! s:tmux_move(direction)
+    "     let wnr = winnr()
+    "     silent! execute 'wincmd ' . a:direction
+    "     " If the winnr is still the same after we moved, it is the last pane
+    "     if wnr == winnr()
+    "         call system('tmux select-pane -' . tr(a:direction, 'phjkl', 'lLDUR'))
+    "     end
+    " endfunction
+    "
+    " nnoremap <unique> <silent> <c-h> :call <sid>tmux_move('h')<cr>
+    " nnoremap <unique> <silent> <c-j> :call <sid>tmux_move('j')<cr>
+    " nnoremap <unique> <silent> <c-k> :call <sid>tmux_move('k')<cr>
+    " nnoremap <unique> <silent> <c-l> :call <sid>tmux_move('l')<cr>
 
 
-" nnoremap <unique> <silent> <c-h> :call keys#tmux_move('h')<cr>
-" nnoremap <unique> <silent> <c-j> :call keys#tmux_move('j')<cr>
-" nnoremap <unique> <silent> <c-k> :call keys#tmux_move('k')<cr>
-" nnoremap <unique> <silent> <c-l> :call keys#tmux_move('l')<cr>
-" nnoremap <unique> <silent> <c-w><c-h> :call keys#tmux_move('h')<cr>
+    " nnoremap <unique> <silent> <c-h> :call keys#tmux_move('h')<cr>
+    " nnoremap <unique> <silent> <c-j> :call keys#tmux_move('j')<cr>
+    " nnoremap <unique> <silent> <c-k> :call keys#tmux_move('k')<cr>
+    " nnoremap <unique> <silent> <c-l> :call keys#tmux_move('l')<cr>
+    " nnoremap <unique> <silent> <c-w><c-h> :call keys#tmux_move('h')<cr>
 
-" nnoremap <unique> <silent> <c-w><c-j> :call keys#tmux_move('j')<cr>
-" nnoremap <unique> <silent> <c-w><c-k> :call keys#tmux_move('k')<cr>
-" nnoremap <unique> <silent> <c-w><c-l> :call keys#tmux_move('l')<cr>
+    " nnoremap <unique> <silent> <c-w><c-j> :call keys#tmux_move('j')<cr>
+    " nnoremap <unique> <silent> <c-w><c-k> :call keys#tmux_move('k')<cr>
+    " nnoremap <unique> <silent> <c-w><c-l> :call keys#tmux_move('l')<cr>
 
-" nnoremap <silent> <c-<> :TmuxNavigateUp<cr>
-" nnoremap <silent> <c->> :TmuxNavigateDown<cr>
-" nnoremap <silent> <c-,> :TmuxNavigateLeft<cr>
-" nnoremap <silent> <c-.> :TmuxNavigateRight<cr>
-" nnoremap <silent> <c-\> :TmuxNavigatePrevious<cr>
+    " nnoremap <silent> <c-<> :TmuxNavigateUp<cr>
+    " nnoremap <silent> <c->> :TmuxNavigateDown<cr>
+    " nnoremap <silent> <c-,> :TmuxNavigateLeft<cr>
+    " nnoremap <silent> <c-.> :TmuxNavigateRight<cr>
+    " nnoremap <silent> <c-\> :TmuxNavigatePrevious<cr>
 
-" nnoremap <silent> <c-k> :call keys#tmux_move('k', g:navigate)<cr>
-" nnoremap <silent> <c-j> :call keys#tmux_move('j', g:navigate)<cr>
-" nnoremap <silent> <c-h> :call keys#tmux_move('h', g:navigate)<cr>
-" nnoremap <silent> <c-l> :call keys#tmux_move('l', g:navigate)<cr>
+    " nnoremap <silent> <c-k> :call keys#tmux_move('k', g:navigate)<cr>
+    " nnoremap <silent> <c-j> :call keys#tmux_move('j', g:navigate)<cr>
+    " nnoremap <silent> <c-h> :call keys#tmux_move('h', g:navigate)<cr>
+    " nnoremap <silent> <c-l> :call keys#tmux_move('l', g:navigate)<cr>
 
-" Write all buffers before navigating from Vim to tmux pane
-let g:tmux_navigator_save_on_switch = 2
 
-" Disable tmux navigator when zooming the Vim pane
-let g:tmux_navigator_disable_when_zoomed = 1
+    " Disable tmux navigator when zooming the Vim pane
+    let g:tmux_navigator_disable_when_zoomed = 1
 
-" https://github.com/RyanMillerC/better-vim-tmux-resizer
-let g:tmux_resizer_no_mappings = 1
+    " https://github.com/RyanMillerC/better-vim-tmux-resizer
+    let g:tmux_resizer_no_mappings = 1
+
+    let g:tpipeline_autoembed = 0
+    let g:tpipeline_cursormoved = 1
+    " tpipeline comes bundled with its own custom minimal statusline seen above
+    " let g:tpipeline_statusline = '%!tpipeline#stl#line()'
+    " set stl=%!tpipeline#stl#line()
+    " You can also use standard statusline syntax, see :help stl
+    " let g:tpipeline_statusline = '%f'
+
+    " https://superuser.com/questions/1158269/use-tmux-pane-border-format-with-vim-to-set-pane-titles
+    augroup tmux-pane-border-format
+        au!
+        " https://github.com/tmux/tmux/issues/1852
+        " autocmd BufWinLeave * call system('tmux set-window-option -g pane-border-format "#{pane_index}
+        "     \ #(%!v:lua.WindLine.show(' . bufnr('#') . ',' . win_getid(bufwinnr(bufnr('#'))) . '))" && tmux refresh -S')
+        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter,BufNew,WinEnter,CursorHoldI,CursorHold *
+        "     \ call system('tmux set-window-option
+        "     \ -g pane-border-format "#{pane_index} #(%!v:lua.WindLine.show(' . bufnr('%') .
+        "     \ ',' . win_getid(bufwinnr(bufnr('%'))) . '))" && tmux refresh -S')
+        "     " \ -g pane-border-format "#{pane_index} vim-' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
+        " " autocmd VimLeave * call system('tmux pane-border-format "#{pane_index} ' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] '"')
+
+
+
+        " autocmd BufWinLeave,WinLeave * silent! execute 'lua vim.g["tpipeline_statusline"] =
+        "     \ "%!v:lua.WindLine.show(' . bufnr('#') . ',' . win_getid(bufwinnr(bufnr('#'))) . ')"'
+
+        " " https://superuser.com/questions/517402/force-update-for-tmux-status-bar
+        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter,BufNew,WinEnter,CursorHoldI,CursorHold,FocusGained *
+        "     \ let &stl=&stl
+        "     \ | silent! execute 'lua vim.g["tpipeline_statusline"]= "%!v:lua.WindLine.show(' . bufnr('%') . ',' . win_getid(bufwinnr(bufnr('%'))) . ')"'
+        "     \ | redrawstatus!
+        "     \ | silent! exec '!tmux refresh-client -S'
+        " " \ | silent! exec '!tmux refresh -S'
+
+        " autocmd VimLeave * call system('tmux rename-window ' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1])
+        " autocmd VimEnter,BufNewFile,BufReadPost * call system('tmux rename-window "vim-' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
+    augroup END
+
+endif
 
 let g:sudo_no_gui = 1
 
@@ -3601,9 +3829,10 @@ set autowriteall
 
 " cnoremap w!! execute 'silent! write !sudo /usr/bin/tee "%" >/dev/null' <CR> <bar> call feedkeys('l', 't') <CR> <bar> :edit <CR>
 
-" cnoremap w!! write !doas tee > /dev/null % <CR> :edit<CR>
+" cnoremap w!! write !doas tee % > /dev/null <CR> :edit<CR>
 
 " cnoremap w!! exec 'w !sudo dd of=' . shellescape(expand('%')) <CR> :edit<CR>
+" cnoremap w!! exec 'w !doas dd of=' . shellescape(expand('%')) <CR> :edit<CR>
 
 " https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
 cnoremap w!! call <sid>save_file_via_sudo()<cr>
@@ -3617,8 +3846,11 @@ function! s:save_file_via_sudo() abort
     " https://github.com/vim-scripts/sudo.vim
     "     (command line): vim sudo:/etc/passwd
     "     (within vim):   :e sudo:/etc/passwd
-    execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null'
-    " execute (has('gui_running') ? '' : 'silent') 'write !env DOAS_EDITOR=tee doas -e ' . shellescape(expand('%')) . ' >/dev/null'
+    if executable('sudo')
+        execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null '
+    elseif executable('doas')
+        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
+    endif
     let &modified = v:shell_error
 endfunction
 
@@ -3644,77 +3876,78 @@ endfunction
 " noremap  <silent> <C-s> :SudoWrite<CR>
 " inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
+if has('nvim')
+    " https://github.com/kyazdani42/nvim-tree.lua
+    " vimrc
+    let g:nvim_tree_indent_markers = 1 "0 by default, this option shows indent markers when folders are open
+    let g:nvim_tree_git_hl = 1 "0 by default, will enable file highlight for git attributes (can be used without the icons).
+    let g:nvim_tree_highlight_opened_files = 1 "0 by default, will enable folder and file icon highlight for opened files/directories.
+    let g:nvim_tree_root_folder_modifier = ':~' "This is the default. See :help filename-modifiers for more options
+    let g:nvim_tree_add_trailing = 1 "0 by default, append a trailing slash to folder names
+    let g:nvim_tree_group_empty = 1 " 0 by default, compact folders that only contain a single folder into one node in the file tree
+    let g:nvim_tree_disable_window_picker = 1 "0 by default, will disable the window picker.
+    let g:nvim_tree_icon_padding = ' ' "one space by default, used for rendering the space between the icon and the filename. Use with caution, it could break rendering if you set an empty string depending on your font.
+    let g:nvim_tree_symlink_arrow = ' >> ' " defaults to ' ➛ '. used as a separator between symlinks' source and target.
+    let g:nvim_tree_respect_buf_cwd = 1 "0 by default, will change cwd of nvim-tree to that of new buffer's when opening nvim-tree.
+    let g:nvim_tree_create_in_closed_folder = 1 "0 by default, When creating files, sets the path of a file when cursor is on a closed folder to the parent folder when 0, and inside the folder when 1.
+    let g:nvim_tree_window_picker_exclude = {
+        \   'filetype': [
+            \     'notify',
+            \     'packer',
+            \     'qf'
+            \   ],
+            \   'buftype': [
+                \     'terminal'
+                \   ]
+                \ }
+    " Dictionary of buffer option names mapped to a list of option values that
+    " indicates to the window picker that the buffer's window should not be
+    " selectable.
+    let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 } " List of filenames that gets highlighted with NvimTreeSpecialFile
+    let g:nvim_tree_show_icons = {
+        \ 'git': 1,
+        \ 'folders': 0,
+        \ 'files': 0,
+        \ 'folder_arrows': 0,
+        \ }
+    "If 0, do not show the icons for one of 'git' 'folder' and 'files'
+    "1 by default, notice that if 'files' is 1, it will only display
+    "if nvim-web-devicons is installed and on your runtimepath.
+    "if folder is 1, you can also tell folder_arrows 1 to show small arrows next to the folder icons.
+    "but this will not work when you set indent_markers (because of UI conflict)
 
-" https://github.com/kyazdani42/nvim-tree.lua
-" vimrc
-let g:nvim_tree_indent_markers = 1 "0 by default, this option shows indent markers when folders are open
-let g:nvim_tree_git_hl = 1 "0 by default, will enable file highlight for git attributes (can be used without the icons).
-let g:nvim_tree_highlight_opened_files = 1 "0 by default, will enable folder and file icon highlight for opened files/directories.
-let g:nvim_tree_root_folder_modifier = ':~' "This is the default. See :help filename-modifiers for more options
-let g:nvim_tree_add_trailing = 1 "0 by default, append a trailing slash to folder names
-let g:nvim_tree_group_empty = 1 " 0 by default, compact folders that only contain a single folder into one node in the file tree
-let g:nvim_tree_disable_window_picker = 1 "0 by default, will disable the window picker.
-let g:nvim_tree_icon_padding = ' ' "one space by default, used for rendering the space between the icon and the filename. Use with caution, it could break rendering if you set an empty string depending on your font.
-let g:nvim_tree_symlink_arrow = ' >> ' " defaults to ' ➛ '. used as a separator between symlinks' source and target.
-let g:nvim_tree_respect_buf_cwd = 1 "0 by default, will change cwd of nvim-tree to that of new buffer's when opening nvim-tree.
-let g:nvim_tree_create_in_closed_folder = 1 "0 by default, When creating files, sets the path of a file when cursor is on a closed folder to the parent folder when 0, and inside the folder when 1.
-let g:nvim_tree_window_picker_exclude = {
-    \   'filetype': [
-        \     'notify',
-        \     'packer',
-        \     'qf'
-        \   ],
-        \   'buftype': [
-            \     'terminal'
-            \   ]
-            \ }
-" Dictionary of buffer option names mapped to a list of option values that
-" indicates to the window picker that the buffer's window should not be
-" selectable.
-let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 } " List of filenames that gets highlighted with NvimTreeSpecialFile
-let g:nvim_tree_show_icons = {
-    \ 'git': 1,
-    \ 'folders': 0,
-    \ 'files': 0,
-    \ 'folder_arrows': 0,
-    \ }
-"If 0, do not show the icons for one of 'git' 'folder' and 'files'
-"1 by default, notice that if 'files' is 1, it will only display
-"if nvim-web-devicons is installed and on your runtimepath.
-"if folder is 1, you can also tell folder_arrows 1 to show small arrows next to the folder icons.
-"but this will not work when you set indent_markers (because of UI conflict)
+    " default will show icon by default if no icon is provided
+    " default shows no icon by default
+    let g:nvim_tree_icons = {
+        \ 'default': '',
+        \ 'symlink': '',
+        \ 'git': {
+            \   'unstaged': "✗",
+            \   'staged': "✓",
+            \   'unmerged': "",
+            \   'renamed': "➜",
+            \   'untracked': "★",
+            \   'deleted': "",
+            \   'ignored': "◌"
+            \   },
+            \ 'folder': {
+                \   'arrow_open': "",
+                \   'arrow_closed': "",
+                \   'default': "",
+                \   'open': "",
+                \   'empty': "",
+                \   'empty_open': "",
+                \   'symlink': "",
+                \   'symlink_open': "",
+                \   }
+                \ }
 
-" default will show icon by default if no icon is provided
-" default shows no icon by default
-let g:nvim_tree_icons = {
-    \ 'default': '',
-    \ 'symlink': '',
-    \ 'git': {
-        \   'unstaged': "✗",
-        \   'staged': "✓",
-        \   'unmerged': "",
-        \   'renamed': "➜",
-        \   'untracked': "★",
-        \   'deleted': "",
-        \   'ignored': "◌"
-        \   },
-        \ 'folder': {
-            \   'arrow_open': "",
-            \   'arrow_closed': "",
-            \   'default': "",
-            \   'open': "",
-            \   'empty': "",
-            \   'empty_open': "",
-            \   'symlink': "",
-            \   'symlink_open': "",
-            \   }
-            \ }
-
-" nnoremap <C-n> :NvimTreeToggle<CR>
-nnoremap <leader>n :NvimTreeToggle<CR>
-nnoremap <leader>r :NvimTreeRefresh<CR>
-" nnoremap <leader>n :NvimTreeFindFile<CR>
-" NvimTreeOpen, NvimTreeClose, NvimTreeFocus, NvimTreeFindFileToggle, and NvimTreeResize are also available if you need them
+    " nnoremap <C-n> :NvimTreeToggle<CR>
+    nnoremap <leader>n :NvimTreeToggle<CR>
+    nnoremap <leader>r :NvimTreeRefresh<CR>
+    " nnoremap <leader>n :NvimTreeFindFile<CR>
+    " NvimTreeOpen, NvimTreeClose, NvimTreeFocus, NvimTreeFindFileToggle, and NvimTreeResize are also available if you need them
+endif
 
 set termguicolors " this variable must be enabled for colors to be applied properly
 
@@ -3727,7 +3960,7 @@ highlight NvimTreeFolderIcon guibg=blue
 " coc explorer
 " nnoremap <leader>e <Cmd>CocCommand explorer<CR>
 
-
+if exists('g:_use_fern')
 
 " https://github.com/lambdalisue/fern-renderer-devicons.vim
 let g:fern#renderer = "devicons"
@@ -4014,6 +4247,7 @@ augroup fern_preview
     autocmd FileType fern call s:fern_preview_init()
 augroup END
 
+endif
 
 " CtrlP
 " Disable default mapping since we are overriding it with our command let g:ctrlp_map = ''
@@ -4056,11 +4290,13 @@ let g:tex_flavor = "latex"
 
 
 " https://github.com/andymass/vim-matchup
-let g:loaded_matchit = 1
+" Disable mathcit
+" let g:loaded_matchit = 1
 
-augroup cxx_auto_format | au!
-    autocmd FileType c,cxx,cpp ClangFormatAutoEnable
-augroup END
+" augroup cxx_auto_format | au!
+"     " Won't read .clang-format
+"     autocmd FileType c,cxx,cpp ClangFormatAutoEnable
+" augroup END
 
 " call packager#add('Chiel92/vim-autoformat', { 'type' : 'start' })
 " noremap <F3> :Autoformat<cr>
@@ -4071,9 +4307,10 @@ nmap ea <Plug>(EasyAlign)
 xmap ea <Plug>(EasyAlign)
 " noremap <F4> :EasyAlign<cr>
 
-" let g:autoformat_autoindent             = 0
-" let g:autoformat_retab                  = 0
-" let g:autoformat_remove_trailing_spaces = 0
+" https://github.com/vim-autoformat/vim-autoformat
+let g:autoformat_autoindent             = 0
+let g:autoformat_retab                  = 0
+let g:autoformat_remove_trailing_spaces = 0
 
 " augroup auto_format
 "     au!
@@ -4095,10 +4332,12 @@ xmap ea <Plug>(EasyAlign)
 "     autocmd FileType json autocmd BufWritePre *.json if g:format_flag | :JsonFormat | endif
 "     autocmd FileType json autocmd! json_group FileType
 " augroup END
-"
-" https://lorenzod8n.wordpress.com/2007/05/14/quick-vim-tip-getting-vim-to-know-zsh-files/
-autocmd BufNewFile,BufRead *.zsh setlocal filetype=zsh
-autocmd BufNewFile,BufRead vimoutlinerrc setlocal filetype=vim
+
+augroup filetypes | au!
+    " https://lorenzod8n.wordpress.com/2007/05/14/quick-vim-tip-getting-vim-to-know-zsh-files/
+    autocmd BufNewFile,BufRead *.zsh setlocal filetype=zsh
+    autocmd BufNewFile,BufRead vimoutlinerrc setlocal filetype=vim
+augroup END
 
 " " for original command
 " let g:vim_format_list   = {
@@ -4192,7 +4431,7 @@ endif
 " cnoreabbrev aG Ack
 " cnoreabbrev Ag Ack
 " cnoreabbrev AG Ack
-
+" You need to install ack from package manager for ack.vim
 cnoreabbrev Ack Ack!
 " Will generate huge file!
 nnoremap <leader>a :Ack!<space>
@@ -4259,13 +4498,13 @@ nnoremap <silent> <C-p>  :call <sid>fzf_open(':Files')<cr>
 
 " "complition functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 " "complition functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
+"
 " Set completeopt to have a better completion experience
-set completeopt=menuone,longest
+" set completeopt=menu,menuone,longest
+set completeopt=menu,menuone
 set completeopt+=noinsert,noselect
 set completeopt-=preview
 
-set shortmess+=c   " Shut off completion messages
 set belloff+=ctrlg " Add only if Vim beeps during completion
 let g:mucomplete#enable_auto_at_startup = 1
 let g:mucomplete#completion_delay = 1
@@ -4279,7 +4518,11 @@ set noinfercase
 " Installing clangd
 " https://clangd.llvm.org/installation.html
 " let g:clang_library_path = '/usr/lib'
-let g:clang_library_path = boot#chomped_system("echo $(llvm-config --libdir)")
+if has('nvim')
+    let g:clang_library_path = boot#chomp(system(['llvm-config', '--libdir']))
+else
+    let g:clang_library_path = boot#chomp(system('llvm-config --libdir'))
+endif
 let g:clang_user_options = '-std=c++2a'
 let g:clang_complete_auto = 1
 imap <expr> <down> mucomplete#extend_fwd("\<down>")
@@ -4419,15 +4662,15 @@ let g:smartq_bw_buftypes = [
 
 " "session operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
-if exists('g:loaded_session')
-    " https://github.com/xolox/vim-session
-    let g:session_autoload         = 'yes'
-    let g:session_autosave         = 'yes'
-    " Will generate .default.vim
-    let g:session_autosave_to      = '.default'
-    let g:session_verbose_messages = 0
-    let g:session_directory        = getcwd()
-endif
+" if exists('g:loaded_session')
+"     " https://github.com/xolox/vim-session
+"     let g:session_autoload         = 'yes'
+"     let g:session_autosave         = 'yes'
+"     " Will generate .default.vim
+"     let g:session_autosave_to      = '.default'
+"     let g:session_verbose_messages = 0
+"     let g:session_directory        = getcwd()
+" endif
 
 " " https://github.com/xolox/vim-notes/issues/80
 " augroup reset_xolox
@@ -4585,118 +4828,123 @@ augroup END
 " https://vi.stackexchange.com/questions/26050/how-to-set-read-only-for-only-one-buffer
 augroup readonly
     autocmd!
-    autocmd BufReadPost g:log_address setlocal readonly | setlocal buftype=nofile | setlocal filetype=log
+    autocmd BufReadPost g:_log_address setlocal readonly | setlocal buftype=nofile | setlocal filetype=log
 augroup END
 
 " "session operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
 " "dict ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''"
 
-" For fun (doesn't work: 16928 segmentation fault  goldendict). Actally sdcv works in console
-if 1 == g:_is_windows
-    let g:goldendict_path = 'C:\Program Files\GoldenDict\GoldenDict.exe'
-else
-    let g:goldendict_path = boot#chomped_system('which goldendict')
-endif
+" " For fun (doesn't work: 16928 segmentation fault  goldendict). Actally sdcv works in console
+" if 1 == g:_is_windows
+"     let g:goldendict_path = 'C:\Program Files\GoldenDict\GoldenDict.exe'
+" else
+"     let g:goldendict_path = boot#chomped_system('which goldendict')
+" endif
+"
+" imap <F1> <C-\><C-O><Plug>(goldendict-lookup-cursor)<cr>
+" nmap <F1> <Plug>(goldendict-lookup-cursor)<cr>
+" vmap <F1> <C-G><Plug>(goldendict-lookup-visual)<C-G><cr>
 
-imap <F1> <C-\><C-O><Plug>(goldendict-lookup-cursor)<cr>
-nmap <F1> <Plug>(goldendict-lookup-cursor)<cr>
-vmap <F1> <C-G><Plug>(goldendict-lookup-visual)<C-G><cr>
+augroup github | au!
+    au BufEnter github.com_*.txt set filetype=markdown
+augroup END
 
-if exists('g:started_by_firenvim')
-    set laststatus=0
-else
-    set laststatus=2
-endif
-
-function! OnUIEnter(event) abort
-    if 'Firenvim' ==# get(get(nvim_get_chan_info(a:event.chan), 'client', {}), 'name', '')
-        set laststatus=0
-    endif
-endfunction
-
-au BufEnter github.com_*.txt set filetype=markdown
-
-if ! exists("g:firenvim_write")
-
-    " let g:firenvim_config = {
-    "             \ 'localSettings': {
-    "                 \ '.*': {,
-    "                 \ 'filename': '/tmp/{hostname}_{pathname%10}.{extension}',
-    "                 \ }
-    "                 \ }
-
-    " Broken Websites - glacambre/firenvim Wiki
-    " \ 'localSettings': {
-    "     \ '.*': {
-    "         \ 'cmdline': 'firenvim',
-    "         \ 'priority': 0,
-    "         \ 'selector': 'textarea:not([readonly]):not([class="handsontableInput"]), div[role="textbox"]',
-    "         \ 'takeover': 'always',
-    "     \ },
-    "     \ '.*notion\.so.*': { 'priority': 9, 'takeover': 'never', },
-    "     \ '.*docs\.google\.com.*': { 'priority': 9, 'takeover': 'never', },
-    " \ }
-    let g:firenvim_config =
-        \ { 'globalSettings':
-        \ { 'cmdlineTimeout': 3000,
-        \ '<C-w>': 'noop',
-        \ '<C-n>': 'default',
-        \ 'alt': 'all',
-        \  },
-        \ 'localSettings':
-        \ { '.*':
-        \ { 'cmdline': 'neovim',
-        \ 'content': 'text',
-        \ 'priority': 0,
-        \ 'selector': 'textarea:not([readonly]):not([class="handsontableInput"]), div[role="textbox"]',
-        \ 'takeover': 'always',
-        \ },
-        \ '.*notion\.so.*': { 'priority': 9, 'takeover': 'never', },
-        \ '.*docs\.google\.com.*': { 'priority': 9, 'takeover': 'never', },
-        \ }
-        \ }
-
-    let fc = g:firenvim_config['localSettings']
-    let fc['https?://[^/]+\.co\.uk/'] = { 'takeover': 'never', 'priority': 1 }
-
-    let fc['.*'] = { 'selector': 'textarea:not([readonly]), div[role="textbox"]' }
-
-
-
-    let g:dont_write = v:false
-
-    function! s:firenvim_write(timer) abort
-        let g:dont_write = v:false
-        if filewritable(bufname('%'))
-            write
-        endif
-    endfunction
-
-    function! s:delay_firenvim_write() abort
-        if g:dont_write
-            return
-        end
-        let g:dont_write = v:true
-        let timer = 10000
-        " https://vi.stackexchange.com/questions/27035/vim-script-how-to-pass-varargs-to-a-lambda-in-timer-start
-        call timer_start(timer, { -> execute ("call s:firenvim_write('" . timer . "')", "") })
-    endfunction
-
-    augroup firenvim_write
-        au!
-        if has("gui_running")
-            autocmd UIEnter * call OnUIEnter(deepcopy(v:event))
-        endif
-        " au TextChanged * ++nested write
-        " au TextChangedI * ++nested write
-        au TextChanged  * ++nested call s:delay_firenvim_write()
-        au TextChangedI * ++nested call s:delay_firenvim_write()
-    augroup END
-
-    let g:firenvim_write = 1
-
-endif
+" if ! exists("g:_firenvim_write")
+"
+"     if exists('g:started_by_firenvim')
+"
+"         set laststatus=0
+"     else
+"         set laststatus=2
+"     endif
+"
+"     function! OnUIEnter(event) abort
+"         if 'Firenvim' ==# get(get(nvim_get_chan_info(a:event.chan), 'client', {}), 'name', '')
+"             set laststatus=0
+"         endif
+"     endfunction
+"
+"
+"     " let g:firenvim_config = {
+"     "             \ 'localSettings': {
+"     "                 \ '.*': {,
+"     "                 \ 'filename': '/tmp/{hostname}_{pathname%10}.{extension}',
+"     "                 \ }
+"     "                 \ }
+"
+"     " Broken Websites - glacambre/firenvim Wiki
+"     " \ 'localSettings': {
+"     "     \ '.*': {
+"     "         \ 'cmdline': 'firenvim',
+"     "         \ 'priority': 0,
+"     "         \ 'selector': 'textarea:not([readonly]):not([class="handsontableInput"]), div[role="textbox"]',
+"     "         \ 'takeover': 'always',
+"     "     \ },
+"     "     \ '.*notion\.so.*': { 'priority': 9, 'takeover': 'never', },
+"     "     \ '.*docs\.google\.com.*': { 'priority': 9, 'takeover': 'never', },
+"     " \ }
+"     let g:firenvim_config =
+"         \ { 'globalSettings':
+"         \ { 'cmdlineTimeout': 3000,
+"         \ '<C-w>': 'noop',
+"         \ '<C-n>': 'default',
+"         \ 'alt': 'all',
+"         \  },
+"         \ 'localSettings':
+"         \ { '.*':
+"         \ { 'cmdline': 'neovim',
+"         \ 'content': 'text',
+"         \ 'priority': 0,
+"         \ 'selector': 'textarea:not([readonly]):not([class="handsontableInput"]), div[role="textbox"]',
+"         \ 'takeover': 'always',
+"         \ },
+"         \ '.*notion\.so.*': { 'priority': 9, 'takeover': 'never', },
+"         \ '.*docs\.google\.com.*': { 'priority': 9, 'takeover': 'never', },
+"         \ }
+"         \ }
+"
+"     let fc = g:firenvim_config['localSettings']
+"     let fc['https?://[^/]+\.co\.uk/'] = { 'takeover': 'never', 'priority': 1 }
+"
+"     let fc['.*'] = { 'selector': 'textarea:not([readonly]), div[role="textbox"]' }
+"
+"
+"
+"     let g:dont_write = v:false
+"
+"     function! s:firenvim_write(timer) abort
+"         unlet g:dont_write
+"         let g:dont_write = v:false
+"         if filewritable(bufname('%'))
+"             write
+"         endif
+"     endfunction
+"
+"     function! s:delay_firenvim_write() abort
+"         if g:dont_write
+"             return
+"         end
+"         let g:dont_write = v:true
+"         let timer = 10000
+"         " https://vi.stackexchange.com/questions/27035/vim-script-how-to-pass-varargs-to-a-lambda-in-timer-start
+"         call timer_start(timer, { -> execute ("call s:firenvim_write('" . timer . "')", "") })
+"     endfunction
+"
+"     augroup firenvim_write_group
+"         au!
+"         if has("gui_running")
+"             autocmd UIEnter * call OnUIEnter(deepcopy(v:event))
+"         endif
+"         " au TextChanged * ++nested write
+"         " au TextChangedI * ++nested write
+"         au TextChanged  * ++nested call s:delay_firenvim_write()
+"         au TextChangedI * ++nested call s:delay_firenvim_write()
+"     augroup END
+"
+"     let g:_firenvim_write = 1
+"
+" endif
 
 " "dict ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''"
 
@@ -4704,41 +4952,41 @@ endif
 
 
 
-" https://www.quora.com/How-do-I-compile-a-program-C++-or-Java-in-Vim-like-Sublime-Text-Ctrl+B/answer/Lin-Wei-31
-" open quickfix window automatically when AsyncRun is executed
-" set the quickfix window 6 lines height.
-let g:asyncrun_open = 6
-
-" ring the bell to notify you job finished
-let g:asyncrun_bell = 1
-
-
-" F10 to toggle quickfix window
-" nnoremap <F10> :call asyncrun#quickfix_toggle(6)<cr>
-nmap <C-g><C-o> <Plug>window:quickfix:loop
-
-let g:asyncrun_rootmarks = ['.git', '.svn', '.root', '.project', '.hg']
-
-" https://stackoverflow.com/questions/42905008/quickfix-list-how-to-add-and-remove-entries
-:packadd cfilter
-" :Cfilter DPUST
-
-
-" if has('win32') || has('win64')
-"     noremap <silent><F2> :AsyncRun! -cwd=<root> findstr /n /s /C:"<C-R><C-W>" "\%CD\%\*.h*" --include='*.i*' "\%cd\%\*.c*" <cr>
-" else
-"     noremap <silent><F2> :AsyncRun! -cwd=<root> grep -n -s -R <C-R><C-W> --include='*.h*' --include='*.i*' --include='*.c*' '<root>' <cr>
-" endif
+" " https://www.quora.com/How-do-I-compile-a-program-C++-or-Java-in-Vim-like-Sublime-Text-Ctrl+B/answer/Lin-Wei-31
+" " open quickfix window automatically when AsyncRun is executed
+" " set the quickfix window 6 lines height.
+" let g:asyncrun_open = 6
+"
+" " ring the bell to notify you job finished
+" let g:asyncrun_bell = 1
+"
+"
+" " F10 to toggle quickfix window
+" " nnoremap <F10> :call asyncrun#quickfix_toggle(6)<cr>
+" nmap <C-g><C-o> <Plug>window:quickfix:loop
+"
+" let g:asyncrun_rootmarks = ['.git', '.svn', '.root', '.project', '.hg']
+"
+" " https://stackoverflow.com/questions/42905008/quickfix-list-how-to-add-and-remove-entries
+" :packadd cfilter
+" " :Cfilter DPUST
+"
+"
+" " if has('win32') || has('win64')
+" "     noremap <silent><F2> :AsyncRun! -cwd=<root> findstr /n /s /C:"<C-R><C-W>" "\%CD\%\*.h*" --include='*.i*' "\%cd\%\*.c*" <cr>
+" " else
+" "     noremap <silent><F2> :AsyncRun! -cwd=<root> grep -n -s -R <C-R><C-W> --include='*.h*' --include='*.i*' --include='*.c*' '<root>' <cr>
+" " endif
 
 if exists('s:_init_develop') && 1 == s:_init_develop
     function! s:log() abort
-        " silent! execute '!(printf "scriptnames\t\t: ">> '. g:log_address . ' 2>&1 &) > /dev/null'
+        " silent! execute '!(printf "scriptnames\t\t: ">> '. g:_log_address . ' 2>&1 &) > /dev/null'
         call s:log_silent("scriptnames", "", g:_environment)
-        " silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | call s:log_silent(\'\n\') | redir END'
-        silent! execute 'redir >> ' . g:log_address . ' | silent scriptnames | redir END | call s:log_silent("\n")'
-        silent! execute 'redir >> ' . g:log_address . ' | silent verbose map | redir END | call s:log_silent("\n")'
-        " silent! execute 'redir! > ' . g:log_address . ' | silent map | redir END | call s:log_silent("\n")'
-        " silent! execute '!(printf \'\n\'>> '. g:log_address . ' 2>&1 &) > /dev/null'
+        " silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames | call s:log_silent(\'\n\') | redir END'
+        silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames | redir END | call s:log_silent("\n")'
+        silent! execute 'redir >> ' . g:_log_address . ' | silent verbose map | redir END | call s:log_silent("\n")'
+        " silent! execute 'redir! > ' . g:_log_address . ' | silent map | redir END | call s:log_silent("\n")'
+        " silent! execute '!(printf \'\n\'>> '. g:_log_address . ' 2>&1 &) > /dev/null'
         " call s:log_silent("\n", "", g:_environment)
     endfunction
 
@@ -4780,11 +5028,12 @@ augroup reload_vimrc
     " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC | setlocal filetype=vim
     " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC
 
-    if has('nvim')
-        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
-    else
-        autocmd! BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
-    endif
+    " if has('nvim')
+    "     autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
+    " else
+        autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
+        " autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
+    " endif
 augroup END
 
 " "auto reload .vimrc __________________________________________________________________________________________"
@@ -4796,7 +5045,7 @@ augroup END
 " https://stackoverflow.com/questions/14779299/syntax-highlighting-randomly-disappears-during-file-saving
 augroup reset_syntax
     au!
-    autocmd BufWritePost * ++nested syntax enable <bar> doautocmd filetypedetect BufRead "%"
+    autocmd SourcePost,BufReadPost,BufWritePost * doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
     " syntax enable
 augroup END
 
@@ -4807,7 +5056,7 @@ augroup END
 " "keep above code block at the very end of the file ___________________________________________________________"
 
 
-if ! has('nvim') " && (exists('g:loaded_minpac') || exists('g:loaded_vim_packager'))
+if ! has('nvim') && empty($TMUX) " && (exists('g:loaded_minpac') || exists('g:loaded_vim_packager'))
     " https://github.com/itchyny/lightline.vim/issues/512
     hi LightlineLeft_active_0 guibg=darkgrey
 
@@ -4835,7 +5084,8 @@ else
     augroup indent_blankline_hl
         au!
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
+            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested redraw!
+            " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
     augroup END
 endif
 
@@ -4891,4 +5141,5 @@ if exists('s:_init_develop') && 1 == s:_init_develop && bufnr(g:_log_address) < 
     " https://stackoverflow.com/questions/4043650/open-a-file-in-a-tab-in-vim-in-readonly-mode
     " :tabedit +set\ noma|set\ ro FILE
 endif
+" vim: set ts=4 sw=4 tw=0 et :
 " vim: set ts=4 sw=4 tw=0 et :

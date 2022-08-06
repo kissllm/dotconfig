@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+[ -z "${LOGNAME}" ] && {
+    export LOGNAME=$(/usr/bin/whoami)
+}
+
+export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" '{if ($1==v) print $6}' /etc/passwd)"
+
+export LLVM_IAS="1"
+export LLVM="1"
+
+export SSL_CERT_FILE=$HOME/.cert/cacert.pem
+export BOOTSTRAP_ROOT=sysroot
+
+[ -f /etc/profile ] && . /etc/profile
+[ "${SHELL}" != "${0}" ] && export SHELL=$0
+[ -f $HOME/.ashrc ] && . $HOME/.ashrc

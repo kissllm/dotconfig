@@ -26,6 +26,14 @@ rbac_auth
 # umask 077
 umask 037
 
+# zinit initialization
+SHARE_PREFIX="/opt"
+SRC_PREFIX="/working"
+BUILD_PREFIX="/build"
+
+. /opt/init/env
+# . /opt/init/toolchain
+
 ZDOTDIR="${ZDOTDIR:-${HOME}}"
 ZSHDDIR="${HOME}/.config/zsh.d"
 HISTFILE="${ZDOTDIR}/.zsh_history"
@@ -96,9 +104,9 @@ if ! [ -z ${USE_SHELDON} ]; then
         fd/_fd
         docker/_docker
         docker-compose/_docker-compose
-        rust/_rust
+        # rust/_rust
         cargo
-        rustup
+        # rustup
         npm
         yarn
         nvm
@@ -160,6 +168,7 @@ VINIT[HOME_DIR]="${SHARE_PREFIX}/vinit"
 # tinit
 declare -A TINIT
 TINIT[HOME_DIR]="${SHARE_PREFIX}/tinit"
+TMUX_PLUGIN_MANAGER_PATH=${TINIT[HOME_DIR]}/tmux/plugins
 
 export SHARE_PREFIX=${SHARE_PREFIX}
 export ZINIT[HOME_DIR]=${ZINIT[HOME_DIR]}
@@ -300,9 +309,10 @@ _fzf_complete_kubectl_view-serviceaccount-kubeconfig() {
 }
 # Completion.
 # https://stackoverflow.com/questions/58283701/why-cant-zsh-execute-command-compdef
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
 # K8s auto-complete
 autoload -U +X compinit && compinit
-source <(kubectl completion zsh)
+[[ -f /usr/bin/kubectl ]] && source <(kubectl completion zsh)
 
 # https://unix.stackexchange.com/questions/534942/auto-trigger-history-search-in-terminal-using-fzf-fuzzy-finder
 # zstyle ':autocomplete:*' default-context history-incremental-search-backward
@@ -803,11 +813,12 @@ alias nv=_nv
 setopt aliases
 
 # https://superuser.com/questions/749314/how-do-you-set-alias-sudo-nocorrect-sudo-correctly
+alias doas='noglob do_doas '
 function do_doas
 {
     integer glob=1
     local -a run
-    run=( command sudo )
+    run=( command doas )
     if [[ $# -gt 1 && $1 = -u ]]; then
         run+=($1 $2)
         shift ; shift
@@ -923,7 +934,8 @@ case $TERM in
         bindkey "^[[A"  history-beginning-search-backward
         bindkey "^[[B"  history-beginning-search-forward
         # /usr/bin/setfont /usr/share/kbd/consolefonts/LatGrkCyr-12x22.psfu.gz
-        /usr/bin/setfont /usr/share/kbd/consolefonts/ter-124b.psf.gz
+        # /usr/bin/setfont /usr/share/kbd/consolefonts/ter-124b.psf.gz
+        /usr/bin/setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
 
     ;;
 
@@ -1069,6 +1081,7 @@ if [ -f ~/.alert ]; then echo '>>> Check ~/.alert'; fi
 # }
 
 export XBPS_DISTDIR=$HOME/.void-packages
+export XBPS_MAKEJOBS=13
 
 # export PS1='%n@%m %~$ '
 # export PS1='%n@%m %(!.#.$)~$ '
@@ -1110,18 +1123,13 @@ export ELM_DISPLAY=wl
 export ECORE_EVAS_ENGINE=wayland_egl
 export ELM_ENGINE=wayland_egl
 
-export DENO_INSTALL="${SHARE_PREFIX}/deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
+# Running sway without xwayland
+# https://github.com/swaywm/sway/issues/676
+export WLC_XWAYLAND=0
 
-# # Set font when running in console. For hidpi screen
-# if [ $TERM = linux ]; then
-#     # terminus-font
-#     /usr/bin/setfont /usr/share/kbd/consolefonts/ter-122b.psf.gz
-#     # Use default font
-#     # /usr/bin/setfont /usr/share/kbd/consolefonts/LatGrkCyr-12x22.psfu.gz
-# fi
-
-if [[ $TERM == xterm ]]; then TERM=xterm-256color; fi
+# export PS1='%n@%m %~$ '
+# export PS1='%n@%m %(!.#.$)~$ '
+# export PS1='%(!.#.$) '
 
 # export TERM=alacritty
 # export TERM=screen-256color
@@ -1144,20 +1152,10 @@ export VOIDNSUNDO_BIN=/usr/local/bin/voidnsundo
 
 # [[ ! -f /bedrock/run/profile ]] || source /bedrock/run/profile
 [ -f /bedrock/run/profile ] && source /bedrock/run/profile
+# [ -f ${HOME}/.profile ] && source ${HOME}/.profile
 
 # Set commands or paths to LLVM-provided tools outside the script via 'export ...'
 # or before these lines
-export AR=${AR:=llvm-ar}
-export NM=${NM:=llvm-nm}
-export CC=/usr/bin/clang
-export CXX=/usr/bin/clang++
-# You may also set CFLAGS, CPPFLAGS, CXXFLAGS, and LDFLAGS
-# See build/toolchain/linux/unbundle/ in the Chromium source for more details.
-#
-# # Hack to allow clang to find the default cfi_blacklist.txt
-# export CXXFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
-# export CPPFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
-# export CFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
 
 export QT_AUTO_SCREEN_SCALE_FACTOR=0
 export QT_SCALE_FACTOR=1
@@ -1168,7 +1166,7 @@ export GDK_DPI_SCALE=0.75
 # bindkey -v
 
 # export TMUX_DIR=$HOME/.tmux
-export TMUX_DIR=${SHARE_PREFIX}/tinit/.tmux
+export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
 
 alias bmux='pgrep -vx tmux > /dev/null && \
     tmux new -d -s delete-me && \
@@ -1312,21 +1310,33 @@ function post_update(){
 
     command doas chmod -R go+rx "${ZPFX}/bin"
 
-    for packages_path in "${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+    if [ -d "$1" ]; then
+        echo "\${1}: "${1}
+        working_path=("${1}")
+    else
+        working_path=("${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}")
+    fi
+
+    # for packages_path in "${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+    for packages_path in "${working_path[@]}"
     do
         # command doas find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
         #     -o -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
         #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + \
         #     && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
 
-        command doas chmod --quiet go+rx "$packages_path" >/dev/null 2>&1 &
+        # command doas chmod --quiet go+rx "$packages_path" >/dev/null 2>&1 &
+        command doas chmod -f go+rx "$packages_path" >/dev/null 2>&1 &
 
         # command doas find "$packages_path" -type d -exec sh -c 'for d; do command doas chmod --quiet go+rx "$d"; done' _ {} 2>&1 + &
-        command doas find "$packages_path" -type d -exec doas \chmod --quiet g+s,go+rx '{}' 2>&1 + &
-
-        # command doas \chown -R --quiet root:users "$packages_path"
-        command doas chgrp -R --quiet users "$packages_path" >/dev/null 2>&1 &
-
+        # command doas find "$packages_path" -type d -exec doas \chmod --quiet g+s,go+rx '{}' 2>&1 + &
+        # command doas find "$packages_path" -type d -exec doas \chmod -f g+s,go+rx '{}' 2>&1 + &
+        command doas find "$packages_path" -type d -exec doas \chmod -f go+rx '{}' 2>&1 + &
+        if [ ! -d "$1" ]; then
+            # command doas \chown -R --quiet root:users "$packages_path"
+            # command doas chgrp -R --quiet users "$packages_path" >/dev/null 2>&1 &
+            command doas chgrp -R -f users "$packages_path" >/dev/null 2>&1 &
+        fi
         # command doas find "$packages_path" \
         #     -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
         #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + &
@@ -1359,17 +1369,24 @@ function post_update(){
                     needs_ra= ; \
                     user_read="$(expr substr $perm 2 1)" ; \
                     group_read="$(expr substr $perm 5 1)" ; \
+                    other_read="$(expr substr $perm 8 1)" ; \
                     [ "r" = "$user_read" ] && [ "r" != "$group_read" ] && { needs_ra="r" ; needs_operation="1" ; } ; \
+                    [ "r" = "$user_read" ] && [ "r" != "$other_read" ] && { needs_ra="r" ; needs_operation="1" ; } ; \
                     needs_ea= ; \
                     user_run="$(expr substr $perm 4 1)" ; \
                     group_run="$(expr substr $perm 7 1)" ; \
-                    [ "x" = "$user_run" ] && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
-                    [ "x" != "$user_run" ] && [ "x" = "$group_run" ] && needs_operation="1" ; \
+                    other_run="$(expr substr $perm 10 1)" ; \
+                    [ "x" = "$user_run" ]  && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "x" = "$user_run" ]  && [ "x" != "$other_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "s" = "$user_run" ]  && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "s" = "$user_run" ]  && [ "x" != "$other_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "x" != "$user_run" ] && [ "s" != "$user_run" ]  && [ "x" = "$group_run" ] && needs_operation="1" ; \
                     [ "r" = "$user_read" ] && [ "" != "$needs_operation" ] && needs_ra="r" ; \
-                    [ "x" = "$user_run" ] && [ "" != "$needs_operation" ] && needs_ea="x" ; \
+                    [ "x" = "$user_run" ]  && [ "" != "$needs_operation" ] && needs_ea="x" ; \
+                    [ "s" = "$user_run" ]  && [ "" != "$needs_operation" ] && needs_ea="x" ; \
                     perm_group=$needs_ra$needs_ea ; \
                     [ "" != "$perm_group" ] && printf "should no be empty: %s\n" "$perm_group" >> $HOME/.vim.log 2>&1 ; \
-                    [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o= "$f" 2>&1 &  \
+                    [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o=$perm_group "$f" 2>&1 &  \
                 else \
                     IFS{# echo "Error" "$f" > /dev/stderr} ; \
                     command doas rm -f "$f" 2>&1 &  \
@@ -1503,10 +1520,10 @@ if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
         OMZP::fd/_fd \
         OMZP::docker/_docker \
         OMZP::docker-compose/_docker-compose \
-        OMZP::rust/_rust \
-        OMZP::cargo \
-        OMZP::rustup
+        OMZP::cargo
 
+        # OMZP::rustup
+        # OMZP::rust/_rust \
 
     # zinit ice as"completion"
     # zinit snippet OMZP::docker/_docker
@@ -1575,9 +1592,9 @@ if [ ! -z "${USE_ZPM}" ]; then
     zpm load @omz-lib/fd/_fd
     zpm load @omz-lib/docker/_docker
     zpm load @omz-lib/docker-compose/_docker-compose
-    zpm load @omz-lib/rust/_rust
+    # zpm load @omz-lib/rust/_rust
     zpm load @omz-lib/cargo
-    zpm load @omz-lib/rustup
+    # zpm load @omz-lib/rustup
     zpm load jhawthorn/fzy
 fi
 
@@ -1676,8 +1693,9 @@ if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
     # `make"install PREFIX=$ZPFX"`, if "install" wouldn't be the only, default target.
     zinit ice as"program" pick"$ZPFX/bin/git-*" make"PREFIX=$ZPFX"
     zinit light tj/git-extras
-
+    source ${ZINIT[HOME_DIR]}/plugins/tj---git-extras/etc/git-extras-completion.zsh
     # # Handle completions without loading any plugin, see "clist" command.
+    export XBPS_MAKEJOBS=13
     # # This one is to be ran just once, in interactive session.
     # zinit creinstall %HOME/my_completions
 
@@ -1854,21 +1872,26 @@ typeset -U fpath
 # autoload -U promptinit; promptinit
 # prompt restore
 # prompt grml
+# prompt zefram
+prompt walters
 # prompt clint2 blue yellow cyan magenta white red white
-if [ "${USER}" = "root" ]; then
-    prompt clint2 magenta red yellow cyan green
-else
-    prompt clint2 yellow green cyan darkgray red
-fi
+
+# if [ "${USER}" = "root" ]; then
+#     prompt clint2 magenta red yellow cyan green
+# else
+#     prompt clint2 yellow green cyan darkgray red
+# fi
+
 # prompt agkozak
 # prompt guezwhoz-zshell
 # prompt powerlevel10k
 
-# if [ "$USER" = "root" ]; then
-# # https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
-#     # zpcompinit
-#     autoload -Uz compinit && compinit
-# fi
+if [ "$USER" = "root" ]; then
+# https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
+    # zpcompinit
+    autoload -Uz compinstall && compinstall
+    autoload -Uz compinit && compinit
+fi
 
 # [ -z "$TMUX" ] && ! [ "$USER" = "root" ] && ! ( [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] )  && exec tmux new -As .
 
@@ -1878,6 +1901,4 @@ fi
 
 # # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-
-
+command chmod -f a+r $HOME/.zcompdump

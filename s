@@ -1,0 +1,1 @@
+/mnt/local/bin/s
