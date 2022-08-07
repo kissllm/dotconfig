@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+BACKUP_ROOT="$HOME/downloads/linux/glasnost/glasnost-chroot-x86_64"
+
+TARET_ROOT="/mnt/kiss"
+
+if [ "${HOSTNAME}" = "kiss" ]; then
+    TARET_ROOT=""
+else
+    doas load-kiss
+fi
+
+doas \cp -rf "${BACKUP_ROOT}/*" "${TARET_ROOT}/"

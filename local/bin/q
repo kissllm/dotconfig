@@ -7,7 +7,7 @@
 # q mesa* 3
 # env USE_GMAKE=1 q wld 0
 # If you use it with doas/sudo, alias will not work. Under this circumstance, you should use it this way:
-# q "*mesa*"
+# doas q "*mesa*"
 
 # do not use single quotes for $1 in []
 if [ -z "${1}" ]; then
@@ -30,7 +30,7 @@ else
     if [ -n "$selected" ]; then
         if [ -n "${USE_GMAKE}" ]; then
             printf "\n%s\n\n" "GNU make used"
-            mkdir -p bin
+            mkdir -p "$PWD/bin"
             ln -sf /usr/bin/pigz  "$PWD/bin/gunzip"
             ln -sf /usr/bin/gmake "$PWD/bin/make"
             export PATH="$PWD/bin:$PATH"
