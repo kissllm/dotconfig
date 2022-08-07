@@ -1,0 +1,44 @@
+# https://github.com/swaywm/wlroots/issues/3189
+WLR_NO_HARDWARE_CURSORS=1
+# export WLR_NO_HARDWARE_CURSORS=${WLR_NO_HARDWARE_CURSORS}
+# export WLR_NO_HARDWARE_CURSORS=1
+
+# Session XDG specification
+# XDG_SESSION_TYPE=wayland
+XDG_SESSION_TYPE=wayland
+# XDG_SESSION_DESKTOP=sway
+XDG_SESSION_DESKTOP=wayland
+# XDG_CURRENT_DESKTOP=sway
+XDG_CURRENT_DESKTOP=wayland
+# DESKTOP_SESSION=sway
+DESKTOP_SESSION=wayland
+
+# XKB
+XKB_DEFAULT_LAYOUT=us
+
+# export XKB_DEFAULT_VARIANT=us
+# LIBSEAT_BACKEND=logind
+# WLR_DRM_DEVICES=/dev/dri/card0
+# Running sway without xwayland
+# https://github.com/swaywm/sway/issues/676
+WLC_XWAYLAND=0
+
+BEMENU_BACKEND=wayland
+# export WAYLAND_DISPLAY=wayland
+# QT
+# QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+QT_QPA_PLATFORM=wayland-egl
+GDK_BACKEND=wayland
+# MOZ_ENABLE_WAYLAND=1
+MOZ_ENABLE_WAYLAND=1
+# CLUTTER_BACKEND=wayland
+CLUTTER_BACKEND=wayland
+# SDL_VIDEODRIVER=wayland
+SDL_VIDEODRIVER=wayland
+# EGL_PALTFORM=wayland
+EWOL_BACKEND=wayland
+
+# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
+# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
+# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user

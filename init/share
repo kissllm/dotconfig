@@ -39,7 +39,8 @@
 # if [ -d "/opt/init" ]; then
 #     export SHARE_PREFIX="/opt"
 # elif [ -d "/mnt/init" ]; then
-[ -d "/mnt/init" ] && export SHARE_PREFIX="/mnt"
+
+[ -d "/mnt/init" ] && [ -z "$SHARE_PREFIX" ] && export SHARE_PREFIX="/mnt"
 
 # if ! [ -z "${USE_SHELDON}" ]; then
 #   if ! [ -d ${SHELDON_CONFIG_DIR} ]; then
@@ -66,6 +67,15 @@
 #   ln -sf ${SHARE_PREFIX}/zinit/zlogin ${HOME}/.zlogin
 #   ln -sf ${SHARE_PREFIX}/zinit/zprofile ${HOME}/.zprofile
 # fi
+
+. /etc/profile.d/xdg_runtime_dir.sh
+
+# ${HOME}/.config/wayland/env -> /mnt/init/wayland/env
+[ -f "${XDG_CONFIG_HOME}/wayland/env" ] && \rm -f "${XDG_CONFIG_HOME}/wayland/env"
+[ "$(readlink "${XDG_CONFIG_HOME}/wayland/env")" != "${SHARE_PREFIX}/init/wayland/env" ] && {
+    \rm -f "${XDG_CONFIG_HOME}/wayland/env"
+    \ln -sf "${SHARE_PREFIX}/init/wayland/env" "${XDG_CONFIG_HOME}/wayland/env"
+}
 
 [ -f ${HOME}/.profile ] && \rm -f ${HOME}/.profile
 [ "$(readlink ${HOME}/.profile)" != "${SHARE_PREFIX}/init/profile" ] && {
@@ -115,7 +125,6 @@
 #     cp -rf ${SHARE_PREFIX}/vinit/vim ${HOME}/.vim
 # fi
 
-. /etc/profile.d/xdg_runtime_dir.sh
 
 [ -d ${XDG_CONFIG_HOME}/nvim ] && \rm -rf ${XDG_CONFIG_HOME}/nvim
 
