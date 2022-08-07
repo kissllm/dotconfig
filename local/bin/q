@@ -28,18 +28,31 @@ else
         }
     done
     if [ -n "$selected" ]; then
-        if [ -n "${USE_GMAKE}" ]; then
-            printf "\n%s\n\n" "GNU make used"
-            mkdir -p "$PWD/bin"
-            ln -sf /usr/bin/pigz  "$PWD/bin/gunzip"
-            ln -sf /usr/bin/gmake "$PWD/bin/make"
-            export PATH="$PWD/bin:$PATH"
-        else
-            printf "\n%s\n\n" "BSD make used"
-        fi
         printf "\n%s\n%-4d %-10s %-75s\n\n" "Selected package:" $2 "$(cat "$selected/version")" "$selected"
         dir="$(dirname "$selected")"
         base="$(basename "$selected")"
+        if [ -n "${USE_GMAKE}" ]; then
+            printf "\n%s\n\n" "GNU make used"
+            build_root="${HOME}/.cache/kiss/working"
+            [ ! -d "${build_root}/bin" ] && mkdir -p "${build_root}/bin"
+
+            # ln -sf /usr/bin/pigz  "${build_root}/bin/gunzip"
+            [ -f "${build_root}/bin/gunzip" ] && \rm -f "${build_root}/bin/gunzip"
+            [ "$(readlink "${build_root}/bin/gunzip")" != "/usr/bin/pigz" ] && {
+                \rm -f "${build_root}/bin/gunzip"
+                \ln -sf "/usr/bin/pigz" "${build_root}/bin/gunzip"
+            }
+
+            # ln -sf /usr/bin/gmake "${build_root}/bin/make"
+            [ -f "${build_root}/bin/make" ] && \rm -f "${build_root}/bin/gunzip"
+            [ "$(readlink "${build_root}/bin/make")" != "/usr/bin/gmake" ] && {
+                \rm -f "${build_root}/bin/make"
+                \ln -sf "/usr/bin/gmake" "${build_root}/bin/make"
+            }
+            export PATH="${build_root}/bin:$PATH"
+        else
+            printf "\n%s\n\n" "BSD make used"
+        fi
         eval "KISS_PATH=$dir kiss c $base"
         eval "KISS_PATH=$dir kiss b $base"
         eval "KISS_PATH=$dir kiss i $base"
