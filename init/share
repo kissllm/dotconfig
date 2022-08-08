@@ -73,33 +73,29 @@
 # ${XDG_CONFIG_HOME}/wayland/env -> ${SHARE_PREFIX}/init/wayland/env
 [ -f "${XDG_CONFIG_HOME}/wayland/env" ] && \rm -f "${XDG_CONFIG_HOME}/wayland/env"
 [ "$(readlink "${XDG_CONFIG_HOME}/wayland/env")" != "${SHARE_PREFIX}/init/wayland/env" ] && {
-    \rm -f "${XDG_CONFIG_HOME}/wayland/env"
+    [ ! -d "${XDG_CONFIG_HOME}/wayland" ] && \mkdir -p "${XDG_CONFIG_HOME}/wayland"
     \ln -sf "${SHARE_PREFIX}/init/wayland/env" "${XDG_CONFIG_HOME}/wayland/env"
 }
 
 [ -f ${HOME}/.profile ] && \rm -f ${HOME}/.profile
 [ "$(readlink ${HOME}/.profile)" != "${SHARE_PREFIX}/init/profile" ] && {
-    \rm -f ${HOME}/.profile
     \ln -sf "${SHARE_PREFIX}/init/profile" "${HOME}/.profile"
 }
 
 [ -f ${HOME}/.ashrc ] && \rm -f ${HOME}/.ashrc
 [ "$(readlink ${HOME}/.ashrc)" != "${SHARE_PREFIX}/init/ashrc" ] && {
-    \rm -f ${HOME}/.ashrc
     \ln -sf "${SHARE_PREFIX}/init/ashrc" "${HOME}/.ashrc"
 }
 
 [ -f ${HOME}/.tmux.conf ] && \rm -f ${HOME}/.tmux.conf
 
 [ "$(readlink ${HOME}/.tmux.conf)" != "${SHARE_PREFIX}/tinit/tmux.conf" ] && {
-    \rm -f ${HOME}/.tmux.conf
     \ln -sf "${SHARE_PREFIX}/tinit/tmux.conf" "${HOME}/.tmux.conf"
 }
 
 [ -d ${HOME}/.tmux ] && \rm -rf ${HOME}/.tmux
 
 [ "$(readlink ${HOME}/.tmux)" != "${SHARE_PREFIX}/tinit/tmux" ] && {
-    \rm -f ${HOME}/.tmux
     \ln -sf ${SHARE_PREFIX}/tinit/tmux ${HOME}/.tmux
 }
 
@@ -110,14 +106,12 @@
 [ -f ${HOME}/.vimrc ] && \rm -f ${HOME}/.vimrc
 
 [ "$(readlink ${HOME}/.vimrc)" != "${SHARE_PREFIX}/vinit/nvim/init.vim" ] && {
-    \rm -f ${HOME}/.vimrc
     \ln -sf ${SHARE_PREFIX}/vinit/nvim/init.vim ${HOME}/.vimrc
 }
 
 [ -d ${HOME}/.vim ]  && \rm -rf ${HOME}/.vim
 
 [ "$(readlink ${HOME}/.vim)" != "${SHARE_PREFIX}/vinit/vim" ] && {
-    \rm -f ${HOME}/.vim
     \ln -sf ${SHARE_PREFIX}/vinit/vim ${HOME}/.vim
 }
 
@@ -130,7 +124,6 @@
 
 if [ -f ${XDG_CONFIG_HOME}/nvim ]; then
     [ "$(readlink ${XDG_CONFIG_HOME}/nvim)" != "${SHARE_PREFIX}/vinit/nvim" ] && {
-        \rm -f ${XDG_CONFIG_HOME}/nvim
         \ln -sf ${SHARE_PREFIX}/vinit/nvim ${XDG_CONFIG_HOME}/nvim
     }
 else
@@ -154,12 +147,12 @@ fi
 
 if [ 1 = ${HAS_LIBCXX} ]; then
     [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" != "${SHARE_PREFIX}/vinit/nvim/site/pack-clang" ] && {
-        \rm -f ${XDG_DATA_HOME}/nvim/site/pack
+        [ ! -d "${XDG_DATA_HOME}/nvim/site" ] && \mkdir -p "${XDG_DATA_HOME}/nvim/site"
         \ln -sf ${SHARE_PREFIX}/vinit/nvim/site/pack-clang ${XDG_DATA_HOME}/nvim/site/pack
     }
 else
     [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" != "${SHARE_PREFIX}/vinit/nvim/site/pack" ] && {
-        \rm -f ${XDG_DATA_HOME}/nvim/site/pack
+        [ ! -d "${XDG_DATA_HOME}/nvim/site" ] && \mkdir -p "${XDG_DATA_HOME}/nvim/site"
         \ln -sf ${SHARE_PREFIX}/vinit/nvim/site/pack ${XDG_DATA_HOME}/nvim/site/pack
     }
 fi

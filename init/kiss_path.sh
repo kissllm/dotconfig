@@ -121,11 +121,12 @@ KISS_PATH=$REPO_MAIN/system:$KISS_PATH
 KISS_PATH=$REPO_MAIN/extra:$KISS_PATH
 KISS_PATH=$REPO_MAIN/core:$KISS_PATH
 
-KISS_PATH=$REPO_MAIN/static/bin:$KISS_PATH
-KISS_PATH=$REPO_MAIN/static/community:$KISS_PATH
-KISS_PATH=$REPO_MAIN/static/wayland:$KISS_PATH
-KISS_PATH=$REPO_MAIN/static/extra:$KISS_PATH
-KISS_PATH=$REPO_MAIN/static/core:$KISS_PATH
+# Static version will remove dynamic libraries
+# KISS_PATH=$REPO_MAIN/static/bin:$KISS_PATH
+# KISS_PATH=$REPO_MAIN/static/community:$KISS_PATH
+# KISS_PATH=$REPO_MAIN/static/wayland:$KISS_PATH
+# KISS_PATH=$REPO_MAIN/static/extra:$KISS_PATH
+# KISS_PATH=$REPO_MAIN/static/core:$KISS_PATH
 
 export KISS_XHOST_TRIPLE="x86_64-linux-musl"
 
