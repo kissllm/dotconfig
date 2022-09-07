@@ -20,7 +20,7 @@ else
     for pack in $packages
     do
         [ -d "$pack" ] && [ -f "$pack/version" ] && {
-            printf "%-4d %-10s %-75s\n" $((index)) "$(cat "$pack/version")" "$pack"
+            printf "%-4d %-15s %-75s\n" $((index)) "$(cat "$pack/version")" "$pack"
             if [ -n "$2" ] && [ $index = $2 ]; then
                 selected="$pack"
             fi
@@ -28,12 +28,12 @@ else
         }
     done
     if [ -n "$selected" ]; then
-        printf "\n%s\n%-4d %-10s %-75s\n\n" "Selected package:" $2 "$(cat "$selected/version")" "$selected"
+        printf "\n%s\n%-4d %-15s %-75s\n\n" "Selected package:" $2 "$(cat "$selected/version")" "$selected"
         dir="$(dirname "$selected")"
         base="$(basename "$selected")"
         if [ -n "${USE_GMAKE}" ]; then
             printf "\n%s\n\n" "GNU make used"
-            build_root="${HOME}/.cache/kiss/working"
+            build_root="${HOME}/.cache/kiss/proc"
             [ ! -d "${build_root}/bin" ] && mkdir -p "${build_root}/bin"
             [ "$(readlink "${build_root}/bin/gunzip")" != "/usr/bin/pigz" ] && \ln -sf "/usr/bin/pigz" "${build_root}/bin/gunzip"
             [ "$(readlink "${build_root}/bin/make")" != "/usr/bin/gmake" ] && \ln -sf "/usr/bin/gmake" "${build_root}/bin/make"

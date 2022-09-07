@@ -1,0 +1,932 @@
+# NOTE: You must be in the 'video', 'audio', and 'tty'
+#       groups. There is no 'input' group requirement
+#       as this sway binary is setgid input.
+#
+# NOTE: You must set XDG_RUNTIME_DIR in your shellrc
+#       or .profile for things to work. This directory
+#       must exist and must be writable by your user.
+#
+#       export XDG_RUNTIME_DIR=/run/user/$(id -u)
+#
+# NOTE: You must be the first to call DRMSetMaster.
+#
+#       If you cannot fulfil this requirement, you must
+#       use the 'sway' package and run the 'seatd' daemon.
+#
+#       Another option is to setuid root the sway binary.
+#
+#       See: https://github.com/torvalds/linux/commit/45bc3d26c95a8fc63a7d8668ca9e57ef0883351c
+#
+# NOTE: sway-tiny does not spawn a subshell for exec
+#       commands, it executes them directly. Use the full
+#       path to the program you would like to execute.
+#
+#       # Will not work.
+#       bindsym $mod+t exec foot
+#
+#       # Works.
+#       bindsym $mod+t exec /bin/foot
+#
+# NOTE: This is a fork of sway for KISS Linux. Send all
+#       bugs/issues to kisslinux/repo and NOT upstream.
+
+
+
+# Default config for sway
+#
+# Copy this to ~/.config/sway/config and edit it to your liking.
+#
+# Read `man 5 sway` for a complete reference.
+
+# exec dbus-update-activation-environment --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+# exec dbus-update-activation-environment --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=gnome
+# https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
+#   XDG_CURRENT_DESKTOP=gnome
+exec hash dbus-update-activation-environment --all 2>/dev/null
+exec dbus-update-activation-environment DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway↴
+
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+set $alt_mod Mod1
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+# Your preferred terminal emulator
+# set $term alacritty
+set $term foot
+# set $term /usr/bin/st
+# set $term kitty
+# set $term urxvt
+# set $term urxvt -fn "xft:Terminus:pixelsize=18,style=Regular"
+# set $term mux
+# set $font_pango_name pango:DejaVu Sans Mono
+# set $font_id Droid Sans Regular
+# set $font_id Roboto Mono Thin for Powerline
+# set $font_id Noto Sans Mono ExtraLight
+
+# set $font_id DejaVu Serif
+set $font_id Noto Sans Mono ExtraLight
+# set $font_id Courier Prime
+# set $font_id Source Code Pro
+# set $font_id MesloLGS NF
+# set $font_id MesloLGS Nerd Font
+
+# set $font_id Roboto Mono Thin
+
+# set $font_pango_name pango:DejaVu Serif
+# set $font_pango_name pango:Noto Sans Mono ExtraLight
+
+# set $font_pango_name pango:Source Code Pro
+set $font_pango_name pango:Noto Sans Mono ExtraLight
+# set $font_pango_name pango:Courier Prime
+
+# set $font_pango_name pango:MesloLGS NF
+# set $font_pango_name pango:MesloLGS Nerd Font
+
+# set $font_pango_name pango:Noto Sans Mono Thin
+# set $font_pango_name pango:Noto Sans Mono ExtraLight
+#   set $normalfontszie 11    # 9
+set $normalfontszie 16
+#   set $biggerfontszie 13
+set $biggerfontszie 18
+#   set $font_pango_package $font_pango_name $normalfontszie
+
+# set $font_pango_package pango:DejaVu Serif 14
+
+set $font_pango_package pango:Noto Sans Mono ExtraLight 14
+# set $font_pango_package pango:Courier Prime 14
+
+# set $font_pango_package pango:MesloLGS NF 14
+# set $font_pango_package pango:MesloLGS Nerd Font 14
+
+# Your preferred application launcher
+# Note: pass the final command to swaymsg so that the resulting window can be opened
+# on the original workspace that the command was run on.
+# https://github.com/swaywm/sway/wiki/Useful-add-ons-for-sway
+# https://github.com/natpen/awesome-wayland#launchers
+
+# set $menu dmenu_path | dmenu | xargs swaymsg exec --
+# set $menu dmenu_path | dmenu -fn 'WenQuanYi Micro Hei Mono Light-24' | xargs swaymsg exec --
+# set $menu dmenu_path | dmenu -fn 'Source Code Pro-24' | xargs swaymsg exec --
+
+# set $menu j4-dmenu-desktop --dmenu='rofi -dmenu -i'
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn 'fira-10' -l 10"
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn '$font_id' -l 10"
+
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn 'DejaVu Serif-16' -l 10"
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans Mono ExtraLight-16' -l 10"
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn 'Courier Prime 16' -l 10"
+
+# set $menu j4-dmenu-desktop --dmenu="dmenu -i -fn 'DejaVu Sans Mono Nerd Font Complete-16' -l 10"
+
+# set $menu j4-dmenu-desktop --dmenu="bemenu -i" --no-generic --term='alacritty'
+# set $menu j4-dmenu-desktop --dmenu='BEMENU_BACKEND=wayland bemenu-run -i --tf "#f1c40f" --nb "#011f4b" --nf "#005b96" --hf "#3498db" --fn "pango:DejaVu Sans Mono 10"' --term='alacritty'
+# set $menu j4-dmenu-desktop --dmenu='bemenu -i -p "apps:" --fn "WenQuanYi Micro Hei Mono Light 24"' --term='${term} -e'
+# set $menu j4-dmenu-desktop --dmenu='bemenu -i --nb "#3f3f3f" --nf "#dcdccc" --fn "pango:DejaVu Sans Mono 12"'
+# set $menu j4-dmenu-desktop --dmenu='bemenu -p ">>>" --wrap --ignorecase --no-overlap'
+# set $menu j4-dmenu-desktop --dmenu="bemenu -i" --term=kitty
+# set $menu j4-dmenu-desktop --dmenu="bemenu -i" --term=${term}
+# set $menu bemenu-run -i -p 'exec:' --fn '$font_id $biggerfontszie'
+# https://www.reddit.com/r/swaywm/comments/gv3xl8/bemenu_does_not_appear/
+
+set $menu sh -c 'BEMENU_BACKEND=wayland PATH=$XDG_DATA_HOME/applications:$PATH bemenu-run -m -1 -i --nb "#3f3f3f" --nf "#dcdccc" --fn "pango:Courier Prime 16" -l 10'
+# set $menu j4-dmenu-desktop --dmenu='BEMENU_BACKEND=wayland PATH=$XDG_DATA_HOME/applications:$PATH bemenu-run -m -1 -i --nb "#3f3f3f" --nf "#dcdccc" --fn "pango:Courier Prime 16" -l 10' --term='alacritty'
+# set $menu j4-dmenu-desktop --dmenu="(cat ; (stest -flx $(echo $PATH | tr : ' ') | sort -u)) | dmenu"
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg #000000 solid_color
+exec_always swaybg -c #000000
+# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fit
+# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+# output * bg /share/$USER/pictures/wallpaper/10.jpg fill
+output * bg /share/$USER/pictures/wallpaper/curves.jpg fill
+
+# exec ~/.azotebg
+# $XDG_CONFIG_HOME/wf-shell.ini
+# exec_always wf-background
+# https://www.reddit.com/r/swaywm/comments/qq74gv/how_do_i_set_correctly_the_cursor_theme/
+exec_always import-gsettings
+# seat seat0 xcursor_theme Vimix-cursors 32
+
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+set $laptop eDP-1
+
+output $laptop scale 1.0
+output HDMI-A-1 resolution 3840x2160 position 3840,0
+
+# output $laptop scale 1.25
+# output HDMI-A-1 resolution 3072x1728 position 3072,0
+
+# output $laptop scale 1.5
+# output HDMI-A-1 resolution 2560x1440 position 2560,0
+
+# output $laptop scale 2.0
+# output HDMI-A-1 resolution 1920x1080 position 1920,0
+
+# bindswitch --locked lid:on output $laptop disable
+bindswitch --locked lid:off output $laptop enable
+
+# Suspend when lib close (according to the definition of lid:on)
+# bindswitch --locked lid:on exec 'sh -c "doas pm-suspend"'
+bindswitch --locked lid:on exec 'sh -c "doas zzz"'
+
+# font pango:Source Code Pro Medium 10
+
+# font pango:WenQuanYi Micro Hei Mono Light 13
+# font $font_pango_name 13
+# font pango:DejaVu Serif 13
+# font pango:Noto Sans Mono Thin 13
+#   font $font_pango_package
+font pango:DejaVu Serif 13
+
+### Idle configuration
+#
+# Example configuration:
+#
+#    exec swayidle -w \
+#        timeout 300 'swaylock -f -c 000000' \
+#        timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+#        before-sleep 'swaylock -f -c 000000'
+
+#    exec swayidle -w \
+#        timeout 600 'swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5' \
+#        timeout 900 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+#        before-sleep 'swaylock -f -c 000000'
+
+#   exec swayidle -w \
+#           before-sleep 'loginctl lock-session $XDG_SESSION_ID' \
+#           lock 'playerctl -a pause && swaylock'
+
+
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+### Input configuration
+#
+# Example configuration:
+#
+#   input "2:14:SynPS/2_Synaptics_TouchPad" {
+#       dwt enabled
+#       tap enabled
+#       natural_scroll enabled
+#       middle_emulation enabled
+#   }
+#
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Read `man 5 sway-input` for more information about this section.
+
+# On sway reload: crash with "Lost connection to Wayland compositor"
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1652820
+# input * {
+#     # xkb_capslock enabled
+#     xkb_numlock enabled
+#     # xkb_layout "us,cn"
+#     xkb_layout "us"
+#     # xkb_options "grp:win_space_toggle"
+#     # repeat_delay 500
+#     # repeat_rate 5
+# }
+
+# setxkbmap -query
+# rules:      evdev
+# model:      pc101
+# layout:     us
+
+# https://github.com/swaywm/sway/issues/6187
+# input "4164:31289:GIGABYTE_USB-HID_Keyboard" {
+input type:keyboard {
+    repeat_rate 45
+    repeat_delay 500
+    xkb_model "pc101"
+    xkb_numlock enabled
+    # xkb_options caps:escape
+    # xkb_layout "us,cn"
+    xkb_layout "us"
+    xkb_options "grp:win_space_toggle"
+    # xkb_options "grp:rctrl_rshift_toggle"
+    xkb_options compose:ralt
+}
+# input 1133:16500:Logitech_G305
+
+# https://wiki.archlinux.org/index.php/Sway
+# http://teqnograf.blogspot.com/2019/10/swaywm.html
+# https://www.reddit.com/r/swaywm/comments/i254n2/how_to_toggle_touchpad_input/
+input "10248:257:FTCS1000:00_2808:0101_Touchpad" {
+    dwt  enable
+    # tap  enable
+    drag enable
+    natural_scroll enabled
+    # events disabled
+    # middle_emulation enable
+    # events disabled_on_external_mouse
+}
+# https://github.com/swaywm/wlroots/issues/1217
+# libinput list-devices
+input "10248:257:FTCS1000:00_2808:0101_Mouse" {
+    dwt  enable
+    # tap  enable
+    drag enable
+    natural_scroll enabled
+}
+
+# NetworkManager is the most popular way to manage wireless networks on Linux,
+# and nm-applet is a desktop environment-independent system tray GUI for it.
+exec --no-startup-id nm-applet
+
+# https://github.com/swaywm/sway/issues/5409
+set $bindsym bindsym --to-code
+
+### Key bindings
+
+# https://wiki.archlinux.org/index.php/Sway#Autostart_on_login
+set $nag exec swaynagmode
+mode "nag" {
+  bindsym --to-code {
+    Ctrl+d    mode "default"
+
+    Ctrl+c    $nag --exit
+    q         $nag --exit
+    Escape    $nag --exit
+
+    Return    $nag --confirm
+
+    Tab       $nag --select prev
+    Shift+Tab $nag --select next
+
+    Left      $nag --select next
+    Right     $nag --select prev
+
+    Up        $nag --select next
+    Down      $nag --select prev
+  }
+}
+
+
+#
+# Basics:
+#
+    # Start a terminal
+    $bindsym $mod+Return exec $term
+    $bindsym $mod+Shift+Return exec alacritty
+    # $bindsym $mod+Shift+Return exec st
+
+    # Kill focused window
+    $bindsym $mod+Shift+q kill
+
+    # Start your launcher
+    $bindsym $mod+d exec $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+    # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+    $bindsym $mod+Shift+R restart
+
+    # Reload the configuration file
+    $bindsym $mod+Shift+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+
+    # $bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+    # $bindsym $mod+Shift+e exec "i3-msg exit"
+    # $bindsym $mod+Shift+e exec "swaymsg exit"
+    # https://www.reddit.com/r/swaywm/comments/qcxcw0/what_can_you_do_to_exit_sway_but_without_exit/
+    $bindsym $mod+Shift+e exec "sway exit"
+#
+# Moving around:
+#
+    # Move your focus around
+    $bindsym $mod+$left focus left
+# https://git.mjanja.ch/alanorth/dotfiles/commit/246fb98c01e44dff836f9be869ccff78b6ca58ea
+# https://git.mjanja.ch/alanorth/dotfiles/raw/commit/246fb98c01e44dff836f9be869ccff78b6ca58ea/sway/config
+    $bindsym $mod+Shift+Tab focus left
+    $bindsym $mod+$down focus down
+    $bindsym $mod+$up focus up
+    $bindsym $mod+$right focus right
+    $bindsym $mod+Tab focus left
+    # Or use $mod+[up|down|left|right]
+    $bindsym $mod+Left focus left
+    $bindsym $mod+Down focus down
+    $bindsym $mod+Up focus up
+    $bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    $bindsym $mod+Shift+$left move left
+    $bindsym $mod+Shift+$down move down
+    $bindsym $mod+Shift+$up move up
+    $bindsym $mod+Shift+$right move right
+    # Ditto, with arrow keys
+    $bindsym $mod+Shift+Left move left
+    $bindsym $mod+Shift+Down move down
+    $bindsym $mod+Shift+Up move up
+    $bindsym $mod+Shift+Right move right
+
+
+#workspace-edit
+# nerd-fonts-otf
+set $ws1 "1:User Space "
+set $ws2 "2:Too "
+set $ws3 "3:Tree "
+set $ws4 "4:For "
+set $ws5 "5:Fight "
+set $ws6 "6:Say "
+set $ws7 "7:Sex "
+set $ws8 "8:Eh "
+set $ws9 "9:Night "
+set $ws0 "0:Their Road "
+
+#bind program to workspace
+
+# assign [app_id="$term"] $ws1
+# for_window [app_id="$term"] focus
+
+# assign [app_id="$term"]       $ws2
+# for_window [app_id="$term"]   focus
+
+assign     [app_id="qtcreator"] $ws3
+for_window [app_id="qtcreator"] focus
+
+assign     [app_id="Pcmanfm"] $ws4
+for_window [app_id="Pcmanfm"] focus
+
+# assign [app_id="(?i)firefox-wayland"] $ws3
+assign     [app_id="firefox"] $ws0
+for_window [app_id="firefox"] focus
+# for_window [app_id=(?i)firefox-wayland] focus
+assign     [app_id="telegram-desktop"] $ws3
+for_window [app_id="telegram-desktop"] focus
+
+# Autostart apps
+# exec --no-startup-id sleep 1 && midori
+# exec --no-startup-id sleep 1 && firefox-wayland
+#
+# exec --no-startup-id sleep 1 && firefox-wayland
+#
+# exec --no-startup-id sleep 2 && lxterminal
+# exec --no-startup-id sleep 5 && $term
+# exec --no-startup-id sleep 3 && pcmanfm
+
+# exec --no-startup-id connman-gtk
+
+# Background browser and setter for X with support for Xinerama
+exec --no-startup-id nitrogen --restore
+
+#backup packages lists:
+# exec pacman -Qqen > packages-repository.txt && pacman -Qqem > packages-AUR.txt
+# # set powersavings for display:
+# exec --no-startup-id xset s 480 dpms 600 600 600
+
+# Lightweight and customizable notification daemon
+# Desktop notifications
+exec --no-startup-id /usr/bin/dunst
+
+# set floating for apps needing it
+# for_window [app_id="Pavucontrol" instance="pavucontrol"] floating enable
+for_window [app_id="Pavucontrol" title="pavucontrol"]           floating enable
+# welcome and others
+# for_window [app_id="Yad" instance="yad"] floating enable
+for_window [app_id="Yad" title="yad"]                           floating enable
+# for_window [app_id="Galculator" instance="galculator"] floating enable
+for_window [app_id="Galculator" title="galculator"]             floating enable
+# for_window [app_id="Geany" instance="geany"] floating enable
+for_window [app_id="Geany" title="geany"]                       floating enable
+# for_window [app_id="Xsane" instance="xsane"] floating enable
+# for_window [app_id="qtcreator" instance="qtcreator"] floating enable
+for_window [app_id="Pcmanfm" title="pcmanfm"]                   floating enable
+for_window [app_id="qtcreator" title="qtcreator"]               floating enable
+# for_window [app_id="firefox" instance="firefox"] floating enable
+# https://github.com/swaywm/sway/issues/6315
+# https://wiki.archlinux.org/title/Sway#Floating_windows
+for_window [app_id="firefox" title="firefox"]                   floating enable
+# for_window [app_id="Zoom"] floating enable
+# for_window [app_id="Zoom" instance="zoom"] floating enable
+# for_window [app_id="falkon" instance="falkon"] floating enable
+for_window [app_id="falkon" title="falkon"]                     floating enable
+# for_window [app_id="gimp" instance="gimp"] floating enable
+for_window [app_id="gimp" title="gimp"]                         floating enable
+# for_window [app_id="qt5ct" instance="qt5ct"] floating enable
+for_window [app_id="qt5ct" title="qt5ct"]                       floating enable
+# for_window [app_id="ibus" instance="ibus"] floating enable
+for_window [app_id="ibus" title="ibus"]                         floating enable
+# for_window [app_id="fcitx" instance="fcitx"] floating enable
+for_window [app_id="fcitx" title="fcitx"]                       floating enable
+# for_window [app_id="telegram-desktop" instance="telegram-desktop"] floating enable
+for_window [app_id="telegram-desktop" title="telegram-desktop"] floating enable
+for_window [app_id="calamares" title="calamares"]               floating enable
+
+# set $opacity 0.75
+set $opacity 0.95
+exec swaymsg 'opacity 95%'
+# https://github.com/rileyrg/linux-init
+# for_window [class=".*"]  opacity $opacity
+for_window [app_id=".*"] opacity set $opacity
+for_window [app_id="__focused__"] opacity minus $opacity
+for_window [app_id="$term"]   opacity $opacity
+for_window [app_id=qtcreator] opacity $opacity
+for_window [app_id=Pcmanfm]   opacity $opacity
+for_window [app_id="firefox"] opacity $opacity
+
+#
+# Workspaces:
+#
+    # Switch to workspace
+    $bindsym $mod+1 workspace number $ws1
+    $bindsym $mod+2 workspace number $ws2
+    $bindsym $mod+3 workspace number $ws3
+    $bindsym $mod+4 workspace number $ws4
+    $bindsym $mod+5 workspace number $ws5
+    $bindsym $mod+6 workspace number $ws6
+    $bindsym $mod+7 workspace number $ws7
+    $bindsym $mod+8 workspace number $ws8
+    $bindsym $mod+9 workspace number $ws9
+    $bindsym $mod+0 workspace number $ws0
+    # Move focused container to workspace
+    $bindsym $mod+Shift+1 move container to workspace number $ws1
+    $bindsym $mod+Shift+2 move container to workspace number $ws2
+    $bindsym $mod+Shift+3 move container to workspace number $ws3
+    $bindsym $mod+Shift+4 move container to workspace number $ws4
+    $bindsym $mod+Shift+5 move container to workspace number $ws5
+    $bindsym $mod+Shift+6 move container to workspace number $ws6
+    $bindsym $mod+Shift+7 move container to workspace number $ws7
+    $bindsym $mod+Shift+8 move container to workspace number $ws8
+    $bindsym $mod+Shift+9 move container to workspace number $ws9
+    $bindsym $mod+Shift+0 move container to workspace number $ws0
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    $bindsym $mod+b splith
+    $bindsym $mod+v splitv
+
+    # Switch the current container between different layout styles
+    $bindsym $mod+s layout stacking
+    $bindsym $mod+w layout tabbed
+    $bindsym $mod+e layout toggle split
+
+    # Make the current focus fullscreen
+    $bindsym $mod+f fullscreen
+
+    # Toggle the current focus between tiling and floating mode
+    $bindsym $mod+Shift+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    $bindsym $mod+space focus mode_toggle
+
+    # Move focus to the parent container
+    $bindsym $mod+a focus parent
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    $bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    $bindsym $mod+minus scratchpad show
+    # How to quit scratchpad mode? When showing the float scratchpad
+    # , use $mod+shift+space to switch to tiling area
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    $bindsym $left resize shrink width 10px
+    $bindsym $down resize grow height 10px
+    $bindsym $up resize shrink height 10px
+    $bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    $bindsym Left resize shrink width 10px
+    $bindsym Down resize grow height 10px
+    $bindsym Up resize shrink height 10px
+    $bindsym Right resize grow width 10px
+
+    # Return to default mode
+    $bindsym Return mode "default"
+    $bindsym Escape mode "default"
+}
+$bindsym $mod+r mode "resize"
+
+# https://gist.github.com/XVilka/8346728
+# https://github.com/rkubosz/base16-sway
+include $XDG_CONFIG_HOME/sway/colorscheme
+
+# Basic color configuration using the Base16 variables for windows and borders.
+# Property Name         Border  BG      Text    Indicator Child Border
+client.focused          $base05 $base0D $base00 $base0D $base0D
+client.focused_inactive $base01 $base01 $base05 $base03 $base01
+client.unfocused        $base01 $base00 $base05 $base01 $base01
+client.urgent           $base08 $base08 $base00 $base08 $base08
+client.placeholder      $base00 $base00 $base05 $base00 $base00
+client.background       $base07
+
+
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+bar {
+    position top
+
+# When the status_command prints a new line to stdout, swaybar updates.
+# The default just shows the current date and time.
+# status_command while date +'%Y-%m-%d %l:%M:%S %p'; do sleep 1; done
+swaybar_command waybar
+# status_command i3status-rs
+# status_command i3status-rs
+# status_command i3blocks -c ~/.config/sway/i3blocks.conf
+# vim ~/.config/waybar/style.css     # for font size setting
+
+    # tray_output primary
+    swaybar_command waybar
+    workspace_buttons yes
+    # tray_padding 0
+
+    strip_workspace_numbers yes
+
+    # colors {
+    #     statusline #ffffff
+    #         background #323232
+    #         inactive_workspace #32323200 #32323200 #5c5c5c
+    # }
+
+    colors {
+        background $base00
+            separator  $base01
+            statusline $base04
+
+# State             Border  BG      Text
+            focused_workspace   $base05 $base0D $base00
+            active_workspace    $base05 $base03 $base00
+            inactive_workspace  $base03 $base01 $base05
+            urgent_workspace    $base08 $base08 $base00
+            binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+# https://git.sr.ht/~tsdh/swayr
+# exec swayr
+exec env RUST_BACKTRACE=1 RUST_LOG=swayr=debug swayrd > /tmp/swayrd.log 2>&1
+
+bindsym $alt_mod+Space exec env RUST_BACKTRACE=1 \
+    swayr switch-window >> /tmp/swayr.log 2>&1
+
+bindsym $alt_mod+Delete exec env RUST_BACKTRACE=1 \
+    swayr quit-window >> /tmp/swayr.log 2>&1
+
+bindsym $alt_mod+Tab exec env RUST_BACKTRACE=1 \
+    swayr switch-to-urgent-or-lru-window >> /tmp/swayr.log 2>&1
+
+bindsym $alt_mod+Next exec env RUST_BACKTRACE=1 \
+    swayr next-window all-workspaces >> /tmp/swayr.log 2>&2
+
+bindsym $alt_mod+Prior exec env RUST_BACKTRACE=1 \
+    swayr prev-window all-workspaces >> /tmp/swayr.log 2>&2
+
+bindsym $alt_mod+Shift+Space exec env RUST_BACKTRACE=1 \
+    swayr switch-workspace-or-window >> /tmp/swayr.log 2>&1
+
+bindsym $alt_mod+c exec env RUST_BACKTRACE=1 \
+    swayr execute-swaymsg-command >> /tmp/swayr.log 2>&1
+
+bindsym $alt_mod+Shift+c exec env RUST_BACKTRACE=1 \
+    swayr execute-swayr-command >> /tmp/swayr.log 2>&1
+
+include /etc/sway/config.d/*
+
+# # https://forum.endeavouros.com/t/completely-get-rid-of-borders/11206
+default_border none
+# default_border normal
+default_floating_border none
+# default_floating_border normal
+
+for_window [app_id="^.*"] border pixel 0
+# for_window [app_id="^.*"] border pixel 1
+# # https://github.com/swaywm/sway/issues/5406
+# smart_gaps on
+# gaps outer 20
+# gaps inner 20
+
+
+# Multimedia Keys
+
+# Use pactl[xtools] to adjust volume in PulseAudio[pulseaudio pipewire].
+# vpm install psmisc for killall
+set $refresh_i3status killall -SIGUSR1 i3status-rs
+# set $refresh_i3status pkill -SIGUSR1 i3status-rs
+# How to install pactl? perform: xlocate pactl (it shows you need to install the package: pulseaudio-utils)
+# pactl list sinks
+# alsamixer
+# Flags: HARDWARE HW_MUTE_CTRL HW_VOLUME_CTRL DECIBEL_VOLUME LATENCY
+$bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@   +10%   && $refresh_i3status
+$bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@   -10%   && $refresh_i3status
+$bindsym XF86AudioMute        exec --no-startup-id pactl set-sink-mute   @DEFAULT_SINK@   toggle && $refresh_i3status
+$bindsym XF86AudioMicMute     exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+
+# set $refresh_i3status pkill -SIGUSR1 i3status-rs
+# $bindsym XF86AudioRaiseVolume        exec amixer -D pulse sset Master 5%+ && $refresh_i3status
+# #$bindsym XF86AudioRaiseVolume       exec amixer -q sset Master 5%+ && pkill -RTMIN+1 i3blocks
+# $bindsym XF86AudioLowerVolume        exec amixer -D pulse sset Master 5%- && $refresh_i3status
+# #$bindsym XF86AudioRaiseVolume       exec amixer -q sset Master 5%- && pkill -RTMIN+1 i3blocks
+
+# # volume
+# $bindsym XF86AudioRaiseVolume        exec amixer -D pulse sset Master 5%+ && pkill -RTMIN+1 i3blocks
+# #$bindsym XF86AudioRaiseVolume       exec amixer -q sset Master 5%+ && pkill -RTMIN+1 i3blocks
+# $bindsym XF86AudioLowerVolume        exec amixer -D pulse sset Master 5%- && pkill -RTMIN+1 i3blocks
+# #$bindsym XF86AudioRaiseVolume       exec amixer -q sset Master 5%- && pkill -RTMIN+1 i3blocks
+
+# # granular volume control
+# $bindsym $mod+XF86AudioRaiseVolume   exec amixer -D pulse sset Master 1%+ && pkill -RTMIN+1 i3blocks
+# #$bindsym $mod+XF86AudioRaiseVolume  exec amixer -q sset Master 1%+ && pkill -RTMIN+1 i3blocks
+# $bindsym $mod+XF86AudioLowerVolume   exec amixer -D pulse sset Master 1%- && pkill -RTMIN+1 i3blocks
+# #$bindsym $mod+XF86AudioRaiseVolume  exec amixer -q sset Master 1%- && pkill -RTMIN+1 i3blocks
+
+# # mute
+# $bindsym XF86AudioMute               exec amixer sset Master toggle && killall -USR1 i3blocks
+
+# How to install playerctl? perform: xlocate playerctl (it shows you need to install the package: playerctl)
+$bindsym XF86AudioPlay  exec playerctl play
+$bindsym XF86AudioPause exec playerctl pause
+$bindsym XF86AudioNext  exec playerctl next
+$bindsym XF86AudioPrev  exec playerctl previous
+
+# $bindsym XF86AudioPlay   exec mocp --toggle-pause
+# $bindsym XF86AudioPause  exec mocp --toggle-pause
+# $bindsym XF86AudioStop   exec mocp --togle-pause
+# $bindsym XF86AudioNext   exec mocp --next
+# $bindsym XF86AudioPrev   exec mocp --previous
+#
+# $bindsym $mod+F5 exec mocp --toggle-pause
+# $bindsym $mod+F6 exec mocp --stop
+# $bindsym $mod+F7 exec mocp --previous
+# $bindsym $mod+F8 exec mocp --next
+# https://wiki.archlinux.org/title/Sway#Custom_keybindings
+# vpsm install brightnessctl
+# doas evtest
+# wev/xev
+# $bindsym XF86MonBrightnessUp             exec light -A 1
+# $bindsym XF86MonBrightnessDown           exec light -U 1
+# $bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl --min-val=2 -q set 5%-
+$bindsym XF86MonBrightnessDown exec --no-startup-id swaymsg input "4164:31289:GIGABYTE_USB-HID_Keyboard" brightnessctl --min-val=2 -q -m set 5%-
+$bindsym XF86MonBrightnessUp   exec --no-startup-id brightnessctl -q -m set 5%+
+$bindsym XF86Search            exec --no-startup-id bemenu-run
+# $bindsym XF86TouchpadToggle exec swaymsg input type:touchpad events toggle enabled disabled && $refresh_i3status
+# $bindsym XF86TouchpadToggle exec swaymsg input type:touchpad events toggle enabled disabled && $refresh_i3status
+# $bindsym XF86TouchpadToggle exec --no-startup-id swaymsg input "4164:31289:GIGABYTE_USB-HID_Keyboard" events toggle enabled disabled
+# $bindsym XF86TouchpadToggle exec --no-startup-id swaymsg input "10248:257:FTCS1000:00_2808:0101_Touchpad" events toggle enabled disabled
+# $bindsym XF86TouchpadToggle exec --no-startup-id swaymsg input type:touchpad events toggle enabled disabled
+
+$bindsym $mod+F3  exec --no-startup-id brightnessctl --min-val=2 -q set 5%-
+$bindsym $mod+F4  exec --no-startup-id brightnessctl -q set +5%
+$bindsym $mod+F10 exec --no-startup-id swaymsg input type:touchpad events toggle enabled disabled
+
+# bindsym XF86TouchpadToggle input type:touchpad events toggle enabled disabled
+
+# $bindsym XF86TouchpadToggle exec --no-startup-id wtype -k XF86TouchpadToggle
+
+
+# App shortcuts
+# $bindsym $mod+w  exec "/usr/bin/midori"
+# $bindsym $mod+n  exec "/usr/bin/pcmanfm"
+# $bindsym Print   exec "scrot ~/%Y-%m-%d-%T-screenshot.png"
+
+# rofi bindings simple menu
+#$bindsym F9   exec rofi -modi drun -show drun -lines 7
+#$bindsym F10  exec rofi -show run   -lines 7
+#$bindsym F12  exec rofi -show window -lines 7
+
+# Lock the system
+#   $bindsym $mod+Escape exec i3lock -i ~/.config/i3/i3-lock-screen.png -t -f
+#   $bindsym $mod+Escape exec waylock --config $XDG_CONFIG_HOME/sway/smiling.jpg
+$bindsym $mod+Escape exec swaylock -i ~/.config/sway/smiling.jpg -t -f
+
+
+# # rofi bindings fancy menu
+# $bindsym F9  exec rofi -modi drun -show drun -line-padding 4 \
+#                 -columns 2 -padding 50 -hide-scrollbar \
+#                 -show-icons -drun-icon-theme "Arc-X-D" -font "Droid Sans Regular 11"
+#
+# $bindsym F10 exec rofi -show window -line-padding 4 \
+#                 -lines 6 -padding 50 -hide-scrollbar \
+#                 -show-icons -drun-icon-theme "Arc-X-D" -font "Droid Sans Regular 11"
+
+# $bindsym $mod+Space exec rofi -show run -line-padding 4 \
+#             -lines 6 -padding 50 -hide-scrollbar \
+#             -show-icons -drun-icon-theme "Arc-X-D" -font "Noto Sans Mono ExtraLight 16"
+
+# https://www.reddit.com/r/i3wm/comments/62epdo/how_can_i_launch_dialog_windows_in_floating_mode/
+
+# for_window [window_role="pop-up"] floating enable
+# for_window [window_role="bubble"] floating enable
+# for_window [window_role="task_dialog"] floating enable
+# for_window [window_role="Preferences"] floating enable
+# for_window [window_type="dialog"] floating enable
+# for_window [window_type="menu"] floating enable
+
+
+# $bindsym $mod+q exec "sh -c 'XDG_CURRENT_DESKTOP=Wayland doas -S pm-suspend'"
+# $bindsym $mod+q exec "XDG_CURRENT_DESKTOP=Wayland doas -u $USER -s /bin/sh -c 'doas pm-suspend'"
+# $bindsym $mod+q exec 'sh -c "/usr/bin/pkexec --user $USER pm-suspend"'
+# $bindsym $mod+q exec 'sh -c "/usr/bin/pkexec pm-suspend"'
+# $bindsym $mod+q exec ~/.config/sway/scripts/suspend
+# $bindsym $mod+q swaymsg -q 'exec loginctl hybrid-sleep'
+
+# $bindsym $mod+q exec loginctl hybrid-sleep    # Failed to put system into hybrid sleep via elogind: Interactive authentication required.
+# When loginctl enable-linger $USER enable it, but hybird-sleep doesn't work as wwell as pm-suspend
+
+# $bindsym $mod+q exec "sh -c 'doas pm-suspend'"
+
+# $bindsym $mod+q swaymsg -q "exec doas pm-suspend"
+# $bindsym $mod+q exec "sh -c 'dbus-send --system --print-reply --dest=\"org.freedesktop.UPower\" /org/freedesktop/UPower org.freedesktop.UPower.Suspend'"
+# $bindsym $mod+q exec "sh -c 'dbus-send --system --print-reply --dest=\"org.freedesktop.login1\" /org/freedesktop/login1 org.freedesktop.login1.suspend  '"
+
+
+
+# Lightweight compositor for X11 (previously a compton fork)
+# exec --no-startup-id picom -cC
+# exec --no-startup-id picom -f
+# set opacity to 0 for zoom screensharing
+exec --no-startup-id picom -o 0 -f -cC
+
+# # exec --no-startup-id picom -o 0
+# # https://www.reddit.com/r/swaywm/comments/m4vagz/running_sway_in_production_in_the_year_of_2021/
+# exec --no-startup-id slurp -o -f "%o"
+
+# Compton has changed into Picom
+# https://arcolinux.com/compton-has-changed-into-picom-on-openbox-delete-compton-conf-from-your-system-you-have-a-picom-conf-now/
+# # Lightweight compositor for X11 (previously a compton fork) (transitional dummy package)
+# exec compton -f
+
+# https://www.reddit.com/r/wayland/comments/ln03pk/how_to_switch_to_pipewire_while_using_sway/
+# https://soyuka.me/make-screen-sharing-wayland-sway-work/
+# https://forums.gentoo.org/viewtopic-t-1124872-start-0.html
+exec --no-startup-id pipewire
+#   /usr/libexec/xdg-desktop-portal-wlr -p BGRx -l DEBUG
+exec /usr/libexec/xdg-desktop-portal-wlr -l DEBUG
+exec /usr/libexec/xdg-desktop-portal --verbose -r
+
+# https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
+#   $bindsym $mod+Ctrl+Shift+o exec $HOME/bin/share-screen.sh
+$bindsym $mod+Shift+o exec $HOME/bin/share-screen.sh
+$bindsym $mod+o       exec $HOME/bin/share-screen.sh stop
+
+# network configuration
+exec_always cmst -m -w 3
+
+# exec --no-startup-id fcitx -d
+# exec_always fcitx -d -r
+exec_always wlpinyin
+
+# https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
+exec_always gnome-keyring-daemon -r -d
+# exec_always strat arch fcitx -r
+# exec ibus-daemon -dr
+# exec fcitx -d -r
+# exec_always --no-startup-id fcitx -d -r
+# exec --no-startup-id fcitx -d -r
+# exec fcitx -d -r
+# exec ibus-daemon -d -r
+# exec_always -c 'env QT_QPA_PLATFORM=xcb ECORE_EVAS_ENGINE= GDK_BACKEND= XDG_SESSION_TYPE= fcitx -r'
+# exec_always -c 'env QT_QPA_PLATFORM= ECORE_EVAS_ENGINE= GDK_BACKEND= XDG_SESSION_TYPE= fcitx -r'
+
+# GTK_IM_MODULE=fcitx
+# INPUT_METHOD=fcitx
+# QT4_IM_MODULE=fcitx
+# QT_IM_MODULE=fcitx
+# XMODIFIERS=@im=fcitx
+# XIM_SERVERS=fcitx
+
+# exec_always -c 'env QT_QPA_PLATFORM=wayland-egl ECORE_EVAS_ENGINE= GDK_BACKEND= XDG_SESSION_TYPE=  GTK_IM_MODULE=fcitx5 INPUT_METHOD=fcitx5 QT4_IM_MODULE=fcitx5 QT_IM_MODULE=fcitx5 XMODIFIERS=@im=fcitx5 XIM_SERVERS=fcitx5 fcitx5 -r'
+#
+# exec_always --no-startup-id autotiling
+exec_always autotiling
+
+
+#   exec_always doas logrotate -f /etc/logrotate.conf
+exec_always doas logrotate -f /etc/logrotate.d/
+
+#    # toggle input
+#    $bindsym $mod+i exec ~/.config/sway/scripts/ibus-toggle
+#
+#    # Chinese input
+#    # exec ibus-daemon -drx --panel /usr/lib/ibus/ibus-ui-gtk3
+#    exec --no-startup-id ibus-daemon -d -r
+
+# exec --no-startup-id xfce4-power-manager -d
+$bindsym $mod+g exec ~/.config/sway/scripts/load_layout.sh
+
+#interactive screenshot by pressing printscreen
+# $bindsym Print exec gnome-screenshot -i
+#crop-area screenshot by pressing Mod + printscreen
+#   $bindsym $mod+Print exec gnome-screenshot -a
+#   $bindsym Print exec scrot $HOME/$USER/Pictures/`date +%Y-%m-%d_%H:%M:%S`.png
+
+#   set $bindsym bindsym --to-code
+#   set $src $HOME/$USER/Pictures/
+#   #   set $src /d/screenshot
+#   $bindsym {
+#       #   ...
+#       Shift+Print         exec grimshot save active   $scr/$(date + "%F_%T_grimshot.png")
+#       #   ...
+#       $mod+p       exec grimshot save active $src/$(date + "%F_%T_grimshot.png")
+#       $mod+Shift+p exec grimshot save area $src/$(date + "%F_%T_grimshot.png")
+#       # Logo key. Use Mod1 for Alt.
+#       $mod+Mod1+p  exec grimshot save output $src/$(date + "%F_%T_grimshot.png")
+#       $mod+Ctrl+p  exec grimshot save window $src/$(date + "%F_%T_grimshot.png")
+#   }
+
+  # Screenshots:
+  # Super+P: Current window
+  # Super+Shift+p: Select area
+  # Super+Alt+p Current output
+  # Super+Ctrl+p Select a window
+
+exec mako
+# https://wiki.archlinux.org/title/Sway#Floating_windows
+exec wl-paste -t text --watch clipman store --no-persist
+# In $HOME/.zshenv
+# export XDG_SCREENSHOTS_DIR=$HOME/pictures/screenshots
+# export XDG_PICTURES_DIR=$HOME/pictures/screenshots
+
+bindsym $mod+p       exec grimshot --notify save active
+bindsym $mod+Shift+p exec grimshot --notify save area
+# Logo key. Use Mod1 for Alt.
+bindsym $mod+Mod1+p  exec grimshot --notify save output
+bindsym $mod+Ctrl+p  exec grimshot --notify save window
+
+bindsym $mod+Next  workspace next
+bindsym $mod+Prior workspace prev
+
+# xwayland disable
+
+#   seat seat0 xcursor_theme my_cursor_theme my_cursor_size
+
+# https://github.com/artizirk/dotfiles/blob/48acc6ddf6bedf5748089c4cff74b025412470f0/.config/sway/config#L348

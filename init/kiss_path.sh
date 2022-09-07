@@ -128,15 +128,24 @@ KISS_PATH=$REPO_MAIN/core:$KISS_PATH
 # KISS_PATH=$REPO_MAIN/static/extra:$KISS_PATH
 # KISS_PATH=$REPO_MAIN/static/core:$KISS_PATH
 
+export KISS_XHOST_ABI="musl"
 export KISS_XHOST_TRIPLE="x86_64-linux-musl"
+export KISS_XBUILD_TRIPLE="x86_64-linux-musl"
 
 export KISS_XHOST_ARCH="x86_64"
 export KISS_XBUILD_ARCH="x86_64"
+
+# For cports
+export CHOST=${KISS_XHOST_TRIPLE}
+export CBUILD=${KISS_XHOST_TRIPLE}
+export CTARGET=${KISS_XHOST_TRIPLE}
+export CLIBC="musl"
 
 export ARCH="${KISS_XHOST_ARCH}"
 export KISS_ROOT=
 export KISS_PATH=$KISS_PATH
 export KISS_REMOTE_REPO=$KISS_PATH
+
 # export CFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
@@ -147,8 +156,11 @@ CFLAGS="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
 # CXXFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
 # CXXFLAGS="--target=$KISS_XHOST_TRIPLE -Os -pipe -fPIC -mtune=native --host=x86_64"
 CXXFLAGS="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
+
 export CFLAGS=$CFLAGS
 export CXXFLAGS=$CXXFLAGS
 export CPPFLAGS=$CXXFLAGS
+
 export MAKEFLAGS="-j $(($(nproc) + 1))"
 export KISS_PROMPT=0
+

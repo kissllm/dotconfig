@@ -45,6 +45,7 @@ let g:_session_auto_develop = 1
 let g:_fixed_tips_width     = 27
 " let g:_buffergator_develop = 1
 " let g:_log_func_name = 'boot#log_silent'
+let g:_use_terminal_transparent = 1
 let g:_log_one_line         = 0
 let g:_job_start            = has('nvim') ? 'jobstart' : 'job_start'
 
@@ -549,45 +550,47 @@ filetype off
 
 
 let g:vim_packages_use = {}
-let g:vim_packages_use['morhetz/gruvbox']                            = {}
-let g:vim_packages_use['kristijanhusak/vim-packager']                = { 'type' : 'opt' }
-let g:vim_packages_use['vimwiki/vimwiki']                            = { 'type' : 'opt' }
-let g:vim_packages_use['Shougo/unite-outline']                       = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-surround']                         = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-repeat']                           = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-scriptease']                       = { 'type' : 'opt' }
-let g:vim_packages_use['junegunn/vader.vim']                         = { 'type' : 'opt' }
-let g:vim_packages_use['drmingdrmer/xptemplate']                     = { 'type' : 'opt' }
+let g:vim_packages_use['morhetz/gruvbox']                                = {}
+let g:vim_packages_use['kristijanhusak/vim-packager']                    = { 'type' : 'opt' }
+let g:vim_packages_use['vimwiki/vimwiki']                                = { 'type' : 'opt' }
+let g:vim_packages_use['Shougo/unite-outline']                           = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-surround']                             = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-repeat']                               = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-scriptease']                           = { 'type' : 'opt' }
+let g:vim_packages_use['junegunn/vader.vim']                             = { 'type' : 'opt' }
+let g:vim_packages_use['drmingdrmer/xptemplate']                         = { 'type' : 'opt' }
 " let g:vim_packages_use['rscarvalho/OpenProject.vim']                 = { 'type' : 'opt' }  " "cd" to that directory
-let g:vim_packages_use['kasandell/Code-Pull']                        = { 'type' : 'opt' }
-let g:vim_packages_use['vim-scripts/genutils']                       = { 'type' : 'opt' }
-let g:vim_packages_use['benmills/vimux']                             = { 'type' : 'opt' }
-let g:vim_packages_use['itchyny/lightline.vim']                      = { 'type' : 'opt' }  " Status line
-let g:vim_packages_use['Yggdroot/indentLine']                        = { 'type' : 'opt' }  " File format
+let g:vim_packages_use['kasandell/Code-Pull']                            = { 'type' : 'opt' }
+let g:vim_packages_use['vim-scripts/genutils']                           = { 'type' : 'opt' }
+let g:vim_packages_use['benmills/vimux']                                 = { 'type' : 'opt' }
+let g:vim_packages_use['itchyny/lightline.vim']                          = { 'type' : 'opt' }  " Status line
+let g:vim_packages_use['Yggdroot/indentLine']                            = { 'type' : 'opt' }  " File format
 " Coflicts with buffergator
-let g:vim_packages_use['tpope/vim-sleuth']                           = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-sleuth']                               = { 'type' : 'opt' }
 " Insert condition here means telling manager to remove the plugin's local copy
 " Using redir in execute triggers an error in vim
-" if exists('g:use_indent_guides')
-let g:vim_packages_use['nathanaelkane/vim-indent-guides']            = { 'type' : 'opt' }  " File format visible
+" if exists('g:_use_indent_guides')
+let g:vim_packages_use['nathanaelkane/vim-indent-guides']                = { 'type' : 'opt' }  " File format visible
 " endif
 " Just work on vim, not neovim
-let g:vim_packages_use['janlazo/vim-bang-terminal']                  = { 'type' : 'opt' }
+let g:vim_packages_use['janlazo/vim-bang-terminal']                      = { 'type' : 'opt' }
 " can't deal with writable permission issues
 " The sessions directory '/opt/vinit/vim/pack/packager/start/' isn't writable!
 " let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
 
-let g:vim_packages_use['ronakg/quickr-cscope.vim']                   = { 'type' : 'opt' }
-let g:vim_packages_use['trailblazing/cscope_auto']                   = { 'type' : 'opt', 'requires' : { 'name' : 'trailblazing/session_auto',
-\ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
+let g:vim_packages_use['ronakg/quickr-cscope.vim']                       = { 'type' : 'opt' }
+let g:vim_packages_use['trailblazing/cscope_auto']                       = { 'type' : 'opt', 'requires' : { 'name' : 'trailblazing/session_auto',
+    \ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
 
-let g:vim_packages_use['airblade/vim-gitgutter']                     = { 'type' : 'opt' }
-let g:vim_packages_use['lifepillar/vim-mucomplete']                  = { 'type' : 'opt' }  " Code completion
-let g:vim_packages_use['Shougo/ddc.vim']                             = { 'type' : 'opt' }
-let g:vim_packages_use['vim-denops/denops.vim']                      = { 'type' : 'opt' }
+let g:vim_packages_use['airblade/vim-gitgutter']                         = { 'type' : 'opt' }
+let g:vim_packages_use['lifepillar/vim-mucomplete']                      = { 'type' : 'opt' }  " Code completion
+let g:vim_packages_use['Shougo/ddc.vim']                                 = { 'type' : 'opt' }
+let g:vim_packages_use['vim-denops/denops.vim']                          = { 'type' : 'opt' }
+let g:vim_packages_use['roman/golden-ratio']                             = { 'type' : 'opt' }  " File format
+let g:vim_packages_use['sbdchd/neoformat']                               = { 'type' : 'start' }
 
 " Tons of errors with something not found
-let g:vim_packages_use['trailblazing/mkdx']                          = { 'type' : 'opt' }
+let g:vim_packages_use['trailblazing/mkdx']                              = { 'type' : 'opt' }
 
 if exists('g:_use_fern')
     let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'opt' }
@@ -675,62 +678,61 @@ endif
 " let g:vim_packages_use['lambdalisue/suda.vim']                       = { 'type' : 'start' }
 
 " Cutlass overrides the delete operations to actually just delete and not affect the current yank
-let g:vim_packages_use['svermeulen/vim-cutlass']                     = { 'type' : 'start' }
-let g:vim_packages_use['google/vim-maktaba']                         = { 'type' : 'start' }
-let g:vim_packages_use['tpope/vim-dispatch']                         = { 'type' : 'start' }
-let g:vim_packages_use['tpope/vim-commentary']                       = { 'type' : 'start' }
-let g:vim_packages_use['jasonccox/vim-wayland-clipboard']            = { 'type' : 'start' }
-let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                   = { 'type' : 'start' }  " File format
-let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }  " File format
-let g:vim_packages_use['vim-autoformat/vim-autoformat']              = { 'type' : 'start' }  " File format
-let g:vim_packages_use['junegunn/vim-easy-align']                    = { 'type' : 'start' }  " File format
-let g:vim_packages_use['rhysd/vim-clang-format']                     = { 'type' : 'start' }  " File format
-let g:vim_packages_use['roman/golden-ratio']                         = { 'type' : 'start' }  " File format
-let g:vim_packages_use['godlygeek/tabular']                          = { 'type' : 'start' }  " File format
-let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']            = { 'type' : 'start' }
-let g:vim_packages_use['itchyny/vim-qfedit']                         = { 'type' : 'start' }
-let g:vim_packages_use['lervag/vimtex']                              = { 'type' : 'start' }
-let g:vim_packages_use['jesseleite/vim-agriculture']                 = { 'type' : 'start' }
-let g:vim_packages_use['ggreer/the_silver_searcher']                 = { 'type' : 'start' }
-let g:vim_packages_use['BurntSushi/ripgrep']                         = { 'type' : 'start' }
-let g:vim_packages_use['preservim/vim-colors-pencil']                = { 'type' : 'start' }
-let g:vim_packages_use['chriskempson/base16-vim']                    = { 'type' : 'start' }
-let g:vim_packages_use['trailblazing/unsuck-flat']                   = { 'type' : 'start' }
+let g:vim_packages_use['svermeulen/vim-cutlass']                          = { 'type' : 'start' }
+let g:vim_packages_use['google/vim-maktaba']                              = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-dispatch']                              = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-commentary']                            = { 'type' : 'start' }
+let g:vim_packages_use['jasonccox/vim-wayland-clipboard']                 = { 'type' : 'start' }
+let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                        = { 'type' : 'start' }  " File format
+let g:vim_packages_use['editorconfig/editorconfig-vim']                   = { 'type' : 'start' }  " File format
+let g:vim_packages_use['vim-autoformat/vim-autoformat']                   = { 'type' : 'start' }  " File format
+let g:vim_packages_use['junegunn/vim-easy-align']                         = { 'type' : 'start' }  " File format
+let g:vim_packages_use['rhysd/vim-clang-format']                          = { 'type' : 'start' }  " File format
+let g:vim_packages_use['godlygeek/tabular']                               = { 'type' : 'start' }  " File format
+let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']                 = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/vim-qfedit']                              = { 'type' : 'start' }
+let g:vim_packages_use['lervag/vimtex']                                   = { 'type' : 'start' }
+let g:vim_packages_use['jesseleite/vim-agriculture']                      = { 'type' : 'start' }
+let g:vim_packages_use['ggreer/the_silver_searcher']                      = { 'type' : 'start' }
+let g:vim_packages_use['BurntSushi/ripgrep']                              = { 'type' : 'start' }
+let g:vim_packages_use['preservim/vim-colors-pencil']                     = { 'type' : 'start' }
+let g:vim_packages_use['chriskempson/base16-vim']                         = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/unsuck-flat']                        = { 'type' : 'start' }
 " let g:vim_packages_use['skywind3000/asyncrun.vim']                   = { 'type' : 'start', 'do' : 'chmod -R a+r ./* && chown -R root:users ./'}
-let g:vim_packages_use['tpope/vim-rhubarb']                          = { 'type' : 'start' }  " Gbrowse
-let g:vim_packages_use['tpope/vim-fugitive']                         = { 'type' : 'start' }  " Gblame
-let g:vim_packages_use['liuchengxu/vim-which-key']                   = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-rhubarb']                               = { 'type' : 'start' }  " Gbrowse
+let g:vim_packages_use['tpope/vim-fugitive']                              = { 'type' : 'start' }  " Gblame
+let g:vim_packages_use['liuchengxu/vim-which-key']                        = { 'type' : 'start' }
 
-let g:vim_packages_use['lambdalisue/nerdfont.vim']                   = { 'type' : 'start' }
+let g:vim_packages_use['lambdalisue/nerdfont.vim']                        = { 'type' : 'start' }
 
 
 " let g:vim_packages_use['terryma/vim-multiple-cursors']               = { 'type' : 'start' }  " obsoleted
 
-let g:vim_packages_use['hashivim/vim-terraform']                     = { 'type' : 'start' }
-let g:vim_packages_use['mg979/vim-visual-multi']                     = { 'type' : 'start' }
+let g:vim_packages_use['hashivim/vim-terraform']                          = { 'type' : 'start' }
+let g:vim_packages_use['mg979/vim-visual-multi']                          = { 'type' : 'start' }
 
-let g:vim_packages_use['tpope/vim-eunuch']                           = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-eunuch']                                = { 'type' : 'start' }
 " let g:vim_packages_use['chrisbra/SudoEdit.vim']                      = { 'type' : 'start' }
-let g:vim_packages_use['tpope/vim-surround']                         = { 'type' : 'start' }
-let g:vim_packages_use['editorconfig/editorconfig-vim']              = { 'type' : 'start' }
-let g:vim_packages_use['mattn/emmet-vim']                            = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-surround']                              = { 'type' : 'start' }
+let g:vim_packages_use['editorconfig/editorconfig-vim']                   = { 'type' : 'start' }
+let g:vim_packages_use['mattn/emmet-vim']                                 = { 'type' : 'start' }
 
 " let g:vim_packages_use['shemerey/vim-project']                       = { 'type' : 'start' }
 " let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
 " let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 
-let g:vim_packages_use['mattolenik/vim-projectrc']                   = { 'type' : 'start' }
-let g:vim_packages_use['majutsushi/ctags']                           = { 'type' : 'start' }
+let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 'type' : 'start' }
+let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'start' }
 
 " let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
 
-let g:vim_packages_use['preservim/tagbar']                           = { 'type' : 'start' }
-let g:vim_packages_use['vhdirk/vim-cmake']                           = { 'type' : 'start' }
-let g:vim_packages_use['gilligan/vim-lldb']                          = { 'type' : 'start' }
-let g:vim_packages_use['mileszs/ack.vim']                            = { 'type' : 'start' }
-let g:vim_packages_use['mhinz/vim-grepper']                          = { 'type' : 'start' }
-let g:vim_packages_use['LucHermitte/vim-refactor']                   = { 'type' : 'start' }
-let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']         = { 'type' : 'start' }
+let g:vim_packages_use['preservim/tagbar']                                = { 'type' : 'start' }
+let g:vim_packages_use['vhdirk/vim-cmake']                                = { 'type' : 'start' }
+let g:vim_packages_use['gilligan/vim-lldb']                               = { 'type' : 'start' }
+let g:vim_packages_use['mileszs/ack.vim']                                 = { 'type' : 'start' }
+let g:vim_packages_use['mhinz/vim-grepper']                               = { 'type' : 'start' }
+let g:vim_packages_use['LucHermitte/vim-refactor']                        = { 'type' : 'start' }
+let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']              = { 'type' : 'start' }
 
 " # # https://github.com/christoomey/vim-tmux-navigator
 " # /mnt/vinit/vim/pack/packager/start/keys/after/plugin/keys.vim
@@ -738,47 +740,47 @@ let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']         = { 'type' 
 " # /mnt/tinit/tmux.conf
 " # set -g @plugin 'christoomey/vim-tmux-navigator'
 " # /mnt/vinit/nvim/init.vim
-let g:vim_packages_use['christoomey/vim-tmux-navigator']             = { 'type' : 'start' }
+let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'start' }
 
 " let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }  " obsoleted
 
-let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']        = { 'type' : 'start' }
-let g:vim_packages_use['mhinz/vim-galore']                           = { 'type' : 'start' }
-let g:vim_packages_use['plasticboy/vim-markdown']                    = { 'type' : 'start' }
-let g:vim_packages_use['jgdavey/tslime.vim']                         = { 'type' : 'start' }
-let g:vim_packages_use['zdharma-continuum/zinit-vim-syntax']         = { 'type' : 'start' }
-let g:vim_packages_use['leafgarland/typescript-vim']                 = { 'type' : 'start' }
-let g:vim_packages_use['chrisbra/Recover.vim']                       = { 'type' : 'start' }
-let g:vim_packages_use['preservim/vim-textobj-quote']                = { 'type' : 'start' }
-let g:vim_packages_use['kana/vim-textobj-user']                      = { 'type' : 'start' }
+let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']             = { 'type' : 'start' }
+let g:vim_packages_use['mhinz/vim-galore']                                = { 'type' : 'start' }
+let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'start' }
+let g:vim_packages_use['jgdavey/tslime.vim']                              = { 'type' : 'start' }
+let g:vim_packages_use['zdharma-continuum/zinit-vim-syntax']              = { 'type' : 'start' }
+let g:vim_packages_use['leafgarland/typescript-vim']                      = { 'type' : 'start' }
+let g:vim_packages_use['chrisbra/Recover.vim']                            = { 'type' : 'start' }
+let g:vim_packages_use['preservim/vim-textobj-quote']                     = { 'type' : 'start' }
+let g:vim_packages_use['kana/vim-textobj-user']                           = { 'type' : 'start' }
 
-let g:vim_packages_use['trailblazing/session_auto']                  = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
-let g:vim_packages_use['trailblazing/boot']                          = { 'type' : 'start' }
+let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
+let g:vim_packages_use['trailblazing/boot']                               = { 'type' : 'start' }
 " let g:vim_packages_use['trailblazing/vim-buffergator']               = { 'type' : 'start' }  " minibufexplorer
 let g:vim_packages_use['git@github.com:trailblazing/vim-buffergator.git'] = { 'type' : 'start', 'requires' : 'trailblazing/boot' }  " minibufexplorer
-let g:vim_packages_use['kmonad/kmonad-vim']                          = { 'type' : 'start' }
-let g:vim_packages_use['skywind3000/vim-quickui']                    = { 'type' : 'start' }
-let g:vim_packages_use['itchyny/vim-gitbranch']                      = { 'type' : 'start' }
-let g:vim_packages_use['mbbill/undotree']                            = { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' }
-let g:vim_packages_use['prabirshrestha/vim-lsp']                     = { 'type' : 'start' }
-let g:vim_packages_use['sheerun/vim-polyglot']                       = { 'type' : 'start' }
-let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']        = { 'type' : 'start' }
-let g:vim_packages_use['inkarkat/vim-ingo-library']                  = { 'type' : 'start' }
-let g:vim_packages_use['marklcrns/vim-smartq']                       = { 'type' : 'start' }
+let g:vim_packages_use['kmonad/kmonad-vim']                               = { 'type' : 'start' }
+let g:vim_packages_use['skywind3000/vim-quickui']                         = { 'type' : 'start' }
+let g:vim_packages_use['itchyny/vim-gitbranch']                           = { 'type' : 'start' }
+let g:vim_packages_use['mbbill/undotree']                                 = { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' }
+let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 'type' : 'start' }
+let g:vim_packages_use['sheerun/vim-polyglot']                            = { 'type' : 'start' }
+let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']             = { 'type' : 'start' }
+let g:vim_packages_use['inkarkat/vim-ingo-library']                       = { 'type' : 'start' }
+let g:vim_packages_use['marklcrns/vim-smartq']                            = { 'type' : 'start' }
 " let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
-let g:vim_packages_use['tpope/vim-unimpaired']                       = { 'type' : 'start' }
-let g:vim_packages_use['justinmk/vim-dirvish']                       = { 'type' : 'start' }
-let g:vim_packages_use['vim-scripts/a.vim']                          = { 'type' : 'start' }
-let g:vim_packages_use['rickhowe/diffchar.vim']                      = { 'type' : 'start' }
-let g:vim_packages_use['rickhowe/spotdiff.vim']                      = { 'type' : 'start' }
-let g:vim_packages_use['rafi/awesome-vim-colorschemes']              = { 'type' : 'start' }
+let g:vim_packages_use['tpope/vim-unimpaired']                            = { 'type' : 'start' }
+let g:vim_packages_use['justinmk/vim-dirvish']                            = { 'type' : 'start' }
+let g:vim_packages_use['vim-scripts/a.vim']                               = { 'type' : 'start' }
+let g:vim_packages_use['rickhowe/diffchar.vim']                           = { 'type' : 'start' }
+let g:vim_packages_use['rickhowe/spotdiff.vim']                           = { 'type' : 'start' }
+let g:vim_packages_use['rafi/awesome-vim-colorschemes']                   = { 'type' : 'start' }
 " Huge
 " let g:vim_packages_use['neoclide/coc.nvim']                          = { 'type' : 'start', 'branch': 'release' }
 " let g:vim_packages_use['elixir-lsp/coc-elixir']                      = { 'type' : 'start', 'do': 'yarn install && yarn prepack'}
-let g:vim_packages_use['stefandtw/quickfix-reflector.vim']           = { 'type' : 'start' }
-let g:vim_packages_use['rakr/vim-two-firewatch']                     = { 'type' : 'start' }
+let g:vim_packages_use['stefandtw/quickfix-reflector.vim']                = { 'type' : 'start' }
+let g:vim_packages_use['rakr/vim-two-firewatch']                          = { 'type' : 'start' }
 " let g:vim_packages_use['ms-jpq/chadtree']                            = { 'type' : 'start', 'branch': 'chad', 'do': 'python3 -m chadtree deps'}
-let g:vim_packages_use['tmux-plugins/vim-tmux']                       = { 'type' : 'start' }
+let g:vim_packages_use['tmux-plugins/vim-tmux']                           = { 'type' : 'start' }
 
 
 " " Provide full URL; useful if you want to clone from somewhere else than Github.
@@ -791,7 +793,7 @@ let g:vim_packages_use['tmux-plugins/vim-tmux']                       = { 'type'
 " let g:vim_packages_use['neoclide/coc.nvim']                           = { 'do'   : function('InstallCoc') }  " code completion
 " let g:vim_packages_use['weirongxu/coc-explorer']                      = { 'do'   : function('InstallCoc') }
 
-let g:vim_packages_use['sonph/onehalf']                               = { 'rtp'  : 'vim' }
+let g:vim_packages_use['sonph/onehalf']                                   = { 'rtp'  : 'vim' }
 
 " " have binarys
 " " Loaded only for specific filetypes on demand. Requires autocommands below.
@@ -802,7 +804,6 @@ let g:vim_packages_use['sonph/onehalf']                               = { 'rtp' 
 " let g:vim_packages_use['kana/vim-vspec']                             = { 'type' : 'opt' }
 " let g:vim_packages_use['xavierd/clang_complete']                     = { 'type' : 'start' }
 " let g:vim_packages_use['skywind3000/asynctasks.vim']                 = { 'type' : 'start' }
-" let g:vim_packages_use['sbdchd/neoformat']                           = { 'type' : 'start' }
 " let g:vim_packages_use['liquidz/vim-iced']                           = { 'type' : 'start', 'for' : 'clojure' }
 " " let g:vim_packages_use['dense-analysis/ale']                         = { 'type' : 'start' }
 " " Huge
@@ -914,17 +915,17 @@ function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environm
 endfunction
 
 function! s:adjust_init_helper(arg_list)
-     call { arg_list -> s:adjust_attributes(arg_list, g:plugin_dir['vim'], g:package_manager['vim'], g:_environment) }(arg_list)
+    call { arg_list -> s:adjust_attributes(arg_list, g:plugin_dir['vim'], g:package_manager['vim'], g:_environment) }(arg_list)
 endfunction
 
-" let g:use_setup_minpac = 1
-" let g:use_setup_reference = 1
-let g:use_setup_packager = 1
+" let g:_use_setup_minpac    = 1
+" let g:_use_setup_reference = 1
+let g:_use_setup_packager  = 1
 
 " syntax disable
 syntax off
 
-if exists('g:use_setup_minpac')
+if exists('g:_use_setup_minpac')
 
     function! s:pack_init(plugin_dir) abort
         " Try to load minpac.
@@ -985,7 +986,7 @@ if exists('g:use_setup_minpac')
 
     call s:pack_init(g:plugin_dir['vim'])
 
-elseif exists('g:use_setup_reference')
+elseif exists('g:_use_setup_reference')
 
     function! s:packager_init_ref(packager) abort
 
@@ -999,7 +1000,7 @@ elseif exists('g:use_setup_reference')
     " The second parameter is to set the packages installation location: where to put /pack/*/start and /pack/*/opt
     call packager#setup(function('s:packager_init_ref'), g:plugin_dir['vim'])
 
-elseif exists('g:use_setup_packager')
+elseif exists('g:_use_setup_packager')
 
     " function! s:packager_init(function_adjust_init_helper, plugin_dir, package_manager) abort
     function! s:packager_init(plugin_dir, package_manager) abort
@@ -1179,7 +1180,7 @@ function! s:adjust_hook_helper(plugin_list, plugin_dir, package_manager, environ
 endfunction
 
 
-if exists('g:use_setup_packager')
+if exists('g:_use_setup_packager')
 
     " command! PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#install()
     " command! -bang PackagerUpdate call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#update({ 'force_hooks': '<bang>' })
@@ -1310,8 +1311,8 @@ if has('nvim')
 
     function! s:lua_update()
         " if $USER ==# 'root'
-            lua require'plugins'.install()
-            :PackerCompile
+        lua require'plugins'.install()
+        :PackerCompile
         " else
         "     lua require'plugins'.startup()
         " endif
@@ -1351,7 +1352,6 @@ if has('nvim')
     " lua require("status-line")
 
 
-    let mucomplete#no_mappings = 1
 
     " https://www.reddit.com/r/vim/comments/oywg54/how_to_remap_tab_without_affecting_ctrli/
     nnoremap <c-i> i
@@ -1456,7 +1456,7 @@ endif
 
 " h term-dependent-settings
 set termguicolors
-let base16colorspace=256  " Access colors present in 256 colorspace
+let base16colorspace = 256  " Access colors present in 256 colorspace
 
 " https://www.reddit.com/r/vim/comments/f3v3lq/syntax_highlighting_changes_while_using_tmux/
 if empty($TMUX)
@@ -1491,9 +1491,6 @@ augroup unfold
     au BufWinEnter * normal! zv
 augroup END
 
-set background=dark
-" set background=light
-
 silent! execute '!export TERM=xterm-256color'
 
 if ! has('gui_running')
@@ -1517,17 +1514,23 @@ endif
 " let g:theme_name = "unsuck-flat"
 " let g:theme_name = "sierra"
 " let g:theme_name = "base16-default-dark"
-" let g:theme_name = "base16-tomorrow-night"
+let g:theme_name = "base16-tomorrow-night"
 " let g:theme_name = "base16-flat"
 " let g:theme_name = "badwolf"
-" let g:theme_name = "tabula"
 " let g:theme_name = "tender"
 " let g:theme_name = "carbonized-dark"
+
+" let g:theme_name = "onehalfdark"
 " let g:theme_name = "onehalflight"
+" silent! exe 'colorscheme ' . g:theme_name
+" let g:theme_name = "tabula"
+
 " Recommend
 " let g:theme_name = "pencil"
-let g:theme_name = "two-firewatch"
-let g:two_firewatch_italics = 1
+
+" let g:theme_name = "two-firewatch"
+" let g:two_firewatch_italics = 1
+
 " let g:theme_name = "lucid"
 
 " https://github.com/vim-airline/vim-airline-themes/tree/master/autoload/airline/themes
@@ -1645,8 +1648,7 @@ else
     call s:lightline_disable()
 endif
 
-silent! exe 'colorscheme ' . g:theme_name
-augroup color_scheme | au!
+augroup color_scheme_refresh | au!
     " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
     autocmd VimEnter *
         \ if ! exists('g:colors_name') || g:colors_name !=# g:theme_name |
@@ -1665,18 +1667,17 @@ augroup END
 "     autocmd ColorScheme pencil call s:sdjust_solarized()
 " augroup END
 
-
-" :set background=light
-" https://www.iditect.com/how-to/53501604.html
-let g:pencil_termtrans          = 1
-let g:pencil_termcolors         = 256
-let g:pencil_terminal_italics   = 1
-let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
-let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
-let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
-let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
-let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
-
+if "pencil" == g:theme_name
+    " https://www.iditect.com/how-to/53501604.html
+    let g:pencil_termtrans          = 1
+    let g:pencil_termcolors         = 256
+    let g:pencil_terminal_italics   = 1
+    let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
+    let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
+    let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
+    let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
+    let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
+endif
 
 let g:powerline_pycmd            = "py3"
 
@@ -1735,21 +1736,49 @@ if exists("g:indentLine_loaded")
     " let g:indentLine_char_list       = ['|', '¦', '┆', '┊']
 endif
 
+" https://stackoverflow.com/questions/36813466/highlighting-arbitrary-lines-in-vim
+" \l to highlight a line
+" nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
+nnoremap <silent> <leader>L :call matchadd('Search', '\%'.line('.').'l')<CR>
+" nnoremap <silent> <leader>c :execute 'match Search /\%'.virtcol('.').'v/'<cr>
+
+" \L to remove highlighted line
+nnoremap <silent> <leader>l :
+    \for m in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
+    \<BAR>     :call matchdelete(m.id)
+    \<BAR> :endfor<CR>
+
+" https://vim.fandom.com/wiki/Highlight_current_line
+" nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
+
+
 " https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
 set cursorline
-set nocursorcolumn
+set cursorcolumn
 
-let g:indent_blankline_disable_with_nolist = v:true
-let g:indent_blankline_show_trailing_blankline_indent = v:false
-let g:indent_blankline_show_first_indent_level = v:false
-let g:indent_blankline_filetype_exclude = ['help', 'txt'. 'log']
-let g:indent_blankline_buftype_exclude = ['terminal']
+" Only show the cursor line in the active buffer.
+setlocal cursorline | setlocal cursorcolumn
+" setlocal cursorline
+augroup cursor_line
+    au!
+    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
+    au WinEnter * setlocal cursorline | setlocal cursorcolumn
+    " au WinEnter * setlocal cursorline
+    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
+augroup END
+
+let g:indent_blankline_disable_with_nolist                        = v:true
+let g:indent_blankline_show_trailing_blankline_indent             = v:false
+let g:indent_blankline_show_first_indent_level                    = v:false
+let g:indent_blankline_filetype_exclude                           = ['help', 'txt'. 'log']
+let g:indent_blankline_buftype_exclude                            = ['terminal']
 let g:indent_blankline_show_current_context_start_on_current_line = v:false
-let g:indent_blankline_viewport_buffer = 20
+let g:indent_blankline_viewport_buffer                            = 20
 
 " cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
 " cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
-augroup backgroung_color
+
+augroup color_background
     au!
     au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
         \ exe 'set colorcolumn="0,".join(range(0, 120),",")' |
@@ -1796,56 +1825,46 @@ noremap <Leader>w :let @w=float2nr(log10(line("$")))+82\|:vertical resize <c-r>w
 " au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%80v.\+', -1)
 
 
-" https://stackoverflow.com/questions/36813466/highlighting-arbitrary-lines-in-vim
-" \l to highlight a line
-nnoremap <silent> <leader>L :call matchadd('Search', '\%'.line('.').'l')<CR>
-
-" \L to remove highlighted line
-nnoremap <silent> <leader>l :
-    \for m in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
-    \<BAR>     :call matchdelete(m.id)
-    \<BAR> :endfor<CR>
-
-" " https://vim.fandom.com/wiki/Highlight_current_line
-" " :nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
-" nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
-" " :nnoremap <silent> <leader>c :execute 'match Search /\%'.virtcol('.').'v/'<cr>
 
 " http://www.pixelbeat.org/docs/terminal_colours/
 
 let g:insert_fg_gui = 'DarkYellow'
 let g:insert_bg_gui = 'Black'
-
-let g:leave_insert_fg_gui   = 'NONE'
+if exists("g:_use_terminal_transparent")
+    let g:leave_insert_fg_gui   = 'darkgray'
+    let g:leave_insert_fg_cterm = '080808'
+else
+    let g:leave_insert_fg_gui   = 'NONE'
+    " Warning: Color name "Background" is not defined. "NONE" is not a eligile argument for cterm colors
+    let g:leave_insert_fg_cterm = 'NONE'
+endif
 if 'linux' == $TERM
     " let g:leave_insert_bg_gui = 'Brown'
     let g:leave_insert_bg_gui = 'NONE'
+    " let g:leave_insert_bg_cterm = 8
+    let g:leave_insert_bg_cterm = 'NONE'
 else
-    " let g:leave_insert_bg_gui = '#000000'
-    let g:leave_insert_bg_gui = 'NONE'
+    let g:leave_insert_bg_gui = '#000008'
+    " let g:leave_insert_bg_gui = 'NONE'
+    let g:leave_insert_bg_cterm = 8
+    " let g:leave_insert_bg_cterm = 'NONE'
 endif
 
 let g:insert_fg_cterm = 'DarkYellow'
 let g:insert_bg_cterm = 'Black'
 
-" Warning: Color name "Background" is not defined. "NONE" is not a eligile argument for cterm colors
-let g:leave_insert_fg_cterm = 'NONE'
-if 'linux' == $TERM
-    " let g:leave_insert_bg_cterm = 8
-    let g:leave_insert_bg_cterm = 'NONE'
-else
-    " let g:leave_insert_bg_cterm = 8
-    let g:leave_insert_bg_cterm = 'NONE'
-endif
-
 let g:nontext_fg_cterm = 241
 let g:nontext_fg_gui = 'gray'
+
 
 " :help highlight-groups
 " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
 " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
 
-highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
+if ! exists("g:_use_terminal_transparent")
+    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
+endif
+
 highlight FileStyleIgnorePattern guibg=bg ctermbg=0
 " highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
 " https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
@@ -1881,41 +1900,58 @@ highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
 
 
 " "~" vertically under the line numbers
-" That command should set the color of non text characters to be the same as the background color.
-" hi NonText guifg=bg
-" highlight NonText ctermfg=7 guifg=gray
-silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+
+if ! exists("g:_use_terminal_transparent")
+    " That command should set the color of non text characters to be the same as the background color.
+    " hi NonText guifg=bg
+    " highlight NonText ctermfg=7 guifg=gray
+    silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+    if exists('g:_use_dynamic_color')
+        augroup nontext_eara
+            au!
+            autocmd ColorScheme,SourcePost *
+                \ silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+        augroup end
+    endif
+    " https://newbedev.com/highlighting-the-current-line-number-in-vim
+    hi clear CursorLine
+    if exists('g:_use_dynamic_color')
+        augroup CLClear
+            au!
+            autocmd ColorScheme * hi clear CursorLine
+            autocmd ColorScheme * highlight CursorLine ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE cterm=NONE gui=NONE term=NONE
+        augroup END
+
+        augroup CLNRSet
+            au!
+            autocmd ColorScheme * hi CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+        augroup END
+
+    endif
+    highlight CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+
+    " https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
+    " highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
+    highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+
+    if exists('g:_use_dynamic_color')
+        augroup buffer_ending
+            au!
+            autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+        augroup end
+    endif
+endif
 
 " hi LineNr guibg=fg
 " highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
 silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
-" https://newbedev.com/highlighting-the-current-line-number-in-vim
-hi clear CursorLine
-augroup CLClear
-    au!
-    autocmd ColorScheme * hi clear CursorLine
-    autocmd ColorScheme * highlight CursorLine ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE cterm=NONE gui=NONE term=NONE
-augroup END
-augroup CLNRSet
-    au!
-    autocmd ColorScheme * hi CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
-augroup END
-highlight CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
 
-" https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
-" highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
-highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
-augroup end_of_buffer
-    au!
-    autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
-        \ | silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-augroup end
-
-set foldlevel=1
 " https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
 set nuw        =7
 set foldcolumn =0
+set foldlevel  =1
+
 augroup allways_show_line_number | au!
     au BufWinEnter * set number relativenumber | set foldcolumn=0
     " au BufWinEnter * set number | set foldcolumn=0
@@ -1948,24 +1984,14 @@ highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
 " hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
 " hi! VertSplit guifg=lightgrey guibg=lightgrey ctermfg=lightgrey ctermbg=lightgrey
 " must be before setting your colorscheme
-augroup nosplit
-    au!
-    autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
-        \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-augroup END
-
-" vim-gitgutter
-set signcolumn=yes
-if has('nvim')
-    let g:gitgutter_git_executable = boot#chomp(system(['which', 'git']))
-else
-    let g:gitgutter_git_executable = boot#chomp(system('which git'))
+if exists('g:_use_dynamic_color')
+    augroup nosplit
+        au!
+        autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+            \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+    augroup END
 endif
-let g:gitgutter_sign_allow_clobber   = 1
-let g:gitgutter_sign_allow_clobber   = 1
-let g:gitgutter_set_sign_backgrounds = 1
-highlight link GitGutterChangeLine DiffText
-highlight link GitGutterAddIntraLine DiffAdd
+
 highlight SignColumn ctermbg=NONE guibg=NONE
 
 " https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
@@ -1975,52 +2001,54 @@ hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 silent! execute ':hi ColorColumn guifg=' . g:nontext_fg_gui . ' guibg=' . g:nontext_fg_gui
     \ . ' ctermfg=' . g:nontext_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
 
-" silent! execute ':hi CursorLine   guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
-"             \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-" silent! execute ':hi CursorColumn guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
-"             \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+let hl_insert_leave = ' guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
+    \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+let hl_insert_enter = ' guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
+    \ . ' ctermfg=' . g:insert_fg_cterm . ' ctermbg=' . g:insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
 
-augroup cursor_theme
-    au!
-    " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
-    " Workaround for creating transparent bg
-    autocmd SourcePost * highlight Normal ctermbg=0 guibg=NONE
-        \ | silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-        \ | highlight SignColumn ctermbg=NONE guibg=NONE
-        \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+silent! execute ':hi CursorLine' . hl_insert_leave
+silent! execute ':hi CursorColumn' . hl_insert_leave
 
-    " " Change Color when entering Insert Mode
-    autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-        \ silent! execute ':hi ColorColumn guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
-        \ . ' ctermfg=' . g:insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-    autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-        \ silent! execute ':hi ColorColumn guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
-        \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+if exists('g:_use_dynamic_color')
+    augroup cursor_theme
+        au!
+        " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
+        " Workaround for creating transparent bg
+        if ! exists("g:_use_terminal_transparent")
+            autocmd SourcePost * highlight Normal ctermbg=0 guibg=NONE
+                \ silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+        else
+            autocmd SourcePost *
+                \ silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+        endif
 
-    " autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-    "             \ silent! execute ':hi CursorLine guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
-    "             \ . ' ctermfg=' . g:insert_fg_cterm . ' ctermbg=' . g:insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-    " autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-    "             \ silent! execute ':hi CursorLine guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
-    "             \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+        " " Change Color when entering Insert Mode
+        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi ColorColumn guifg=' . hl_insert_leave
+        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi ColorColumn guifg=' . hl_insert_enter
 
-    " autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-    "             \ silent! execute ':hi CursorColumn guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
-    "             \ . ' ctermfg=' . g:insert_fg_cterm . ' ctermbg=' . g:insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-    " autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-    "             \ silent! execute ':hi CursorColumn guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
-    "             \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-augroup END
+        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi CursorLine' . hl_insert_enter
+        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi CursorLine' . hl_insert_leave
 
-if has('nvim')
-    if exists('g:use_indent_guides')
-        unlet g:use_indent_guides
-    endif
-else
-    " let g:use_indent_guides = 1
+        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi CursorColumn' . hl_insert_enter
+        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            \ silent! execute ':hi CursorColumn' . hl_insert_leave
+
+    augroup END
+endif
+if has('nvim') && exists('g:_use_indent_guides')
+    unlet g:_use_indent_guides
 endif
 
-if exists('g:use_indent_guides')
+if exists('g:_use_indent_guides')
 
     let g:indent_guides_auto_colors = 0
     let g:indent_guides_enable_on_vim_startup = 1
@@ -2029,47 +2057,61 @@ if exists('g:use_indent_guides')
 
     " https://stackoverflow.com/questions/9912116/vimscript-programmatically-get-colors-from-colorscheme
     " let bgcolor=synIDattr(hlID('NonText'), 'bg#')
-    " " if light == background
-    " hi IndentGuidesOdd  ctermbg=white
-    " hi IndentGuidesEven ctermbg=lightgrey
-    " " endif
-    " if dark == background
-    " hi IndentGuidesOdd  ctermbg=black
-    " hi IndentGuidesEven ctermbg=darkgrey
 
-    " hi IndentGuidesOdd  ctermbg=black
-    " hi IndentGuidesEven ctermbg=darkgrey
+    if light == background
+        hi IndentGuidesOdd  ctermbg=white
+        hi IndentGuidesEven ctermbg=lightgrey
+    elseif dark == background
+        hi IndentGuidesOdd  ctermbg=black
+        hi IndentGuidesEven ctermbg=darkgrey
+    endif
 
     " hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
-    " hi IndentGuidesEven guibg=green ctermbg=4
+    " hi IndentGuidesEven guibg=green    ctermbg=4
 
     " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
-    " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=4
+    " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green    ctermbg=4
 
-    " hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
-    " hi IndentGuidesEven guibg=green ctermbg=4
-    let indent_even = '#ecf2dd'
-    let indent_odd  = '#767966'
-    let indent_even  = '#494b40'
-    let indent_color_odd = 'hi IndentGuidesOdd guifg=NONE guibg=' . indent_odd . ' gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE'
+    let indent_even       = '#ecf2dd'
+    let indent_odd        = '#767966'
+    let indent_even       = '#494b40'
+    let indent_color_odd  = 'hi IndentGuidesOdd  guifg=NONE guibg=' . indent_odd . '  gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE'
+    " let indent_color_odd  = 'hi! IndentGuidesOdd  guifg=NONE guibg=#333333 gui=NONE ctermfg=8 ctermbg=3 cterm=NONE'
     let indent_color_even = 'hi IndentGuidesEven guifg=NONE guibg=' . indent_even . ' gui=NONE ctermfg=black ctermbg=2 cterm=NONE term=NONE'
+    " let indent_color_even = 'hi! IndentGuidesEven guifg=NONE guibg=#2b2b2b gui=NONE ctermfg=8 ctermbg=2 cterm=NONE'
     silent! execute indent_color_odd
     silent! execute indent_color_even
 
     augroup odd_even
         au!
-        " " https://githubmemory.com/repo/nathanaelkane/vim-indent-guides/issues?cursor=Y3Vyc29yOnYyOpK5MjAxNi0wNy0xNFQxODoyMDoyMyswODowMM4J3b-h&pagination=next&page=3
-        " au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesOdd  guifg=NONE guibg=#333333 gui=NONE ctermfg=8 ctermbg=3 cterm=NONE
-        " au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * hi! IndentGuidesEven guifg=NONE guibg=#2b2b2b gui=NONE ctermfg=8 ctermbg=2 cterm=NONE
-        " " https://www.titanwolf.org/Network/q/ad9924f3-2db9-4eb0-885f-bc68bffe6e3c/ynonenone
+        " https://githubmemory.com/repo/nathanaelkane/vim-indent-guides/issues?cursor=Y3Vyc29yOnYyOpK5MjAxNi0wNy0xNFQxODoyMDoyMyswODowMM4J3b-h&pagination=next&page=3
+        " https://www.titanwolf.org/Network/q/ad9924f3-2db9-4eb0-885f-bc68bffe6e3c/ynonenone
         au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * silent! execute indent_color_odd
         au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * silent! execute indent_color_even
     augroup END
 
 endif
-" endif
 
 
+
+set background=dark
+silent! exe 'colorscheme ' . g:theme_name
+
+if exists('g:_use_gitgutter')
+    " vim-gitgutter
+    set signcolumn=yes
+    if has('nvim')
+        let g:gitgutter_git_executable = boot#chomp(system(['which', 'git']))
+    else
+        let g:gitgutter_git_executable = boot#chomp(system('which git'))
+    endif
+    let g:gitgutter_sign_allow_clobber   = 1
+    let g:gitgutter_sign_allow_clobber   = 1
+    let g:gitgutter_set_sign_backgrounds = 1
+
+    highlight link GitGutterChangeLine DiffText
+    highlight link GitGutterAddIntraLine DiffAdd
+endif
 
 " "color settings ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
@@ -2236,7 +2278,7 @@ set lcs=extends:>,precedes:<,nbsp:%,tab:>~
 " set list lcs=tab:\|\
 
 " Toggle visually showing all whitespace characters.
-noremap <F7> :set list!<cr>
+noremap  <F7> :set list!<cr>
 inoremap <F7> <C-o>:set list!<cr>
 cnoremap <F7> <C-c>:set list!<cr>
 " https://vi.stackexchange.com/questions/454/whats-the-simplest-way-to-strip-trailing-whitespace-from-all-lines-in-a-file
@@ -2323,14 +2365,6 @@ augroup guard
 
     au VimEnter,WinEnter,BufWinEnter * setlocal expandtab
     " verbose setlocal ts? sts? et? sw?
-augroup END
-
-" Only show the cursor line in the active buffer.
-augroup cursor_line
-    au!
-    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
-    " au WinEnter * setlocal cursorline | setlocal cursorcolumn
-    au WinLeave * setlocal cursorline | setlocal nocursorcolumn
 augroup END
 
 augroup stop_auto_indenting
@@ -2506,7 +2540,7 @@ if 1 == g:navi_protect
 
 
 
-endif " g:navi_protect
+endif | " g:navi_protect
 
 " "enter insert new line in normal mode ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
@@ -2996,18 +3030,21 @@ endif
 " https://github.com/alacritty/alacritty/issues/2931
 " https://github.com/alacritty/alacritty/issues/1142
 if ! has('nvim')
+
     if has("mouse_sgr")
         set ttymouse=sgr
     else
         set ttymouse=xterm2
-    end
+    endif
 endif
+
 if ! has('nvim')
-    :set term=xterm-256color    " :set term=alacritty
+    set term=xterm-256color
+    " set term=alacritty
 endif
 
 if has('mouse')
-    " :set mouse=n
+    " set mouse=n
     set mouse=a
 endif
 
@@ -3616,7 +3653,7 @@ endfunction
 function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
     let jl = getjumplist() | let jumplist = jl[0] | let curjump = jl[1]
     let jumpcmdstr = a:dir > 0 ? '<C-O>' : '<C-I>'
-    " let jumpcmdchr = a:dir > 0 ? '' : '	'    " <C-I> or <C-O>
+    " let jumpcmdchr = a:dir > 0 ? '' : ' '    " <C-I> or <C-O>
     let searchrange = a:dir > 0 ? range(curjump + 1, len(jumplist))
         \ : range(curjump - 1, 0, -1)
     for i in searchrange
@@ -3794,7 +3831,7 @@ if exists('$TMUX')
         " autocmd VimEnter,BufNewFile,BufReadPost * call system('tmux rename-window "vim-' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
     augroup END
 
-endif
+endif | " exists('$TMUX')
 
 let g:sudo_no_gui = 1
 
@@ -3892,14 +3929,14 @@ if has('nvim')
     let g:nvim_tree_create_in_closed_folder = 1 "0 by default, When creating files, sets the path of a file when cursor is on a closed folder to the parent folder when 0, and inside the folder when 1.
     let g:nvim_tree_window_picker_exclude = {
         \   'filetype': [
-            \     'notify',
-            \     'packer',
-            \     'qf'
-            \   ],
-            \   'buftype': [
-                \     'terminal'
-                \   ]
-                \ }
+        \     'notify',
+        \     'packer',
+        \     'qf'
+        \   ],
+        \   'buftype': [
+        \     'terminal'
+        \   ]
+        \ }
     " Dictionary of buffer option names mapped to a list of option values that
     " indicates to the window picker that the buffer's window should not be
     " selectable.
@@ -3922,25 +3959,25 @@ if has('nvim')
         \ 'default': '',
         \ 'symlink': '',
         \ 'git': {
-            \   'unstaged': "✗",
-            \   'staged': "✓",
-            \   'unmerged': "",
-            \   'renamed': "➜",
-            \   'untracked': "★",
-            \   'deleted': "",
-            \   'ignored': "◌"
-            \   },
-            \ 'folder': {
-                \   'arrow_open': "",
-                \   'arrow_closed': "",
-                \   'default': "",
-                \   'open': "",
-                \   'empty': "",
-                \   'empty_open': "",
-                \   'symlink': "",
-                \   'symlink_open': "",
-                \   }
-                \ }
+        \   'unstaged': "✗",
+        \   'staged': "✓",
+        \   'unmerged': "",
+        \   'renamed': "➜",
+        \   'untracked': "★",
+        \   'deleted': "",
+        \   'ignored': "◌"
+        \   },
+        \ 'folder': {
+        \   'arrow_open': "",
+        \   'arrow_closed': "",
+        \   'default': "",
+        \   'open': "",
+        \   'empty': "",
+        \   'empty_open': "",
+        \   'symlink': "",
+        \   'symlink_open': "",
+        \   }
+        \ }
 
     " nnoremap <C-n> :NvimTreeToggle<CR>
     nnoremap <leader>n :NvimTreeToggle<CR>
@@ -3962,292 +3999,292 @@ highlight NvimTreeFolderIcon guibg=blue
 
 if exists('g:_use_fern')
 
-" https://github.com/lambdalisue/fern-renderer-devicons.vim
-let g:fern#renderer = "devicons"
+    " https://github.com/lambdalisue/fern-renderer-devicons.vim
+    let g:fern#renderer = "devicons"
 
-" https://github.com/lambdalisue/fern.vim/wiki/Plugins
-let g:fern_renderer_devicons_disable_warning = 1
-let g:fern#disable_default_mappings          = 1
-" let g:fern#disable_drawer_auto_quit          = 1
-let g:fern#disable_drawer_smart_quit         = 1
-" let g:fern#disable_viewer_hide_cursor        = 1
+    " https://github.com/lambdalisue/fern.vim/wiki/Plugins
+    let g:fern_renderer_devicons_disable_warning = 1
+    let g:fern#disable_default_mappings          = 1
+    " let g:fern#disable_drawer_auto_quit          = 1
+    let g:fern#disable_drawer_smart_quit         = 1
+    " let g:fern#disable_viewer_hide_cursor        = 1
 
-" https://github.com/lambdalisue/fern-git-status.vim
-" Disable the following options one by one if you encounter performance issues.
-" Disable listing ignored files/directories
-let g:fern_git_status#disable_ignored     = 1
-" Disable listing untracked files
-let g:fern_git_status#disable_untracked   = 1
-" Disable listing status of submodules
-let g:fern_git_status#disable_submodules  = 1
-" Disable listing status of directories
-let g:fern_git_status#disable_directories = 1
+    " https://github.com/lambdalisue/fern-git-status.vim
+    " Disable the following options one by one if you encounter performance issues.
+    " Disable listing ignored files/directories
+    let g:fern_git_status#disable_ignored     = 1
+    " Disable listing untracked files
+    let g:fern_git_status#disable_untracked   = 1
+    " Disable listing status of submodules
+    let g:fern_git_status#disable_submodules  = 1
+    " Disable listing status of directories
+    let g:fern_git_status#disable_directories = 1
 
-" https://github.com/lambdalisue/fern-renderer-nerdfont.vim
-let g:fern#renderer = "nerdfont"
+    " https://github.com/lambdalisue/fern-renderer-nerdfont.vim
+    let g:fern#renderer = "nerdfont"
 
-let g:fern#renderer#default#leading          = "│"
-let g:fern#renderer#default#root_symbol      = "┬ "
-let g:fern#renderer#default#leaf_symbol      = "├─ "
-let g:fern#renderer#default#collapsed_symbol = "├─ "
-let g:fern#renderer#default#expanded_symbol  = "├┬ "
+    let g:fern#renderer#default#leading          = "│"
+    let g:fern#renderer#default#root_symbol      = "┬ "
+    let g:fern#renderer#default#leaf_symbol      = "├─ "
+    let g:fern#renderer#default#collapsed_symbol = "├─ "
+    let g:fern#renderer#default#expanded_symbol  = "├┬ "
 
-let g:fern#mark_symbol                       = '●'
-let g:fern#renderer#default#collapsed_symbol = '▷ '
-let g:fern#renderer#default#expanded_symbol  = '▼ '
-let g:fern#renderer#default#leading          = ' '
-let g:fern#renderer#default#leaf_symbol      = ' '
-let g:fern#renderer#default#root_symbol      = '~ '
+    let g:fern#mark_symbol                       = '●'
+    let g:fern#renderer#default#collapsed_symbol = '▷ '
+    let g:fern#renderer#default#expanded_symbol  = '▼ '
+    let g:fern#renderer#default#leading          = ' '
+    let g:fern#renderer#default#leaf_symbol      = ' '
+    let g:fern#renderer#default#root_symbol      = '~ '
 
-" https://www.reddit.com/r/vim/comments/i1p3s9/fernvim_a_modern_asynchronous_file_manager_for_vim/
-" autocmd VimEnter * ++nested Fern . -drawer -stay
-" https://github.com/Allaman/dotfiles/blob/master/vimrc
-noremap <silent> <Leader>p :Fern . -drawer -width=35 -toggle<CR><C-w>=
-noremap <silent> <leader>d :Fern . -drawer -width=35 -toggle<cr><C-w>=
-noremap <silent> <leader>f :Fern . -drawer -reveal=% -width=35<cr><C-w>=
-noremap <silent> <leader>. :Fern %:h -drawer -width=35<cr><C-w>=
+    " https://www.reddit.com/r/vim/comments/i1p3s9/fernvim_a_modern_asynchronous_file_manager_for_vim/
+    " autocmd VimEnter * ++nested Fern . -drawer -stay
+    " https://github.com/Allaman/dotfiles/blob/master/vimrc
+    noremap <silent> <Leader>p :Fern . -drawer -width=35 -toggle<CR><C-w>=
+    noremap <silent> <leader>d :Fern . -drawer -width=35 -toggle<cr><C-w>=
+    noremap <silent> <leader>f :Fern . -drawer -reveal=% -width=35<cr><C-w>=
+    noremap <silent> <leader>. :Fern %:h -drawer -width=35<cr><C-w>=
 
-" https://github.com/lambdalisue/fern.vim
-function! s:init_fern() abort
-    echo "This function is called ON a fern buffer WHEN initialized"
+    " https://github.com/lambdalisue/fern.vim
+    function! s:init_fern() abort
+        echo "This function is called ON a fern buffer WHEN initialized"
 
-    function! s:init_fern_mapping_reload_all()
-        nmap <buffer> R <Plug>(fern-action-reload:all)
-    endfunction
-    augroup action-fern-mapping-reload-all
-        autocmd! *
-        autocmd FileType fern call s:init_fern_mapping_reload_all()
-    augroup END
+        function! s:init_fern_mapping_reload_all()
+            nmap <buffer> R <Plug>(fern-action-reload:all)
+        endfunction
+        augroup action-fern-mapping-reload-all
+            autocmd! *
+            autocmd FileType fern call s:init_fern_mapping_reload_all()
+        augroup END
 
-    " augroup FernTypeGroup
-    "     autocmd! * <buffer>
-    "     autocmd BufEnter <buffer> silent execute "normal \<Plug>(fern-action-reload)"
-    " augroup END
-
-
-    " Use 'select' instead of 'edit' for default 'open' action
-    nmap <buffer> <Plug>(fern-action-open) <Plug>(fern-action-open:select)
-
-    if 0 == g:navi_protect
-        " Open node with 'o'
-        nmap <buffer> o <Plug>(fern-action-open)
-
-        " Add any code to customize fern buffer
-        " Define NERDTree like mappings
-        nmap <buffer> o  <Plug>(fern-action-open:edit)
-    endif
-
-    nmap <buffer> <CR> <Plug>(fern-my-open-expand-collapse)
-    nmap <buffer> n <Plug>(fern-action-new-path)
-    " nmap <buffer> ma <Plug>(fern-action-new-path)
-    nmap <buffer> D <Plug>(fern-action-trash)
-    " nmap <buffer> m <Plug>(fern-action-move)
-    nmap <buffer> M <Plug>(fern-action-rename)
-    nmap <buffer> c <Plug>(fern-action-copy)
-    nmap <buffer> r <Plug>(fern-action-reload)
-    nmap <buffer> t <Plug>(fern-action-mark:toggle)
-    nmap <buffer> s <Plug>(fern-action-open:split)
-    " nmap <buffer> i  <Plug>(fern-action-open:split)
-    " nmap <buffer> gi <Plug>(fern-action-open:split)<C-w>p
-    nmap <buffer> v <Plug>(fern-action-open:vsplit)
-    " nmap <buffer> s  <Plug>(fern-action-open:vsplit)
-    " nmap <buffer> gs <Plug>(fern-action-open:vsplit)<C-w>p
-    nmap <buffer><nowait> i <Plug>(fern-action-hidden:toggle)
-    " nmap <buffer> I <Plug>(fern-action-hide-toggle)
-    nmap <buffer><nowait> u <Plug>(fern-action-leave)
-    nmap <buffer><nowait> e <Plug>(fern-action-enter)
-    nmap <buffer> q :<C-u>quit<CR>
+        " augroup FernTypeGroup
+        "     autocmd! * <buffer>
+        "     autocmd BufEnter <buffer> silent execute "normal \<Plug>(fern-action-reload)"
+        " augroup END
 
 
-    nmap <buffer> go <Plug>(fern-action-open:edit)<C-w>p
-    " nmap <buffer> t  <Plug>(fern-action-open:tabedit)
-    " nmap <buffer> T  <Plug>(fern-action-open:tabedit)gT
-    nmap <buffer> gv <Plug>(fern-action-open:vsplit)<C-w>p
-    nmap <buffer> P gg
+        " Use 'select' instead of 'edit' for default 'open' action
+        nmap <buffer> <Plug>(fern-action-open) <Plug>(fern-action-open:select)
 
-    nmap <buffer> C  <Plug>(fern-action-enter)
-    nmap <buffer> cd <Plug>(fern-action-cd)
-    nmap <buffer> R  gg<Plug>(fern-action-reload)<C-o>
-    nmap <buffer> CD gg<Plug>(fern-action-cd)<C-o>
+        if 0 == g:navi_protect
+            " Open node with 'o'
+            nmap <buffer> o <Plug>(fern-action-open)
+
+            " Add any code to customize fern buffer
+            " Define NERDTree like mappings
+            nmap <buffer> o  <Plug>(fern-action-open:edit)
+        endif
+
+        nmap <buffer> <CR> <Plug>(fern-my-open-expand-collapse)
+        nmap <buffer> n <Plug>(fern-action-new-path)
+        " nmap <buffer> ma <Plug>(fern-action-new-path)
+        nmap <buffer> D <Plug>(fern-action-trash)
+        " nmap <buffer> m <Plug>(fern-action-move)
+        nmap <buffer> M <Plug>(fern-action-rename)
+        nmap <buffer> c <Plug>(fern-action-copy)
+        nmap <buffer> r <Plug>(fern-action-reload)
+        nmap <buffer> t <Plug>(fern-action-mark:toggle)
+        nmap <buffer> s <Plug>(fern-action-open:split)
+        " nmap <buffer> i  <Plug>(fern-action-open:split)
+        " nmap <buffer> gi <Plug>(fern-action-open:split)<C-w>p
+        nmap <buffer> v <Plug>(fern-action-open:vsplit)
+        " nmap <buffer> s  <Plug>(fern-action-open:vsplit)
+        " nmap <buffer> gs <Plug>(fern-action-open:vsplit)<C-w>p
+        nmap <buffer><nowait> i <Plug>(fern-action-hidden:toggle)
+        " nmap <buffer> I <Plug>(fern-action-hide-toggle)
+        nmap <buffer><nowait> u <Plug>(fern-action-leave)
+        nmap <buffer><nowait> e <Plug>(fern-action-enter)
+        nmap <buffer> q :<C-u>quit<CR>
+
+
+        nmap <buffer> go <Plug>(fern-action-open:edit)<C-w>p
+        " nmap <buffer> t  <Plug>(fern-action-open:tabedit)
+        " nmap <buffer> T  <Plug>(fern-action-open:tabedit)gT
+        nmap <buffer> gv <Plug>(fern-action-open:vsplit)<C-w>p
+        nmap <buffer> P gg
+
+        nmap <buffer> C  <Plug>(fern-action-enter)
+        nmap <buffer> cd <Plug>(fern-action-cd)
+        nmap <buffer> R  gg<Plug>(fern-action-reload)<C-o>
+        nmap <buffer> CD gg<Plug>(fern-action-cd)<C-o>
 
 
 
-    nmap <buffer><expr>
-        \ <Plug>(fern-action-expand-or-collapse)
-        \ fern#smart#leaf(
-        \   "\<Plug>(fern-action-collapse)",
-        \   "\<Plug>(fern-action-expand)",
-        \   "\<Plug>(fern-action-collapse)",
-        \ )
+        nmap <buffer><expr>
+            \ <Plug>(fern-action-expand-or-collapse)
+            \ fern#smart#leaf(
+            \   "\<Plug>(fern-action-collapse)",
+            \   "\<Plug>(fern-action-expand)",
+            \   "\<Plug>(fern-action-collapse)",
+            \ )
 
-    nmap <buffer><nowait> l <Plug>(fern-action-expand-or-collapse)
+        nmap <buffer><nowait> l <Plug>(fern-action-expand-or-collapse)
 
-    nmap <buffer><expr>
-        \ <Plug>(fern-action-expand-or-enter)
-        \ fern#smart#drawer(
-        \   "\<Plug>(fern-open-or-expand)",
-        \   "\<Plug>(fern-open-or-enter)",
-        \ )
-    nmap <buffer><expr>
-        \ <Plug>(fern-action-collapse-or-leave)
-        \ fern#smart#drawer(
-        \   "\<Plug>(fern-action-collapse)",
-        \   "\<Plug>(fern-action-leave)",
-        \ )
+        nmap <buffer><expr>
+            \ <Plug>(fern-action-expand-or-enter)
+            \ fern#smart#drawer(
+            \   "\<Plug>(fern-open-or-expand)",
+            \   "\<Plug>(fern-open-or-enter)",
+            \ )
+        nmap <buffer><expr>
+            \ <Plug>(fern-action-collapse-or-leave)
+            \ fern#smart#drawer(
+            \   "\<Plug>(fern-action-collapse)",
+            \   "\<Plug>(fern-action-leave)",
+            \ )
 
-    nmap <buffer><nowait> l <Plug>(fern-action-expand-or-enter)
-    nmap <buffer><nowait> h <Plug>(fern-action-collapse-or-leave)
+        nmap <buffer><nowait> l <Plug>(fern-action-expand-or-enter)
+        nmap <buffer><nowait> h <Plug>(fern-action-collapse-or-leave)
 
-    nmap <buffer> <Plug>(fern-action-enter-and-tcd)
-        \ <Plug>(fern-action-enter)
-        \ <Plug>(fern-wait)
-        \ <Plug>(fern-action-tcd:root)
+        nmap <buffer> <Plug>(fern-action-enter-and-tcd)
+            \ <Plug>(fern-action-enter)
+            \ <Plug>(fern-wait)
+            \ <Plug>(fern-action-tcd:root)
 
-    nmap <buffer> <Plug>(fern-action-leave-and-tcd)
-        \ <Plug>(fern-action-leave)
-        \ <Plug>(fern-wait)
-        \ <Plug>(fern-action-tcd:root)
+        nmap <buffer> <Plug>(fern-action-leave-and-tcd)
+            \ <Plug>(fern-action-leave)
+            \ <Plug>(fern-wait)
+            \ <Plug>(fern-action-tcd:root)
 
-    augroup action_fern_tcd
-        autocmd! * <buffer>
-        autocmd BufEnter <buffer> call feedkeys("\<Plug>(fern-action-tcd:root)")
-    augroup END
+        augroup action_fern_tcd
+            autocmd! * <buffer>
+            autocmd BufEnter <buffer> call feedkeys("\<Plug>(fern-action-tcd:root)")
+        augroup END
 
-    " Find and enter project root
-    nnoremap <buffer><silent>
-        \ <Plug>(fern-action-enter-project-root)
-        \ :<C-u>call fern#helper#call(funcref('<SID>map_enter_project_root'))<cr>
-    nmap <buffer><expr><silent>
-        \ ^
-        \ fern#smart#scheme(
-        \   "^",
-        \   {
+        " Find and enter project root
+        nnoremap <buffer><silent>
+            \ <Plug>(fern-action-enter-project-root)
+            \ :<C-u>call fern#helper#call(funcref('<SID>map_enter_project_root'))<cr>
+        nmap <buffer><expr><silent>
+            \ ^
+            \ fern#smart#scheme(
+            \   "^",
+            \   {
             \     'file': "\<Plug>(fern-action-enter-project-root)",
             \   }
             \ )
 
-    " Open bookmark:///
-    nnoremap <buffer><silent>
-        \ <Plug>(fern-action-enter-bookmark)
-        \ :<C-u>Fern bookmark:///<cr>
-    nmap <buffer><expr><silent>
-        \ <C-^>
-        \ fern#smart#scheme(
-        \   "\<Plug>(fern-action-enter-bookmark)",
-        \   {
+        " Open bookmark:///
+        nnoremap <buffer><silent>
+            \ <Plug>(fern-action-enter-bookmark)
+            \ :<C-u>Fern bookmark:///<cr>
+        nmap <buffer><expr><silent>
+            \ <C-^>
+            \ fern#smart#scheme(
+            \   "\<Plug>(fern-action-enter-bookmark)",
+            \   {
             \     'bookmark': "\<C-^>",
             \   },
             \ )
 
-    " Use <C-w><C-p> like
-    nmap <buffer> <Plug>(my-fern-open-and-stay) <Plug>(fern-action-open)<C-w><C-p>
+        " Use <C-w><C-p> like
+        nmap <buffer> <Plug>(my-fern-open-and-stay) <Plug>(fern-action-open)<C-w><C-p>
 
-    " Use :FernDo to execute close command after open. Note that <Plug>(fer-close-drawer) is a global mapping.
-    nnoremap <Plug>(fern-close-drawer) :<C-u>FernDo close -drawer -stay<cr>
-    nmap <buffer><silent> <Plug>(fern-action-open-and-close)
-        \ <Plug>(fern-action-open)
-        \ <Plug>(fern-close-drawer)
+        " Use :FernDo to execute close command after open. Note that <Plug>(fer-close-drawer) is a global mapping.
+        nnoremap <Plug>(fern-close-drawer) :<C-u>FernDo close -drawer -stay<cr>
+        nmap <buffer><silent> <Plug>(fern-action-open-and-close)
+            \ <Plug>(fern-action-open)
+            \ <Plug>(fern-close-drawer)
 
-    " https://github.com/LumaKernel/fern-mapping-fzf.vim
-    function! Fern_mapping_fzf_customize_option(spec)
-        let a:spec.options .= ' --multi'
-        " Note that fzf#vim#with_preview comes from fzf.vim
-        if exists('*fzf#vim#with_preview')
-            return fzf#vim#with_preview(a:spec)
-        else
-            return a:spec
+        " https://github.com/LumaKernel/fern-mapping-fzf.vim
+        function! Fern_mapping_fzf_customize_option(spec)
+            let a:spec.options .= ' --multi'
+            " Note that fzf#vim#with_preview comes from fzf.vim
+            if exists('*fzf#vim#with_preview')
+                return fzf#vim#with_preview(a:spec)
+            else
+                return a:spec
+            endif
+        endfunction
+
+        function! Fern_mapping_fzf_before_all(dict)
+            if !len(a:dict.lines)
+                return
+            endif
+            return a:dict.fern_helper.async.update_marks([])
+        endfunction
+
+        function! s:reveal(dict)
+            execute "FernReveal -wait" a:dict.relative_path
+            execute "normal \<Plug>(fern-action-mark:set)"
+        endfunction
+
+        let g:Fern_mapping_fzf_file_sink = function('s:reveal')
+        let g:Fern_mapping_fzf_dir_sink = function('s:reveal')
+
+        nnoremap <c-i> i
+        " Map to your custom function.
+        nmap <silent><buffer><Tab> <Plug>(fern-action-call-function:project_top)
+        unmap <c-i>
+
+        " call fern#mapping#call_function#add('project_top', function('s:fern_project_top'))
+
+    endfunction
+
+    augroup fern-custom
+        autocmd! *
+        autocmd FileType fern call s:init_fern()
+    augroup END
+
+    nnoremap <silent> <leader>ee :<C-u>Fern <C-r>=<SID>smart_path()<cr><cr>
+
+    " Return a parent directory of the current buffer when the buffer is a file.
+    " Otherwise it returns a current working directory.
+    function! s:smart_path() abort
+        if !empty(&buftype) || bufname('%') =~# '^[^:]\+://'
+            return fnamemodify('.', ':p')
         endif
+        return fnamemodify(expand('%'), ':p:h')
     endfunction
 
-    function! Fern_mapping_fzf_before_all(dict)
-        if !len(a:dict.lines)
-            return
-        endif
-        return a:dict.fern_helper.async.update_marks([])
+    " https://github.com/hrsh7th/fern-mapping-call-function.vim
+    " Add your custom function to mapping.
+    function! s:fern_project_top(helper) abort
+        let l:node = a:helper.sync.get_current_node()
+        let l:proj = s:detect_project_root(l:node._path)
+        execute printf('Fern %s', fnameescape(l:proj))
     endfunction
 
-    function! s:reveal(dict)
-        execute "FernReveal -wait" a:dict.relative_path
-        execute "normal \<Plug>(fern-action-mark:set)"
+    function! s:map_enter_project_root(helper) abort
+        " NOTE: require 'file' scheme
+        let root = a:helper.get_root_node()
+        let path = root._path
+        let path = finddir('.git/..', path . ';')
+        execute printf('Fern %s', fnameescape(path))
     endfunction
 
-    let g:Fern_mapping_fzf_file_sink = function('s:reveal')
-    let g:Fern_mapping_fzf_dir_sink = function('s:reveal')
+    function! s:fern_preview_init() abort
+        nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
+        nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
+        nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
+        nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
 
-    nnoremap <c-i> i
-    " Map to your custom function.
-    nmap <silent><buffer><Tab> <Plug>(fern-action-call-function:project_top)
-    unmap <c-i>
+        nmap <silent> <buffer> <expr> <Plug>(fern-quit-or-close-preview) fern_preview#smart_preview("\<Plug>(fern-action-preview:close)", ":q\<CR>")
+        nmap <silent> <buffer> q <Plug>(fern-quit-or-close-preview)
 
-    " call fern#mapping#call_function#add('project_top', function('s:fern_project_top'))
+        nmap <buffer><expr>
+            \ <Plug>(fern-action-preview-or-nop)
+            \ fern#smart#leaf(
+            \   "\<Plug>(fern-action-open:edit)\<C-w>p",
+            \   "",
+            \ )
+        nmap <buffer><expr> j
+            \ fern#smart#drawer(
+            \   "j\<Plug>(fern-action-preview-or-nop)",
+            \   "j",
+            \ )
+        nmap <buffer><expr> k
+            \ fern#smart#drawer(
+            \   "k\<Plug>(fern-action-preview-or-nop)",
+            \   "k",
+            \ )
+    endfunction
 
-endfunction
+    augroup fern_preview
+        autocmd! *
+        autocmd FileType fern call s:fern_preview_init()
+    augroup END
 
-augroup fern-custom
-    autocmd! *
-    autocmd FileType fern call s:init_fern()
-augroup END
-
-nnoremap <silent> <leader>ee :<C-u>Fern <C-r>=<SID>smart_path()<cr><cr>
-
-" Return a parent directory of the current buffer when the buffer is a file.
-" Otherwise it returns a current working directory.
-function! s:smart_path() abort
-    if !empty(&buftype) || bufname('%') =~# '^[^:]\+://'
-        return fnamemodify('.', ':p')
-    endif
-    return fnamemodify(expand('%'), ':p:h')
-endfunction
-
-" https://github.com/hrsh7th/fern-mapping-call-function.vim
-" Add your custom function to mapping.
-function! s:fern_project_top(helper) abort
-    let l:node = a:helper.sync.get_current_node()
-    let l:proj = s:detect_project_root(l:node._path)
-    execute printf('Fern %s', fnameescape(l:proj))
-endfunction
-
-function! s:map_enter_project_root(helper) abort
-    " NOTE: require 'file' scheme
-    let root = a:helper.get_root_node()
-    let path = root._path
-    let path = finddir('.git/..', path . ';')
-    execute printf('Fern %s', fnameescape(path))
-endfunction
-
-function! s:fern_preview_init() abort
-    nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
-    nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
-    nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
-    nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
-
-    nmap <silent> <buffer> <expr> <Plug>(fern-quit-or-close-preview) fern_preview#smart_preview("\<Plug>(fern-action-preview:close)", ":q\<CR>")
-    nmap <silent> <buffer> q <Plug>(fern-quit-or-close-preview)
-
-    nmap <buffer><expr>
-        \ <Plug>(fern-action-preview-or-nop)
-        \ fern#smart#leaf(
-        \   "\<Plug>(fern-action-open:edit)\<C-w>p",
-        \   "",
-        \ )
-    nmap <buffer><expr> j
-        \ fern#smart#drawer(
-        \   "j\<Plug>(fern-action-preview-or-nop)",
-        \   "j",
-        \ )
-    nmap <buffer><expr> k
-        \ fern#smart#drawer(
-        \   "k\<Plug>(fern-action-preview-or-nop)",
-        \   "k",
-        \ )
-endfunction
-
-augroup fern_preview
-    autocmd! *
-    autocmd FileType fern call s:fern_preview_init()
-augroup END
-
-endif
+endif | " exists('g:_use_fern')
 
 " CtrlP
 " Disable default mapping since we are overriding it with our command let g:ctrlp_map = ''
@@ -4288,6 +4325,22 @@ tnoremap <f4> <Cmd>call <sid>toggle_term()<cr>
 
 let g:tex_flavor = "latex"
 
+if exists('g:_use_neoformat')
+    let g:neoformat_try_formatprg = 1
+    " Enable alignment
+    let g:neoformat_basic_format_align = 1
+
+    " Enable tab to spaces conversion
+    let g:neoformat_basic_format_retab = 1
+
+    " Enable trimmming of trailing whitespace
+    let g:neoformat_basic_format_trim = 1
+    let g:shfmt_opt  = "-ci"
+    augroup fmt
+        autocmd!
+        autocmd BufWritePre * undojoin | Neoformat
+    augroup END
+endif
 
 " https://github.com/andymass/vim-matchup
 " Disable mathcit
@@ -4506,27 +4559,30 @@ set completeopt+=noinsert,noselect
 set completeopt-=preview
 
 set belloff+=ctrlg " Add only if Vim beeps during completion
-let g:mucomplete#enable_auto_at_startup = 1
-let g:mucomplete#completion_delay = 1
 
-
-let g:jedi#popup_on_dot = 0  " It may be 1 as well
-let g:mucomplete#user_mappings = { 'sqla' : "\<c-c>a" }
-let g:mucomplete#chains = { 'sql' : ['file', 'sqla', 'keyn'] }
-set noinfercase
-
-" Installing clangd
-" https://clangd.llvm.org/installation.html
-" let g:clang_library_path = '/usr/lib'
 if has('nvim')
-    let g:clang_library_path = boot#chomp(system(['llvm-config', '--libdir']))
-else
-    let g:clang_library_path = boot#chomp(system('llvm-config --libdir'))
-endif
-let g:clang_user_options = '-std=c++2a'
-let g:clang_complete_auto = 1
-imap <expr> <down> mucomplete#extend_fwd("\<down>")
+    let mucomplete#no_mappings = 1
+    let g:mucomplete#enable_auto_at_startup = 1
+    let g:mucomplete#completion_delay = 1
 
+
+    let g:jedi#popup_on_dot = 0  " It may be 1 as well
+    let g:mucomplete#user_mappings = { 'sqla' : "\<c-c>a" }
+    let g:mucomplete#chains = { 'sql' : ['file', 'sqla', 'keyn'] }
+    set noinfercase
+
+    " Installing clangd
+    " https://clangd.llvm.org/installation.html
+    " let g:clang_library_path = '/usr/lib'
+    if has('nvim')
+        let g:clang_library_path = boot#chomp(system(['llvm-config', '--libdir']))
+    else
+        let g:clang_library_path = boot#chomp(system('llvm-config --libdir'))
+    endif
+    let g:clang_user_options = '-std=c++2a'
+    let g:clang_complete_auto = 1
+    imap <expr> <down> mucomplete#extend_fwd("\<down>")
+endif
 
 " Enable completion where available.
 " This setting must be set before ALE is loaded.
@@ -4554,9 +4610,9 @@ if exists("g:_use_ddc.vim")
     " https://github.com/Shougo/ddc-sorter_rank
     call ddc#custom#patch_global('sourceOptions', {
         \ '_': {
-            \   'matchers': ['matcher_head'],
-            \   'sorters': ['sorter_rank']},
-            \ })
+        \   'matchers': ['matcher_head'],
+        \   'sorters': ['sorter_rank']},
+        \ })
 
     " Change source options
     call ddc#custom#patch_global('sourceOptions', {
@@ -4695,7 +4751,7 @@ command! -nargs=0 L silent! :call lens#run()
 
 " https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
 " Don't resize automatically.
-let g:golden_ratio_autocommand = 1
+let g:golden_ratio_autocommand = 0
 " Mnemonic: - is next to =, but instead of resizing equally, all windows are
 " resized to focus on the current.
 nmap <c-w>- <Plug>(golden_ratio_resize)
@@ -5031,8 +5087,8 @@ augroup reload_vimrc
     " if has('nvim')
     "     autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
     " else
-        autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
-        " autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
+    " autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
     " endif
 augroup END
 
@@ -5085,12 +5141,12 @@ else
         au!
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
             \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested redraw!
-            " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
+        " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
     augroup END
 endif
 
 
-if exists('g:use_indent_guides')
+if exists('g:_use_indent_guides')
     augroup indent_guides_enable
         au!
         " au BufEnter,BufWritePost,VimEnter * silent execute ":normal! \<Plug>IndentGuidesEnable"
@@ -5141,5 +5197,6 @@ if exists('s:_init_develop') && 1 == s:_init_develop && bufnr(g:_log_address) < 
     " https://stackoverflow.com/questions/4043650/open-a-file-in-a-tab-in-vim-in-readonly-mode
     " :tabedit +set\ noma|set\ ro FILE
 endif
-" vim: set ts=4 sw=4 tw=0 et :
+
+
 " vim: set ts=4 sw=4 tw=0 et :

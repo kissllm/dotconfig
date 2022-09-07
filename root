@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # doas chroot.sh /mnt/gentoo /bin/bash
-. /mnt/lib/smart_mount
+. /mnt/lib/mount_smart
 # des = /mnt/gentoo # or some absolute path
 
 if [ -z $1 ] || [ ! -d "$1" ]; then
