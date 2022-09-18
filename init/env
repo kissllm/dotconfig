@@ -9,19 +9,20 @@ export _PATH_BSHELL=$(which ash)
 
 # Set font when running in console. For hidpi screen
 if { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "$TMUX" ]; then
-    # terminus-font
-    if [ -f "/usr/share/consolefonts/ter-124b.psf.gz" ]; then
-        setfont /usr/share/consolefonts/ter-124b.psf.gz
-    elif [ -f "/usr/share/kbd/consolefonts/ter-124b.psf.gz" ]; then
-        setfont /usr/share/kbd/consolefonts/ter-124b.psf.gz
-    elif [ -f "/mnt/setfont/consolefonts/ter-124b.psf.gz" ]; then
-        setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
-        # Use default font
-    elif [ -f "/usr/share/kbd/consolefonts/LatGrkCyr-12x22.psfu.gz" ]; then
-        setfont /usr/share/kbd/consolefonts/LatGrkCyr-12x22.psfu.gz
-    elif [ -f "/usr/share/consolefonts/LatGrkCyr-12x22.psfu.gz" ]; then
-        setfont /usr/share/consolefonts/LatGrkCyr-12x22.psfu.gz
-    fi
+    tty_name="$(tty)"
+    case $tty_name in 
+        *"tty"*)
+            consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
+            # terminus-font
+            if [ -f "${consolefonts_dir}/ter-124b.psf.gz" ]; then
+                setfont "${consolefonts_dir}/ter-124b.psf.gz"
+            elif [ -f "/mnt/setfont/consolefonts/ter-124b.psf.gz" ]; then
+                setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
+                # Use default font
+            elif [ -f "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz" ]; then
+                setfont "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz"
+            fi
+    esac
 fi
 
 if [ -z "$CC" ]; then
@@ -469,7 +470,6 @@ export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
 
 . "${SHARE_PREFIX}/init/share"
 
-# set ts=4 sw=4 tw=0 et :
 
 # https://github.com/caenrique/nvim-toggle-terminal
 _v () {
@@ -489,4 +489,6 @@ export EDITOR=v
 
 export INITRAMFS=/build/os/initramfs
 
-# [ -z "$TMUX" ] && [ "$USER" != "root" ] && ! ( [ -z $DISPLAY ] && [ $tty_num = "1" ] )  && exec tmux new -As .
+# [ -z "$TMUX" ] && [ ! $(id -u) -eq 0 ] && ! ( [ -z $DISPLAY ] && [ $tty_num = "1" ] )  && exec tmux new -As .
+
+# set ts=4 sw=4 tw=0 et :
