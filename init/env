@@ -8,9 +8,9 @@ export SHELL=$(which ash)
 export _PATH_BSHELL=$(which ash)
 
 # Set font when running in console. For hidpi screen
-if { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "$TMUX" ]; then
+{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "$TMUX" ]; } && {
     tty_name="$(tty)"
-    case $tty_name in 
+    case $tty_name in
         *"tty"*)
             consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
             # terminus-font
@@ -23,26 +23,21 @@ if { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "$TMUX" ]; then
                 setfont "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz"
             fi
     esac
-fi
+}
 
-if [ -z "$CC" ]; then
-    CC=/usr/bin/clang
-fi
-
-if [ -z "$CXX" ]; then
-    CXX=/usr/bin/clang++
-fi
+[ -z "$CC" ]  && CC=/usr/bin/clang
+[ -z "$CXX" ] && CXX=/usr/bin/clang++
 
 search_config=$(find /usr/include -type f -name "__config" -exec echo {} +)
 HAS_LIBCXX=0
 for file in $search_config ;
-do if [ -f "$file" ]; then
+do [ -f "$file" ] && {
     key_word=$(printf "#include <$file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}');
-    if [ "$key_word" = "_LIBCPP_VERSION" ]; then
+    [ "$key_word" = "_LIBCPP_VERSION" ] && {
         export HAS_LIBCXX=1
         break
-    fi
-fi
+    }
+}
 done
 
 # https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
@@ -52,14 +47,14 @@ prepend () {
     CONTAINER_KEY="${1}"
     CONTAINER_VALUE="$(eval echo $"${1}")"
     PREPEND_VALUE="${2}"
-    if [ -n "${PREPEND_VALUE}" ] && [ -d "${PREPEND_VALUE}" ]; then
+    [ -n "${PREPEND_VALUE}" ] && [ -d "${PREPEND_VALUE}" ] && {
         # echo "prepend \$CONTAINER_KEY   = $CONTAINER_KEY"
         # echo "prepend \$CONTAINER_VALUE = $CONTAINER_VALUE"
         case ":$CONTAINER_VALUE:" in
             *":${PREPEND_VALUE}:"*) :;;
             *) eval "export $CONTAINER_KEY=${PREPEND_VALUE}\${$CONTAINER_KEY:+\":\$$CONTAINER_KEY\"}" ;;
         esac
-    fi
+    }
 }
 prepend PATH "/build/os"
 
@@ -107,22 +102,22 @@ _path_append() {
 }
 
 # https://unix.stackexchange.com/questions/4965/keep-duplicates-out-of-path-on-source
-# define append_path and prepend_path to add directory paths, e.g. PATH, MANPATH
+# define path_append and path_prepend to add directory paths, e.g. PATH, MANPATH
 # add to end of path
-append_path () {
-    if ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+path_append () {
+    ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
         eval "$1=\$$1:$2"
-    fi
+    }
 }
 
 # add to front of path
-prepend_path () {
-    if ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+path_prepend () {
+    ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
         eval "$1=$2:\$$1"
-    fi
+    }
 }
-# prepend_path PATH $macPortsDir/sbin
-# prepend_path MANPATH $macPortsDir/man
+# path_prepend PATH $macPortsDir/sbin
+# path_prepend MANPATH $macPortsDir/man
 
 
 # NOTE: To enable 'ccache' add this to your
@@ -135,10 +130,10 @@ prepend_path () {
 #
 # -> ln -s /usr/bin/ccache /usr/lib/ccache/bin/gcc
 # -> ln -s /usr/bin/ccache /usr/lib/ccache/bin/g++
-prepend_path PATH "/usr/lib/ccache/bin"
+path_prepend PATH "/usr/lib/ccache/bin"
 
 # For chroot tools I put it there
-prepend_path PATH "/mnt"
+path_prepend PATH "/mnt"
 
 # share folder initialization
 # if [ -d "/opt/init" ]; then
@@ -146,10 +141,10 @@ prepend_path PATH "/mnt"
 # elif [ -d "/mnt/init" ]; then
 if [ -d "/mnt/init" ]; then
     export SHARE_PREFIX="/mnt"
-    prepend_path PATH "/mnt/init"
+    path_prepend PATH "/mnt/init"
 fi
 
-prepend_path PATH "${SHARE_PREFIX}/local/bin"
+path_prepend PATH "${SHARE_PREFIX}/local/bin"
 
 
 export SRC_PREFIX="/working"
@@ -188,7 +183,7 @@ fi
 
 
 # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash/229585#229585
-prepend_path PATH "${HOME}/bin"
+path_prepend PATH "${HOME}/bin"
 # https://firefox-source-docs.mozilla.org/setup/linux_build.html
 # ${HOME}/.local
 PYTHON_BASE="$(python3 -m site --user-base)"
@@ -196,31 +191,27 @@ PYTHON_BASE="$(python3 -m site --user-base)"
 # [ "${PATH}" = "${PATH/${PYTHON_BASE_REFINED}\/bin/}" ] && [ -d "${PYTHON_BASE}/bin" ] && {
 #     export PATH="${PYTHON_BASE}/bin:$PATH"
 # }
-prepend_path PATH "${PYTHON_BASE}/bin"
-prepend_path PATH "${HOME}/.local/bin"
-prepend_path PATH "${HOME}/.emacs.d/bin"
+path_prepend PATH "${PYTHON_BASE}/bin"
+path_prepend PATH "${HOME}/.local/bin"
+path_prepend PATH "${HOME}/.emacs.d/bin"
 
 # For npm
-prepend_path PATH "${HOME}/node/bin"
+path_prepend PATH "${HOME}/node/bin"
 
 SHARE_PREFIX_REFINED=$(echo "${SHARE_PREFIX}" | sed 's#/#\\/#g' | sed 's#\.#\\.#g')
 
 [ -d "${SHARE_PREFIX}/deno/bin" ] && {
     export DENO_INSTALL="${SHARE_PREFIX}/deno"
 }
-prepend_path PATH "${SHARE_PREFIX}/deno/bin"
+path_prepend PATH "${SHARE_PREFIX}/deno/bin"
 
-[ -f "${HOME}/.cargo/env" ] && {
-    # source "${HOME}/.cargo/env"
-    . "${HOME}/.cargo/env"
-}
-[ -f "${HOME}/.local/share/cargo/env" ] && {
-    . "${HOME}/.local/share/cargo/env"
-}
+[ -f "${HOME}/.cargo/env" ] && . "${HOME}/.cargo/env"
+[ -f "${HOME}/.local/share/cargo/env" ] && . "${HOME}/.local/share/cargo/env"
+
 export CARGO_HOME="$XDG_DATA_HOME"/cargo
 [ ! -d "${CARGO_HOME}" ] && mkdir -p "${CARGO_HOME}"
-prepend_path PATH "${HOME}/.cargo/bin"
-prepend_path PATH "${HOME}/.local/share/cargo/bin"
+path_prepend PATH "${HOME}/.cargo/bin"
+path_prepend PATH "${HOME}/.local/share/cargo/bin"
 
 
 # command -v /usr/bin/luarocks > /dev/null 2>&1 && {
@@ -336,15 +327,15 @@ alias tmux='[ ! -d "${TMUX_TMPDIR}" ] && \mkdir -p "${TMUX_TMPDIR}"; TMUX_TMPDIR
 alias history="history 1 -1"
 
 # https://stackoverflow.com/questions/3701809/how-to-detect-using-of-wildcard-asterisk-as-parameter-for-shell-script
-globstopper() {
-    if [ "$2" == "*" ]
-    then echo "You cannot use a wildcard"
+glob_stop() {
+    [ "$2" = "*" ] && {
+        echo "You can not use a wildcard"
         return
-    fi
+    }
     set +f
     "$@";
 }
-alias q="set -f; globstopper /mnt/local/bin/q"
+alias q="set -f; glob_stop /mnt/local/bin/q"
 
 export INPUT_METHOD=fcitx
 export GTK_IM_MODULE=fcitx    # export GTK_IM_MODULE=wayland
@@ -464,9 +455,7 @@ export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
 # export TMUX_DIR=$HOME/.tmux
 export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
 
-[ -d "${SHARE_PREFIX}/.void-packages" ] && {
-    export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
-}
+[ -d "${SHARE_PREFIX}/.void-packages" ] && export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
 
 . "${SHARE_PREFIX}/init/share"
 
