@@ -2348,7 +2348,9 @@ let g:mkdx#settings = { 'tokens': { 'fence': '' } }
 
 augroup guard
     au!
+    " https://stackoverflow.com/questions/70283937/resize-splits-in-vim-automatically-across-tabs
     " Auto-resize splits when Vim gets resized.
+    " Will resize tagbar?
     autocmd VimResized * wincmd =
 
     " Unset paste on InsertLeave.
@@ -4571,18 +4573,18 @@ if has('nvim')
     let g:mucomplete#chains = { 'sql' : ['file', 'sqla', 'keyn'] }
     set noinfercase
 
-    " Installing clangd
-    " https://clangd.llvm.org/installation.html
-    " let g:clang_library_path = '/usr/lib'
-    if has('nvim')
-        let g:clang_library_path = boot#chomp(system(['llvm-config', '--libdir']))
-    else
-        let g:clang_library_path = boot#chomp(system('llvm-config --libdir'))
-    endif
-    let g:clang_user_options = '-std=c++2a'
-    let g:clang_complete_auto = 1
-    imap <expr> <down> mucomplete#extend_fwd("\<down>")
 endif
+" Installing clangd
+" https://clangd.llvm.org/installation.html
+" let g:clang_library_path = '/usr/lib'
+if has('nvim')
+    let g:clang_library_path = boot#chomp(system(['llvm-config', '--libdir']))
+else
+    let g:clang_library_path = boot#chomp(system('llvm-config --libdir'))
+endif
+let g:clang_user_options = '-std=c++2a'
+let g:clang_complete_auto = 1
+imap <expr> <down> mucomplete#extend_fwd("\<down>")
 
 " Enable completion where available.
 " This setting must be set before ALE is loaded.

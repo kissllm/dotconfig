@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+echo "Entered tty: $tty_num"
+
+# https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
+# WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+export WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+
+# sway specific environment
+if [ -f ${WAYLAND_CONFIG_HOME}/env ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "${WAYLAND_CONFIG_HOME}/env"
+    set +a
+fi
+
+# swc-launch velox
+[ -n "$(pgrep velox)" ] && {
+    ids=$(pgrep velox)
+    for I in $ids; do
+        kill -9 $I > /dev/null 2>&1 &
+    done
+}
+exec swc-launch -t /dev/tty7 -- /usr/bin/velox > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
+# echo "${WAYLAND_DISPLAY}" > $HOME/.wayland_display &

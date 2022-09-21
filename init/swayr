@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+set -e
+echo "Entered tty: $tty_num"
+
+# https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
+# SWAY_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/sway"
+export SWAY_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/sway"
+
+# sway specific environment
+if [ -f ${SWAY_CONFIG_HOME}/env ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "${SWAY_CONFIG_HOME}/env"
+    set +a
+fi
+
+# sway -d > ~/.config/sway/.sway_autolauncher.log 2>&1
+# exec sway > \$HOME/.config/sway/.sway_autolauncher.log 2>&1
+# dbus-launch --sh-syntax --exit-with-session sway > ~/.config/sway/.sway_autolauncher.log 2>&1
+dbus-run-session swayrd > ${SWAY_CONFIG_HOME}/.sway_autolauncher.log 2>&1
