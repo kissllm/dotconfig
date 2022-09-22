@@ -12,7 +12,8 @@ export _PATH_BSHELL=$(which ash)
     tty_name="$(tty)"
     case $tty_name in
         *"tty"*)
-            consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
+            # consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
+            consolefonts_dir="/usr/share/consolefonts"
             # terminus-font
             if [ -f "${consolefonts_dir}/ter-124b.psf.gz" ]; then
                 setfont "${consolefonts_dir}/ter-124b.psf.gz"
@@ -28,17 +29,20 @@ export _PATH_BSHELL=$(which ash)
 [ -z "$CC" ]  && CC=/usr/bin/clang
 [ -z "$CXX" ] && CXX=/usr/bin/clang++
 
-search_config=$(find /usr/include -type f -name "__config" -exec echo {} +)
+# search_config=$(find /usr/include -type f -name "__config" -exec echo {} +)
+# /usr/include/c++/v1/experimental/__config
+# /usr/include/c++/v1/__config
 HAS_LIBCXX=0
-for file in $search_config ;
-do [ -f "$file" ] && {
-    key_word=$(printf "#include <$file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}');
+# for config_file in $search_config; do
+config_file="/usr/include/c++/v1/__config"
+[ -f "$config_file" ] && {
+    key_word=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}');
     [ "$key_word" = "_LIBCPP_VERSION" ] && {
         export HAS_LIBCXX=1
         break
     }
 }
-done
+# done
 
 # https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
 # https://tldp.org/LDP/abs/html/parameter-substitution.html
