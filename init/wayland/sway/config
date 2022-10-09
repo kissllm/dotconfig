@@ -381,16 +381,30 @@ mode "nag" {
 
 #workspace-edit
 # nerd-fonts-otf
-set $ws1 "1:User Space "
-set $ws2 "2:Too "
-set $ws3 "3:Tree "
-set $ws4 "4:For "
-set $ws5 "5:Fight "
-set $ws6 "6:Say "
-set $ws7 "7:Sex "
-set $ws8 "8:Eh "
-set $ws9 "9:Night "
-set $ws0 "0:Their Road "
+
+# # set $ws0 "0:Their Road "
+# set $ws0 "0:Their "
+# # set $ws1 "1:User Space "
+# set $ws1 "1:User "
+# set $ws2 "2:Too "
+# set $ws3 "3:Tree "
+# set $ws4 "4:For "
+# set $ws5 "5:Fight "
+# set $ws6 "6:Say "
+# set $ws7 "7:Sex "
+# set $ws8 "8:Eh "
+# set $ws9 "9:Night "
+
+set $ws0 '0:  '
+set $ws1 '1:  '
+set $ws2 '2:  '
+set $ws3 '3:  '
+set $ws4 '4:  '
+set $ws5 '5:  '
+set $ws6 '6:  '
+set $ws7 '7:  '
+set $ws8 '8:  '
+set $ws9 '9:  '
 
 #bind program to workspace
 
@@ -487,6 +501,7 @@ for_window [app_id="firefox"] opacity $opacity
 # Workspaces:
 #
     # Switch to workspace
+    $bindsym $mod+0 workspace number $ws0
     $bindsym $mod+1 workspace number $ws1
     $bindsym $mod+2 workspace number $ws2
     $bindsym $mod+3 workspace number $ws3
@@ -496,8 +511,8 @@ for_window [app_id="firefox"] opacity $opacity
     $bindsym $mod+7 workspace number $ws7
     $bindsym $mod+8 workspace number $ws8
     $bindsym $mod+9 workspace number $ws9
-    $bindsym $mod+0 workspace number $ws0
     # Move focused container to workspace
+    $bindsym $mod+Shift+0 move container to workspace number $ws0
     $bindsym $mod+Shift+1 move container to workspace number $ws1
     $bindsym $mod+Shift+2 move container to workspace number $ws2
     $bindsym $mod+Shift+3 move container to workspace number $ws3
@@ -507,7 +522,6 @@ for_window [app_id="firefox"] opacity $opacity
     $bindsym $mod+Shift+7 move container to workspace number $ws7
     $bindsym $mod+Shift+8 move container to workspace number $ws8
     $bindsym $mod+Shift+9 move container to workspace number $ws9
-    $bindsym $mod+Shift+0 move container to workspace number $ws0
     # Note: workspaces can have any name you want, not just numbers.
     # We just use 1-10 as the default.
 #
@@ -593,7 +607,7 @@ client.background       $base07
 #
 # Read `man 5 sway-bar` for more information about this section.
 bar {
-    position top
+    # position top
 
 # When the status_command prints a new line to stdout, swaybar updates.
 # The default just shows the current date and time.
@@ -613,21 +627,21 @@ swaybar_command waybar
 
     # colors {
     #     statusline #ffffff
-    #         background #323232
-    #         inactive_workspace #32323200 #32323200 #5c5c5c
+    #     background #323232
+    #     inactive_workspace #32323200 #32323200 #5c5c5c
     # }
 
     colors {
         background $base00
-            separator  $base01
-            statusline $base04
+        separator  $base01
+        statusline $base04
 
-# State             Border  BG      Text
-            focused_workspace   $base05 $base0D $base00
-            active_workspace    $base05 $base03 $base00
-            inactive_workspace  $base03 $base01 $base05
-            urgent_workspace    $base08 $base08 $base00
-            binding_mode        $base00 $base0A $base00
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base03 $base00
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
     }
 
 }
@@ -667,6 +681,10 @@ default_border none
 # default_border normal
 default_floating_border none
 # default_floating_border normal
+hide_edge_borders --i3 smart
+smart_borders on
+smart_gaps on
+titlebar_border_thickness 0
 
 for_window [app_id="^.*"] border pixel 0
 # for_window [app_id="^.*"] border pixel 1

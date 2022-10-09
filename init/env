@@ -306,14 +306,12 @@ alias ls="ls --color=auto -h --group-directories-first -F"
 alias ll="ls --color=auto -h --group-directories-first -F -la"
 alias la="ls --color=auto -h --group-directories-first -F -lathr"
 
-# alias vim="/usr/bin/vim-huge"
-
-alias nv="/usr/bin/nvim"
+alias nv='rm -f "$HOME/.vim*.tmp"; /usr/bin/nvim'
 
 if [ -e "/usr/bin/vim-huge" ]; then
-   alias vi="/usr/bin/vim-huge"
+   alias vi='rm -f "$HOME/.vim*.tmp"; /usr/bin/vim-huge'
 elif [ -e "/usr/bin/vim" ]; then
-   alias vi="/usr/bin/vim"
+   alias vi="rm -f "$HOME/.vim*.tmp"; /usr/bin/vim"
 fi
 # This is nvi on current system
 # alias vi="/usr/bin/vi"
@@ -325,7 +323,7 @@ export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$(id -u)"
 # export TMUX_TMPDIR="${TMPDIR}"
 # if [ ! -d "${TMUX_TMPDIR}" ]; then command mkdir -p "${TMUX_TMPDIR}"; fi
 # If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
-alias tmux='[ ! -d "${TMUX_TMPDIR}" ] && \mkdir -p "${TMUX_TMPDIR}"; TMUX_TMPDIR="${TMUX_TMPDIR}" \tmux -2 2>&1 '
+alias tmux='rm -f "$HOME/tmux*.log"; [ ! -d "${TMUX_TMPDIR}" ] && \mkdir -p "${TMUX_TMPDIR}"; TMUX_TMPDIR="${TMUX_TMPDIR}" \tmux -2 2>&1 '
 # alias tmux="tmux -2"
 
 alias history="history 1 -1"
