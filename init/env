@@ -136,8 +136,8 @@ path_prepend () {
 # -> ln -s /usr/bin/ccache /usr/lib/ccache/bin/g++
 path_prepend PATH "/usr/lib/ccache/bin"
 
-# For chroot tools I put it there
-path_prepend PATH "/mnt"
+# # For chroot tools I put it there
+# path_prepend PATH "/mnt"
 
 # share folder initialization
 # if [ -d "/opt/init" ]; then

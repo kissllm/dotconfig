@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # How to use:
 # . s
 . $HOME/.profile
