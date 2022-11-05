@@ -109,6 +109,7 @@ _path_append() {
 # define path_append and path_prepend to add directory paths, e.g. PATH, MANPATH
 # add to end of path
 path_append () {
+    [ -d "$2" ] &&
     ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
         eval "$1=\$$1:$2"
     }
@@ -116,6 +117,7 @@ path_append () {
 
 # add to front of path
 path_prepend () {
+    [ -d "$2" ] &&
     ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
         eval "$1=$2:\$$1"
     }
