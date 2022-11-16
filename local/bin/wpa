@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+wap_list="$(ps -e | grep wpa_supplicant|grep conf|awk -F' ' '{print $1}')"
+for wpa in $wap_list; do doas kill -9 $wpa; done
+# https://www.linuxquestions.org/questions/slackware-14/wpa_supplicant-failed-to-initialize-driver-4175668012/
+# bring up the ethernet adapter
+doas /sbin/ip link set dev wlan0 up
+# flush its configuration
+doas /sbin/ip address flush dev wlan0
+# you might need an IP address before doing the IEEE 802.1X authentication with wpa_supplicant
+# /sbin/dhclient eth0
+doas /sbin/dhcpcd wlan0
+# then run wpa_supplicant
+# doas wpa_supplicant -D nl80211 -B -i wlan0 -c $HOME/.config/wpa_supplicant/wpa_supplicant.conf
+doas wpa_supplicant -D nl80211 -i wlan0 -c $HOME/.config/wpa_supplicant/wpa_supplicant.conf > $HOME/.config/wpa_supplicant/.wpa.log &

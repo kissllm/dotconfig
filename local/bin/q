@@ -49,8 +49,9 @@ else
             [ "$(readlink "${build_root}/bin/make")"   != "/usr/bin/gmake" ] && \ln -sf "/usr/bin/gmake" "${build_root}/bin/make"
             export PATH="${build_root}/bin:$PATH"
         fi
-        eval "KISS_PATH=$dir /usr/bin/kiss c $base"
-        eval "KISS_PATH=$dir /usr/bin/kiss b $base"
-        eval "KISS_PATH=$dir /usr/bin/kiss i $base"
+        export KISS_PATH=$dir
+        /usr/bin/kiss c $base 2>&1 > /dev/stderr &&
+        /usr/bin/kiss b $base 2>&1 > /dev/stderr &&
+        /usr/bin/kiss i $base
     fi
 fi

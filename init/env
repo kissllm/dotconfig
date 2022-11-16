@@ -29,7 +29,7 @@ export _PATH_BSHELL=$(which ash)
 [ -z "$CC" ]  && CC=/usr/bin/clang
 [ -z "$CXX" ] && CXX=/usr/bin/clang++
 
-# search_config=$(find /usr/include -type f -name "__config" -exec echo {} +)
+# search_config="$(find /usr/include -type f -name "__config" -exec echo {} +)"
 # /usr/include/c++/v1/experimental/__config
 # /usr/include/c++/v1/__config
 HAS_LIBCXX=0
@@ -142,12 +142,12 @@ path_prepend PATH "/usr/lib/ccache/bin"
 # path_prepend PATH "/mnt"
 
 # share folder initialization
-# if [ -d "/opt/init" ]; then
-#     export SHARE_PREFIX="/opt"
-# elif [ -d "/mnt/init" ]; then
-if [ -d "/mnt/init" ]; then
+if [ -d "/opt/init" ]; then
     export SHARE_PREFIX="/mnt"
     path_prepend PATH "/mnt/init"
+elif [ -d "/mnt/init" ]; then
+    export SHARE_PREFIX="/opt"
+    path_prepend PATH "/opt/init"
 fi
 
 path_prepend PATH "${SHARE_PREFIX}/local/bin"
@@ -409,9 +409,8 @@ export MOZ_DBUS_REMOTE=1
 # XDG_RUNTIME_DIR defined in /etc/profile.d/xdg_runtime_dir.sh
 [ ! -f "$HOME/.wayland_display" ] && touch "$HOME/.wayland_display"
 if [ -n "${WAYLAND_DISPLAY}" ] && [ -z "$(cat $HOME/.wayland_display)" ]; then
-    # echo "WAYLAND_DISPLAY=${WAYLAND_DISPLAY}"
-    echo "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
-elif [ -n "$(cat $HOME/.wayland_display)" ] && [ -z "${WAYLAND_DISPLAY}" ]; then
+    printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+elif [ -n "$(cat $HOME/.wayland_display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
     export WAYLAND_DISPLAY="$(cat $HOME/.wayland_display)"
 fi
 
@@ -419,10 +418,10 @@ export XDG_SCREENSHOTS_DIR=$HOME/pictures/screenshots
 export XDG_PICTURES_DIR=$HOME/pictures/screenshots
 
 # # https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
-# if [ -n "$DESKTOP_SESSION" ];then
+# [ -n "$DESKTOP_SESSION" ] && {
 #     eval $(gnome-keyring-daemon --start)
 #     export SSH_AUTH_SOCK
-# fi
+# }
 
 export LIBGL_ALWAYS_SOFTWARE=1
 export FONTCONFIG_PATH=/etc/fonts
@@ -461,7 +460,7 @@ export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
 
 [ -d "${SHARE_PREFIX}/.void-packages" ] && export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
 
-. "${SHARE_PREFIX}/init/share"
+[ -d "S{SHARE_PREFIX}/init" ] && . "${SHARE_PREFIX}/init/share"
 
 
 # https://github.com/caenrique/nvim-toggle-terminal
