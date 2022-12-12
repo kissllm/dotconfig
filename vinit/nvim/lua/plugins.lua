@@ -258,6 +258,8 @@ local function init()
     log_file:write("config_packer.compile_path: " .. config_packer.compile_path .. "\n")
     log_file:write("config_packer.snapshot_path: " .. config_packer.snapshot_path .. "\n")
 
+    use { 'matveyt/neoclip' }
+
     use ({
         "nvim-telescope/telescope.nvim",
         disable = true,
@@ -542,89 +544,106 @@ local function init()
 
     -- use_rocks('mah0x211/lua-realpath')
 
+    -- disable netrw at the very start of your init.lua (strongly advised)
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
+    -- set termguicolors to enable highlight groups
+    vim.opt.termguicolors = true
     -- attempt to index global 'TreeExplorer' (a function value)
-    -- use ({
-    --     "kyazdani42/nvim-tree.lua",
-    --     requires = {
-    --         "kyazdani42/nvim-web-devicons", -- optional, for file icon
-    --     },
-    --     config = function()
-    --         -- require'nvim-tree'.setup {
-    --         -- init.lua
-    --         -- following options are the default
-    --         -- each of these are documented in `:help nvim-tree.OPTION_NAME`
-    --         require("nvim-tree").setup({
-    --             disable_netrw = false,
-    --             hijack_netrw = true,
-    --             open_on_setup = false,
-    --             ignore_ft_on_setup = {},
-    --             auto_close = false,
-    --             auto_reload_on_write = true,
-    --             open_on_tab = false,
-    --             hijack_cursor = false,
-    --             update_cwd = false,
-    --             hijack_unnamed_buffer_when_opening = false,
-    --             hijack_directories = {
-    --                 enable = true,
-    --                 auto_open = true,
-    --             },
-    --             diagnostics = {
-    --                 enable = false,
-    --                 icons = {
-    --                     hint = "",
-    --                     info = "",
-    --                     warning = "",
-    --                     error = "",
-    --                 },
-    --             },
-    --             update_focused_file = {
-    --                 enable = false,
-    --                 update_cwd = false,
-    --                 ignore_list = {},
-    --             },
-    --             system_open = {
-    --                 cmd = nil,
-    --                 args = {},
-    --             },
-    --             filters = {
-    --                 dotfiles = false,
-    --                 custom = {},
-    --             },
-    --             git = {
-    --                 enable = true,
-    --                 ignore = true,
-    --                 timeout = 500,
-    --             },
-    --             view = {
-    --                 width = 30,
-    --                 height = 30,
-    --                 hide_root_folder = false,
-    --                 side = "left",
-    --                 auto_resize = false,
-    --                 mappings = {
-    --                     custom_only = false,
-    --                     list = {},
-    --                 },
-    --                 number = false,
-    --                 relativenumber = false,
-    --                 signcolumn = "yes",
-    --             },
-    --             trash = {
-    --                 cmd = "trash",
-    --                 require_confirm = true,
-    --             },
-    --             actions = {
-    --                 change_dir = {
-    --                     global = false,
-    --                 },
-    --                 open_file = {
-    --                     quit_on_open = false,
-    --                 },
-    --             },
-    --         })
-    --         -- }
-    --     end,
-    -- })
+    use ({
+        -- "kyazdani42/nvim-tree.lua",
+        'nvim-tree/nvim-tree.lua',
+        requires = {
+            -- "kyazdani42/nvim-web-devicons", -- optional, for file icon
+            'nvim-tree/nvim-web-devicons', -- optional, for file icons
+        },
+        tag = 'nightly', -- optional, updated every week. (see issue #1193)
+        config = function()
+            -- require'nvim-tree'.setup {
+            -- init.lua
+            -- following options are the default
+            -- each of these are documented in `:help nvim-tree.OPTION_NAME`
+            require("nvim-tree").setup({
+                disable_netrw = false,
+                hijack_netrw = true,
+                open_on_setup = false,
+                ignore_ft_on_setup = {},
+                auto_close = false,
+                auto_reload_on_write = true,
+                open_on_tab = false,
+                hijack_cursor = false,
+                update_cwd = false,
+                hijack_unnamed_buffer_when_opening = false,
+                hijack_directories = {
+                    enable = true,
+                    auto_open = true,
+                },
+                diagnostics = {
+                    enable = false,
+                    icons = {
+                        hint = "",
+                        info = "",
+                        warning = "",
+                        error = "",
+                    },
+                },
+                update_focused_file = {
+                    enable = false,
+                    update_cwd = false,
+                    ignore_list = {},
+                },
+                system_open = {
+                    cmd = nil,
+                    args = {},
+                },
+                filters = {
+                    -- dotfiles = false,
+                    dotfiles = true,
+                    custom = {},
+                },
+                git = {
+                    enable = true,
+                    ignore = true,
+                    timeout = 500,
+                },
+                view = {
+                    adaptive_size = true,
+                    width = 30,
+                    height = 30,
+                    hide_root_folder = false,
+                    side = "left",
+                    auto_resize = false,
+                    mappings = {
+                        custom_only = false,
+                        list = {
+                            { key = "u", action = "dir_up" },
+                        },
+                    },
+                    number = false,
+                    relativenumber = false,
+                    signcolumn = "yes",
+                },
+                trash = {
+                    cmd = "trash",
+                    require_confirm = true,
+                },
+                actions = {
+                    change_dir = {
+                        global = false,
+                    },
+                    open_file = {
+                        quit_on_open = false,
+                    },
+                },
+                sort_by = "case_sensitive",
+                renderer = {
+                    group_empty = true,
+                },
+            })
+            -- }
+        end,
+    })
 
     -- -- Local plugins can be included
     -- use '~/projects/personal/hover.nvim'

@@ -480,6 +480,7 @@ alias v=_v
 export EDITOR=v
 
 export INITRAMFS=/build/os/initramfs
+export PIP_CERT=$HOME/.cert/python-cert.pem
 
 # [ -z "$TMUX" ] && [ ! $(id -u) -eq 0 ] && ! ( [ -z $DISPLAY ] && [ $tty_num = "1" ] )  && exec tmux new -As .
 

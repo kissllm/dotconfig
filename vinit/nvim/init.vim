@@ -33,25 +33,30 @@ noremap <Space> <Nop>
 map     <Space> <Leader>
 " let mapleader       = ','
 
-let s:_init_develop         = 0
+let g:loaded_ruby_provider       = 0
+let g:loaded_perl_provider       = 0
 
-let g:_log_address          = $HOME . '/.vim.log'
-let g:_log_verbose          = 1
-let g:_script_develop       = 0
-" let g:_boot_develop        = 1
-let g:_keys_develop         = 0
-let g:_cscope_auto_develop  = 1
-let g:_session_auto_develop = 1
-let g:_fixed_tips_width     = 27
-" let g:_buffergator_develop = 1
-" let g:_log_func_name = 'boot#log_silent'
-let g:_use_terminal_transparent = 1
-let g:_log_one_line         = 0
-let g:_job_start            = has('nvim') ? 'jobstart' : 'job_start'
+let s:_init_develop              = 0
 
-let g:debug             = 1
-let g:navi_protect      = 1
-let g:polyglot_disabled = ['markdown']
+let g:_log_address               = $HOME . '/.vim.log'
+let g:_log_verbose               = 1
+let g:_script_develop            = 0
+" let g:_boot_develop            = 1
+let g:_keys_develop              = 0
+if has("cscope")
+    let g:_cscope_auto_develop   = 1
+endif
+let g:_session_auto_develop      = 1
+let g:_fixed_tips_width          = 27
+" let g:_buffergator_develop     = 1
+" let g:_log_func_name           = 'boot#log_silent'
+let g:_use_terminal_transparent  = 1
+let g:_log_one_line              = 0
+let g:_job_start                 = has('nvim') ? 'jobstart' : 'job_start'
+
+let g:debug                      = 1
+let g:navi_protect               = 1
+let g:polyglot_disabled          = ['markdown']
 
 
 
@@ -331,6 +336,11 @@ endif
 "     exe 'set runtimepath^='. "."
 " endif
 
+if exists("g:_use_fzf")
+    " https://github.com/junegunn/fzf.vim/issues/1
+    set rtp+=~/.fzf
+endif
+
 for element in values(g:plugin_dir)
     let pack_index = stridx(&packpath, element)
     if -1 == pack_index
@@ -578,9 +588,11 @@ let g:vim_packages_use['janlazo/vim-bang-terminal']                      = { 'ty
 " The sessions directory '/opt/vinit/vim/pack/packager/start/' isn't writable!
 " let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
 
-let g:vim_packages_use['ronakg/quickr-cscope.vim']                       = { 'type' : 'opt' }
-let g:vim_packages_use['trailblazing/cscope_auto']                       = { 'type' : 'opt', 'requires' : { 'name' : 'trailblazing/session_auto',
-    \ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
+if has("cscope")
+    let g:vim_packages_use['ronakg/quickr-cscope.vim']                       = { 'type' : 'opt' }
+    let g:vim_packages_use['trailblazing/cscope_auto']                       = { 'type' : 'opt', 'requires' : { 'name' : 'trailblazing/session_auto',
+        \ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
+endif
 
 let g:vim_packages_use['airblade/vim-gitgutter']                         = { 'type' : 'opt' }
 let g:vim_packages_use['lifepillar/vim-mucomplete']                      = { 'type' : 'opt' }  " Code completion
@@ -682,7 +694,12 @@ let g:vim_packages_use['svermeulen/vim-cutlass']                          = { 't
 let g:vim_packages_use['google/vim-maktaba']                              = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-dispatch']                              = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-commentary']                            = { 'type' : 'start' }
-let g:vim_packages_use['jasonccox/vim-wayland-clipboard']                 = { 'type' : 'start' }
+if exists("g:_use_wl_clipboard")
+    " Replaced with
+    " use { 'matveyt/neoclip' }
+    " in g:lua_config_dir . "/plugins.lua"
+    let g:vim_packages_use['jasonccox/vim-wayland-clipboard']                 = { 'type' : 'start' }
+endif
 let g:vim_packages_use['vim-scripts/RltvNmbr.vim']                        = { 'type' : 'start' }  " File format
 let g:vim_packages_use['editorconfig/editorconfig-vim']                   = { 'type' : 'start' }  " File format
 let g:vim_packages_use['vim-autoformat/vim-autoformat']                   = { 'type' : 'start' }  " File format
@@ -808,9 +825,11 @@ let g:vim_packages_use['sonph/onehalf']                                   = { 'r
 " " let g:vim_packages_use['dense-analysis/ale']                         = { 'type' : 'start' }
 " " Huge
 " let g:vim_packages_use['prettier/prettier']                          = { 'type' : 'start' }
-" let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
-" let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
-
+" fzf needs go and is not friendly to musl
+if exists("g:_use_fzf")
+    " let g:vim_packages_use['junegunn/fzf']                               = { 'type' : 'start', 'do' : './install --all && ln -s $(pwd) ~/.fzf' }
+    let g:vim_packages_use['junegunn/fzf.vim']                           = { 'type' : 'start' }
+endif
 
 function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environment)
     let l:func_name = boot#function_name(expand('<SID>'), expand('<sfile>'))
@@ -2549,68 +2568,70 @@ endif | " g:navi_protect
 " "don't flush clipboard register ______________________________________________________________________________"
 " "don't flush clipboard register ______________________________________________________________________________"
 
-" https://www.reddit.com/r/vim/comments/hge0qw/for_those_who_are_still_struggling_with_waylands/
-if !empty($WAYLAND_DISPLAY)
-    if has('nvim')
-        " function! s:paste_list_plus()
-        "     let l:result_list = []
-        "     let l:list_src = systemlist(['wl-paste', '--no-newline'])
-        "     for item in l:list_src
-        "         " https://stackoverflow.com/questions/42326732/get-rid-of-in-vim-output-from-system
-        "         " let l:tr_item = strtrans(substitute(item, "\n\\+$", "", ""))
-        "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"'. item . '"', ')'])
-        "         let l:tr_item = boot#chomp(item)
-        "         call add(l:result_list, l:tr_item)
-        "     endfor
-        "     return l:result_list
-        " endfunction
-        " function! s:paste_list_asterisk()
-        "     let l:result_list = []
-        "     let l:list_src = systemlist(['wl-paste', '--no-newline', '--primary'])
-        "     for item in l:list_src
-        "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"' . item . '"', ')'])
-        "         let l:tr_item = boot#chomp(item)
-        "         call add(l:result_list, l:tr_item)
-        "     endfor
-        "     return l:result_list
-        " endfunction
-        " let g:clipboard =
-        "     \ { 'name': 'wayland-strip-carriage',
-        "     \   'copy':
-        "     \ {     '+': 'wl-copy --foreground --type text/plain',
-        "     \       '*': 'wl-copy --foreground --type text/plain --primary',
-        "     \ },
-        "     \   'paste':
-        "     \ {     '+': {-> s:paste_list_plus()},
-        "     \       '*': {-> s:paste_list_asterisk()},
-        "     \ },
-        "     \   'cache_enabled': 1,
-        "     \ }
-        let g:clipboard =
-            \ { 'name': 'wayland-strip-carriage',
-            \   'copy':
-            \ {     '+': 'wl-copy --foreground --type text/plain',
-            \       '*': 'wl-copy --foreground --type text/plain --primary',
-            \ },
-            \   'paste':
-            \ {     '+': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline']))},
-            \       '*': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline', '--primary']))},
-            \ },
-            \   'cache_enabled': 1,
-            \ }
-    else
-        let g:clipboard =
-            \ { 'name': 'wayland-strip-carriage',
-            \   'copy':
-            \ {     '+': 'wl-copy --foreground --type text/plain',
-            \       '*': 'wl-copy --foreground --type text/plain --primary',
-            \ },
-            \   'paste':
-            \ {     '+': {-> systemlist('wl-paste --no-newline \| tr -d "\r"')},
-            \       '*': {-> systemlist('wl-paste --no-newline --primary \| tr -d "\r"')},
-            \ },
-            \   'cache_enabled': 1,
-            \ }
+if exists("g:_use_wl_clipboard")
+    " https://www.reddit.com/r/vim/comments/hge0qw/for_those_who_are_still_struggling_with_waylands/
+    if !empty($WAYLAND_DISPLAY)
+        if has('nvim')
+            " function! s:paste_list_plus()
+            "     let l:result_list = []
+            "     let l:list_src = systemlist(['wl-paste', '--no-newline'])
+            "     for item in l:list_src
+            "         " https://stackoverflow.com/questions/42326732/get-rid-of-in-vim-output-from-system
+            "         " let l:tr_item = strtrans(substitute(item, "\n\\+$", "", ""))
+            "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"'. item . '"', ')'])
+            "         let l:tr_item = boot#chomp(item)
+            "         call add(l:result_list, l:tr_item)
+            "     endfor
+            "     return l:result_list
+            " endfunction
+            " function! s:paste_list_asterisk()
+            "     let l:result_list = []
+            "     let l:list_src = systemlist(['wl-paste', '--no-newline', '--primary'])
+            "     for item in l:list_src
+            "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"' . item . '"', ')'])
+            "         let l:tr_item = boot#chomp(item)
+            "         call add(l:result_list, l:tr_item)
+            "     endfor
+            "     return l:result_list
+            " endfunction
+            " let g:clipboard =
+            "     \ { 'name': 'wayland-strip-carriage',
+            "     \   'copy':
+            "     \ {     '+': 'wl-copy --foreground --type text/plain',
+            "     \       '*': 'wl-copy --foreground --type text/plain --primary',
+            "     \ },
+            "     \   'paste':
+            "     \ {     '+': {-> s:paste_list_plus()},
+            "     \       '*': {-> s:paste_list_asterisk()},
+            "     \ },
+            "     \   'cache_enabled': 1,
+            "     \ }
+            let g:clipboard =
+                \ { 'name': 'wayland-strip-carriage',
+                \   'copy':
+                \ {     '+': 'wl-copy --foreground --type text/plain',
+                \       '*': 'wl-copy --foreground --type text/plain --primary',
+                \ },
+                \   'paste':
+                \ {     '+': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline']))},
+                \       '*': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline', '--primary']))},
+                \ },
+                \   'cache_enabled': 1,
+                \ }
+        else
+            let g:clipboard =
+                \ { 'name': 'wayland-strip-carriage',
+                \   'copy':
+                \ {     '+': 'wl-copy --foreground --type text/plain',
+                \       '*': 'wl-copy --foreground --type text/plain --primary',
+                \ },
+                \   'paste':
+                \ {     '+': {-> systemlist('wl-paste --no-newline \| tr -d "\r"')},
+                \       '*': {-> systemlist('wl-paste --no-newline --primary \| tr -d "\r"')},
+                \ },
+                \   'cache_enabled': 1,
+                \ }
+        endif
     endif
 endif
 
@@ -2625,15 +2646,17 @@ set clipboard+=unnamedplus
 " vmap <C-c> "+yi
 " imap <C-v> <esc>"+gpi
 
-if has('nvim')
-    xnoremap "+y y:call system(['wl-copy', '@"'])<cr>
-    nnoremap "+p :let @"=substitute(system(['wl-paste', '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
-    nnoremap "*p :let @"=substitute(system(['wl-paste', '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
-else
-    " https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
-    xnoremap "+y y:call system("wl-copy", @")<cr>
-    nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
-    nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v><C-m>', '', 'g')<cr>p
+if exists("g:_use_wl_clipboard")
+    if has('nvim') 
+        xnoremap "+y y:call system(['wl-copy', '@"'])<cr>
+        nnoremap "+p :let @"=substitute(system(['wl-paste', '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "*p :let @"=substitute(system(['wl-paste', '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
+    else
+        " https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
+        xnoremap "+y y:call system("wl-copy", @")<cr>
+        nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v><C-m>', '', 'g')<cr>p
+    endif
 endif
 
 " https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118
@@ -3190,28 +3213,32 @@ augroup END
 
 " https://alex.dzyoba.com/blog/vim-revamp/
 " cscope - "find usages"
-function! s:cscope(option, query) range
-    let color = '{ x = $1; $1 = ""; z = $3; $3 = ""; printf "\033[34m%s\033[0m:\033[31m%s\033[0m\011\033[37m%s\033[0m\n", x,z,$0; }'
-    let opts = {
-        \ 'source':  "cscope -dL" . a:option . " " . a:query . " | awk '" . color . "'",
-        \ 'options': ['--ansi', '--prompt', '> ',
-        \             '--multi', '--bind', 'alt-a:select-all,alt-d:deselect-all',
-        \             '--color', 'fg:188,fg+:222,bg+:#3a3a3a,hl+:104'],
-        \ 'down': '40%'
-        \ }
-    function! opts.sink(lines)
-        let data = split(a:lines)
-        let file = split(data[0], ":")
-        execute 'e ' . '+' . file[1] . ' ' . file[0]
+if has("fzf")
+    function! s:cscope(option, query) range
+        let color = '{ x = $1; $1 = ""; z = $3; $3 = ""; printf "\033[34m%s\033[0m:\033[31m%s\033[0m\011\033[37m%s\033[0m\n", x,z,$0; }'
+        let opts = {
+            \ 'source':  "cscope -dL" . a:option . " " . a:query . " | awk '" . color . "'",
+            \ 'options': ['--ansi', '--prompt', '> ',
+            \             '--multi', '--bind', 'alt-a:select-all,alt-d:deselect-all',
+            \             '--color', 'fg:188,fg+:222,bg+:#3a3a3a,hl+:104'],
+            \ 'down': '40%'
+            \ }
+        function! opts.sink(lines)
+            let data = split(a:lines)
+            let file = split(data[0], ":")
+            execute 'e ' . '+' . file[1] . ' ' . file[0]
+        endfunction
+        call fzf#run(opts)
     endfunction
-    call fzf#run(opts)
-endfunction
 
-" Invoke command. 'g' is for call graph, kinda.
-nnoremap <silent> <leader>g :call <SID>cscope('3', expand('<cword>'))<cr>
+    " Invoke command. 'g' is for call graph, kinda.
+    nnoremap <silent> <leader>g :call <SID>cscope('3', expand('<cword>'))<cr>
+endif
 
-let g:qquickruickr_cscope_use_qf_g = 1
-let g:quickr_cscope_db_file = "cscope_quickr.out"
+if has("cscope")
+    let g:qquickruickr_cscope_use_qf_g = 1
+    let g:quickr_cscope_db_file = "cscope_quickr.out"
+endif
 
 " https://github.com/erig0/cscope_dynamic
 " nmap <F11> <Plug>CscopeDBInit
@@ -3394,9 +3421,11 @@ nmap <silent> <c-\>d :cs find d <C-R>=expand("<cword>")<cr><cr>
 " nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<cr>$<cr>:copen<cr>
 " nmap <C-\>d :cs find d <C-R>=expand("<cword>")<cr><cr>:copen<cr>
 
-set cscopetag
-set cscoperelative
-set cscopequickfix=s-,c-,d-,i-,t-,e-
+if has("cscope")
+    set cscopetag
+    set cscoperelative
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+endif
 
 " cscope error: Assertion failed: invcntl-aram.sizeblk == sizeof(t_logicalblk) (invlib.c: invopen: 593)
 " https://bugzilla.redhat.com/show_bug.cgi?id=877955
@@ -4451,23 +4480,24 @@ fun! s:MkdxFormatHeader(key, val)
     return repeat(' ', 4 - strlen(lnum)) . lnum . ': ' . text
 endfun
 
-fun! s:MkdxFzfQuickfixHeaders()
-    " passing 0 to mkdx#QuickfixHeaders causes it to return the list instead of opening the quickfix list
-    " this allows you to create a 'source' for fzf.
-    " first we map each item (formatted for quickfix use) using the function MkdxFormatHeader()
-    " then, we strip out any remaining empty headers.
-    let headers = filter(map(mkdx#QuickfixHeaders(0), function('<SID>MkdxFormatHeader')), 'v:val != ""')
+if has("fzf")
+    fun! s:MkdxFzfQuickfixHeaders()
+        " passing 0 to mkdx#QuickfixHeaders causes it to return the list instead of opening the quickfix list
+        " this allows you to create a 'source' for fzf.
+        " first we map each item (formatted for quickfix use) using the function MkdxFormatHeader()
+        " then, we strip out any remaining empty headers.
+        let headers = filter(map(mkdx#QuickfixHeaders(0), function('<SID>MkdxFormatHeader')), 'v:val != ""')
 
-    " run the fzf function with the formatted data and as a 'sink' (action to execute on selected entry)
-    " supply the MkdxGoToHeader() function which will parse the line, extract the line number and move the cursor to it.
-    call fzf#run(fzf#wrap(
-        \ {'source': headers, 'sink': function('<SID>MkdxGoToHeader') }
-        \ ))
-endfun
+        " run the fzf function with the formatted data and as a 'sink' (action to execute on selected entry)
+        " supply the MkdxGoToHeader() function which will parse the line, extract the line number and move the cursor to it.
+        call fzf#run(fzf#wrap(
+            \ {'source': headers, 'sink': function('<SID>MkdxGoToHeader') }
+            \ ))
+    endfun
 
-" finally, map it -- in this case, I mapped it to overwrite the default action for toggling quickfix (<PREFIX>I)
-nnoremap <silent> <Leader>I :call <SID>MkdxFzfQuickfixHeaders()<Cr>
-
+    " finally, map it -- in this case, I mapped it to overwrite the default action for toggling quickfix (<PREFIX>I)
+    nnoremap <silent> <Leader>I :call <SID>MkdxFzfQuickfixHeaders()<Cr>
+endif
 
 
 " "code format ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -4531,21 +4561,21 @@ set wildmenu
 " noremap <leader>fn :<C-U><C-R>=printf("Leaderf gtags --next %s", "")<cr><cr>
 " noremap <leader>fp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<cr><cr>
 
+if has("fzf")
+    " https://github.com/junegunn/fzf/issues/453
+    function! s:fzf_open(command_str)
+        if (expand('%') =~# 'NERD_tree' && winnr('$') > 1)
+            exe "normal! \<c-w>\<c-w>"
+        endif
+        exe 'normal! ' . a:command_str . "\<cr>"
+    endfunction
 
-" https://github.com/junegunn/fzf/issues/453
-function! s:fzf_open(command_str)
-    if (expand('%') =~# 'NERD_tree' && winnr('$') > 1)
-        exe "normal! \<c-w>\<c-w>"
-    endif
-    exe 'normal! ' . a:command_str . "\<cr>"
-endfunction
-
-nnoremap <silent> <C-b>  :call <sid>fzf_open(':Buffers')<cr>
-nnoremap <silent> <C-g>g :call <sid>fzf_open(':Ag')<cr>
-nnoremap <silent> <C-g>c :call <sid>fzf_open(':Commands')<cr>
-nnoremap <silent> <C-g>l :call <sid>fzf_open(':BLines')<cr>
-nnoremap <silent> <C-p>  :call <sid>fzf_open(':Files')<cr>
-
+    nnoremap <silent> <C-b>  :call <sid>fzf_open(':Buffers')<cr>
+    nnoremap <silent> <C-g>g :call <sid>fzf_open(':Ag')<cr>
+    nnoremap <silent> <C-g>c :call <sid>fzf_open(':Commands')<cr>
+    nnoremap <silent> <C-g>l :call <sid>fzf_open(':BLines')<cr>
+    nnoremap <silent> <C-p>  :call <sid>fzf_open(':Files')<cr>
+endif
 
 " "search functions ********************************************************************************************"
 " "search functions ********************************************************************************************"

@@ -15,3 +15,6 @@ export BOOTSTRAP_ROOT=sysroot
 [ -f /etc/profile ] && . /etc/profile
 [ "${SHELL}" != "${0}" ] && export SHELL=$0
 [ -f $HOME/.ashrc ] && . $HOME/.ashrc
+
+# rustup doesn't work on llvm-musl
+# . "$HOME/.local/share/cargo/env"
