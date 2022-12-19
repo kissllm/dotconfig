@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+# doas load_gentoo /mnt/kiss
+. /mnt/lib/mount_smart
+
+des=/mnt/kiss
+blkid
+# mount /dev/nvme1n1p3 $des
+mount_smart $des          /dev/nvme1n1p3
+# mount /dev/nvme1n1p2 $des/boot
+mount_smart $des/boot     /dev/nvme1n1p2
+# mount /dev/nvme1n1p1 $des/boot/efi
+mount_smart $des/boot/efi /dev/nvme1n1p1
+# mount /dev/nvme1n1p4 $des/var
+# mount_smart $des/var /dev/nvme1n1p4
+# mount /dev/nvme1n1p5 $des/usr
+# mount /dev/nvme0n1p4 $des/home
+mount_smart $des/home     /dev/nvme0n1p4
+# mount /dev/nvme1n1p6 $des/root
+# mount /dev/nvme0n1p6 $des/opt
+mount_smart $des/opt      /dev/nvme0n1p6
+# mount /dev/nvme1n1p5 $des/mnt
+mount_smart $des/mnt      /dev/nvme1n1p5
+
+# mount /dev/nvme1n1p4 $des/shared
+mount_smart $des/share    /dev/nvme1n1p4
+
+[ $(target_exists "$des/working") -eq 0 ] && {
+    # $(which chroot) $des mount --bind /share/eli/working /working
+    $(which chroot) $des mount -o bind /share/eli/working /working
+    # $(which chroot) $des /mnt/mount_smart /working /share/eli/working
+}
+[ $(target_exists "$des/build") -eq 0 ] && {
+    # $(which chroot) $des mount --bind /share/eli/build /build
+    $(which chroot) $des mount -o bind /share/eli/build /build
+    # $(which chroot) $des mount_smart /build /share/eli/build
+}
+
+# swapon /dev/nvme1n1p8
+mount --make-rprivate $des
+lsblk
+# ./chroot.sh $des

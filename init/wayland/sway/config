@@ -701,10 +701,10 @@ for_window [app_id="^.*"] border pixel 0
 # Use pactl[xtools] to adjust volume in PulseAudio[pulseaudio pipewire].
 # vpm install psmisc for killall
 set $refresh_i3status killall -SIGUSR1 i3status-rs
-#   set $refresh_i3status pkill -SIGUSR1 i3status-rs
+# set $refresh_i3status pkill -SIGUSR1 i3status-rs
 # How to install pactl? perform: xlocate pactl (it shows you need to install the package: pulseaudio-utils)
-#   pactl list sinks
-#   alsamixer
+# pactl list sinks
+# alsamixer
 # Flags: HARDWARE HW_MUTE_CTRL HW_VOLUME_CTRL DECIBEL_VOLUME LATENCY
 $bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@   +10%   && $refresh_i3status
 $bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@   -10%   && $refresh_i3status

@@ -19,4 +19,6 @@ else
     # then run wpa_supplicant
     # doas wpa_supplicant -D nl80211 -B -i wlan0 -c $HOME/.config/wpa_supplicant/wpa_supplicant.conf
     doas wpa_supplicant -D nl80211 -i wlan0 -c $HOME/.config/wpa_supplicant/$1.conf > $HOME/.config/wpa_supplicant/.wpa.log &
+    sleep 3s
+    doas /sbin/dhcpcd wlan0
 fi
