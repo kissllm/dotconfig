@@ -51,6 +51,7 @@ let g:_fixed_tips_width          = 27
 " let g:_buffergator_develop     = 1
 " let g:_log_func_name           = 'boot#log_silent'
 let g:_use_terminal_transparent  = 1
+let g:_use_dynamic_color         = 1
 let g:_log_one_line              = 0
 let g:_job_start                 = has('nvim') ? 'jobstart' : 'job_start'
 
@@ -1468,89 +1469,10 @@ endif
 
 " "path settings _______________________________________________________________________________________________"
 
-
-
-
-" "color settings ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
-
-" h term-dependent-settings
-set termguicolors
-let base16colorspace = 256  " Access colors present in 256 colorspace
-
-" https://www.reddit.com/r/vim/comments/f3v3lq/syntax_highlighting_changes_while_using_tmux/
-if empty($TMUX)
-    if has('nvim')
-        let $NVIM_TUI_ENABLE_TRUE_COLOR = 1
-    endif
-    if has('termguicolors')
-        set termguicolors
-    endif
-endif
-
-" Enable 24-bit true colors if your terminal supports it.
-if has('termguicolors')
-    " https://github.com/vim/vim/issues/993#issuecomment-255651605
-    if has('vim_starting') && ! has('gui_running') && ! has('nvim')
-        let &t_8f = "\e[38;2;%lu;%lu;%lum"
-        let &t_8b = "\e[48;2;%lu;%lu;%lum"
-    endif
-    set termguicolors
-endif
-
-
-
-
-" " https://github.com/nathanaelkane/vim-indent-guides/issues/109
-" " Guides not showing up the first time with colorscheme desert #109
-" let g:indent_guides_color_name_guibg_pattern = "guibg='?\zs[0-9A-Za-z]+\ze'?"
-
-
-augroup unfold
-    au!
-    au BufWinEnter * normal! zv
-augroup END
-
-silent! execute '!export TERM=xterm-256color'
-
-if ! has('gui_running')
-    " https://github.com/tmux/tmux/issues/699
-    set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
-endif
-
-
+" "status line -------------------------------------------------------------------------------------------------"
 
 " packadd vim-airline
 " packadd vim-airline-themes
-
-" CPU busy on busybox
-" let schemes = boot#chomp(system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
-"     \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]")))
-
-
-" https://github.com/preservim/vim-colors-pencil
-" https://github.com/chriskempson/base16
-" https://github.com/chriskempson/base16-vim/tree/master/colors
-" let g:theme_name = "unsuck-flat"
-" let g:theme_name = "sierra"
-" let g:theme_name = "base16-default-dark"
-let g:theme_name = "base16-tomorrow-night"
-" let g:theme_name = "base16-flat"
-" let g:theme_name = "badwolf"
-" let g:theme_name = "tender"
-" let g:theme_name = "carbonized-dark"
-
-" let g:theme_name = "onehalfdark"
-" let g:theme_name = "onehalflight"
-" silent! exe 'colorscheme ' . g:theme_name
-" let g:theme_name = "tabula"
-
-" Recommend
-" let g:theme_name = "pencil"
-
-" let g:theme_name = "two-firewatch"
-" let g:two_firewatch_italics = 1
-
-" let g:theme_name = "lucid"
 
 " https://github.com/vim-airline/vim-airline-themes/tree/master/autoload/airline/themes
 " https://github.com/vim-airline/vim-airline/wiki/Screenshots
@@ -1667,49 +1589,14 @@ else
     call s:lightline_disable()
 endif
 
-augroup color_scheme_refresh | au!
-    " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
-    autocmd VimEnter *
-        \ if ! exists('g:colors_name') || g:colors_name !=# g:theme_name |
-        \ silent! exe '++nested colorscheme ' . g:theme_name |
-        \ endif
-    " autocmd VimEnter * silent! exe '++nested colorscheme ' . g:theme_name
-augroup END
-
-" function! s:sdjust_solarized()
-"     hi! EndOfBuffer ctermbg=bg ctermfg=bg guibg=bg guifg=bg
-" endfunction
-"
-" augroup sierra
-"     autocmd!
-"     " autocmd ColorScheme sierra call s:sdjust_solarized()
-"     autocmd ColorScheme pencil call s:sdjust_solarized()
-" augroup END
-
-if "pencil" == g:theme_name
-    " https://www.iditect.com/how-to/53501604.html
-    let g:pencil_termtrans          = 1
-    let g:pencil_termcolors         = 256
-    let g:pencil_terminal_italics   = 1
-    let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
-    let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
-    let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
-    let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
-    let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
-endif
-
 let g:powerline_pycmd            = "py3"
 
 
-function! s:delmarks()
-    let l:m = join(filter(
-        \ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)'),
-        \ 'line("''".v:val) == line(".")'))
-    if !empty(l:m)
-        exe 'delmarks' l:m
-    endif
-endfunction
-nnoremap <silent> dm :<c-u>call <sid>delmarks()<cr>
+
+
+" "status line -------------------------------------------------------------------------------------------------"
+
+" "indent line *************************************************************************************************"
 
 if exists("g:indentLine_loaded")
     " https://github.com/Yggdroot/indentLine
@@ -1755,36 +1642,9 @@ if exists("g:indentLine_loaded")
     " let g:indentLine_char_list       = ['|', '¦', '┆', '┊']
 endif
 
-" https://stackoverflow.com/questions/36813466/highlighting-arbitrary-lines-in-vim
-" \l to highlight a line
-" nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
-nnoremap <silent> <leader>L :call matchadd('Search', '\%'.line('.').'l')<CR>
-" nnoremap <silent> <leader>c :execute 'match Search /\%'.virtcol('.').'v/'<cr>
-
-" \L to remove highlighted line
-nnoremap <silent> <leader>l :
-    \for m in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
-    \<BAR>     :call matchdelete(m.id)
-    \<BAR> :endfor<CR>
-
-" https://vim.fandom.com/wiki/Highlight_current_line
-" nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
-
-
-" https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
-set cursorline
-set cursorcolumn
-
-" Only show the cursor line in the active buffer.
-setlocal cursorline | setlocal cursorcolumn
-" setlocal cursorline
-augroup cursor_line
-    au!
-    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
-    au WinEnter * setlocal cursorline | setlocal cursorcolumn
-    " au WinEnter * setlocal cursorline
-    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
-augroup END
+" " https://github.com/nathanaelkane/vim-indent-guides/issues/109
+" " Guides not showing up the first time with colorscheme desert #109
+" let g:indent_guides_color_name_guibg_pattern = "guibg='?\zs[0-9A-Za-z]+\ze'?"
 
 let g:indent_blankline_disable_with_nolist                        = v:true
 let g:indent_blankline_show_trailing_blankline_indent             = v:false
@@ -1794,275 +1654,7 @@ let g:indent_blankline_buftype_exclude                            = ['terminal']
 let g:indent_blankline_show_current_context_start_on_current_line = v:false
 let g:indent_blankline_viewport_buffer                            = 20
 
-" cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
-" cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
 
-augroup color_background
-    au!
-    au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
-        \ exe 'set colorcolumn="0,".join(range(0, 120),",")' |
-        \ else |
-        \ set colorcolumn= | setlocal nolist | redraw! |
-        \ endif
-    " \ set colorcolumn=120 | setlocal list |
-    " \ | let &colorcolumn="80,".join(range(120,999),",") |
-    " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
-
-    " Will generate race condition and "help" will lost propper cursor position
-    " autocmd FileType,WinNew txt,help,log wincmd L | set colorcolumn="" | setlocal nolist | redraw!
-
-    " autocmd WinNew txt,help,log wincmd L | set colorcolumn="" | setlocal nolist | redraw!
-    " au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
-
-    " https://stackoverflow.com/questions/7463555/how-to-get-the-help-window-to-always-open-in-the-same-position
-    " autocmd FileType help :wincmd L
-    autocmd FileType help set bufhidden=wipe
-augroup END
-
-" https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
-:cabbrev h vert h
-" if has('autocmd')
-"     function! ILikeHelpToTheRight()
-"         if !exists('w:help_is_moved') || w:help_is_moved != "right"
-"             wincmd L
-"             let w:help_is_moved = "right"
-"         endif
-"     endfunction
-"
-"     augroup HelpPages
-"         autocmd FileType help nested call ILikeHelpToTheRight()
-"     augroup END
-" endif
-
-
-" https://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
-" make window 80 + some for numbers wide
-
-" Shrink window width to given size
-noremap <Leader>w :let @w=float2nr(log10(line("$")))+82\|:vertical resize <c-r>w<cr>
-
-" au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%80v.\+', -1)
-
-
-
-" http://www.pixelbeat.org/docs/terminal_colours/
-
-let g:insert_fg_gui = 'DarkYellow'
-let g:insert_bg_gui = 'Black'
-if exists("g:_use_terminal_transparent")
-    let g:leave_insert_fg_gui   = 'darkgray'
-    let g:leave_insert_fg_cterm = '080808'
-else
-    let g:leave_insert_fg_gui   = 'NONE'
-    " Warning: Color name "Background" is not defined. "NONE" is not a eligile argument for cterm colors
-    let g:leave_insert_fg_cterm = 'NONE'
-endif
-if 'linux' == $TERM
-    " let g:leave_insert_bg_gui = 'Brown'
-    let g:leave_insert_bg_gui = 'NONE'
-    " let g:leave_insert_bg_cterm = 8
-    let g:leave_insert_bg_cterm = 'NONE'
-else
-    let g:leave_insert_bg_gui = '#000008'
-    " let g:leave_insert_bg_gui = 'NONE'
-    let g:leave_insert_bg_cterm = 8
-    " let g:leave_insert_bg_cterm = 'NONE'
-endif
-
-let g:insert_fg_cterm = 'DarkYellow'
-let g:insert_bg_cterm = 'Black'
-
-let g:nontext_fg_cterm = 241
-let g:nontext_fg_gui = 'gray'
-
-
-" :help highlight-groups
-" :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
-" :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
-
-if ! exists("g:_use_terminal_transparent")
-    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
-endif
-
-highlight FileStyleIgnorePattern guibg=bg ctermbg=0
-" highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
-" https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
-highlight clear StatusLine
-augroup statusline_highlight | au!
-    " au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost *
-    "     \ highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
-
-    au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost * highlight clear StatusLine
-augroup END
-" https://vi.stackexchange.com/questions/28752/vim-terminal-interferes-with-statusline
-augroup statusline_highlight_term | au!
-    autocmd ColorScheme * hi! link StatusLineTerm StatusLine
-    autocmd ColorScheme * hi! link StatusLineTermNC StatusLineNC
-augroup end
-
-
-" https://vi.stackexchange.com/questions/6150/a-highlight-command-resets-previously-declared-highlights
-hi NewLineWin ctermfg=248 guifg=#999999
-match NewLineWin /\r\n/
-hi WhiteSpaceChar ctermfg=252 guifg=#999999
-2match WhiteSpaceChar / /
-" https://stackoverflow.com/questions/24232354/vim-set-color-for-listchars-tabs-and-spaces
-hi Whitespace ctermfg=DarkGray guifg=DarkGray
-match Whitespace /\s/
-highlight ExtraWhitespace ctermbg=red guibg=red
-match ExtraWhitespace /\s\+$/
-
-highlight SpecialKey ctermfg=NONE guifg=NONE
-
-" vim-ShowTrailingWhitespace. works under pure terminal emulator without window managers
-highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
-
-
-" "~" vertically under the line numbers
-
-if ! exists("g:_use_terminal_transparent")
-    " That command should set the color of non text characters to be the same as the background color.
-    " hi NonText guifg=bg
-    " highlight NonText ctermfg=7 guifg=gray
-    silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-    if exists('g:_use_dynamic_color')
-        augroup nontext_eara
-            au!
-            autocmd ColorScheme,SourcePost *
-                \ silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-        augroup end
-    endif
-    " https://newbedev.com/highlighting-the-current-line-number-in-vim
-    hi clear CursorLine
-    if exists('g:_use_dynamic_color')
-        augroup CLClear
-            au!
-            autocmd ColorScheme * hi clear CursorLine
-            autocmd ColorScheme * highlight CursorLine ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE cterm=NONE gui=NONE term=NONE
-        augroup END
-
-        augroup CLNRSet
-            au!
-            autocmd ColorScheme * hi CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
-        augroup END
-
-    endif
-    highlight CursorLineNR ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
-
-    " https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
-    " highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
-    highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
-
-    if exists('g:_use_dynamic_color')
-        augroup buffer_ending
-            au!
-            autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
-        augroup end
-    endif
-endif
-
-" hi LineNr guibg=fg
-" highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
-silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-
-
-" https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
-set nuw        =7
-set foldcolumn =0
-set foldlevel  =1
-
-augroup allways_show_line_number | au!
-    au BufWinEnter * set number relativenumber | set foldcolumn=0
-    " au BufWinEnter * set number | set foldcolumn=0
-augroup END
-" hi foldcolumn guibg=fg
-highlight foldcolumn ctermbg=NONE guibg=NONE
-set nofoldenable    " disable folding
-
-" Vertical split style settings
-" Can the split separator in vim be less than a full column wide?
-" https://vi.stackexchange.com/questions/2938/can-the-split-separator-in-vim-be-less-than-a-full-column-wide/2941#2941
-" https://vi.stackexchange.com/questions/22053/how-to-completely-hide-the-seperator-between-windows
-" set fillchars=vert:\|
-" set fillchars=vert:\│
-" https://stackoverflow.com/questions/9001337/vim-split-bar-styling
-" Set a space followed '\ ' to the fillchars->vert option
-" From this following expressions, you do not neeed tralling spaces exposed to vim
-silent! execute 'set fillchars =vert:\ '
-" let &fillchars = 'vert:\ '
-
-" https://vi.stackexchange.com/questions/28994/can-i-change-the-ugly-indicator-after-eol
-" EndOfBuffer, ugly indicator after EOL tildes (~)
-let &fillchars ..=',eob: '
-" making lines touch each other.
-set linespace =0
-
-" hi VertSplit guibg=fg guifg=bg
-highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
-
-" hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
-" hi! VertSplit guifg=lightgrey guibg=lightgrey ctermfg=lightgrey ctermbg=lightgrey
-" must be before setting your colorscheme
-if exists('g:_use_dynamic_color')
-    augroup nosplit
-        au!
-        autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
-            \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-    augroup END
-endif
-
-highlight SignColumn ctermbg=NONE guibg=NONE
-
-" https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
-" https://jonasjacek.github.io/colors/
-hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-
-silent! execute ':hi ColorColumn guifg=' . g:nontext_fg_gui . ' guibg=' . g:nontext_fg_gui
-    \ . ' ctermfg=' . g:nontext_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-
-let hl_insert_leave = ' guifg=' . g:leave_insert_fg_gui . ' guibg=' . g:leave_insert_bg_gui
-    \ . ' ctermfg=' . g:leave_insert_fg_cterm . ' ctermbg=' . g:leave_insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-let hl_insert_enter = ' guifg=' . g:insert_fg_gui . ' guibg=' . g:insert_bg_gui
-    \ . ' ctermfg=' . g:insert_fg_cterm . ' ctermbg=' . g:insert_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-
-silent! execute ':hi CursorLine' . hl_insert_leave
-silent! execute ':hi CursorColumn' . hl_insert_leave
-
-if exists('g:_use_dynamic_color')
-    augroup cursor_theme
-        au!
-        " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
-        " Workaround for creating transparent bg
-        if ! exists("g:_use_terminal_transparent")
-            autocmd SourcePost * highlight Normal ctermbg=0 guibg=NONE
-                \ silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-                \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-        else
-            autocmd SourcePost *
-                \ silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-                \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-        endif
-
-        " " Change Color when entering Insert Mode
-        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi ColorColumn guifg=' . hl_insert_leave
-        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi ColorColumn guifg=' . hl_insert_enter
-
-        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi CursorLine' . hl_insert_enter
-        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi CursorLine' . hl_insert_leave
-
-        autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi CursorColumn' . hl_insert_enter
-        autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            \ silent! execute ':hi CursorColumn' . hl_insert_leave
-
-    augroup END
-endif
 if has('nvim') && exists('g:_use_indent_guides')
     unlet g:_use_indent_guides
 endif
@@ -2111,10 +1703,478 @@ if exists('g:_use_indent_guides')
 
 endif
 
+" "indent line *************************************************************************************************"
 
+" "color settings ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+
+" http://www.pixelbeat.org/docs/terminal_colours/
+" :h term-dependent-settings
+set termguicolors
+let base16colorspace = 256  " Access colors present in 256 colorspace
+
+" https://www.reddit.com/r/vim/comments/f3v3lq/syntax_highlighting_changes_while_using_tmux/
+if empty($TMUX)
+    if has('nvim')
+        let $NVIM_TUI_ENABLE_TRUE_COLOR = 1
+    endif
+    if has('termguicolors')
+        set termguicolors
+    endif
+endif
+
+" Enable 24-bit true colors if your terminal supports it.
+if has('termguicolors')
+    " https://github.com/vim/vim/issues/993#issuecomment-255651605
+    if has('vim_starting') && ! has('gui_running') && ! has('nvim')
+        let &t_8f = "\e[38;2;%lu;%lu;%lum"
+        let &t_8b = "\e[48;2;%lu;%lu;%lum"
+    endif
+    set termguicolors
+endif
+
+
+augroup unfold
+    au!
+    au BufWinEnter * normal! zv
+augroup END
+
+if ! empty($TMUX)
+    " silent! execute '!export TERM=xterm-256color'
+    silent! execute '!export TERM=tmux-256color'
+endif
+
+if ! has('gui_running')
+    " https://github.com/tmux/tmux/issues/699
+    set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
+endif
+
+
+
+function! s:delmarks()
+    let l:m = join(filter(
+        \ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)'),
+        \ 'line("''".v:val) == line(".")'))
+    if !empty(l:m)
+        exe 'delmarks' l:m
+    endif
+endfunction
+nnoremap <silent> dm :<c-u>call <sid>delmarks()<cr>
+
+
+" https://stackoverflow.com/questions/36813466/highlighting-arbitrary-lines-in-vim
+" \L to highlight a line
+" nnoremap <silent> <leader>l ml:execute 'match Search /\%'.line('.').'l/'<cr>
+nnoremap <silent> <leader>L :call matchadd('Search', '\%'.line('.').'l')<CR>
+" nnoremap <silent> <leader>c :execute 'match Search /\%'.virtcol('.').'v/'<cr>
+
+" \l to remove highlighted line
+nnoremap <silent> <leader>l :
+    \for m in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
+    \<BAR> :call matchdelete(m.id)
+    \<BAR> :endfor<CR>
+
+" au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%80v.\+', -1)
+
+
+" cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
+" cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
+
+augroup color_background
+    au!
+    au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
+        \ exe 'set colorcolumn="0,".join(range(0, 120),",")' |
+        \ else |
+        \ set colorcolumn= | setlocal nolist | redraw! |
+        \ endif
+    " \ set colorcolumn=120 | setlocal list |
+    " \ | let &colorcolumn="80,".join(range(120,999),",") |
+    " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
+
+    " Will generate race condition and "help" will lost propper cursor position
+    " autocmd FileType,WinNew txt,help,log wincmd L | set colorcolumn="" | setlocal nolist | redraw!
+
+    " autocmd WinNew txt,help,log wincmd L | set colorcolumn="" | setlocal nolist | redraw!
+    " au FileType,BufEnter,WinNew txt set colorcolumn="" && redraw!
+
+    " https://stackoverflow.com/questions/7463555/how-to-get-the-help-window-to-always-open-in-the-same-position
+    " autocmd FileType help :wincmd L
+    autocmd FileType help set bufhidden=wipe
+augroup END
+
+" https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
+:cabbrev h vert h
+" if has('autocmd')
+"     function! ILikeHelpToTheRight()
+"         if !exists('w:help_is_moved') || w:help_is_moved != "right"
+"             wincmd L
+"             let w:help_is_moved = "right"
+"         endif
+"     endfunction
+"
+"     augroup HelpPages
+"         autocmd FileType help nested call ILikeHelpToTheRight()
+"     augroup END
+" endif
+
+
+" https://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
+" make window 80 + some for numbers wide
+
+
+
+
+if ! exists("g:_use_terminal_transparent")
+    let g:insert_enter_fg_gui = 'DarkYellow'
+    let g:insert_enter_bg_gui = 'Black'
+
+    let g:insert_leave_fg_gui   = 'darkgray'
+    let g:insert_leave_fg_cterm = '080808'
+
+    let g:insert_enter_fg_cterm = 'DarkYellow'
+    let g:insert_enter_bg_cterm = 'Black'
+
+    let g:nontext_fg_cterm = 241
+    let g:nontext_fg_gui = 'gray'
+else
+    let g:insert_enter_fg_gui = 'NONE'
+    let g:insert_enter_bg_gui = 'NONE'
+
+    let g:insert_leave_fg_gui   = 'NONE'
+    " Warning: Color name "Background" is not defined. "NONE" is not a eligile argument for cterm colors
+    let g:insert_leave_fg_cterm = 'NONE'
+
+    let g:insert_enter_fg_cterm = 'NONE'
+    let g:insert_enter_bg_cterm = 'NONE'
+
+    let g:nontext_fg_cterm = 'NONE'
+    let g:nontext_fg_gui = 'NONE'
+endif
+
+if 'linux' == $TERM
+    if exists("g:_use_terminal_transparent")
+        let g:insert_leave_bg_gui   = 'Brown'
+        let g:insert_leave_bg_cterm = 8
+    else
+        let g:insert_leave_bg_gui   = 'NONE'
+        let g:insert_leave_bg_cterm = 'NONE'
+    endif
+else
+    if exists("g:_use_terminal_transparent")
+        " /mnt/vinit/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+        " :let _rock        = '#181320'
+        let g:insert_leave_bg_gui   = '#181320'
+        let g:insert_leave_bg_cterm = 8
+    else
+        let g:insert_leave_bg_gui   = 'NONE'
+        let g:insert_leave_bg_cterm = 'NONE'
+    endif
+endif
+
+if has('nvim')
+    " a list of groups can be found at `:help nvim_tree_highlight`
+    highlight NvimTreeFolderIcon guibg=blue
+endif
+
+hi SpellBad   cterm=underline ctermfg=9
+hi SpellLocal cterm=underline ctermfg=9
+hi SpellRare  cterm=underline ctermfg=9
+hi SpellCap   cterm=underline
+
+if ! exists("g:_use_terminal_transparent")
+    " :help highlight-groups
+    " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
+    " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
+    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
+endif
+
+highlight FileStyleIgnorePattern guibg=bg ctermbg=0
+" highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
+" https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
+highlight clear StatusLine
+augroup statusline_highlight | au!
+    " au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost *
+    "     \ highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
+
+    au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost * highlight clear StatusLine
+augroup END
+" https://vi.stackexchange.com/questions/28752/vim-terminal-interferes-with-statusline
+augroup statusline_highlight_term | au!
+    autocmd ColorScheme * hi! link StatusLineTerm StatusLine
+    autocmd ColorScheme * hi! link StatusLineTermNC StatusLineNC
+augroup end
+
+
+" https://vi.stackexchange.com/questions/6150/a-highlight-command-resets-previously-declared-highlights
+hi NewLineWin ctermfg=248 guifg=#999999
+match NewLineWin /\r\n/
+hi WhiteSpaceChar ctermfg=252 guifg=#999999
+2match WhiteSpaceChar / /
+" https://stackoverflow.com/questions/24232354/vim-set-color-for-listchars-tabs-and-spaces
+hi Whitespace ctermfg=DarkGray guifg=DarkGray
+match Whitespace /\s/
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+
+" vim-ShowTrailingWhitespace. works under pure terminal emulator without window managers
+highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
+
+highlight SpecialKey ctermfg=NONE guifg=NONE
+
+" https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
+" https://jonasjacek.github.io/colors/
+hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+
+" "~" vertically under the line numbers
+
+let g:hl_insert_leave = ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . '#888888'
+    \ . ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+let g:hl_insert_enter = ' guifg=' . g:insert_enter_fg_gui . ' guibg=' . g:insert_enter_bg_gui
+    \ . ' ctermfg=' . g:insert_enter_fg_cterm . ' ctermbg=' . g:insert_enter_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+
+" /mnt/vinit/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+" :let _cloud       = '#e4e0ed'
+let g:hl_insert_leave_invert = ' guifg=' . '#e4e0ed' . ' guibg=' . g:insert_leave_bg_gui
+    \ . ' ctermfg=' . g:insert_enter_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE' 
+let g:hl_insert_enter_invert = ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_enter_bg_gui
+    \ . ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+
+" https://newbedev.com/highlighting-the-current-line-number-in-vim
+hi clear CursorLine
+silent! execute ':hi CursorLine' . g:hl_insert_leave_invert
+silent! execute ':hi CursorColumn' . g:hl_insert_leave
+silent! execute ':hi ColorColumn' . g:hl_insert_leave_invert
+
+" That command should set the color of non text characters to be the same as the background color.
+" hi NonText guifg=bg
+" highlight NonText ctermfg=7 guifg=gray
+silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+
+
+highlight CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+
+" hi VertSplit guibg=fg guifg=bg
+" hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
+" hi! VertSplit guifg=lightgrey guibg=lightgrey ctermfg=lightgrey ctermbg=lightgrey
+highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+
+highlight SignColumn ctermbg=NONE guibg=NONE
+
+" https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
+" highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
+highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+
+" hi LineNr guibg=fg
+" highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
+silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+
+
+
+if exists("g:_use_terminal_transparent")
+
+    " must be before setting your colorscheme
+    if exists('g:_use_dynamic_color')
+        augroup nosplit
+            au!
+            autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+        augroup END
+        augroup nontext_eara
+            au!
+            autocmd ColorScheme,SourcePost *
+                \ silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+        augroup end
+
+        augroup CLClear
+            au!
+            autocmd ColorScheme * highlight clear CursorLine
+            autocmd ColorScheme * silent! execute ':hi CursorLine' . g:hl_insert_leave_invert
+        augroup END
+
+        augroup CLNRSet
+            au!
+            autocmd ColorScheme * hi CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+        augroup END
+
+        augroup cursor_theme
+            au!
+
+            " Change Color when entering Insert Mode
+            autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+                \ silent! execute ':hi CursorColumn' . g:hl_insert_enter
+                \ | silent! execute ':hi ColorColumn' . g:hl_insert_enter_invert
+                \ | highlight clear CursorLine
+                \ | silent! execute ':hi CursorLine' . g:hl_insert_enter_invert
+
+            autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+                \ silent! execute ':hi CursorColumn' . g:hl_insert_leave
+                \ | silent! execute ':hi ColorColumn' . g:hl_insert_leave_invert
+                \ | highlight clear CursorLine
+                \ | silent! execute ':hi CursorLine' . g:hl_insert_leave_invert
+
+            " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
+            " Workaround for creating transparent bg
+            if ! exists("g:_use_terminal_transparent")
+                autocmd SourcePost *
+                    \ highlight Normal ctermbg=0 guibg=NONE
+                    \ | silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+                    \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                    \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+            else
+                autocmd SourcePost *
+                    \ silent! execute 'highlight LineNr ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+                    \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                    \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+            endif
+        augroup END
+        augroup buffer_ending
+            au!
+            autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+        augroup end
+    endif
+
+
+endif
+
+
+
+" https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
+set nuw        =7
+set foldcolumn =0
+set foldlevel  =1
+
+augroup allways_show_line_number | au!
+    au BufWinEnter * set number relativenumber | set foldcolumn=0
+    " au BufWinEnter * set number | set foldcolumn=0
+augroup END
+" hi foldcolumn guibg=fg
+highlight foldcolumn ctermbg=NONE guibg=NONE
+set nofoldenable    " disable folding
+
+" Vertical split style settings
+" Can the split separator in vim be less than a full column wide?
+" https://vi.stackexchange.com/questions/2938/can-the-split-separator-in-vim-be-less-than-a-full-column-wide/2941#2941
+" https://vi.stackexchange.com/questions/22053/how-to-completely-hide-the-seperator-between-windows
+" set fillchars=vert:\|
+" set fillchars=vert:\│
+" https://stackoverflow.com/questions/9001337/vim-split-bar-styling
+" Set a space followed '\ ' to the fillchars->vert option
+" From this following expressions, you do not neeed tralling spaces exposed to vim
+silent! execute 'set fillchars =vert:\ '
+" let &fillchars = 'vert:\ '
+
+" https://vi.stackexchange.com/questions/28994/can-i-change-the-ugly-indicator-after-eol
+" EndOfBuffer, ugly indicator after EOL tildes (~)
+let &fillchars ..=',eob: '
+" making lines touch each other.
+set linespace =0
+
+
+
+
+
+
+
+
+
+" CPU busy on busybox
+" let schemes = boot#chomp(system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
+"     \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]")))
+
+
+" https://github.com/preservim/vim-colors-pencil
+" https://github.com/chriskempson/base16
+" https://github.com/chriskempson/base16-vim/tree/master/colors
+" let g:scheme_name = "unsuck-flat"
+" let g:scheme_name = "sierra"
+" let g:scheme_name = "base16-default-dark"
+
+
+" let g:scheme_name = "base16-flat"
+" let g:scheme_name = "badwolf"
+" let g:scheme_name = "tender"
+" let g:scheme_name = "carbonized-dark"
+
+" let g:scheme_name = "onehalfdark"
+" let g:scheme_name = "onehalflight"
+" silent! exe 'colorscheme ' . g:scheme_name
+" let g:scheme_name = "tabula"
+
+
+" let g:scheme_name = "mountaineer"
+" let g:scheme_name = "hybrid_reverse"
+" let g:scheme_name = "happy_hacking"
+" let g:scheme_name = "orbital"
+" let g:scheme_name = "parsec"
+" let g:scheme_name = "termschool"
+
+
+" let g:scheme_name = "minimalist"
+" let g:scheme_name = "meta5"
+" let g:scheme_name = "archery"
+" let g:scheme_name = "afterglow"
+" let g:scheme_name = "nord"
+" let g:scheme_name = "jellybeans"
+
+" Recommend (later is better)
+" let g:scheme_name = "base16-tomorrow-night"
+" let g:scheme_name = "sunbather"
+" let g:scheme_name = "fogbell"
+" let g:scheme_name = "pencil"
+" let g:scheme_name = "two-firewatch"
+" let g:two_firewatch_italics = 1
+let g:scheme_name = "lucid"
+
+
+if "pencil" == g:scheme_name
+    " https://www.iditect.com/how-to/53501604.html
+    let g:pencil_termtrans          = 1
+    let g:pencil_termcolors         = 256
+    let g:pencil_terminal_italics   = 1
+    let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
+    let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
+    let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
+    let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
+    let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
+endif
+
+" function! s:sdjust_solarized()
+"     hi! EndOfBuffer ctermbg=bg ctermfg=bg guibg=bg guifg=bg
+" endfunction
+"
+" augroup sierra
+"     autocmd!
+"     autocmd ColorScheme sierra call s:sdjust_solarized()
+" augroup END
+
+augroup color_scheme_refresh | au!
+    " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
+    autocmd VimEnter *
+        \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
+        \ silent! execute '++nested colorscheme ' . g:scheme_name |
+        \ endif
+
+    autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
+augroup END
 
 set background=dark
-silent! exe 'colorscheme ' . g:theme_name
+silent! execute 'colorscheme ' . g:scheme_name
+
+" https://vim.fandom.com/wiki/Highlight_current_line
+" nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
+
+" https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
+set cursorline
+set cursorcolumn
+
+" Only show the cursor line in the active buffer.
+setlocal cursorline | setlocal cursorcolumn
+" setlocal cursorline
+augroup cursor_line
+    au!
+    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
+    au WinEnter * setlocal cursorline | setlocal cursorcolumn
+    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
+augroup END
 
 if exists('g:_use_gitgutter')
     " vim-gitgutter
@@ -2647,7 +2707,7 @@ set clipboard+=unnamedplus
 " imap <C-v> <esc>"+gpi
 
 if exists("g:_use_wl_clipboard")
-    if has('nvim') 
+    if has('nvim')
         xnoremap "+y y:call system(['wl-copy', '@"'])<cr>
         nnoremap "+p :let @"=substitute(system(['wl-paste', '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
         nnoremap "*p :let @"=substitute(system(['wl-paste', '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
@@ -2758,6 +2818,9 @@ endif
 
 
 " "resizing windows ********************************************************************************************"
+
+" Shrink window width to given size
+noremap <Leader>w :let @w=float2nr(log10(line("$")))+82\|:vertical resize <c-r>w<cr>
 
 " noremap <silent> <C-S-Up>    :resize +1<cr>
 " noremap <silent> <C-S-Down>  :resize -1<cr>
@@ -2924,10 +2987,6 @@ set title
 packadd! matchit
 " runtime! macros/matchit.vim
 
-hi SpellBad   cterm=underline ctermfg=9
-hi SpellLocal cterm=underline ctermfg=9
-hi SpellRare  cterm=underline ctermfg=9
-hi SpellCap   cterm=underline
 
 if has("autocmd")
     filetype plugin indent on " indents corresponding to specific file format
@@ -2986,7 +3045,7 @@ setl cino=e-2
 set vb t_vb=
 
 set hlsearch   " highlight research result
-" set ignorecase " search patter
+" set ignorecase " search pattern
 set smartcase
 set incsearch  " incrementally match search result
 set backspace=indent,eol,start whichwrap+=<,>,[,] " enable backspace key
@@ -4019,8 +4078,6 @@ endif
 
 set termguicolors " this variable must be enabled for colors to be applied properly
 
-" a list of groups can be found at `:help nvim_tree_highlight`
-highlight NvimTreeFolderIcon guibg=blue
 
 " chadtree
 " nnoremap <leader>v <cmd>CHADopen<cr>

@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/sh
+
 if [ -d "/mnt/init" ]; then
     export SHARE_PREFIX="/mnt"
 elif [ -d "/opt/init" ]; then
@@ -8,10 +9,10 @@ fi
 tty_num=$(tty | sed -e "s/.*tty\(.*\)/\1/")
 export tty_num=$tty_num
 
-[ -d "${SHARE_PREFIX}/init" ] &&
-[ -z $DISPLAY ] &&
-[ "1" = "$tty_num" ] &&
-[ "$(/usr/bin/whoami)" != "root" ] && {
+[ ! -d "${SHARE_PREFIX}/init" ] ||
+[ ! -z "${DISPLAY+x}" ] ||
+[ "1" != "$tty_num" ] ||
+[ "$(/usr/bin/whoami)" = "root" ] || {
     ${SHARE_PREFIX}/init/sway-launch
     # ${SHARE_PREFIX}/init/velox-launch
     printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
@@ -19,9 +20,9 @@ export tty_num=$tty_num
 
 export DISPLAY=${WAYLAND_DISPLAY}
 
-[ -d "${SHARE_PREFIX}/init" ] && . ${SHARE_PREFIX}/init/env
+[ ! -d "${SHARE_PREFIX}/init" ] || . ${SHARE_PREFIX}/init/env
 
-[ -s "$HOME/.luaver/luaver" ] && . $HOME/.luaver/luaver
+[ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
 
 # . ${SHARE_PREFIX}/toolchain/env
 

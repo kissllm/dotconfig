@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # In busybox, $SHELL != $0
 # [ "${SHELL}" != "${0}" ] && export SHELL=$0
@@ -8,7 +8,7 @@ export SHELL=$(which ash)
 export _PATH_BSHELL=$(which ash)
 
 # Set font when running in console. For hidpi screen
-{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "$TMUX" ]; } && {
+{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "${TMUX+x}" ]; } && {
     tty_name="$(tty)"
     case $tty_name in
         *"tty"*)
@@ -26,23 +26,32 @@ export _PATH_BSHELL=$(which ash)
     esac
 }
 
-[ -z "$CC" ]  && CC=/usr/bin/clang
-[ -z "$CXX" ] && CXX=/usr/bin/clang++
+[ ! -z "${CC+x}" ]  || CC=/usr/bin/clang
+[ ! -z "${CXX+x}" ] || CXX=/usr/bin/clang++
 
+search_config="/usr/include/c++/v1/__config"
+[ ! -f "$search_config" ] ||
+# search_config="$(grep -L "experimental" $(find /usr/include -type f -name "__config"))"
+search_config="$(find /usr/include -type f -name "__config" | grep -v "experimental")"
+# /usr/include/c++/v1/__config
 # search_config="$(find /usr/include -type f -name "__config" -exec echo {} +)"
 # /usr/include/c++/v1/experimental/__config
 # /usr/include/c++/v1/__config
-HAS_LIBCXX=0
-# for config_file in $search_config; do
-config_file="/usr/include/c++/v1/__config"
-[ -f "$config_file" ] && {
-    key_word=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}');
-    [ "$key_word" = "_LIBCPP_VERSION" ] && {
-        export HAS_LIBCXX=1
-        break
+for config_file in $search_config; do
+    [ ! -f "$config_file" ] || {
+        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " | awk '{print $3}');
+        [ -z "${_LIBCPP_VERSION+x}" ] || {
+            export _LIBCPP_VERSION="$_LIBCPP_VERSION"
+            break
+        }
     }
-}
-# done
+done
+
+[ ! -z "${OSTYPE+x}" ] ||
+OSTYPE="$(ldd --version 2>&1 | grep musl | awk '{print $1}')"
+! expr "$OSTYPE" : "musl" 1>/dev/null ||
+CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 $CXXFLAGS"
+# CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 -D_LIBCPP_HAS_MUSL_LIBC=1 $CXXFLAGS"
 
 # https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
 # https://tldp.org/LDP/abs/html/parameter-substitution.html
@@ -142,10 +151,10 @@ path_prepend PATH "/usr/lib/ccache/bin"
 # path_prepend PATH "/mnt"
 
 # share folder initialization
-if [ -d "/opt/init" ]; then
+if [ -d "/mnt/init" ]; then
     export SHARE_PREFIX="/mnt"
     path_prepend PATH "/mnt/init"
-elif [ -d "/mnt/init" ]; then
+elif [ -d "/opt/init" ]; then
     export SHARE_PREFIX="/opt"
     path_prepend PATH "/opt/init"
 fi
@@ -313,7 +322,7 @@ alias nv='rm -f "$HOME/.vim*.tmp"; /usr/bin/nvim'
 if [ -e "/usr/bin/vim-huge" ]; then
    alias vi='rm -f "$HOME/.vim*.tmp"; /usr/bin/vim-huge'
 elif [ -e "/usr/bin/vim" ]; then
-   alias vi="rm -f "$HOME/.vim*.tmp"; /usr/bin/vim"
+   alias vi='rm -f "$HOME/.vim*.tmp"; /usr/bin/vim'
 fi
 # This is nvi on current system
 # alias vi="/usr/bin/vi"
@@ -372,7 +381,7 @@ export DBUS_SESSION_ADDRESS=unix:path=/run/usr/$(id -u)/bus
 export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
 export KWIN_DRM_USE_EGL_STREAMS=1
 
-[ $TERM == xterm ] && export TERM=xterm-256color
+[ "$TERM" != "xterm" ] || export TERM=xterm-256color
 
 # # [Running ncurses program that uses funky glyphs in alacritty freezes sway](https://github.com/swaywm/sway/issues/5417)
 export WLR_DRM_NO_ATOMIC=1
@@ -408,7 +417,7 @@ export MOZ_DBUS_REMOTE=1
 # https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
 # XDG_RUNTIME_DIR defined in /etc/profile.d/xdg_runtime_dir.sh
 [ ! -f "$HOME/.wayland_display" ] && touch "$HOME/.wayland_display"
-if [ -n "${WAYLAND_DISPLAY}" ] && [ -z "$(cat $HOME/.wayland_display)" ]; then
+if [ ! -z "${WAYLAND_DISPLAY+x}" ] && [ -z "$(cat $HOME/.wayland_display)" ]; then
     printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
 elif [ -n "$(cat $HOME/.wayland_display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
     export WAYLAND_DISPLAY="$(cat $HOME/.wayland_display)"

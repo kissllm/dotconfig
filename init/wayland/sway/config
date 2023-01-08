@@ -69,6 +69,7 @@ set $term foot
 # set $font_id Noto Sans Mono ExtraLight
 
 # set $font_id DejaVu Serif
+# set $font_id Noto Sans Mono Light
 # set $font_id Noto Sans Mono ExtraLight
 set $font_id Courier Prime
 # set $font_id Source Code Pro
@@ -81,8 +82,9 @@ set $font_id Courier Prime
 # set $font_pango_name pango:Noto Sans Mono ExtraLight
 
 # set $font_pango_name pango:Source Code Pro
-set $font_pango_name pango:Noto Sans Mono ExtraLight
-# set $font_pango_name pango:Courier Prime
+# set $font_pango_name pango:Noto Sans Mono Light
+# set $font_pango_name pango:Noto Sans Mono ExtraLight
+set $font_pango_name pango:Courier Prime
 
 # set $font_pango_name pango:MesloLGS NF
 # set $font_pango_name pango:MesloLGS Nerd Font
@@ -97,8 +99,9 @@ set $biggerfontszie 19
 
 # set $font_pango_package pango:DejaVu Serif 14
 
-set $font_pango_package pango:Noto Sans Mono ExtraLight 15
-# set $font_pango_package pango:Courier Prime 14
+# set $font_pango_package pango:Noto Sans Mono Light 15
+# set $font_pango_package pango:Noto Sans Mono ExtraLight 15
+set $font_pango_package pango:Courier Prime 16
 
 # set $font_pango_package pango:MesloLGS NF 14
 # set $font_pango_package pango:MesloLGS Nerd Font 14

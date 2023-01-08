@@ -1,13 +1,11 @@
-#!/usr/bin/env sh
-# KISS_PATH=$REPO_ROOT/repo:$REPO_ROOT/repos:$REPO_ROOT/kiss-repo
-# KISS_PATH=$REPO_ROOT/repos
+#!/bin/sh
 
 export LOGNAME=$(/usr/bin/whoami)
 
 KISS_PATH=''
 export REPO_ROOT="/var/db/kiss"
 
-# Late ones have higher priority
+# Later ones have higher priority
 KISS_PATH=$REPO_ROOT/kiss-repo-repos
 
 KISS_PATH=$REPO_ROOT/repos/flatpak/flatpak:$KISS_PATH
@@ -147,24 +145,22 @@ export KISS_ROOT=
 export KISS_PATH=$KISS_PATH
 export KISS_REMOTE_REPO=$KISS_PATH
 
-# export CFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
-# CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
+# https://github.com/glasnostlinux/glasnost/releases
+# CFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -pipe -fPIC -mtune=native --host=x86_64"
+# CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
 CFLAGS="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
-# export CXXFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
-# CXXFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
-# CXXFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
-# CXXFLAGS="--target=$KISS_XHOST_TRIPLE -Os -pipe -fPIC -mtune=native --host=x86_64"
-CXXFLAGS="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
+CXXFLAGS="$CFLAGS"
+CPPFLAGS="$CXXFLAGS"
 
-export CFLAGS=$CFLAGS
-export CXXFLAGS=$CXXFLAGS
-export CPPFLAGS=$CXXFLAGS
+export CFLAGS="$CFLAGS"
+export CXXFLAGS="$CXXFLAGS"
+export CPPFLAGS="$CXXFLAGS"
 
 export MAKEFLAGS="-j $(($(nproc) + 1))"
 export KISS_PROMPT=0
 export KISS_TMPDIR="/tmp$HOME/kiss"
 [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
-export KISS_SHARED_SRC="/working/kiss/sources"
+export KISS_SHARED_SRC="/working/kiss"
 [ -d "$KISS_SHARED_SRC" ] || \mkdir -p "$KISS_SHARED_SRC"
