@@ -1,10 +1,9 @@
 #!/bin/sh
 
-# In busybox, $SHELL != $0
-# [ "${SHELL}" != "${0}" ] && export SHELL=$0
-# command -v "${SHELL}" > /dev/null 2>&1 || {
+# In busybox, default SHELL=-ash
+command -v "${SHELL}" > /dev/null 2>&1 ||
 export SHELL=$(which ash)
-# }
+
 export _PATH_BSHELL=$(which ash)
 
 # Set font when running in console. For hidpi screen
@@ -69,7 +68,7 @@ prepend () {
         esac
     }
 }
-prepend PATH "/build/os"
+# prepend PATH "/build/os"
 
 # https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
 # # prepend to PATH
@@ -118,19 +117,20 @@ _path_append() {
 # define path_append and path_prepend to add directory paths, e.g. PATH, MANPATH
 # add to end of path
 path_append () {
-    [ -d "$2" ] &&
-    ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
-        eval "$1=\$$1:$2"
-    }
+    [ ! -d "$2" ] ||
+    eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+    eval "$1=\$$1:$2"
 }
 
 # add to front of path
 path_prepend () {
-    [ -d "$2" ] &&
-    ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" && {
-        eval "$1=$2:\$$1"
-    }
+    [ ! -d "$2" ] ||
+    eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+    eval "$1=$2:\$$1"
 }
+
+path_prepend PATH "/build/os"
+
 # path_prepend PATH $macPortsDir/sbin
 # path_prepend MANPATH $macPortsDir/man
 
@@ -145,6 +145,7 @@ path_prepend () {
 #
 # -> ln -s /usr/bin/ccache /usr/lib/ccache/bin/gcc
 # -> ln -s /usr/bin/ccache /usr/lib/ccache/bin/g++
+
 path_prepend PATH "/usr/lib/ccache/bin"
 
 # # For chroot tools I put it there
@@ -215,16 +216,16 @@ path_prepend PATH "${HOME}/node/bin"
 
 SHARE_PREFIX_REFINED=$(echo "${SHARE_PREFIX}" | sed 's#/#\\/#g' | sed 's#\.#\\.#g')
 
-[ -d "${SHARE_PREFIX}/deno/bin" ] && {
+[ ! -d "${SHARE_PREFIX}/deno/bin" ] || {
     export DENO_INSTALL="${SHARE_PREFIX}/deno"
+    path_prepend PATH "${SHARE_PREFIX}/deno/bin"
 }
-path_prepend PATH "${SHARE_PREFIX}/deno/bin"
 
-[ -f "${HOME}/.cargo/env" ] && . "${HOME}/.cargo/env"
-[ -f "${HOME}/.local/share/cargo/env" ] && . "${HOME}/.local/share/cargo/env"
+[ ! -f "${HOME}/.cargo/env" ] || . "${HOME}/.cargo/env"
+[ ! -f "${HOME}/.local/share/cargo/env" ] || . "${HOME}/.local/share/cargo/env"
 
 export CARGO_HOME="$XDG_DATA_HOME"/cargo
-[ ! -d "${CARGO_HOME}" ] && mkdir -p "${CARGO_HOME}"
+[ -d "${CARGO_HOME}" ] || \mkdir -p "${CARGO_HOME}"
 path_prepend PATH "${HOME}/.cargo/bin"
 path_prepend PATH "${HOME}/.local/share/cargo/bin"
 
@@ -286,25 +287,6 @@ elif command -v colordiff > /dev/null 2>&1; then
     alias diff="colordiff -Nuar"
 fi
 
-# https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
-# set a fancy prompt (non-color, overwrite the one in /etc/profile)
-if [ $(id -u) -eq 0 ]; then
-    # root user
-    # export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
-    # export PS1='\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
-    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;39m[\w]\e[m \$ "
-    export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m \$ "
-else
-    # non root
-    # export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
-    # export PS1='\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
-    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;32m[\w]\e[m \$ "
-    export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m \$ "
-fi
 
 # # shortcuts
 # alias la='ls $LS_OPTIONS -all -h'
@@ -318,6 +300,7 @@ alias ll="ls --color=auto -h --group-directories-first -F -la"
 alias la="ls --color=auto -h --group-directories-first -F -lathr"
 
 alias nv='rm -f "$HOME/.vim*.tmp"; /usr/bin/nvim'
+alias nivm='rm -f "$HOME/.vim*.tmp"; /usr/bin/nvim'
 
 if [ -e "/usr/bin/vim-huge" ]; then
    alias vi='rm -f "$HOME/.vim*.tmp"; /usr/bin/vim-huge'
@@ -416,7 +399,7 @@ export MOZ_DBUS_REMOTE=1
 # https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
 # https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
 # XDG_RUNTIME_DIR defined in /etc/profile.d/xdg_runtime_dir.sh
-[ ! -f "$HOME/.wayland_display" ] && touch "$HOME/.wayland_display"
+[ -e "$HOME/.wayland_display" ] || touch "$HOME/.wayland_display"
 if [ ! -z "${WAYLAND_DISPLAY+x}" ] && [ -z "$(cat $HOME/.wayland_display)" ]; then
     printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
 elif [ -n "$(cat $HOME/.wayland_display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
@@ -467,9 +450,9 @@ export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
 # export TMUX_DIR=$HOME/.tmux
 export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
 
-[ -d "${SHARE_PREFIX}/.void-packages" ] && export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
+[ ! -d "${SHARE_PREFIX}/.void-packages" ] || export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
 
-[ -d "S{SHARE_PREFIX}/init" ] && . "${SHARE_PREFIX}/init/share"
+[ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
 
 
 # https://github.com/caenrique/nvim-toggle-terminal
@@ -491,6 +474,32 @@ export EDITOR=v
 export INITRAMFS=/build/os/initramfs
 export PIP_CERT=$HOME/.cert/python-cert.pem
 
-# [ -z "$TMUX" ] && [ ! $(id -u) -eq 0 ] && ! ( [ -z $DISPLAY ] && [ $tty_num = "1" ] )  && exec tmux new -As .
+# https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
+export pwd_length=13
+export TRIMMED='printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$pwd_length})|\1...\2|"'
+
+# https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
+# If not running interactively, don't do anything
+[ ! -z "${PS1+x}" ] || return
+# set a fancy prompt (non-color, overwrite the one in /etc/profile)
+if [ $(id -u) -eq 0 ]; then
+    # root user
+    # export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
+    # export PS1='\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
+    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;39m[\w]\e[m \$ "
+    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
+    # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
+    export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+else
+    # non root
+    # export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
+    # export PS1='\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
+    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;32m[\w]\e[m \$ "
+    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
+    # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
+    export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;17m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+fi
+
+[ ! -z "${TMUX+x}" ] || [ $(id -u) -eq 0 ] || ( [ -z $DISPLAY ] && [ $tty_num = "1" ] ) || exec tmux new -As .
 
 # set ts=4 sw=4 tw=0 et :

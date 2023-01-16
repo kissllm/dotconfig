@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
+
 if [ -d "/mnt/init" ]; then
     export SHARE_PREFIX="/mnt"
 elif [ -d "/opt/init" ]; then
@@ -24,7 +26,7 @@ export DISPLAY=${WAYLAND_DISPLAY}
 
 [ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
 
-# . ${SHARE_PREFIX}/toolchain/env
+# [ ! -f "${SHARE_PREFIX}/toolchain/env" ] || . ${SHARE_PREFIX}/toolchain/env
 
 # set ts=4 sw=4 tw=0 et :
 

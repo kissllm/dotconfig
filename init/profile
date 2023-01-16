@@ -1,19 +1,30 @@
 #!/bin/sh
 
+[ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.profile"
+
 [ ! -z "${LOGNAME+x}" ] ||
 export LOGNAME="$(/usr/bin/whoami)"
 
 [ ! -z "${HOME+x}" ] ||
 export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" '{if ($1==v) print $6}' /etc/passwd)"
 
-export LLVM_IAS="1"
-export LLVM="1"
+export LLVM_IAS=1
+export LLVM=1
 
 export SSL_CERT_FILE=$HOME/.cert/cacert.pem
-export BOOTSTRAP_ROOT="sysroot"
 
-[ ! -f /etc/profile ] || . /etc/profile
-[ "${SHELL}" = "${0}" ] || export SHELL=$0
+# For Chimera Linux
+[ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
+
+# echo "\$loaded_profile = $loaded_profile"
+# [ ! -z "${loaded_profile+x}" ] ||
+[ ! -f /etc/profile ] ||
+. /etc/profile
+
+# [ "${SHELL}" = "${0}" ] || export SHELL=$0
+command -v "${SHELL}" > /dev/null 2>&1 ||
+export SHELL=$(which ash)
+
 [ ! -f $HOME/.ashrc ] || . $HOME/.ashrc
 
 # rustup doesn't work on llvm-musl

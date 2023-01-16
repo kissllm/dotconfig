@@ -7,7 +7,21 @@ TARET_ROOT="/mnt/kiss"
 if [ "${HOSTNAME}" = "kiss" ]; then
     TARET_ROOT=""
 else
-    doas load-kiss
+    doas /mnt/load-kiss
 fi
 
-doas \cp -rf "${BACKUP_ROOT}/*" "${TARET_ROOT}/"
+if [ "$(/usr/bin/whoami)" = "root" ]; then
+    copy="rsync -aqz"
+else
+    copy="doas rsync -aqz"
+fi
+
+cd "${BACKUP_ROOT}"
+for dir in $(doas \ls -1 "${BACKUP_ROOT}"); do
+    if ! eval '$copy "${BACKUP_ROOT}/$dir" "${TARET_ROOT}/"'; then
+        echo "Failed to copy '${BACKUP_ROOT}/$dir'"
+        exit 1
+    else
+        echo "Succeeded to copy '${BACKUP_ROOT}/$dir'"
+    fi
+done

@@ -323,6 +323,8 @@ mode "nag" {
 #
     # Start a terminal
     $bindsym $mod+Return exec $term
+    $bindsym $mod+t exec $term
+    $bindsym $alt_mod+t exec $term
     $bindsym $mod+Shift+Return exec alacritty
     #   $bindsym $mod+Shift+Return exec st
 
@@ -921,7 +923,7 @@ $bindsym $mod+g exec ~/.config/sway/scripts/load_layout.sh
 #     $mod+p       exec grimshot save active $src/$(date + "%F_%T_grimshot.png")
 #     $mod+Shift+p exec grimshot save area $src/$(date + "%F_%T_grimshot.png")
 #     # Logo key. Use Mod1 for Alt.
-#     $mod+Mod1+p  exec grimshot save output $src/$(date + "%F_%T_grimshot.png")
+#     $mod+$alt_mod+p  exec grimshot save output $src/$(date + "%F_%T_grimshot.png")
 #     $mod+Ctrl+p  exec grimshot save window $src/$(date + "%F_%T_grimshot.png")
 # }
 
@@ -941,7 +943,7 @@ exec wl-paste -t text --watch clipman store --no-persist
 bindsym $mod+p       exec grimshot --notify save active
 bindsym $mod+Shift+p exec grimshot --notify save area
 # Logo key. Use Mod1 for Alt.
-bindsym $mod+Mod1+p  exec grimshot --notify save output
+bindsym $mod+$alt_mod+p  exec grimshot --notify save output
 bindsym $mod+Ctrl+p  exec grimshot --notify save window
 
 bindsym $mod+Next  workspace next

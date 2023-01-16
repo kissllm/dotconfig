@@ -162,5 +162,5 @@ export MAKEFLAGS="-j $(($(nproc) + 1))"
 export KISS_PROMPT=0
 export KISS_TMPDIR="/tmp$HOME/kiss"
 [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
-export KISS_SHARED_SRC="/working/kiss"
-[ -d "$KISS_SHARED_SRC" ] || \mkdir -p "$KISS_SHARED_SRC"
+export KISS_SRC_ROOT="/working/kiss"
+[ -d "$KISS_SRC_ROOT" ] || \mkdir -p "$KISS_SRC_ROOT"

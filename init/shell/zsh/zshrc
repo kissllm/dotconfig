@@ -1,0 +1,1904 @@
+# # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# # Initialization code that may require console input (password prompts, [y/n]
+# # confirmations, etc.) must go above this block; everything else may go below.
+# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# fi
+
+# https://github.com/slashbeast/conf-mgmt/blob/master/roles/home_files/files/DOTzshrc
+# .zshrc
+# Author: Piotr Karbowski <piotr.karbowski@gmail.com>
+# License: beerware.
+
+# Are we running under grsecurity's RBAC?
+function rbac_auth() {
+    local auth_to_role='admin'
+    if [ "${USER}" = "root" ]; then
+        if ! grep -qE '^RBAC:' "/proc/self/status" && command -v gradm > /dev/null 2>&1; then
+            echo -e "\n${BLUE}*${NC} ${GREEN}RBAC${NC} Authorize to '${auth_to_role}' RBAC role."
+            gradm -a "${auth_to_role}" && exec "${SHELL}" "$@"
+        fi
+    fi
+}
+rbac_auth
+
+# Basic zsh config.
+# umask 077
+umask 037
+
+# zinit initialization
+SHARE_PREFIX="/opt"
+SRC_PREFIX="/working"
+BUILD_PREFIX="/build"
+
+. /opt/init/env
+# . /opt/init/toolchain
+
+ZDOTDIR="${ZDOTDIR:-${HOME}}"
+ZSHDDIR="${HOME}/.config/zsh.d"
+HISTFILE="${ZDOTDIR}/.zsh_history"
+HISTSIZE="640000"
+SAVEHIST="${HISTSIZE}"
+# tmux will query the real editor name from this:
+# export EDITOR="/usr/bin/vim-huge"
+export EDITOR="/usr/bin/nvim"
+export TMP="$HOME/tmp"
+export TEMP="$TMP"
+export TMPDIR="$TMP"
+export TMPPREFIX="${TMPDIR}/zsh"
+
+XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
+
+
+
+USE_SHELDON=
+# USE_SHELDON=1
+export USE_SHELDON=${USE_SHELDON}
+
+if ! [ -z ${USE_SHELDON} ]; then
+    # sheldon initilization
+    # --color <WHEN>           Output coloring: always, auto, or never [default: auto]
+    # --config-dir <PATH>      The configuration directory [env: SHELDON_CONFIG_DIR=]
+    # --data-dir <PATH>        The data directory [env: SHELDON_DATA_DIR=]
+    # --config-file <PATH>     The config file [env: SHELDON_CONFIG_FILE=]
+    # --lock-file <PATH>       The lock file [env: SHELDON_LOCK_FILE=]
+    # --clone-dir <PATH>       The directory where git sources are cloned to [env: SHELDON_CLONE_DIR=]
+    # --download-dir <PATH>    The directory where remote sources are downloaded to [env: SHELDON_DOWNLOAD_DIR=]
+
+    SHELDON_CONFIG_DIR=/opt/zinit/sheldon
+    SHELDON_DATA_DIR=${SHELDON_CONFIG_DIR}
+    SHELDON_CONFIG_FILE=${SHELDON_CONFIG_DIR}/plugins.toml
+    SHELDON_LOCK_FILE=${SHELDON_DATA_DIR}/plugins.lock
+    SHELDON_CLONE_DIR=${SHELDON_DATA_DIR}/repos
+    SHELDON_DOWNLOAD_DIR=${SHELDON_DATA_DIR}/downloads
+
+
+    export SHELDON_CONFIG_DIR=${SHELDON_CONFIG_DIR}
+    export SHELDON_DATA_DIR=${SHELDON_DATA_DIR}
+    export SHELDON_CONFIG_FILE=${SHELDON_CONFIG_FILE}
+    export SHELDON_LOCK_FILE=${SHELDON_LOCK_FILE}
+    export SHELDON_CLONE_DIR=${SHELDON_CLONE_DIR}
+    export SHELDON_DOWNLOAD_DIR=${SHELDON_DOWNLOAD_DIR}
+
+
+    export ZSH="${SHELDON_CLONE_DIR}/github.com/ohmyzsh/ohmyzsh"
+
+    # https://github.com/denysdovhan/dotfiles/blob/master/home/.zshrc
+    plugins=(
+        history-substring-search
+        clipboard
+        termsupport
+        git
+        gitfast
+        dotenv
+        rake
+        rbenv
+        ruby
+        macos
+        colorize
+        command-not-found
+        mvn
+        completion
+        key-bindings
+        fd/_fd
+        docker/_docker
+        docker-compose/_docker-compose
+        # rust/_rust
+        cargo
+        # rustup
+        npm
+        yarn
+        nvm
+        sudo
+        extract
+        ssh-agent
+        gpg-agent
+        osx
+        gh
+        vscode
+        common-aliases
+        command-not-found
+        docker
+    )
+
+    eval "$(sheldon source)"
+fi
+
+# zinit initialization
+SHARE_PREFIX="/opt"
+SRC_PREFIX="/working"
+BUILD_PREFIX="/build"
+
+declare -A CMLFS
+CMLFS[BIN_DIR]=${SHARE_PREFIX}/cmlfs
+export CMLFS[BIN_DIR]=${SHARE_PREFIX}/cmlfs
+if [ ! -z ${CMLFS[BIN_DIR]} ]; then
+    mkdir -p ${CMLFS[BIN_DIR]}
+fi
+
+CMLFS[BUILD_DIR]=${BUILD_PREFIX}/toolchain/cmlfs
+export CMLFS[BUILD_DIR]=${BUILD_PREFIX}/toolchain/cmlfs
+if [ ! -z ${CMLFS[BUILD_DIR]} ]; then
+    mkdir -p ${CMLFS[BUILD_DIR]}
+fi
+CMLFS[SRC_DIR]=${SRC_PREFIX}/toolchain/cmlfs
+export CMLFS[SRC_DIR]=${SRC_PREFIX}/toolchain/cmlfs
+
+# https://github.com/zdharma/zinit/issues/197
+ZSH_CACHE_DIR="${XDG_CACHE_HOME}/zinit"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME}/zinit"
+
+# zinit
+declare -A ZINIT
+ZINIT[HOME_DIR]="${SHARE_PREFIX}/zinit"
+ZINIT[BIN_DIR]="${ZINIT[HOME_DIR]}/bin"
+ZINIT[PLUGINS_DIR]="${ZINIT[HOME_DIR]}/plugins"
+ZINIT[COMPLETIONS_DIR]="${ZINIT[HOME_DIR]}/completions"
+ZINIT[SNIPPETS_DIR]="${ZINIT[HOME_DIR]}/snippets"
+ZINIT[ZCOMPDUMP_PATH]="$XDG_CACHE_HOME/zcompdump"
+ZPFX="${ZINIT[HOME_DIR]}/polaris"
+ZINIT[COMPINIT_OPTS]="-C"
+ZINIT[MUTE_WARNINGS]="1"
+ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]="1"
+ZINIT_HOME="${ZINIT[HOME_DIR]}/bin"
+# vinit
+declare -A VINIT
+VINIT[HOME_DIR]="${SHARE_PREFIX}/vinit"
+# tinit
+declare -A TINIT
+TINIT[HOME_DIR]="${SHARE_PREFIX}/tinit"
+TMUX_PLUGIN_MANAGER_PATH=${TINIT[HOME_DIR]}/tmux/plugins
+
+export SHARE_PREFIX=${SHARE_PREFIX}
+export ZINIT[HOME_DIR]=${ZINIT[HOME_DIR]}
+export ZINIT[BIN_DIR]=${ZINIT[BIN_DIR]}
+export ZINIT[PLUGINS_DIR]=${ZINIT[PLUGINS_DIR]}
+export ZINIT[COMPLETIONS_DIR]=${ZINIT[COMPLETIONS_DIR]}
+export ZINIT[SNIPPETS_DIR]=${ZINIT[SNIPPETS_DIR]}
+export ZINIT[ZCOMPDUMP_PATH]=${ZINIT[ZCOMPDUMP_PATH]}
+export ZPFX=${ZPFX}
+export ZINIT[COMPINIT_OPTS]=${ZINIT[COMPINIT_OPTS]}
+export ZINIT[MUTE_WARNINGS]=${ZINIT[MUTE_WARNINGS]}
+export ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]=${ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]}
+export ZINIT_HOME=${ZINIT_HOME}
+export VINIT[HOME_DIR]=${VINIT[HOME_DIR]}
+export TINIT[HOME_DIR]=${TINIT[HOME_DIR]}
+
+if [ ! -d "${TMP}" ]; then mkdir "${TMP}"; fi
+
+# Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
+TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
+if [ ! -d "${TMUX_TMPDIR}" ]; then mkdir -p "${TMUX_TMPDIR}"; fi
+export TMUX_TMPDIR=${TMUX_TMPDIR}
+
+if ! [[ "${PATH}" =~ "^${HOME}/bin" ]]; then
+    export PATH="${HOME}/bin:${PATH}"
+    export PATH="${HOME}/.local/bin:${PATH}"
+fi
+
+if ! [[ "${PATH}" =~ "^${HOME}/.emacs.d/bin" ]]; then
+    export PATH="${HOME}/.emacs.d/bin:${PATH}"
+fi
+
+# For npm
+export PATH=${HOME}/node/bin:$PATH
+# For chroot tools I put it there
+export PATH=/mnt:$PATH
+
+
+# # Not all servers have terminfo for rxvt-256color. :<
+# if [ "${TERM}" = 'rxvt-256color' ] && ! [ -f '/usr/share/terminfo/r/rxvt-256color' ] && ! [ -f '/lib/terminfo/r/rxvt-256color' ] && ! [ -f "${HOME}/.terminfo/r/rxvt-256color" ]; then
+#     export TERM='rxvt-unicode'
+# fi
+
+# Colors.
+red='\e[0;31m'
+RED='\e[1;31m'
+green='\e[0;32m'
+GREEN='\e[1;32m'
+yellow='\e[0;33m'
+YELLOW='\e[1;33m'
+blue='\e[0;34m'
+BLUE='\e[1;34m'
+purple='\e[0;35m'
+PURPLE='\e[1;35m'
+cyan='\e[0;36m'
+CYAN='\e[1;36m'
+NC='\e[0m'
+
+# Functions
+
+# Fancy cd that can cd into parent directory, if trying to cd into file.
+# useful with ^F fuzzy searcher.
+function cd() {
+    if (( $+2 )); then
+        builtin cd "$@"
+        return 0
+    fi
+
+    if [ -f "$1" ]; then
+        echo "${yellow}cd ${1:h}${NC}" >&2
+        builtin cd "${1:h}"
+    else
+        builtin cd "${@}"
+    fi
+}
+
+function run_under_tmux() {
+    # Run $1 under session or attach if such session already exist.
+    # $2 is optional path, if no specified, will use $1 from $PATH.
+    # If you need to pass extra variables, use $2 for it as in example below..
+    # Example usage:
+    #   torrent() { run_under_tmux 'rtorrent' '/usr/local/rtorrent-git/bin/rtorrent'; }
+    #   mutt() { run_under_tmux 'mutt'; }
+    #   irc() { run_under_tmux 'irssi' "TERM='screen' command irssi"; }
+
+
+    # There is a bug in linux's libevent...
+    # export EVENT_NOEPOLL=1
+
+    # command -v tmux >/dev/null 2>&1 || return 1
+    command -v tmux >${TMUX_TMPDIR}/.tmux.log 2>&1 || return 1
+
+    if [ -z "$1" ]; then return 1; fi
+    local name="$1"
+    if [ -n "$2" ]; then
+        local execute="$2"
+    else
+        local execute="command ${name}"
+    fi
+
+    if tmux has-session -t "${name}" 2>/dev/null; then
+        tmux attach -d -t "${name}"
+    else
+        tmux new-session -s "${name}" "${execute}" \; set-option status \; set set-titles-string "${name} (tmux@${HOST})"
+    fi
+}
+
+function t() { run_under_tmux rtorrent 'nice -n 19 ionice -c 3 rtorrent'; }
+# irc() { run_under_tmux irssi "TERM='screen' command irssi"; }
+function irc() { run_under_tmux irssi "TERM='screen-256color' command irssi"; }
+
+function over_ssh() {
+    if [ -n "${SSH_CLIENT}" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+# This function implements `kubectl view-serviceaccount-kubeconfig **`
+# Function name must be _fzf_complete_(command)_(subcommand)
+_fzf_complete_kubectl_view-serviceaccount-kubeconfig() {
+
+    # Call preprocessors
+    _fzf_complete_kubectl_parse_resource_and_name 2
+    _fzf_complete_kubectl_parse_completing_option
+    _fzf_complete_kubectl_parse_kubectl_arguments
+
+    # Return status code other than 0 to fall back to default
+    if [[ -n $completing_option ]]; then
+        return 1
+    fi
+
+    # Call any one of completion functions; see source code as to their usage
+    resource=serviceaccounts
+    _fzf_complete_kubectl-resource-names '' "$@"
+}
+# Completion.
+# https://stackoverflow.com/questions/58283701/why-cant-zsh-execute-command-compdef
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+# K8s auto-complete
+autoload -U +X compinit && compinit
+[[ -f /usr/bin/kubectl ]] && source <(kubectl completion zsh)
+
+# https://unix.stackexchange.com/questions/534942/auto-trigger-history-search-in-terminal-using-fzf-fuzzy-finder
+# zstyle ':autocomplete:*' default-context history-incremental-search-backward
+# zinit ice wait lucid
+# zinit light marlonrichert/zsh-autocomplete
+
+
+# https://gist.github.com/LukeSmithxyz/e62f26e55ea8b0ed41a65912fbebbe52
+zmodload zsh/complist && compinit
+
+# function reload () {
+#     exec "${SHELL}" "$@"
+# }
+
+# https://gist.github.com/liwh/894109
+# When we create new function or install new bin, the default zsh cant get the new completion for us. So we
+# can add a new function for this problem, you can add the below content in your .zshrc file
+function reload() {
+    if [[ "$#*" -eq 0 ]]; then
+        test -r /etc/zsh/zsh-oli && . /etc/zsh/zsh-oli
+        test -r ~/.zshrc && . ~/.zshrc
+        return 0
+    else
+        local fn
+        for fn in $*; do
+            unfunction $fn
+            autoload -U $fn
+        done
+    fi
+}
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org
+# compdef _functions reload
+# compdef _function  reload
+compdef _reload    reload
+autoload -Uz _reload
+(( ${+_comps} )) && _comps[reload]=_reload
+
+
+function escape() {
+    # Uber useful when you need to translate weird as fuck path into single-argument string.
+    local escape_string_input
+    echo -n "String to escape: "
+    read escape_string_input
+    printf '%q\n' "$escape_string_input"
+}
+
+function confirm() {
+    local answer
+    echo -ne "zsh: sure you want to run '${YELLOW}$*${NC}' [yN]? "
+    read -q answer
+        echo
+    if [[ "${answer}" =~ ^[Yy]$ ]]; then
+        command "${@}"
+    else
+        return 1
+    fi
+}
+
+function confirm_wrapper() {
+    if [ "$1" = '--root' ]; then
+        local as_root='true'
+        shift
+    fi
+
+    local prefix=''
+
+    if [ "${as_root}" = 'true' ] && [ "${USER}" != "root" ]; then
+        prefix="sudo"
+    fi
+    confirm ${prefix} "$@"
+}
+
+function poweroff()  { confirm_wrapper --root $0 "$@"; }
+function reboot()    { confirm_wrapper --root $0 "$@"; }
+function hibernate() { confirm_wrapper --root $0 "$@"; }
+
+function startx()    { exec =startx "$@" }
+
+function has() {
+    local string="${1}"
+    shift
+    local element=''
+    for element in "$@"; do
+        if [ "${string}" = "${element}" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+function begin_with() {
+    local string="${1}"
+    shift
+    local element=''
+    for element in "$@"; do
+        if [[ "${string}" =~ "^${element}" ]]; then
+            return 0
+        fi
+    done
+    return 1
+
+}
+
+# function termtitle() {
+#     case "$TERM" in
+#         rxvt*|xterm*|nxterm|gnome|screen|screen-*)
+#             local prompt_host="${(%):-%m}"
+#             local prompt_user="${(%):-%n}"
+#             local prompt_char="${(%):-%~}"
+#             case "$1" in
+#                 precmd)
+#                     printf '\e]0;%s@%s: %s\a' "${prompt_user}" "${prompt_host}" "${prompt_char}"
+#                     ;;
+#                 preexec)
+#                     printf '\e]0;%s [%s@%s: %s]\a' "$2" "${prompt_user}" "${prompt_host}" "${prompt_char}"
+#                     ;;
+#             esac
+#             ;;
+#     esac
+# }
+#
+# function setup_git_prompt() {
+#     if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+#         unset git_prompt
+#         return 0
+#     fi
+#
+#     local git_status_dirty git_status_stash git_branch
+#
+#     if [ "$(git --no-optional-locks status --untracked-files='no' --porcelain)" ]; then
+#         git_status_dirty='%F{green}*'
+#     else
+#         unset git_status_dirty
+#     fi
+#
+#     if [ "$(git stash list)" ]; then
+#         git_status_stash="%F{yellow}▲"
+#     else
+#         unset git_status_stash
+#     fi
+#
+#     git_branch="$(git symbolic-ref HEAD 2>/dev/null)"
+#     git_branch="${git_branch#refs/heads/}"
+#
+#     if [ "${#git_branch}" -ge 24 ]; then
+#         git_branch="${git_branch:0:21}..."
+#     fi
+#
+#     git_branch="${git_branch:-no branch}"
+#
+#     git_prompt=" %F{blue}[%F{253}${git_branch}${git_status_dirty}${git_status_stash}%F{blue}]"
+#
+# }
+#
+# function precmd() {
+#     # Set terminal title.
+#     termtitle precmd
+#
+#     # Set optional git part of prompt.
+#     setup_git_prompt
+#
+#     # Maybe to be used someday, too annoying with vim and other interactive apps.
+#     #   # $REPORTTIME is about cpu time, not real time.
+#     #   if [ "${executed_on}" ]; then
+#     #       local current_timestamp=${(%):-'%D{%s}'}
+#     #       local last_cmd_took=$(( current_timestamp - executed_on ))
+#     #       if [ "${last_cmd_took}" -gt 60 ]; then
+#     #           printf "\n>>> [INFO] Execution took %ss\n\n" "$last_cmd_took"
+#     #       fi
+#     #       unset executed_on
+#     #   fi
+# }
+#
+# function preexec() {
+#     # Set terminal title along with current executed command pass as second argument
+#     termtitle preexec "${(V)1}"
+#
+#     # # Save timestamp when we executed this command
+#     # executed_on=${(%):-'%D{%s}'}
+# }
+
+function man() {
+    if command -v vimmanpager >/dev/null 2>&1; then
+        PAGER="vimmanpager" command man "$@"
+    else
+        command man "$@"
+    fi
+}
+
+
+function dot_progress() {
+    # Fancy progress function from Landley's Aboriginal Linux.
+    # Useful for long rm, tar and such.
+    # Usage:
+    #     rm -rfv /foo | dot_progress
+    local i='0'
+    local line=''
+
+    while read line; do
+        i="$((i+1))"
+        if [ "${i}" = '25' ]; then
+            printf '.'
+            i='0'
+        fi
+    done
+    printf '\n'
+}
+
+
+# Le features!
+# extended globbing, awesome!
+# https://zsh.sourceforge.io/Doc/Release/Options.html#Options
+# man 1 zshall
+# man zshoptions
+setopt extended_glob
+setopt auto_cd
+# https://stackoverflow.com/questions/36668910/how-do-i-reload-zsh-config-files-without-replacing-the-current-shell
+setopt inc_append_history
+
+# zmv -  a command for renaming files by means of shell patterns.
+autoload -U zmv
+
+# zargs, as an alternative to find -exec and xargs.
+autoload -U zargs
+
+
+# # Prevent insert key from changing input mode.
+# # (switch to Emacs mode)
+# bindkey -e
+
+# Control-x-e to open current line in $EDITOR, awesome when writting functions or editing multiline commands.
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line
+
+# https://www.reddit.com/r/zsh/comments/fqpidr/removing_zcompdump_file_creation/
+function () {
+    emulate -L zsh
+    local -r cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
+    autoload -Uz _store_cache compinit
+    zstyle ':completion:*' use-cache true
+    zstyle ':completion:*' cache-path $cache_dir/.zcompcache
+    [[ -f $cache_dir/.zcompcache/.make-cache-dir ]] || _store_cache .make-cache-dir
+    compinit -C -d $cache_dir/.zcompdump
+}
+
+
+# Include user-specified configs.
+if [ ! -d "${ZSHDDIR}" ]; then
+    mkdir -p "${ZSHDDIR}" && echo "# Put your user-specified config here." > "${ZSHDDIR}/example.zsh"
+fi
+
+for zshd in $(ls -A ${HOME}/.config/zsh.d/^*.(z)sh$); do
+    . "${zshd}"
+done
+
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' completer _expand _complete _ignored _approximate
+zstyle ':completion:*' menu select=2
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion::complete:*' use-cache 1
+zstyle ':completion:*:descriptions' format '%U%F{cyan}%d%f%u'
+
+# If running as root and nice >0, renice to 0.
+if [ "$USER" = "root" ] && [ "$(cut -d ' ' -f 19 /proc/$$/stat)" -gt 0 ]; then
+    renice -n 0 -p "$$" && echo "# Adjusted nice level for current shell to 0."
+fi
+
+# Fancy prompt.
+if over_ssh && [ -z "${TMUX}" ]; then
+    prompt_is_ssh='%F{blue}[%F{red}SSH%F{blue}] '
+elif over_ssh; then
+    prompt_is_ssh='%F{blue}[%F{253}SSH%F{blue}] '
+else
+    unset prompt_is_ssh
+fi
+
+case $USER in
+    root)
+        PROMPT='%B%F{cyan}%m%k %(?..%F{blue}[%F{253}%?%F{blue}] )${prompt_is_ssh}%B%F{blue}%1~${git_prompt}%F{blue} %# %b%f%k'
+    ;;
+
+    *)
+        PROMPT='%B%F{blue}%n@%m%k %(?..%F{blue}[%F{253}%?%F{blue}] )${prompt_is_ssh}%B%F{cyan}%1~${git_prompt}%F{cyan} %# %b%f%k'
+
+    ;;
+esac
+
+# Keep history of `cd` as in with `pushd` and make `cd -<TAB>` work.
+DIRSTACKSIZE=16
+setopt auto_pushd
+setopt pushd_ignore_dups
+setopt pushd_minus
+setopt completealiases
+
+# Ignore lines prefixed with '#'.
+setopt interactive_comments
+
+# Ignore duplicate in history.
+setopt hist_ignore_dups
+
+# Prevent record in history entry if preceding them with at least one space
+setopt hist_ignore_space
+
+# Nobody need flow control anymore. Troublesome feature.
+#stty -ixon
+setopt noflowcontrol
+
+# Ensure that / is added after tab complation to directories.
+# without disabling it, $LBUFFER does not have the slash at the end
+# and it's required for _append_path_to_buffer thing..
+# setopt auto_param_slash
+# unsetopt auto_remove_slash
+
+function _select_path_with_fzy() {
+    (
+        if [ "$1" != '.' ]; then
+            if ! [ -d $~1 ]; then
+                echo -e "${yellow}The $1 is not a directory.${NC}"  >&2
+                return
+            fi
+            cd $~1
+        fi
+
+        find -L . \( -type d -printf "%p/\n" , -type f -print \) 2>/dev/null | cut -c 3- | sort | fzy
+    )
+}
+
+function _append_path_to_buffer() {
+    local selected_path
+
+    if ! command -v fzy >/dev/null 2>&1; then
+        echo 'No fzy binary found in $PATH.'
+        return 1
+    fi
+    echo
+    print -nr "${zle_bracketed_paste[2]}" >/dev/tty
+    {
+        if [ "${LBUFFER[-1]}" = '/' ]; then
+            search_in="${LBUFFER##*[$'\t' ]}"
+        else
+            search_in='.'
+        fi
+
+        selected_path="$(_select_path_with_fzy "${search_in}")"
+    } always {
+        print -nr "${zle_bracketed_paste[1]}" >/dev/tty
+    }
+    if [ "${selected_path}" ]; then
+        if [[ "${LBUFFER[-1]}" =~ [[:alnum:]] ]]; then
+            # if last character is a word character, insert space.
+            # before inserting selected path. Useful when one's lazy
+            # and use 'vim^F', yet works okay with 'cmd foo=^F'.
+            LBUFFER+=" "
+        fi
+        LBUFFER+="${(q)selected_path}"
+    fi
+    zle reset-prompt
+}
+zle -N _append_path_to_buffer
+bindkey "^F" _append_path_to_buffer
+
+function _history_search_with_fzy() {
+    local selected_history_entry
+
+    if ! command -v fzy >/dev/null 2>&1; then
+        echo 'No fzy binary found in $PATH.'
+        return 1
+    fi
+
+    if ! command -v awk >/dev/null 2>&1; then
+        echo 'No awk binary found in $PATH.'
+        return 1
+    fi
+    echo
+
+    print -nr "${zle_bracketed_paste[2]}" >/dev/tty
+    {
+        # The awk is used to filter out duplicates, keeping the most
+        # recent entries, while not re-ordering the history list.
+        selected_history_entry="$(fc -nrl 1 | awk '!v[$0]++' | fzy)"
+    } always {
+        print -nr "${zle_bracketed_paste[1]}" >/dev/tty
+    }
+    if [ "${selected_history_entry}" ]; then
+        BUFFER="${selected_history_entry}"
+        CURSOR="${#BUFFER}"
+    fi
+    zle reset-prompt
+}
+zle -N _history_search_with_fzy
+bindkey "^T" _history_search_with_fzy
+
+# ^A to open new terminal in current working directory
+# Check `logname` so we won't create new terminal as user after `su`.
+function _open_new_terminal_here(){
+    if \
+        [ "${XAUTHORITY}" ] && \
+        [ "${DISPLAY}" ] && \
+        [ "${LOGNAME}" = "$(logname)" ] && \
+        command -v urxvt >/dev/null 2>&1
+    then
+        # Spawn terminal with clean login shell.
+        env -i \
+            XAUTHORITY="${XAUTHORITY}" \
+            PATH="${PATH}" \
+            HOME="${HOME}" \
+            DISPLAY="${DISPLAY}" \
+            LOGNAME="${LOGNAME}" \
+            SHELL="${SHELL}" \
+            LANG="${LANG}" \
+            urxvt -e "${SHELL}" --login >/dev/null 2>&1 &!
+    fi
+}
+zle -N _open_new_terminal_here
+bindkey "^A" _open_new_terminal_here
+
+# Fix for tmux on linux.
+case "$(uname -o)" in
+    'GNU/Linux')
+        export EVENT_NOEPOLL=1
+    ;;
+esac
+
+# Aliases
+alias cp="cp -iv"
+alias rcp="rsync -v --progress"
+alias rmv="rsync -v --progress --remove-source-files"
+alias mv="mv -iv"
+alias rm="rm -iv"
+alias rmdir="rmdir -v"
+alias ln="ln -v"
+alias chmod="chmod -c"
+alias chown="chown -c"
+alias mkdir="mkdir -v"
+# alias dotconfig="doas /usr/bin/git --git-dir=/home/dotconfig --work-tree=/home"
+
+if command -v colordiff > /dev/null 2>&1; then
+    alias diff="colordiff -Nuar"
+else
+    alias diff="diff -Nuar"
+fi
+
+alias grep="grep --colour=auto"
+alias egrep="egrep --colour=auto"
+alias ls="ls --color=auto --human-readable --group-directories-first --classify"
+# alias ll="ls --color=auto --human-readable --group-directories-first --classify -l"
+alias ll="ls --color=auto --human-readable --group-directories-first --classify -la"
+alias la="ls --color=auto --human-readable --group-directories-first --classify -lathr"
+# alias vim="/usr/bin/vim-huge"
+alias nv="/usr/bin/nvim"
+alias vi="/usr/bin/vim-huge"
+alias tmux="tmux -2 2>&1 > ${TMUX_TMPDIR}/.tmux.log"
+alias history="history 1 -1"
+
+# https://github.com/caenrique/nvim-toggle-terminal
+function _v () {
+    NVIM=`which nvim`
+    if test -z $NVIM_LISTEN_ADDRESS; then
+        $NVIM $@
+    else
+        if test -z $@; then
+            nvr -l -c new
+        else
+            nvr -l $@
+        fi
+    fi
+}
+alias v=_v
+export EDITOR=v
+
+# Not so usefull. Don't recommend
+# SUDO_EDITOR=/usr/bin/nvim
+SUDO_EDITOR=${SHARE_PREFIX}/zinit/v
+export SUDO_EDITOR
+
+# alias sv="doas -EH env XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR WAYLAND_SOCKET=$WAYLAND_SOCKET WAYLAND_DISPLAY=$WAYLAND_DISPLAY DISPLAY= nvim"
+# https://bugzilla.redhat.com/show_bug.cgi?id=1274451
+# alias sv="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY nvim"
+alias sn="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY nvim"
+alias sv="doas -EH --preserve-env=XDG_RUNTIME_DIR,WAYLAND_SOCKET,WAYLAND_DISPLAY,DISPLAY vim-huge"
+
+function als() {
+    `alias "$@" | cut -d\' -f2`
+}
+
+# v will attach or create an abduco session running neovim and if run
+# in a neovim terminal it will open files in the existing neovim
+function _nv () {
+    if [ -z "$NVIM_LISTEN_ADDRESS" ]; then
+        abduco -A nvim nvim
+    else
+        nvr "$@"
+    fi
+}
+alias nv=_nv
+# export EDITOR=v
+setopt aliases
+
+# https://superuser.com/questions/749314/how-do-you-set-alias-sudo-nocorrect-sudo-correctly
+alias doas='noglob do_doas '
+function do_doas
+{
+    integer glob=1
+    local -a run
+    run=( command doas )
+    if [[ $# -gt 1 && $1 = -u ]]; then
+        run+=($1 $2)
+        shift ; shift
+    fi
+    (($# == 0)) && 1=/bin/zsh
+    while (($#)); do
+        case "$1" in
+            command|exec|-) shift; break ;;
+            nocorrect) shift ;;
+            noglob) glob=0; shift ;;
+            *) break ;;
+        esac
+    done
+    if ((glob)); then
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
+    else
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
+    fi
+}
+alias doas='noglob do_doas '
+# alias doas="doas "
+
+alias sudo='noglob do_sudo '
+function do_sudo
+{
+    integer glob=1
+    local -a run
+    run=( command sudo )
+    if [[ $# -gt 1 && $1 = -u ]]; then
+        run+=($1 $2)
+        shift ; shift
+    fi
+    (($# == 0)) && 1=/bin/zsh
+    while (($#)); do
+        case "$1" in
+            command|exec|-) shift; break ;;
+            nocorrect) shift ;;
+            noglob) glob=0; shift ;;
+            *) break ;;
+        esac
+    done
+    if ((glob)); then
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $~==*
+    else
+        PATH="/sbin:/usr/sbin:/usr/local/sbin:$PATH" $run $==*
+    fi
+}
+# alias sudo="sudo "
+
+
+# https://darmawan-salihun.blogspot.com/2015/02/zsh-tmux-configuration-for-arch-linux.html
+# create a zkbd compatible hash;
+# to add other keys to this hash, see: man 5 terminfo
+typeset -A key
+
+key[Home]=${terminfo[khome]}
+key[End]=${terminfo[kend]}
+key[Insert]=${terminfo[kich1]}
+key[Delete]=${terminfo[kdch1]}
+key[Up]=${terminfo[kcuu1]}
+key[Down]=${terminfo[kcud1]}
+key[Left]=${terminfo[kcub1]}
+key[Right]=${terminfo[kcuf1]}
+key[PageUp]=${terminfo[kpp]}
+key[PageDown]=${terminfo[knp]}
+
+# setup key accordingly
+[[ -n "${key[Home]}"     ]]  && bindkey  "${key[Home]}"     beginning-of-line
+[[ -n "${key[End]}"      ]]  && bindkey  "${key[End]}"      end-of-line
+[[ -n "${key[Insert]}"   ]]  && bindkey  "${key[Insert]}"   overwrite-mode
+[[ -n "${key[Delete]}"   ]]  && bindkey  "${key[Delete]}"   delete-char
+[[ -n "${key[Up]}"       ]]  && bindkey  "${key[Up]}"       up-line-or-history
+[[ -n "${key[Down]}"     ]]  && bindkey  "${key[Down]}"     down-line-or-history
+[[ -n "${key[Left]}"     ]]  && bindkey  "${key[Left]}"     backward-char
+[[ -n "${key[Right]}"    ]]  && bindkey  "${key[Right]}"    forward-char
+[[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"   beginning-of-buffer-or-history
+[[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}" end-of-buffer-or-history
+
+
+# Finally, make sure the terminal is in application mode, when zle is
+# active. Only then are the values from $terminfo valid.
+if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
+    function zle-line-init () {
+    printf '%s' "${terminfo[smkx]}"
+}
+
+function zle-line-finish () {
+printf '%s' "${terminfo[rmkx]}"
+}
+zle -N zle-line-init
+zle -N zle-line-finish
+fi
+
+
+# Keys.
+case $TERM in
+    rxvt*|xterm*)
+        bindkey "^[[7~" beginning-of-line                 # Home key
+        bindkey "^[[8~" end-of-line                       # End key
+        bindkey "^[[3~" delete-char                       # Del key
+        bindkey "^[[A"  history-beginning-search-backward # Up Arrow
+        bindkey "^[[B"  history-beginning-search-forward  # Down Arrow
+        bindkey "^[Oc"  forward-word                      # control + right arrow
+        bindkey "^[Od"  backward-word                     # control + left arrow
+        # bindkey "^H"    backward-kill-word                # control + backspace
+        bindkey "^[[3^" kill-word                         # control + delete
+    ;;
+
+    linux)
+        bindkey "^[[1~" beginning-of-line                 # Home key
+        bindkey "^[[4~" end-of-line                       # End key
+        bindkey "^[[3~" delete-char                       # Del key
+        bindkey "^[[A"  history-beginning-search-backward
+        bindkey "^[[B"  history-beginning-search-forward
+        # /usr/bin/setfont /usr/share/kbd/consolefonts/LatGrkCyr-12x22.psfu.gz
+        # /usr/bin/setfont /usr/share/kbd/consolefonts/ter-124b.psf.gz
+        /usr/bin/setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
+
+    ;;
+
+    screen|screen-*)
+        bindkey "^[[1~" beginning-of-line                 # Home key
+        bindkey "^[[4~" end-of-line                       # End key
+        bindkey "^[[3~" delete-char                       # Del key
+        bindkey "^[[A"  history-beginning-search-backward # Up Arrow
+        bindkey "^[[B"  history-beginning-search-forward  # Down Arrow
+        bindkey "^[Oc"  forward-word                      # control + right arrow
+        bindkey "^[OC"  forward-word                      # control + right arrow
+        bindkey "^[Od"  backward-word                     # control + left arrow
+        bindkey "^[OD"  backward-word                     # control + left arrow
+        # bindkey "^H"    backward-kill-word                # control + backspace
+        bindkey "^[[3^" kill-word                         # control + delete
+    ;;
+esac
+
+# Replaced with _history_search_with_fzy
+bindkey "^R" history-incremental-pattern-search-backward
+bindkey "^S" history-incremental-pattern-search-forward
+
+# # https://betterprogramming.pub/boost-your-command-line-productivity-with-keyboard-shortcuts-4de2f6cbd069
+# bindkey "^M"       accept-line                # unter
+# # bindkey "^[M"      autosuggest-execute        # ctrl + return
+# # bindkey '^\n'      autosuggest-execute        # ctrl + return
+bindkey '^[[13;5u' self-insert-unmeta         # ctrl + return
+bindkey '^[[13;2u' down-line                  # shift + return
+# bindkey "^[^M"     self-insert-unmeta           # alt + return
+# # bindkey "^[^M"     accept-and-hold            # esc-enter
+# bindkey '^[[[SE'     accept-and-hold            # does not work
+
+
+fpath+=${ZDOTDIR:-~}/.zsh_functions
+
+
+# # https://stackoverflow.com/questions/54394738/oh-my-zsh-cursor-up-before-program-has-finished-vs-after-how-to-make-them-behav
+# refer to /usr/share/oh-my-zsh/zshrc
+# bindkey "^[[A" up-line-or-beginning-search   # Up
+# bindkey "^[[B" down-line-or-beginning-search # Down
+
+
+_comp_options+=(globdots)        # Include hidden files.
+
+# vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
+# # Use vim keys in tab complete menu:
+# bindkey -M menuselect 'h' vi-backward-char
+# bindkey -M menuselect 'k' vi-up-line-or-history
+# bindkey -M menuselect 'l' vi-forward-char
+# bindkey -M menuselect 'j' vi-down-line-or-history
+# bindkey -v '^?' backward-delete-char
+
+# alacritty.yml
+# blinking: Always
+# https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
+function _fix_cursor() {
+   echo -ne '\e[3 q'
+}
+precmd_functions+=( _fix_cursor )
+# Set cursor style (DECSCUSR), VT520.
+# 0  ⇒  blinking block.
+# 1  ⇒  blinking block (default).
+# 2  ⇒  steady block.
+# 3  ⇒  blinking underline.
+# 4  ⇒  steady underline.
+# 5  ⇒  blinking bar, xterm.
+# 6  ⇒  steady bar, xterm.
+# Change cursor shape for different vi modes.
+function zle-keymap-select() {
+if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] ||
+    [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
+    echo -ne '\e[3 q'
+fi
+}
+zle -N zle-keymap-select
+function zle-line-init() {
+    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+    echo -ne '\e[3 q'
+}
+zle -N zle-line-init
+function preexec() { echo -ne '\e[3 q' ;} # Use beam shape cursor for each new prompt.
+preexec_finctions+=( preexec )
+echo -ne '\e[3 q' # Use beam shape cursor on startup.
+export VI_MODE_SET_CURSOR=true
+function zle-line-finish() { echo -ne '\e[3 q' }
+zle -N zle-line-finish
+
+# TEST=`bindkey -v | awk '/keymap/ {print $NF}'`
+# if [ "$TEST" = 'vi-insert' ]; then
+#    echo -ne "\033]12;Green\007"
+# else
+#    echo -ne "\033]12;Red\007"
+# fi
+
+
+# Use lf to switch directories and bind it to ctrl-o
+function lfcd () {
+    tmp="$(mktemp)"
+    lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
+    fi
+}
+bindkey -s '^o' 'lfcd\n'
+
+# Edit line in vim with ctrl-e:
+autoload edit-command-line; zle -N edit-command-line
+bindkey '^e' edit-command-line
+
+
+
+if [ -f ~/.alert ]; then echo '>>> Check ~/.alert'; fi
+
+
+# # The following lines were added by compinstall
+# zstyle :compinstall filename '$HOME/.zshrc'
+
+
+# End of lines added by compinstall
+# Lines configured by zsh-newuser-install
+
+# HISTFILE=~/.histfile
+# HISTSIZE=1000
+# SAVEHIST=1000
+
+# export HISTFILE=~/.histfile
+# export HISTSIZE=1000
+# export SAVEHIST=1000
+
+# bindkey -e
+
+# # End of lines configured by zsh-newuser-install
+# if [[ -f /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh ]] {
+#     powerline-daemon -q
+#     . /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh
+# }
+
+export XBPS_DISTDIR=$HOME/.void-packages
+export XBPS_MAKEJOBS=13
+
+# export PS1='%n@%m %~$ '
+# export PS1='%n@%m %(!.#.$)~$ '
+# export PS1='%(!.#.$) '
+
+export INPUT_METHOD=fcitx
+export GTK_IM_MODULE=fcitx    # export GTK_IM_MODULE=wayland
+export QT_IM_MODULE=fcitx
+export QT4_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+export XIM_SERVERS=fcitx
+
+export GDK_BACKEND=wayland    # export GDK_BACKEND=x11
+export XDG_SESSION_TYPE=wayland
+export WINIT_UNIX_BACKEND=wayland   # export WINIT_UNIX_BACKEND=x11
+export SDL_VIDEODRIVER=wayland
+# https://doc.qt.io/qt-6/qtwaylandcompositor-index.html
+export QT_QPA_PLATFORM=wayland-egl #   export QT_QPA_PLATFORM="wayland;xcb"  #   export QT_QPA_PLATFORM=wayland-egl     #   export QT_QPA_PLATFORM=wayland  # export QT_QPA_PLATFORM=xcb
+
+export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_PLATFORM_PLUGIN=qt5ct
+export QT_PLATFORMTHEME=qt5ct
+export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+#   export QT_WAYLAND_FORCE_DPI=physical
+export QT_WAYLAND_FORCE_DPI=0
+
+# https://forum.obarun.org/viewtopic.php?id=855
+export DBUS_SESSION_ADDRESS=unix:path=/run/usr/${UID}/bus
+export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${UID}/bus
+export KWIN_DRM_USE_EGL_STREAMS=1
+
+# https://docs.voidlinux.org/config/graphical-session/wayland.html
+# https://news.ycombinator.com/item?id=24236003
+export MOZ_ENABLE_WAYLAND=1
+export MOZ_WEBRENDER=1
+export MOZ_USE_XINPUT2=1
+
+export ELM_DISPLAY=wl
+export ECORE_EVAS_ENGINE=wayland_egl
+export ELM_ENGINE=wayland_egl
+
+# Running sway without xwayland
+# https://github.com/swaywm/sway/issues/676
+export WLC_XWAYLAND=0
+
+# export PS1='%n@%m %~$ '
+# export PS1='%n@%m %(!.#.$)~$ '
+# export PS1='%(!.#.$) '
+
+# export TERM=alacritty
+# export TERM=screen-256color
+# export TERM=xterm-256color
+
+# Running sway without xwayland
+# https://github.com/swaywm/sway/issues/676
+export WLC_XWAYLAND=0
+
+# Load aliases and shortcuts if existent.
+[ -f "$HOME/.config/shortcutrc" ] && source "$HOME/.config/shortcutrc" 2>/dev/null
+[ -f "$HOME/.config/aliasrc" ] && source "$HOME/.config/aliasrc" 2>/dev/null
+
+# # Load zsh-syntax-highlighting; should be last.
+# source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2>/dev/null
+
+# https://github.com/gch1p/voidnsrun
+export VOIDNSRUN_DIR=/usr/lib/libc  #   export VOIDNSRUN_DIR=/glibc
+export VOIDNSUNDO_BIN=/usr/local/bin/voidnsundo
+
+# [[ ! -f /bedrock/run/profile ]] || source /bedrock/run/profile
+[ -f /bedrock/run/profile ] && source /bedrock/run/profile
+# [ -f ${HOME}/.profile ] && source ${HOME}/.profile
+
+# Set commands or paths to LLVM-provided tools outside the script via 'export ...'
+# or before these lines
+
+export QT_AUTO_SCREEN_SCALE_FACTOR=0
+export QT_SCALE_FACTOR=1
+
+export GDK_SCALE=2.0
+export GDK_DPI_SCALE=0.75
+
+# bindkey -v
+
+# export TMUX_DIR=$HOME/.tmux
+export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
+
+alias bmux='pgrep -vx tmux > /dev/null && \
+    tmux new -d -s delete-me && \
+    tmux run-shell $TMUX_DIR/plugins/tmux-resurrect/scripts/restore.sh && \
+    tmux kill-session -t delete-me && \
+    tmux attach || tmux attach'
+
+# Locales!
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+# This allows putting # to comment out the command
+setopt interactive_comments
+
+# https://gitlab.com/alourie/dotfiles/-/blob/master/.zshrc
+# # For now
+# unset SSH_ASKPASS
+#
+# # If keychain is installed and .ssh exists, load the keys
+# if command -v keychain > /dev/null; then
+#     keychain -l | grep "no identities" 2>&1 > /dev/null
+#     if [[ $? = 0 && -d $HOME/.ssh ]]; then
+#         # Just load all paired keys
+#         for f in $HOME/.ssh/*; do
+#             if [[ -f $f\.pub ]]; then
+#                 eval $(keychain -q --agents ssh --eval $f)
+#             fi
+#         done
+#     fi
+# fi
+
+
+function vi-append-x-selection () { RBUFFER=$(xsel -o -p </dev/null)$RBUFFER; }
+zle -N vi-append-x-selection
+bindkey -a '^X' vi-append-x-selection
+function vi-yank-x-selection () { print -rn -- $CUTBUFFER | xsel -i -p; }
+zle -N vi-yank-x-selection
+bindkey -a '^Y' vi-yank-x-selection
+
+
+export PATH=${ZINIT[HOME_DIR]}:${ZINIT[BIN_DIR]}:$PATH
+
+# USE_ZPM=1
+USE_ZPM=
+export USE_ZPM=${USE_ZPM}
+
+if [ ! -z "${USE_ZPM}" ]; then
+    declare -A ZPM
+    ZPM[HOME_DIR]="${ZINIT[HOME_DIR]}/zpm"
+    export ZPM[HOME_DIR]="${ZINIT[HOME_DIR]}/zpm"
+
+    if [ "$USER" = "root" ] && [[ ! -f "${ZPM[HOME_DIR]}/zpm.zsh" ]]; then
+        git clone --recursive https://github.com/zpm-zsh/zpm ${ZPM[HOME_DIR]}
+    fi
+    source ${ZPM[HOME_DIR]}/zpm.zsh
+
+    ### OpenWrt
+    zpm if openwrt load zpm-zsh/openwrt
+
+    ### Termux
+    zpm if termux load zpm-zsh/termux
+
+    ### Tmux
+    zpm if ssh load zpm-zsh/tmux
+    zpm if-not ssh load zpm-zsh/tmux,apply:path
+
+    ### VTE
+    zpm if vte load zpm-zsh/vte
+
+    ### 3party plugins
+    zpm load                         \
+        zpm-zsh/core-config          \
+        zpm-zsh/ignored-users,async  \
+        zpm-zsh/check-deps,async     \
+        zpm-zsh/minimal-theme        \
+        zpm-zsh/ls,async             \
+        zpm-zsh/colorize,async       \
+        zpm-zsh/ssh,async            \
+        zpm-zsh/dot,async            \
+        zpm-zsh/undollar,async
+
+    ### Plugins for local host
+    zpm if-not ssh load                             \
+        zpm-zsh/dropbox,apply:path:fpath            \
+        zpm-zsh/zsh-better-npm-completion,async     \
+                                                    \
+        zpm-zsh/clipboard                           \
+        zpm-zsh/mysql-colorize,async                \
+        zpm-zsh/bookmarks,async                     \
+        voronkovich/gitignore.plugin.zsh,async      \
+        zpm-zsh/autoenv,async                       \
+                                                    \
+        mdumitru/fancy-ctrl-z,async                 \
+        zpm-zsh/zsh-history-substring-search,async  \
+        zpm-zsh/zsh-autosuggestions,async           \
+        zpm-zsh/fast-syntax-highlighting,async      \
+        zpm-zsh/history-search-multi-word,async
+
+    source ~/.zshrc.local 2>/dev/null
+fi
+
+### Added by Zinit's installer
+if [[ ! -f ${ZINIT[BIN_DIR]}/zinit.zsh ]]; then
+    print -P "%F{33}▓▒░ %F{220}Installing %F{33}DHARMA%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+    # command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas \chmod g-rwX "${ZINIT[HOME_DIR]}"
+    command doas mkdir -p "${ZINIT[HOME_DIR]}" && command doas \chmod g+rX "${ZINIT[HOME_DIR]}" >/dev/null 2>&1 \
+        && command doas \chmod o+rX "${ZINIT[HOME_DIR]}" >/dev/null 2>&1
+    # command doas git clone https://github.com/zdharma/zinit "${ZINIT[BIN_DIR]}" && \
+    command doas git clone https://github.com/zdharma-continuum/zinit.git "${ZINIT[BIN_DIR]}" && \
+        print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
+        print -P "%F{160}▓▒░ The clone has failed.%f%b"
+
+fi
+
+function group_permission_fix(){
+    # echo "Entered group_permission_fix" > /dev/stderr
+    perm="$(stat -L -c '%A' "$1")"
+    needs_ra=
+    [ "r" != "$(expr substr "$perm" 5 1)" ] && needs_ra="r"
+    needs_ea=
+    [ "$(expr substr "$perm" 4 1)" = "x" ] && [ "$(expr substr "$perm" 7 1)" != "x" ] && needs_ea="x"
+    [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$1"
+}
+autoload -Uz _group_permission_fix
+(( ${+_comps} )) && _comps[post_update]=_group_permission_fix
+# typeset -f group_permission_fix
+# export -f group_permission_fix
+function post_update(){
+
+    command doas find "${ZINIT[COMPLETIONS_DIR]}" -mindepth 1 -delete
+
+    # command doas \chmod -R --quiet go+rX "${ZINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet go+rX "${VINIT[HOME_DIR]}"
+    # command doas \chmod -R --quiet go+rX "${TINIT[HOME_DIR]}"
+
+    # # command doas \chown -R -f --quiet root:zinit "${ZINIT[HOME_DIR]}"
+    # # command doas \chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
+    # # command doas \chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
+
+    # find "${SHARE_PREFIX}/.git" -type f -name "*" -print -exec \chmod --quiet g+r {} +
+
+    command doas chmod -R go+rx "${ZPFX}/bin"
+
+    if [ -d "$1" ]; then
+        echo "\${1}: "${1}
+        working_path=("${1}")
+    else
+        working_path=("${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}")
+    fi
+
+    # for packages_path in "${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+    for packages_path in "${working_path[@]}"
+    do
+        # command doas find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
+        #     -o -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + \
+        #     && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+
+        # command doas chmod --quiet go+rx "$packages_path" >/dev/null 2>&1 &
+        command doas chmod -f go+rx "$packages_path" >/dev/null 2>&1 &
+
+        # command doas find "$packages_path" -type d -exec sh -c 'for d; do command doas chmod --quiet go+rx "$d"; done' _ {} 2>&1 + &
+        # command doas find "$packages_path" -type d -exec doas \chmod --quiet g+s,go+rx '{}' 2>&1 + &
+        # command doas find "$packages_path" -type d -exec doas \chmod -f g+s,go+rx '{}' 2>&1 + &
+        command doas find "$packages_path" -type d -exec doas \chmod -f go+rx '{}' 2>&1 + &
+        if [ ! -d "$1" ]; then
+            # command doas \chown -R --quiet root:users "$packages_path"
+            # command doas chgrp -R --quiet users "$packages_path" >/dev/null 2>&1 &
+            command doas chgrp -R -f users "$packages_path" >/dev/null 2>&1 &
+        fi
+        # command doas find "$packages_path" \
+        #     -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + &
+
+        # # && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+        # # Extremely slow
+        # command doas find "$packages_path" -type f -name '*' -exec sh -c ' [ \
+        #     "$(expr substr $(stat -L -c %A "$1") 4 1)" = "x" ] \
+        #     && command doas \chmod --quiet g+rx "$1" || command doas \chmod --quiet g+r "$1" ' sh '{}' >/dev/null 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # command doas find "$packages_path" -type f -name '*' -exec sh -c 'perm="$(stat -L -c '%A' "$1")"; \
+        #     needs_ra=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"; needs_ea=; \
+        #     [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"; \
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$1";' \
+        #     sh '{}' >/dev/null 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # # Doesn't work
+        # command doas find "$packages_path" -type f -name '*' -exec group_permission_fix '{}' 2>&1 \; \
+        #     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+
+        # Wroks
+        command doas find "$packages_path" -type f -name '*' -exec sh -c ' \
+            for f ; \
+            do \
+                if [ -f "$f" ] ; then \
+                    perm="$(stat -L -c '%A' "$f")" ; \
+                    needs_operation= ; \
+                    needs_ra= ; \
+                    user_read="$(expr substr $perm 2 1)" ; \
+                    group_read="$(expr substr $perm 5 1)" ; \
+                    other_read="$(expr substr $perm 8 1)" ; \
+                    [ "r" = "$user_read" ] && [ "r" != "$group_read" ] && { needs_ra="r" ; needs_operation="1" ; } ; \
+                    [ "r" = "$user_read" ] && [ "r" != "$other_read" ] && { needs_ra="r" ; needs_operation="1" ; } ; \
+                    needs_ea= ; \
+                    user_run="$(expr substr $perm 4 1)" ; \
+                    group_run="$(expr substr $perm 7 1)" ; \
+                    other_run="$(expr substr $perm 10 1)" ; \
+                    [ "x" = "$user_run" ]  && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "x" = "$user_run" ]  && [ "x" != "$other_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "s" = "$user_run" ]  && [ "x" != "$group_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "s" = "$user_run" ]  && [ "x" != "$other_run" ] && { needs_ea="x" ; needs_operation="1" ; } ; \
+                    [ "x" != "$user_run" ] && [ "s" != "$user_run" ]  && [ "x" = "$group_run" ] && needs_operation="1" ; \
+                    [ "r" = "$user_read" ] && [ "" != "$needs_operation" ] && needs_ra="r" ; \
+                    [ "x" = "$user_run" ]  && [ "" != "$needs_operation" ] && needs_ea="x" ; \
+                    [ "s" = "$user_run" ]  && [ "" != "$needs_operation" ] && needs_ea="x" ; \
+                    perm_group=$needs_ra$needs_ea ; \
+                    [ "" != "$perm_group" ] && printf "should no be empty: %s\n" "$perm_group" >> $HOME/.vim.log 2>&1 ; \
+                    [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o=$perm_group "$f" 2>&1 &  \
+                else \
+                    IFS{# echo "Error" "$f" > /dev/stderr} ; \
+                    command doas rm -f "$f" 2>&1 &  \
+                fi \
+            done' _ "{}" 2>&1 + &
+
+        # # Won't work
+        # # a=()
+        # while IFS='' read -r -u"$FD" -d $'\0' file; do
+        #     # note that $IFS is having the default value here
+        #     # a+=("$file") # or however you want to process each file
+        #     perm="$(stat -L -c '%A' "$file")";
+        #     needs_ra=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r";
+        #     needs_ea=; [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x";
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$file";
+        # done {FD}< <(command doas find "$packages_path" -type f -print0)
+        # exec {FD}<&-   # close the file descriptor
+
+        # # # Extremely slow
+        # # https://www.reddit.com/r/linux/comments/2xgpcf/handy_bash_feature_process_substitution/
+        # while read line; do
+        #     # echo ${line}
+        #     # short=${line##*/}
+        #     # ln -s ${line} $HOME/bin/${short%.sh}
+        #     perm=$(echo "obase=2; ibase=8; $(stat -L -c '%a' "$line")" | bc)
+        #     # perm="$(stat -L -c '%A' "$line")"
+        #     needs_ra=
+        #     # [ "r" != "$(expr substr $perm 5 1)" ] && needs_ra="r"
+        #     # group_readable=$((((2#$perm&2#000100000))>>5))
+        #     [ 0 = $((((2#$perm & 2#000100000))>>5)) ] && needs_ra="r"
+        #     needs_ea=
+        #     # user_executable=$((((2#$perm & 2#001000000))>>6))
+        #     # group_executable=$((((2#$perm & 2#000001000))>>3))
+        #     # [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && needs_ea="x"
+        #     [ 1 = $((((2#$perm & 2#001000000))>>6)) ] && [ 0 = $((((2#$perm & 2#000001000))>>3)) ] && needs_ea="x"
+        #     [ "r" = "$needs_ra" ] || [ "x" = "$needs_ea" ] && command doas chmod g+$needs_ra$needs_ea "$line" 2>&1 &;
+        # done < <(command doas find "$packages_path" -type f)
+        # # done < <(find "$packages_path" -type f -name \*.sh)
+
+    done
+}
+
+autoload -Uz _post_update
+(( ${+_comps} )) && _comps[post_update]=_post_update
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    source "${ZINIT[BIN_DIR]}/zinit.zsh"
+fi
+
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+for file in "${ZINIT[HOME_DIR]}/include/"(N/^F) ; do
+    source "$file"
+done
+# My zsh configurations
+for file in "$HOME/.zsh/includes/"(N/^F) ; do
+    source "$file"
+done
+
+
+# if [ "$USER" = "root" ]; then
+
+# # Load a few important annexes, without Turbo
+# # (this is currently required for annexes)
+# zinit light-mode for \
+#     zinit-zsh/z-a-rust \
+#     zinit-zsh/z-a-as-monitor \
+#     zinit-zsh/z-a-patch-dl \
+#     zinit-zsh/z-a-bin-gem-node
+
+### End of Zinit's installer chunk
+
+# https://zdharma.github.io/zinit/wiki/GALLERY/
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    zinit snippet OMZL::clipboard.zsh
+    zinit snippet OMZL::termsupport.zsh
+
+    # # Oh My Zsh Only Setting
+    # ZSH_THEME="alpharized"
+
+    ## Zinit Setting
+    # Must Load OMZ Git library
+    zinit snippet OMZL::git.zsh
+
+
+    # # Load Prompt
+    # zinit light NicoSantangelo/Alpharized
+
+    # ## Oh-My-Zsh Setting
+    # plugins=(
+    #     git
+    #     dotenv
+    #     rake
+    #     rbenv
+    #     ruby
+    #     zsh-system-clipboard
+    #     zsh-completions
+    #     zsh-history-substring-search
+    #     zsh-autosuggestions
+    #     docker
+    #     zsh-syntax-highlighting
+    #     zsh-vi-mode
+    # )
+
+    # plugins+=(zsh-system-clipboard zsh-completions zsh-history-substring-search zsh-autosuggestions docker zsh-syntax-highlighting zsh-vi-mode)
+
+    ## Zinit Setting
+    # Load Git plugin from OMZ
+
+    zinit snippet OMZP::git
+    zinit cdclear -q # <- forget completions provided up to this moment
+    zinit snippet OMZP::git
+
+    zinit ice svn
+    zinit snippet OMZP::gitfast
+
+    zinit snippet OMZP::dotenv
+    zinit snippet OMZP::rake
+    zinit snippet OMZP::rbenv
+    zinit snippet OMZP::ruby
+
+
+    zinit ice svn
+    zinit snippet OMZP::macos
+
+    # For sharing between root and other users, following line does not work
+    # zinit wait lucid is-snippet as"completion" for \
+    zinit ice as"completion" for \
+        OMZP::fd/_fd \
+        OMZP::docker/_docker \
+        OMZP::docker-compose/_docker-compose \
+        OMZP::cargo
+
+        # OMZP::rustup
+        # OMZP::rust/_rust \
+
+    # zinit ice as"completion"
+    # zinit snippet OMZP::docker/_docker
+    # zinit ice as"completion"
+    # zinit snippet OMZP::fd/_fd
+
+    # # Load the pure theme, with zsh-async library that's bundled with it.
+    # zinit ice pick"async.zsh" src"pure.zsh"
+    # zinit light sindresorhus/pure
+
+
+    # A glance at the new for-syntax – load all of the above
+    # plugins with a single command. For more information see:
+    # https://zdharma.github.io/zinit/wiki/For-Syntax/
+    zinit for \
+        atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay" \
+        atload"!_zsh_autosuggest_start" \
+        light-mode zsh-users/zsh-autosuggestions \
+        light-mode zdharma-continuum/fast-syntax-highlighting zdharma-continuum/history-search-multi-word \
+        light-mode agkozak/zsh-z \
+        light-mode OMZL::history.zsh \
+        blockf zsh-users/zsh-completions
+
+    #     light-mode pick"async.zsh" src"pure.zsh" sindresorhus/pure \
+
+    # # xclip dependent
+    # zinit wait'!' lucid for \
+    #     light-mode PZT::modules/utility/init.zsh
+
+    zinit wait'!' lucid for \
+        light-mode OMZP::colorize \
+        light-mode OMZP::command-not-found \
+        light-mode OMZP::mvn
+
+    # light-mode OMZP::colored-man-pages
+
+    zinit wait'!' lucid atload"zicompinit; zicdreplay" for \
+        light-mode OMZL::completion.zsh
+
+    zinit lucid for \
+        light-mode OMZL::key-bindings.zsh
+
+    # GIT
+    zinit wait lucid for \
+        light-mode davidde/git
+
+    # https://github.com/softmoth/zsh-vim-mode
+    zinit ice lucid depth=1
+    zinit light softmoth/zsh-vim-mode
+
+fi
+
+
+if [ ! -z "${USE_ZPM}" ]; then
+    zpm load @omz
+    zpm load @omz-lib/clipboard.zsh
+    zpm load @omz-lib/termsupport.zsh
+    zpm load @omz-lib/git.zsh
+    zpm load @omz-lib/git
+    zpm load @omz-lib/gitfast
+    zpm load @omz-lib/dotenv
+    zpm load @omz-lib/rake
+    zpm load @omz-lib/rbenv
+    zpm load @omz-lib/ruby
+    zpm load @omz-lib/macos
+    zpm load @omz-lib/fd/_fd
+    zpm load @omz-lib/docker/_docker
+    zpm load @omz-lib/docker-compose/_docker-compose
+    # zpm load @omz-lib/rust/_rust
+    zpm load @omz-lib/cargo
+    # zpm load @omz-lib/rustup
+    zpm load jhawthorn/fzy
+fi
+
+# Put this in .zshrc, before this plugin is loaded
+# Enable <Esc>-prefixed bindings that should rarely conflict with NORMAL mode
+VIM_MODE_ESC_PREFIXED_WANTED='^?^Hbdfhul.g'  # Default is '^?^Hbdf.g'
+# Put this in .zshrc, after this plugin is loaded
+bindkey -rpM viins '^[^['
+# Add to .zshrc, before this plugin is loaded:
+# Use Control-D instead of Escape to switch to NORMAL mode
+VIM_MODE_VICMD_KEY='^D'
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # https://github.com/jeffreytse/zsh-vi-mode
+    # VIM mode ....probably needs to be last here
+    zinit ice lucid depth=1
+    zinit light jeffreytse/zsh-vi-mode
+fi
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
+export ZVM_KEYTIMEOUT=0.2
+# The plugin will auto execute this zvm_after_lazy_keybindings function
+function zvm_after_lazy_keybindings() {
+    zvm_define_widget up-line-or-beginning-search
+    zvm_define_widget down-line-or-beginning-search
+
+    zvm_bindkey vicmd 'k' up-line-or-beginning-search
+    zvm_bindkey viins "^[k" up-line-or-beginning-search
+    zvm_bindkey vicmd 'j' down-line-or-beginning-search
+    zvm_bindkey viins "^[j" down-line-or-beginning-search
+}
+
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh 2>/dev/null
+    # GitHub Plugins
+    zinit ice wait'!'
+    zinit light zsh-users/zsh-history-substring-search
+fi
+
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+bindkey "$terminfo[kcuu1]" history-substring-search-up
+bindkey "$terminfo[kcud1]" history-substring-search-down
+
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    # zinit wait lucid as"completion" for \
+    #     junegunn/fzf \
+    #     junegunn/fzf-bin \
+    #     jhawthorn/fzy \
+    #     Aloxaf/fzf-tab \
+    #     chitoku-k/fzf-zsh-completions
+
+    # Binary release in archive, from GitHub-releases page.
+    # After automatic unpacking it provides program "fzf".
+    zinit ice from"gh-r" as"program"
+    zinit light junegunn/fzf
+
+    # Install fzf
+    zinit ice from"gh-r" as"command"
+    zinit load junegunn/fzf-bin
+
+    # or fzy
+    zinit ice as"command" make"\!PREFIX=$ZPFX install" \
+        atclone"cp contrib/fzy-* $ZPFX/bin/" \
+        pick"$ZPFX/bin/fzy*"
+
+    zinit load jhawthorn/fzy
+
+    zinit ice wait lucid
+    zinit light Aloxaf/fzf-tab
+
+    zinit ice wait lucid
+    zinit light chitoku-k/fzf-zsh-completions
+
+
+
+    # One other binary release, it needs renaming from `docker-compose-Linux-x86_64`.
+    # This is done by ice-mod `mv'{from} -> {to}'. There are multiple packages per
+    # single version, for OS X, Linux and Windows – so ice-mod `bpick' is used to
+    # select Linux package – in this case this is actually not needed, Zinit will
+    # grep operating system name and architecture automatically when there's no `bpick'.
+    zinit ice from"gh-r" as"program" mv"docker* -> docker-compose" bpick"*linux*"
+    zinit load docker/compose
+
+    # # Vim repository on GitHub – a typical source code that needs compilation – Zinit
+    # # can manage it for you if you like, run `./configure` and other `make`, etc. stuff.
+    # # Ice-mod `pick` selects a binary program to add to $PATH. You could also install the
+    # # package under the path $ZPFX, see: http://zdharma.github.io/zinit/wiki/Compiling-programs
+    # zinit ice as"program" atclone"rm -f src/auto/config.cache; ./configure" \
+    #     atpull"%atclone" make pick"src/vim"
+    # zinit light vim/vim
+
+    # Scripts that are built at install (there's single default make target, "install",
+    # and it constructs scripts by `cat'ing a few files). The make'' ice could also be:
+    # `make"install PREFIX=$ZPFX"`, if "install" wouldn't be the only, default target.
+    zinit ice as"program" pick"$ZPFX/bin/git-*" make"PREFIX=$ZPFX"
+    zinit light tj/git-extras
+    source ${ZINIT[HOME_DIR]}/plugins/tj---git-extras/etc/git-extras-completion.zsh
+    # # Handle completions without loading any plugin, see "clist" command.
+    export XBPS_MAKEJOBS=13
+    # # This one is to be ran just once, in interactive session.
+    # zinit creinstall %HOME/my_completions
+
+    # For GNU ls (the binaries can be gls, gdircolors, e.g. on OS X when installing the
+    # coreutils package from Homebrew; you can also use https://github.com/ogham/exa)
+    zinit ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh" nocompile'!'
+    zinit light trapd00r/LS_COLORS
+
+    # Hooks won't work under system wide zinit
+    # # make'!...' -> run make before atclone & atpull
+    # zinit ice as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' src"zhook.zsh"
+    # zinit light direnv/direnv
+
+    # https://github.com/zdharma-continuum/zsh-navigation-tools
+    zinit ice wait"1" lucid
+    zinit load zdharma-continuum/zsh-navigation-tools
+
+    # zinit ice wait    # wait is same wait"0"
+    # zinit load zdharma/history-search-multi-word
+    #
+    # zinit ice wait"2" # load after 2 seconds
+    # zinit load zdharma/history-search-multi-word
+    #
+    # zinit ice wait    # also be used in `light` and `snippet`
+    # zinit snippet https://gist.githubusercontent.com/hightemp/5071909/raw/
+    zstyle ":history-search-multi-word" page-size "11"
+    zinit ice wait"1" lucid
+    zinit load zdharma-continuum/history-search-multi-word
+
+    # # source /opt/evil-registers/evil-registers.zsh 2>/dev/null
+    # # https://github.com/zsh-vi-more/evil-registers
+    # # Optionally, track the latest development version:
+    # zinit ice wait "0" ver"dev"
+    # # zinit ice wait "0"
+    # zinit light zsh-vi-more/evil-registers
+
+    zinit ice wait lucid
+    zinit load kutsan/zsh-system-clipboard
+
+    # https://github.com/zdharma/zinit-configs
+    # For docker configration
+    # Install this repo
+    zinit ice wait lucid
+    zinit load zdharma-continuum/zinit-configs
+    # Run the command, under the repo there is a run.sh.
+    # zinit-configs
+fi
+
+[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
+
+# # Installation of Rust compiler environment via the z-a-rust annex
+# # https://github.com/zinit-zsh/z-a-rust
+# # https://zdharma.github.io/zinit/wiki/GALLERY/
+# zinit id-as"rust" wait=1 as=null sbin="bin/*" lucid rustup \
+#         atload="[[ ! -f ${ZINIT[COMPLETIONS_DIR]}/_cargo ]] && zi creinstall -q rust; export CARGO_HOME=\$PWD; export RUSTUP_HOME=\$PWD/rustup" for \
+#         zdharma-continuum/null
+
+
+if [ "$USER" = "root" ] || [ -z "${USE_ZPM}" ]; then
+    zinit ice wait lucid
+    zinit light zdharma-continuum/null
+fi
+
+# .zshrc
+typeset -U PATH
+# https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
+# Using the (N-/) glob qualifier we can remove paths that do not exist.
+path=($^path(N-/))
+
+# https://gitlab.com/alourie/dotfiles/-/blob/master/.zshrc
+
+
+# Load promptinit
+autoload -Uz promptinit && promptinit
+
+# https://gitter.im/zdharma/zinit?at=5fe95372de60814315495d48
+autoload -U colors
+colors
+
+# zinit ice depth=1; zinit light romkatv/powerlevel10k
+# typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+# # zinit load guesswhozzz/guezwhoz-zshell
+# zinit ice wait lucid
+# zinit light guesswhozzz/guezwhoz-zshell
+
+# https://unix.stackexchange.com/questions/121802/zsh-how-to-check-if-an-option-is-enabled
+# https://github.com/sindresorhus/pure/issues/401
+# set -o|grep prompt
+
+# https://github.com/sindresorhus/pure/issues/401
+# Turn on command substitution in the prompt (and parameter expansion and arithmetic expansion).
+setopt prompt_subst
+
+# https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+# RPROMPT=\$vcs_info_msg_0_
+zstyle ':vcs_info:git:*' formats '%F{240}(%b)%r%f'
+zstyle ':vcs_info:*' enable git
+
+# # https://opensourcelibs.com/lib/agkozak-zsh-prompt
+# zinit load agkozak/agkozak-zsh-prompt
+# # Make sure the zsh/terminfo module is loaded
+# (( ${+modules[zsh/terminfo]} )) || zmodload zsh/terminfo
+# # If there are 256 colors, use the following colors; otherwise use the defaults
+# if (( ${terminfo[colors]:-0} >= 256 )); then
+#     AGKOZAK_COLORS_USER_HOST=108
+#     AGKOZAK_COLORS_PATH=116
+#     AGKOZAK_COLORS_BRANCH_STATUS=228
+#     AGKOZAK_COLORS_EXIT_STATUS=174
+#     AGKOZAK_COLORS_CMD_EXEC_TIME=245
+#     AGKOZAK_COLORS_VIRTUALENV=188
+#     AGKOZAK_COLORS_BG_STRING=223
+# fi
+
+# AGKOZAK_CUSTOM_PROMPT=''
+# # Command execution time
+# AGKOZAK_CUSTOM_PROMPT+='%(9V.%F{${AGKOZAK_COLORS_CMD_EXEC_TIME}}%b%9v%b%f .)'
+# # Exit status
+# AGKOZAK_CUSTOM_PROMPT+='%(?..%B%F{${AGKOZAK_COLORS_EXIT_STATUS}}(%?%)%f%b )'
+# # Username and hostname
+# AGKOZAK_CUSTOM_PROMPT+='%(!.%S%B.%B%F{${AGKOZAK_COLORS_USER_HOST}})%n%1v%(!.%b%s.%f%b) '
+# # Virtual environment indicator
+# AGKOZAK_CUSTOM_PROMPT+='%(10V.%F{${AGKOZAK_COLORS_VIRTUALENV}}[%10v]%f .)'
+# # Path
+# AGKOZAK_CUSTOM_PROMPT+='%B%F{${AGKOZAK_COLORS_PATH}}%2v%f%b'
+# # Background job status
+# AGKOZAK_CUSTOM_PROMPT+='%(1j. %F{${AGKOZAK_COLORS_BG_STRING}}%jj%f.)'
+# # Git status
+# AGKOZAK_CUSTOM_PROMPT+=$'%(3V.%F{${AGKOZAK_COLORS_BRANCH_STATUS}}%3v%f.)\n'
+# # SHLVL and prompt character
+# AGKOZAK_CUSTOM_PROMPT+='[%L] %(4V.:.%#) '
+# AGKOZAK_COLORS_BRANCH_STATUS=228
+
+# # No right prompt
+# AGKOZAK_CUSTOM_RPROMPT=''
+# AGKOZAK_BLANK_LINES=0
+# AGKOZAK_LEFT_PROMPT_ONLY=1
+# AGKOZAK_MULTILINE=1
+
+# fpath+=$HOME/.zsh/pure
+typeset -U fpath
+
+# zinit ice compile'(pure|async).zsh' pick'async.zsh' src'pure.zsh'
+# zinit light sindresorhus/pure
+#
+# # .zshrc
+#
+#
+# # optionally define some options
+# PURE_CMD_MAX_EXEC_TIME=10
+# PURE_GIT_UNTRACKED_DIRTY=0
+# # PURE_GIT_PULL=0
+# PURE_GIT_DELAY_DIRTY_CHECK=1000
+# PURE_PROMPT_SYMBOL=❯
+# PURE_PROMPT_VICMD_SYMBOL=❮
+#
+#
+# # change the path color
+# zstyle :prompt:pure:path color white
+#
+# # change the color for both `prompt:success` and `prompt:error`
+# zstyle ':prompt:pure:prompt:*' color cyan
+#
+# # turn on git stash status
+# zstyle :prompt:pure:git:stash show yes
+
+# https://github.com/reobin/typewritten
+# autoload -U promptinit; promptinit
+# prompt typewritten
+
+# autoload -U promptinit; promptinit
+# prompt restore
+# prompt grml
+# prompt zefram
+prompt walters
+# prompt clint2 blue yellow cyan magenta white red white
+
+# if [ "${USER}" = "root" ]; then
+#     prompt clint2 magenta red yellow cyan green
+# else
+#     prompt clint2 yellow green cyan darkgray red
+# fi
+
+# prompt agkozak
+# prompt guezwhoz-zshell
+# prompt powerlevel10k
+
+if [ "$USER" = "root" ]; then
+# https://gitlab.com/rawkode/dotfiles/-/blob/ee8837b88c574c6e9db94b8c0591133b5dd8a3a3/dotfiles/zsh/zshrc.zsh
+    # zpcompinit
+    autoload -Uz compinstall && compinstall
+    autoload -Uz compinit && compinit
+fi
+
+# [ -z "$TMUX" ] && ! [ "$USER" = "root" ] && ! ( [[ -z $DISPLAY ]] && [[ $TTY = /dev/tty1 ]] )  && exec tmux new -As .
+
+
+
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+command chmod -f a+r $HOME/.zcompdump
