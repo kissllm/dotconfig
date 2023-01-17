@@ -487,12 +487,13 @@ if filereadable('.vimrc.local')
 endif
 
 
-" " WhichKey move focused window from current to the right/next one"
-" " vim-which-key is vim port of emacs-which-key that displays available keybindings in popup.
-" " https://github.com/liuchengxu/vim-which-key
+" WhichKey move focused window from current to the right/next one"
+" vim-which-key is vim port of emacs-which-key that displays available keybindings in popup.
+" https://github.com/liuchengxu/vim-which-key
 nnoremap <silent> <leader> :WhichKey '\' <cr>
-" " By default timeoutlen is 1000 ms
+" By default timeoutlen is 1000 ms
 " set timeoutlen=500
+set timeoutlen=100
 
 " User defined key maps
 function! s:keys_reload()
@@ -588,7 +589,7 @@ let g:vim_packages_use['nathanaelkane/vim-indent-guides']                = { 'ty
 " Just work on vim, not neovim
 let g:vim_packages_use['janlazo/vim-bang-terminal']                      = { 'type' : 'opt' }
 " can't deal with writable permission issues
-" The sessions directory '/opt/vinit/vim/pack/packager/start/' isn't writable!
+" The sessions directory '$SHARE_PREFIX/init/editor/vim/pack/packager/start/' isn't writable!
 " let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
 
 if has("cscope")
@@ -742,7 +743,7 @@ let g:vim_packages_use['mattn/emmet-vim']                                 = { 't
 " let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 
 let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 'type' : 'start' }
-let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'start' }
+let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'opt' }
 
 " let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
 
@@ -754,12 +755,12 @@ let g:vim_packages_use['mhinz/vim-grepper']                               = { 't
 let g:vim_packages_use['LucHermitte/vim-refactor']                        = { 'type' : 'start' }
 let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']              = { 'type' : 'start' }
 
-" # # https://github.com/christoomey/vim-tmux-navigator
-" # /mnt/vinit/vim/pack/packager/start/keys/after/plugin/keys.vim
-" # "     silent! execute(a:navigate[a:direction])
-" # /mnt/tinit/tmux.conf
-" # set -g @plugin 'christoomey/vim-tmux-navigator'
-" # /mnt/vinit/nvim/init.vim
+" " https://github.com/christoomey/vim-tmux-navigator
+" $SHARE_PREFIX/init/editor/vim/pack/packager/start/keys/after/plugin/keys.vim
+" "     silent! execute(a:navigate[a:direction])
+" $SHARE_PREFIX/tinit/tmux.conf
+" set -g @plugin 'christoomey/vim-tmux-navigator'
+" $SHARE_PREFIX/init/editor/nvim/init.vim
 let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'start' }
 
 " let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }  " obsoleted
@@ -1216,7 +1217,8 @@ if exists('g:_use_setup_packager')
     " command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
     "             \ | call packager#install(<args>)
 
-    command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+    command! -nargs=* -bar PackagerInstall
+        \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
         \ | call packager#install(s:adjust_hook_helper(<args>,
         \  g:plugin_dir['vim'], g:package_manager['vim'], g:_environment))
 
@@ -1228,7 +1230,8 @@ if exists('g:_use_setup_packager')
 
     " command! -nargs=* -bar PackagerUpdate call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
     "             \ | call packager#update(<args>)
-    command! -nargs=* -bar PackagerUpdate call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+    command! -nargs=* -bar PackagerUpdate
+        \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
         \ | call packager#update(s:adjust_hook_helper(<args>,
         \  g:plugin_dir['vim'], g:package_manager['vim'], g:_environment))
 
@@ -1238,8 +1241,12 @@ if exists('g:_use_setup_packager')
     "             \ 'on_finish' : "call <sid>adjust_attributes(<args>, \"" . g:plugin_dir['vim'] . "\", \"" . g:package_manager['vim'] . "\",
     "             \ \"" . g:_environment . ")"})
 
-    command! -bar PackagerClean  call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#clean()
-    command! -bar PackagerStatus call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim']) | call packager#status()
+    command! -bar PackagerClean
+        \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+        \ | call packager#clean()
+    command! -bar PackagerStatus
+        \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
+        \ | call packager#status()
 endif
 
 " Load plugins only for specific filetype
@@ -1880,7 +1887,7 @@ if 'linux' == $TERM
     endif
 else
     if exists("g:_use_terminal_transparent")
-        " /mnt/vinit/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+        " $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
         " :let _rock        = '#181320'
         " let g:insert_leave_bg_gui   = '#181320'
         let g:insert_leave_bg_gui   = '#36323d'
@@ -1908,7 +1915,7 @@ let g:hl_insert_enter =
     \ ' ctermfg=' . g:insert_enter_fg_cterm . ' ctermbg=' . g:insert_enter_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
 
 " For CursorLine, ColorColumn
-" /mnt/vinit/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+" $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
 " :let _cloud       = '#e4e0ed'
 let g:hl_insert_leave_invert =
     \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_leave_bg_gui .
@@ -2298,13 +2305,19 @@ if exists('g:_disable_direction_key')
     vnoremap <Left> <Nop>
     vnoremap <Right> <Nop>
     vnoremap <Up> <Nop>
+
     " One-hand page up and down
-    " noremap <c-u> u
     " noremap <c-d> d
-    noremap uu <c-u>
+
+    " Will slow down 'undo'
+    " noremap uu <c-u>
+    noremap u <c-u>
+    noremap <c-u> u
+
     " noremap d <c-d>
-    " noremap , <c-d>
-    noremap mm <c-d>
+    noremap , <c-d>
+    " noremap mm <c-d>
+    noremap m <c-d>
 
 endif
 
@@ -3737,7 +3750,12 @@ let g:vim_tags_cache_dir                   = g:cache_root
 let g:tagbar_left                          = 1
 let g:tagbar_expand                        = 1
 nmap <F2> :TagbarToggle<cr>
-set tags=./tags,tags
+
+" https://stackoverflow.com/questions/11975316/vim-ctags-tag-not-found
+" set tags=./tags,tags
+set tags=./tags,tags;$HOME
+" set tags=tags
+
 " set autochdir
 " set switchbuf=useopen,split " make quickfix open in a new split buffer
 set switchbuf=uselast " make quickfix open in a new split buffer
@@ -4027,7 +4045,7 @@ endfunction
 " cmap w!! silent! :SudoWrite<CR>
 
 " https://github.com/tpope/vim-eunuch
-" v +SudoEdit /mnt/gentoo/root/test.cpp
+" v +SudoEdit $SHARE_PREFIX/gentoo/root/test.cpp
 " https://github.com/lambdalisue/suda.vim  " removed
 " " Will erase buffers (not just current one) automatically if you don't have write permission
 " let g:suda_smart_edit = 1  " for suda.vim
@@ -4855,7 +4873,8 @@ let g:smartq_bw_buftypes = [
 " augroup END
 
 " https://github.com/vim/vim/issues/2790
-:set redrawtime=10000
+" :set redrawtime=10000
+:set redrawtime=1000
 " e. It selects the default regular expression engine.
 " https://www.reddit.com/r/vim/comments/8ggdqn/undocumented_tips_make_your_vim_1020x_times_faster/
 " vim hangs when I open a typescript file
@@ -5222,7 +5241,8 @@ augroup END
 " https://stackoverflow.com/questions/14779299/syntax-highlighting-randomly-disappears-during-file-saving
 augroup reset_syntax
     au!
-    autocmd SourcePost,BufReadPost,BufWritePost * doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
+    autocmd SourcePost,BufReadPost,BufWritePost *
+        \ doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
     " syntax enable
 augroup END
 
@@ -5244,7 +5264,8 @@ if ! has('nvim') && empty($TMUX) " && (exists('g:loaded_minpac') || exists('g:lo
         "             \BufReadPost,BufWritePost * ++nested call lightline#update()
         " autocmd VimEnter * ++nested call lightline#update()
         " au VimEnter,Colorscheme * call lightline#disable() | call lightline#enable()
-        autocmd VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
+        autocmd VimEnter,WinEnter,BufEnter,BufDelete,
+            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
             \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() | redraw!
     augroup END
 else
@@ -5260,8 +5281,9 @@ else
 
     augroup indent_blankline_hl
         au!
-        autocmd VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested redraw!
+        autocmd VimEnter,WinEnter,BufEnter,BufDelete,
+            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
+            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
         " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
     augroup END
 endif
@@ -5272,7 +5294,8 @@ if exists('g:_use_indent_guides')
         au!
         " au BufEnter,BufWritePost,VimEnter * silent execute ":normal! \<Plug>IndentGuidesEnable"
         " autocmd BufEnter <buffer> call feedkeys("\<Plug>IndentGuidesEnable", x)
-        autocmd VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
+        autocmd VimEnter,WinEnter,BufEnter,BufDelete,
+            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
             \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested :IndentGuidesEnable
     augroup END
 endif
