@@ -492,8 +492,8 @@ endif
 " https://github.com/liuchengxu/vim-which-key
 nnoremap <silent> <leader> :WhichKey '\' <cr>
 " By default timeoutlen is 1000 ms
-" set timeoutlen=500
-set timeoutlen=100
+set timeoutlen=500
+" set timeoutlen=100
 
 " User defined key maps
 function! s:keys_reload()
@@ -1878,7 +1878,7 @@ endif
 if 'linux' == $TERM
     if exists("g:_use_terminal_transparent")
         let g:insert_leave_bg_gui   = 'Brown'
-        " Warning: Color name "Background" is not defined. 
+        " Warning: Color name "Background" is not defined.
         " "NONE" is not a eligile argument for cterm colors
         let g:insert_leave_bg_cterm = 8
     else
@@ -1919,7 +1919,7 @@ let g:hl_insert_enter =
 " :let _cloud       = '#e4e0ed'
 let g:hl_insert_leave_invert =
     \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_leave_bg_gui .
-    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE' 
+    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
 let g:hl_insert_enter_invert =
     \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_enter_bg_gui .
     \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
@@ -2049,7 +2049,7 @@ if exists("g:_use_terminal_transparent")
                 \ | highlight clear CursorLine
                 \ | silent! execute ':hi CursorLine' . g:hl_insert_enter_invert
 
-            autocmd InsertLeave,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
+            autocmd InsertLeave,VimEnter,WinEnter,BufEnter,SourcePost,Colorscheme *
                 \ silent! execute ':hi CursorColumn' . g:hl_insert_leave
                 \ | silent! execute ':hi ColorColumn' . g:hl_insert_leave_invert
                 \ | highlight clear CursorLine
@@ -2306,6 +2306,11 @@ if exists('g:_disable_direction_key')
     vnoremap <Right> <Nop>
     vnoremap <Up> <Nop>
 
+    nnoremap <silent> <Left>  :exe "vertical resize " . (winwidth(0) * 105/100)<cr>
+    nnoremap <silent> <Right> :exe "vertical resize " . (winwidth(0) * 100/105)<cr>
+    nnoremap <silent> <Up>    :exe "resize " . (winheight(0) * 105/100)<cr>
+    nnoremap <silent> <Down>  :exe "resize " . (winheight(0) * 100/105)<cr>
+
     " One-hand page up and down
     " noremap <c-d> d
 
@@ -2315,9 +2320,12 @@ if exists('g:_disable_direction_key')
     noremap <c-u> u
 
     " noremap d <c-d>
+    " Easy to wrong touch . key
     noremap , <c-d>
     " noremap mm <c-d>
-    noremap m <c-d>
+    " Mapping m key will cause the cursor to jump when switching windows
+    " And xx keys will not work
+    " noremap m <c-d>
 
 endif
 
@@ -2889,8 +2897,13 @@ endif
 " noremap  <silent> <m-l> :vertical resize -1 <bar> :TmuxResizeRight<cr>
 
 " https://vim.fandom.com/wiki/Resize_splits_more_quickly
-nnoremap <silent> <leader>= :exe "resize " . (winheight(0) * 3/2)<cr>
-nnoremap <silent> <leader>- :exe "resize " . (winheight(0) * 2/3)<cr>
+" nnoremap <silent> <leader>= :exe "resize " . (winheight(0) * 3/2)<cr>
+" nnoremap <silent> <leader>- :exe "resize " . (winheight(0) * 2/3)<cr>
+
+
+" https://www.reddit.com/r/vim/comments/oi1okw/question_how_to_stop_horizontal_windows_resizing/
+set eadirection=ver
+set noequalalways
 
 " "resizing windows ********************************************************************************************"
 
@@ -3212,7 +3225,7 @@ augroup END
 " No. Do not do this "Preserve". It will remember your left windows cursor position, and when you switch to another
 " view of the same buffer, it will jump back to the memory position, this operation will demage yuur opened view status.
 " https://stackoverflow.com/questions/40984988/preserve-cursor-position-when-switching-between-buffers-with-bn
-" "Preserve cursor position when switching between buffers"
+" " Preserve cursor position when switching between buffers"
 
 " autocmd BufEnter * silent! normal! g`"
 
@@ -5221,14 +5234,20 @@ let g:reload_on_write = 1
 augroup reload_vimrc
     autocmd!
     autocmd BufEnter * ++nested syntax sync fromstart
-    " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC | setlocal filetype=vim
-    " autocmd! BufWritePost $MYVIMRC ++nested source $MYVIMRC
 
     " if has('nvim')
     "     autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
     " else
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | redraw!
-    " autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
+    " | won't work. <bar> and \| neither
+    " :vert h :\bar
+    " autocmd BufWritePost $MYVIMRC source $MYVIMRC <bar> setlocal filetype=vim <bar> redraw!
+
+    " autocmd BufWritePost $MYVIMRC
+    "     \ execute 'source ' . $MYVIMRC .
+    "     \ ' | setlocal filetype=vim' .
+    "     \ ' | syntax enable'
+
+    autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
     " endif
 augroup END
 
@@ -5266,7 +5285,7 @@ if ! has('nvim') && empty($TMUX) " && (exists('g:loaded_minpac') || exists('g:lo
         " au VimEnter,Colorscheme * call lightline#disable() | call lightline#enable()
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
             \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() | redraw!
+            \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() <bar> redraw!
     augroup END
 else
     augroup lightline_hl
@@ -5283,7 +5302,7 @@ else
         au!
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
             \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
+            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable <bar> redraw!
         " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
     augroup END
 endif
