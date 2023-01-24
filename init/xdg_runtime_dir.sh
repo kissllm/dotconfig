@@ -10,8 +10,8 @@ export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:="$HOME/.config"}
 [ ! -z "${XDG_RUNTIME_DIR+x}" ] || {
     export XDG_RUNTIME_DIR=/run/user/$(id -u)
     [ -d "${XDG_RUNTIME_DIR}" ] || {
-        mkdir -p "${XDG_RUNTIME_DIR}"
-        chown -R $(id -u):users "${XDG_RUNTIME_DIR}"
-        chmod 0700 "${XDG_RUNTIME_DIR}"
+        doas mkdir -p "${XDG_RUNTIME_DIR}"
+        doas chown -R $(id -u):users "${XDG_RUNTIME_DIR}"
+        doas chmod 0700 "${XDG_RUNTIME_DIR}"
     }
 }

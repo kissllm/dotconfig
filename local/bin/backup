@@ -1,15 +1,16 @@
 #!/bin/sh -efE
 
-BACKUP_ROOT="$HOME/downloads/linux/glasnost/glasnost-chroot-x86_64"
-
-SRC_ROOT="/mnt/kiss"
+BACKUP_ROOT="$HOME/downloads/linux/kissllm/chroot-x86_64"
 
 if [ "${HOSTNAME}" = "kiss" ]; then
-    SRC_ROOT=""
-elif [ "$(/usr/bin/whoami)" = "root" ]; then
-    /mnt/load-kiss
+    KISS_ROOT=""
 else
-    doas /mnt/load-kiss
+    KISS_ROOT="/mnt/kiss"
+    if [ "$(/usr/bin/whoami)" = "root" ]; then
+        /mnt/load-kiss
+    else
+        doas /mnt/load-kiss
+    fi
 fi
 
 if [ "$(/usr/bin/whoami)" = "root" ]; then
@@ -21,46 +22,46 @@ fi
 [ -d "${BACKUP_ROOT}" ] || \mkdir -p "${BACKUP_ROOT}"
 [ -d "${BACKUP_ROOT}/boot" ] || \mkdir -p "${BACKUP_ROOT}/boot"
 
-if ! eval '$copy "${SRC_ROOT}/boot" "${BACKUP_ROOT}/"'; then
-    echo "Failed to copy '${SRC_ROOT}/boot'"
+if ! eval '$copy "${KISS_ROOT}/boot" "${BACKUP_ROOT}/"'; then
+    echo "Failed to copy '${KISS_ROOT}/boot'"
     exit 1
 else
-    echo "Succeeded to copy '${SRC_ROOT}/boot'"
+    echo "Succeeded in copying '${KISS_ROOT}/boot'"
 fi
 
 [ -d "${BACKUP_ROOT}/etc" ] || \mkdir -p "${BACKUP_ROOT}/etc"
 
-if ! eval '$copy "${SRC_ROOT}/etc" "${BACKUP_ROOT}/"'; then
-    echo "Failed to copy '${SRC_ROOT}/etc'"
+if ! eval '$copy "${KISS_ROOT}/etc" "${BACKUP_ROOT}/"'; then
+    echo "Failed to copy '${KISS_ROOT}/etc'"
     exit 1
 else
-    echo "Succeeded to copy '${SRC_ROOT}/etc'"
+    echo "Succeeded in copying '${KISS_ROOT}/etc'"
 fi
 
 [ -d "${BACKUP_ROOT}/usr" ] || \mkdir -p "${BACKUP_ROOT}/usr"
 
-cd  "${SRC_ROOT}/usr"
-for dir in $(doas \ls -1 "${SRC_ROOT}/usr"); do
+cd  "${KISS_ROOT}/usr"
+for dir in $(doas \ls -1 "${KISS_ROOT}/usr"); do
     [ ! -d "$dir" ] || [ "$dir" = "src" ] || {
-        if ! eval '$copy "${SRC_ROOT}/usr/$dir" "${BACKUP_ROOT}/usr/"'; then
-            echo "Failed to copy '${SRC_ROOT}/usr/$dir'"
+        if ! eval '$copy "${KISS_ROOT}/usr/$dir" "${BACKUP_ROOT}/usr/"'; then
+            echo "Failed to copy '${KISS_ROOT}/usr/$dir'"
             exit 1
         else
-            echo "Succeeded to copy '${SRC_ROOT}/usr/$dir'"
+            echo "Succeeded in copying '${KISS_ROOT}/usr/$dir'"
         fi
     }
 done
 
 [ -d "${BACKUP_ROOT}/var/db/kiss/installed" ] || \mkdir -p "${BACKUP_ROOT}/var/db/kiss/installed"
 
-if ! eval '$copy "${SRC_ROOT}/var/db/kiss/installed" "${BACKUP_ROOT}/var/db/kiss/"'; then
-    echo "Failed to copy '${SRC_ROOT}/var/db/kiss/installed'"
+if ! eval '$copy "${KISS_ROOT}/var/db/kiss/installed" "${BACKUP_ROOT}/var/db/kiss/"'; then
+    echo "Failed to copy '${KISS_ROOT}/var/db/kiss/installed'"
     exit 1
 else
-    echo "Succeeded to copy '${SRC_ROOT}/var/db/kiss/installed'"
+    echo "Succeeded in copying '${KISS_ROOT}/var/db/kiss/installed'"
 fi
 
 sync
 
 echo "\$BACKUP_ROOT = '${BACKUP_ROOT}'"
-echo "\$SRC_ROOT    = '${SRC_ROOT}'"
+echo "\$KISS_ROOT   = '${KISS_ROOT}'"

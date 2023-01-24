@@ -47,7 +47,7 @@ for config_file in $search_config; do
 done
 
 [ ! -z "${OSTYPE+x}" ] ||
-OSTYPE="$(ldd --version 2>&1 | grep musl | awk '{print $1}')"
+OSTYPE=$(ldd --version 2>&1 | grep musl | awk '{print $1}')
 ! expr "$OSTYPE" : "musl" 1>/dev/null ||
 CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 $CXXFLAGS"
 # CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 -D_LIBCPP_HAS_MUSL_LIBC=1 $CXXFLAGS"
@@ -56,15 +56,15 @@ CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 $CXXFLAGS"
 # https://tldp.org/LDP/abs/html/parameter-substitution.html
 # "grep -q" "$? -eq 0" could be a good solution?
 prepend () {
-    CONTAINER_KEY="${1}"
-    CONTAINER_VALUE="$(eval echo $"${1}")"
-    PREPEND_VALUE="${2}"
-    [ -n "${PREPEND_VALUE}" ] && [ -d "${PREPEND_VALUE}" ] && {
-        # echo "prepend \$CONTAINER_KEY   = $CONTAINER_KEY"
-        # echo "prepend \$CONTAINER_VALUE = $CONTAINER_VALUE"
-        case ":$CONTAINER_VALUE:" in
-            *":${PREPEND_VALUE}:"*) :;;
-            *) eval "export $CONTAINER_KEY=${PREPEND_VALUE}\${$CONTAINER_KEY:+\":\$$CONTAINER_KEY\"}" ;;
+    local key="${1}"
+    # CONTAINER_VALUE="$(eval echo "\$${1}")"
+    local value="${2}"
+    [ ! -d "${value}" ] || {
+        # echo "prepend \$key   = $key"
+        # echo "prepend \$CONTAINER_VALUE = $(eval echo "\$${key}")"
+        case ":$(eval echo "\$${key}"):" in
+            *":${value}:"*) :;;
+            *) eval "export $key=${value}\${$key:+\":\$$key\"}" ;;
         esac
     }
 }
@@ -117,16 +117,22 @@ _path_append() {
 # define path_append and path_prepend to add directory paths, e.g. PATH, MANPATH
 # add to end of path
 path_append () {
+    local extend=":$(eval "echo \$$1"):"
+    # echo "\$2 = $2"
+    # echo "test=${extend##*:$2:*}"
     [ ! -d "$2" ] ||
-    eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-    eval "$1=\$$1:$2"
+    # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+    [ -z "${extend##*:$2:*}" ] || eval "export $1=\${$1:+\"\$$1:\"}$2"
 }
 
 # add to front of path
 path_prepend () {
+    local extend=":$(eval "echo \$$1"):"
+    # echo "\$2 = $2"
+    # echo "test=${extend##*:$2:*}"
     [ ! -d "$2" ] ||
-    eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-    eval "$1=$2:\$$1"
+    # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+    [ -z "${extend##*:$2:*}" ] || eval "export $1=$2\${$1:+\":\$$1\"}"
 }
 
 path_prepend PATH "/build/os"
@@ -317,7 +323,10 @@ export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$(id -u)"
 # export TMUX_TMPDIR="${TMPDIR}"
 # if [ ! -d "${TMUX_TMPDIR}" ]; then command mkdir -p "${TMUX_TMPDIR}"; fi
 # If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
-alias tmux='rm -f "$HOME/tmux*.log"; [ ! -d "${TMUX_TMPDIR}" ] && \mkdir -p "${TMUX_TMPDIR}"; TMUX_TMPDIR="${TMUX_TMPDIR}" \tmux -2 2>&1 '
+alias tmux='command rm -f "$HOME/tmux*.log"; \
+[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"; \
+TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 2>&1'
+
 # alias tmux="tmux -2"
 
 alias history="history 1 -1"
@@ -489,7 +498,8 @@ if [ $(id -u) -eq 0 ]; then
     # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;39m[\w]\e[m \$ "
     # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
     # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;24m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
 else
     # non root
     # export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
@@ -497,9 +507,26 @@ else
     # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;32m[\w]\e[m \$ "
     # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
     # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;17m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;17m\][$(eval $TRIMMED)]\[\e[m\] \$ '
+    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;32m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
 fi
 
-[ ! -z "${TMUX+x}" ] || [ $(id -u) -eq 0 ] || ( [ -z $DISPLAY ] && [ $tty_num = "1" ] ) || exec tmux new -As .
+# How do tell I'm runing in a chroot?
+# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
+
+# No root needed
+# [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ]
+# root permission needed
+# if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+#     echo "We are chrooted!"
+# else
+#     echo "Business as usual"
+# fi
+
+# [ $(id -u) -eq 0 ] ||
+[ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ] ||
+[ ! -z "${TMUX+x}" ] ||
+{ { [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]; } && [ $tty_num = "1" ]; } ||
+exec tmux new -As .
 
 # set ts=4 sw=4 tw=0 et :

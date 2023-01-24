@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-BACKUP_ROOT="$HOME/downloads/linux/glasnost/glasnost-chroot-x86_64"
+BACKUP_ROOT="$HOME/downloads/linux/kissllm/chroot-x86_64"
 
 TARET_ROOT="/mnt/kiss"
 
@@ -22,6 +22,6 @@ for dir in $(doas \ls -1 "${BACKUP_ROOT}"); do
         echo "Failed to copy '${BACKUP_ROOT}/$dir'"
         exit 1
     else
-        echo "Succeeded to copy '${BACKUP_ROOT}/$dir'"
+        echo "Succeeded in copying '${BACKUP_ROOT}/$dir'"
     fi
 done

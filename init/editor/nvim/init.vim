@@ -53,15 +53,17 @@ let g:_fixed_tips_width          = 27
 let g:_use_terminal_transparent  = 1
 let g:_use_dynamic_color         = 1
 let g:_disable_direction_key     = 1
-let g:_use_wl_clipboard          = 1
+if ! has('nvim')
+    let g:_use_wl_clipboard      = 1
+elseif exists('g:_use_wl_clipboard')
+    unlet g:_use_wl_clipboard
+endif
 let g:_log_one_line              = 0
 let g:_job_start                 = has('nvim') ? 'jobstart' : 'job_start'
 
 let g:debug                      = 1
 let g:navi_protect               = 1
 let g:polyglot_disabled          = ['markdown']
-
-
 
 " truncate the log file
 silent! execute '!printf "\n\n"' . ' >> ' . g:_log_address . ' 2>&1 & > /dev/null'
@@ -564,30 +566,31 @@ filetype off
 
 
 let g:vim_packages_use = {}
-let g:vim_packages_use['morhetz/gruvbox']                                = {}
-let g:vim_packages_use['kristijanhusak/vim-packager']                    = { 'type' : 'opt' }
-let g:vim_packages_use['vimwiki/vimwiki']                                = { 'type' : 'opt' }
-let g:vim_packages_use['Shougo/unite-outline']                           = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-surround']                             = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-repeat']                               = { 'type' : 'opt' }
-let g:vim_packages_use['tpope/vim-scriptease']                           = { 'type' : 'opt' }
-let g:vim_packages_use['junegunn/vader.vim']                             = { 'type' : 'opt' }
-let g:vim_packages_use['drmingdrmer/xptemplate']                         = { 'type' : 'opt' }
+let g:vim_packages_use['morhetz/gruvbox']                                 = {}
+let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'opt' }
+let g:vim_packages_use['kristijanhusak/vim-packager']                     = { 'type' : 'opt' }
+let g:vim_packages_use['vimwiki/vimwiki']                                 = { 'type' : 'opt' }
+let g:vim_packages_use['Shougo/unite-outline']                            = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-surround']                              = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-repeat']                                = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-scriptease']                            = { 'type' : 'opt' }
+let g:vim_packages_use['junegunn/vader.vim']                              = { 'type' : 'opt' }
+let g:vim_packages_use['drmingdrmer/xptemplate']                          = { 'type' : 'opt' }
 " let g:vim_packages_use['rscarvalho/OpenProject.vim']                 = { 'type' : 'opt' }  " "cd" to that directory
-let g:vim_packages_use['kasandell/Code-Pull']                            = { 'type' : 'opt' }
-let g:vim_packages_use['vim-scripts/genutils']                           = { 'type' : 'opt' }
-let g:vim_packages_use['benmills/vimux']                                 = { 'type' : 'opt' }
-let g:vim_packages_use['itchyny/lightline.vim']                          = { 'type' : 'opt' }  " Status line
-let g:vim_packages_use['Yggdroot/indentLine']                            = { 'type' : 'opt' }  " File format
+let g:vim_packages_use['kasandell/Code-Pull']                             = { 'type' : 'opt' }
+let g:vim_packages_use['vim-scripts/genutils']                            = { 'type' : 'opt' }
+let g:vim_packages_use['benmills/vimux']                                  = { 'type' : 'opt' }
+let g:vim_packages_use['itchyny/lightline.vim']                           = { 'type' : 'opt' }  " Status line
+let g:vim_packages_use['Yggdroot/indentLine']                             = { 'type' : 'opt' }  " File format
 " Coflicts with buffergator
-let g:vim_packages_use['tpope/vim-sleuth']                               = { 'type' : 'opt' }
+let g:vim_packages_use['tpope/vim-sleuth']                                = { 'type' : 'opt' }
 " Insert condition here means telling manager to remove the plugin's local copy
 " Using redir in execute triggers an error in vim
 " if exists('g:_use_indent_guides')
-let g:vim_packages_use['nathanaelkane/vim-indent-guides']                = { 'type' : 'opt' }  " File format visible
+let g:vim_packages_use['nathanaelkane/vim-indent-guides']                 = { 'type' : 'opt' }  " File format visible
 " endif
 " Just work on vim, not neovim
-let g:vim_packages_use['janlazo/vim-bang-terminal']                      = { 'type' : 'opt' }
+let g:vim_packages_use['janlazo/vim-bang-terminal']                       = { 'type' : 'opt' }
 " can't deal with writable permission issues
 " The sessions directory '$SHARE_PREFIX/init/editor/vim/pack/packager/start/' isn't writable!
 " let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
@@ -598,35 +601,34 @@ if has("cscope")
         \ 'opts': { 'type' : 'start', 'requires' : {'name': 'trailblazing/boot', 'opts': {'type': 'start'} } } } }
 endif
 
-let g:vim_packages_use['airblade/vim-gitgutter']                         = { 'type' : 'opt' }
-let g:vim_packages_use['lifepillar/vim-mucomplete']                      = { 'type' : 'opt' }  " Code completion
-let g:vim_packages_use['Shougo/ddc.vim']                                 = { 'type' : 'opt' }
-let g:vim_packages_use['vim-denops/denops.vim']                          = { 'type' : 'opt' }
-let g:vim_packages_use['roman/golden-ratio']                             = { 'type' : 'opt' }  " File format
-let g:vim_packages_use['sbdchd/neoformat']                               = { 'type' : 'start' }
+let g:vim_packages_use['airblade/vim-gitgutter']                          = { 'type' : 'opt' }
+let g:vim_packages_use['lifepillar/vim-mucomplete']                       = { 'type' : 'opt' }  " Code completion
+let g:vim_packages_use['Shougo/ddc.vim']                                  = { 'type' : 'opt' }
+let g:vim_packages_use['vim-denops/denops.vim']                           = { 'type' : 'opt' }
+let g:vim_packages_use['roman/golden-ratio']                              = { 'type' : 'opt' }  " File format
 
-" Tons of errors with something not found
-let g:vim_packages_use['trailblazing/mkdx']                              = { 'type' : 'opt' }
+" Randerig not stable.
+let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'opt' }
 
 if exists('g:_use_fern')
-    let g:vim_packages_use['lambdalisue/fern.vim']                       = { 'type' : 'opt' }
-    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'opt', 'for' : 'clojure' }
-    let g:vim_packages_use['lambdalisue/fern-hijack.vim']                = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']   = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-git-status.vim']            = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-renderer-nerdfont.vim']     = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-ssh']                       = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-bookmark.vim']              = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']           = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim'] = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']      = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']    = { 'type' : 'opt' }
-    let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']     = { 'type' : 'opt' }
-    let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']     = { 'type' : 'opt' }
-    let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim'] = { 'type' : 'opt' }
-    let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']     = { 'type' : 'opt' }
-    let g:vim_packages_use['LumaKernel/fern-mapping-fzf.vim']            = { 'type' : 'opt' }
-    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']             = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern.vim']                        = { 'type' : 'opt' }
+    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']              = { 'type' : 'opt', 'for' : 'clojure' }
+    let g:vim_packages_use['lambdalisue/fern-hijack.vim']                 = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-project-top.vim']    = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-git-status.vim']             = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-renderer-nerdfont.vim']      = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-ssh']                        = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-bookmark.vim']               = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-git.vim']            = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-mark-children.vim']  = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-mapping-quickfix.vim']       = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-comparator-lexical.vim']     = { 'type' : 'opt' }
+    let g:vim_packages_use['lambdalisue/fern-renderer-devicons.vim']      = { 'type' : 'opt' }
+    let g:vim_packages_use['hrsh7th/fern-mapping-call-function.vim']      = { 'type' : 'opt' }
+    let g:vim_packages_use['hrsh7th/fern-mapping-collapse-or-leave.vim']  = { 'type' : 'opt' }
+    let g:vim_packages_use['LumaKernel/fern-mapping-reload-all.vim']      = { 'type' : 'opt' }
+    let g:vim_packages_use['LumaKernel/fern-mapping-fzf.vim']             = { 'type' : 'opt' }
+    let g:vim_packages_use['liquidz/vim-iced-fern-debugger']              = { 'type' : 'opt' }
 endif
 
 " let g:vim_packages_use['autozimu/LanguageClient-neovim']             = { 'do'   : 'bash install.sh' }
@@ -693,13 +695,17 @@ endif
 " let g:vim_packages_use['moll/vim-bbye']                              = { 'type' : 'start' }
 " let g:vim_packages_use['lambdalisue/suda.vim']                       = { 'type' : 'start' }
 
+let g:vim_packages_use['sbdchd/neoformat']                                = { 'type' : 'start' }
+
+" Tons of errors with something not found
+let g:vim_packages_use['trailblazing/mkdx']                               = { 'type' : 'start' }
 " Cutlass overrides the delete operations to actually just delete and not affect the current yank
 let g:vim_packages_use['svermeulen/vim-cutlass']                          = { 'type' : 'start' }
 let g:vim_packages_use['google/vim-maktaba']                              = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-dispatch']                              = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-commentary']                            = { 'type' : 'start' }
 if exists("g:_use_wl_clipboard")
-    " Replaced with
+    " Replaced with on neovim
     " use { 'matveyt/neoclip' }
     " in g:lua_config_dir . "/plugins.lua"
     let g:vim_packages_use['jasonccox/vim-wayland-clipboard']                 = { 'type' : 'start' }
@@ -726,7 +732,6 @@ let g:vim_packages_use['liuchengxu/vim-which-key']                        = { 't
 
 let g:vim_packages_use['lambdalisue/nerdfont.vim']                        = { 'type' : 'start' }
 
-
 " let g:vim_packages_use['terryma/vim-multiple-cursors']               = { 'type' : 'start' }  " obsoleted
 
 let g:vim_packages_use['hashivim/vim-terraform']                          = { 'type' : 'start' }
@@ -743,7 +748,6 @@ let g:vim_packages_use['mattn/emmet-vim']                                 = { 't
 " let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 
 let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 'type' : 'start' }
-let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'opt' }
 
 " let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
 
@@ -767,7 +771,7 @@ let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 't
 
 let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']             = { 'type' : 'start' }
 let g:vim_packages_use['mhinz/vim-galore']                                = { 'type' : 'start' }
-let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'start' }
+" let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'start' }
 let g:vim_packages_use['jgdavey/tslime.vim']                              = { 'type' : 'start' }
 let g:vim_packages_use['zdharma-continuum/zinit-vim-syntax']              = { 'type' : 'start' }
 let g:vim_packages_use['leafgarland/typescript-vim']                      = { 'type' : 'start' }
@@ -1429,9 +1433,15 @@ if has('nvim')
     " use updatetime instead if not defined
     let g:cursorhold_updatetime = 100
 
-    let g:lens#width_resize_max = 160
-    let g:lens#width_resize_min = 20
-    let g:lens#height_resize_max = 120
+    let g:lens#disabled = 1
+    let g:lens#disabled_filetypes = ['nerdtree', 'fzf', 'tagbar', 'buffergator']
+    " let g:lens#width_resize_max = 160
+    let g:lens#width_resize_max = 120
+    " let g:lens#width_resize_min = 20
+    let g:lens#width_resize_min = 40
+    " let g:lens#height_resize_max = 120
+    let g:lens#height_resize_max = 20
+    " let g:lens#height_resize_min = 5
     let g:lens#height_resize_min = 5
 
     let g:golden_ratio_exclude_nonmodifiable = 1
@@ -2195,10 +2205,12 @@ augroup color_scheme_refresh | au!
     " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
     autocmd VimEnter *
         \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
-        \ silent! execute '++nested colorscheme ' . g:scheme_name |
+        \ silent! execute 'colorscheme ' . g:scheme_name |
         \ endif
 
-    autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
+    " E492: Not an editor command: ++nested colorscheme lucid
+    " autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
+    autocmd VimEnter * silent! execute 'colorscheme ' . g:scheme_name
 augroup END
 
 set background=dark
@@ -2306,26 +2318,26 @@ if exists('g:_disable_direction_key')
     vnoremap <Right> <Nop>
     vnoremap <Up> <Nop>
 
-    nnoremap <silent> <Left>  :exe "vertical resize " . (winwidth(0) * 105/100)<cr>
-    nnoremap <silent> <Right> :exe "vertical resize " . (winwidth(0) * 100/105)<cr>
-    nnoremap <silent> <Up>    :exe "resize " . (winheight(0) * 105/100)<cr>
-    nnoremap <silent> <Down>  :exe "resize " . (winheight(0) * 100/105)<cr>
+    nnoremap <silent> <Left>  :exe "vertical resize " . (winwidth(0) + 10)<cr>
+    nnoremap <silent> <Right> :exe "vertical resize " . (winwidth(0) - 10)<cr>
+    nnoremap <silent> <Up>    :exe "resize " . (winheight(0) + 5)<cr>
+    nnoremap <silent> <Down>  :exe "resize " . (winheight(0) - 5)<cr>
 
     " One-hand page up and down
-    " noremap <c-d> d
+    " nnoremap <c-d> d
 
     " Will slow down 'undo'
-    " noremap uu <c-u>
-    noremap u <c-u>
-    noremap <c-u> u
+    " nnoremap uu <c-u>
+    nnoremap u <c-u>
+    nnoremap <c-u> u
 
-    " noremap d <c-d>
+    " nnoremap d <c-d>
     " Easy to wrong touch . key
-    noremap , <c-d>
-    " noremap mm <c-d>
+    nnoremap , <c-d>
+    " nnoremap mm <c-d>
     " Mapping m key will cause the cursor to jump when switching windows
     " And xx keys will not work
-    " noremap m <c-d>
+    " nnoremap m <c-d>
 
 endif
 
@@ -2678,35 +2690,36 @@ endif | " g:navi_protect
 
 " "don't flush clipboard register ______________________________________________________________________________"
 " "don't flush clipboard register ______________________________________________________________________________"
-
+" On neovim, current toolchain is : wayclip [uninstalled wl-clipboard system-wide], neoclip.lua, tmux clipboard
+" run :checkhealth provider to look into it
 if exists("g:_use_wl_clipboard")
     " https://github.com/noocsharp/wayclip
     " waycopy/waypaste can not across different users
     " https://www.reddit.com/r/vim/comments/hge0qw/for_those_who_are_still_struggling_with_waylands/
     if ! empty($WAYLAND_DISPLAY)
         if has('nvim')
-            " function! s:paste_list_plus()
-            "     let l:result_list = []
-            "     let l:list_src = systemlist(['wl-paste', '--no-newline'])
-            "     for item in l:list_src
-            "         " https://stackoverflow.com/questions/42326732/get-rid-of-in-vim-output-from-system
-            "         " let l:tr_item = strtrans(substitute(item, "\n\\+$", "", ""))
-            "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"'. item . '"', ')'])
-            "         let l:tr_item = boot#chomp(item)
-            "         call add(l:result_list, l:tr_item)
-            "     endfor
-            "     return l:result_list
-            " endfunction
-            " function! s:paste_list_asterisk()
-            "     let l:result_list = []
-            "     let l:list_src = systemlist(['wl-paste', '--no-newline', '--primary'])
-            "     for item in l:list_src
-            "         " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"' . item . '"', ')'])
-            "         let l:tr_item = boot#chomp(item)
-            "         call add(l:result_list, l:tr_item)
-            "     endfor
-            "     return l:result_list
-            " endfunction
+            function! s:paste_list_plus()
+                let l:result_list = []
+                let l:list_src = systemlist(['wl-paste', '--no-newline'])
+                for item in l:list_src
+                    " https://stackoverflow.com/questions/42326732/get-rid-of-in-vim-output-from-system
+                    " let l:tr_item = strtrans(substitute(item, "\n\\+$", "", ""))
+                    " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"'. item . '"', ')'])
+                    let l:tr_item = boot#chomp(item)
+                    call add(l:result_list, l:tr_item)
+                endfor
+                return l:result_list
+            endfunction
+            function! s:paste_list_asterisk()
+                let l:result_list = []
+                let l:list_src = systemlist(['wl-paste', '--no-newline', '--primary'])
+                for item in l:list_src
+                    " let l:tr_item = system(['tr', '-d', '"\r"', '<', '<(', 'echo', '"' . item . '"', ')'])
+                    let l:tr_item = boot#chomp(item)
+                    call add(l:result_list, l:tr_item)
+                endfor
+                return l:result_list
+            endfunction
             " let g:clipboard =
             "     \ { 'name': 'wayland-strip-carriage',
             "     \   'copy':
@@ -2714,8 +2727,8 @@ if exists("g:_use_wl_clipboard")
             "     \       '*': 'wl-copy --foreground --type text/plain --primary',
             "     \ },
             "     \   'paste':
-            "     \ {     '+': {-> s:paste_list_plus()},
-            "     \       '*': {-> s:paste_list_asterisk()},
+            "     \ {     '+': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline']))},
+            "     \       '*': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline', '--primary']))},
             "     \ },
             "     \   'cache_enabled': 1,
             "     \ }
@@ -2726,8 +2739,8 @@ if exists("g:_use_wl_clipboard")
                 \       '*': 'wl-copy --foreground --type text/plain --primary',
                 \ },
                 \   'paste':
-                \ {     '+': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline']))},
-                \       '*': {-> system('tr -d "\r"', systemlist(['wl-paste', '--no-newline', '--primary']))},
+                \ {     '+': {-> s:paste_list_plus()},
+                \       '*': {-> s:paste_list_asterisk()},
                 \ },
                 \   'cache_enabled': 1,
                 \ }
@@ -2751,6 +2764,7 @@ endif
 " https://stackoverflow.com/questions/14635295/vim-takes-a-very-long-time-to-start-up
 " nvim posts error on this:
 " set clipboard=exclude:.*
+
 " set clipboard+=unnamed
 set clipboard+=unnamedplus
 
@@ -4573,6 +4587,7 @@ let g:mkdx#settings = { 'highlight': { 'enable': 1 },
     \ 'links': { 'external': { 'enable': 1 } },
     \ 'toc': { 'text': 'Table of Contents', 'update_on_write': 1 },
     \ 'fold': { 'enable': 1 } }
+
 let g:polyglot_disabled = ['markdown'] " for vim-polyglot users, it loads Plasticboy's markdown
 " plugin which unfortunately interferes with mkdx list indentation.
 
@@ -4904,7 +4919,7 @@ command! -nargs=0 L silent! :call lens#run()
 
 " https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
 " Don't resize automatically.
-let g:golden_ratio_autocommand = 0
+let g:golden_ratio_autocommand = 1
 " Mnemonic: - is next to =, but instead of resizing equally, all windows are
 " resized to focus on the current.
 nmap <c-w>- <Plug>(golden_ratio_resize)
@@ -5285,7 +5300,7 @@ if ! has('nvim') && empty($TMUX) " && (exists('g:loaded_minpac') || exists('g:lo
         " au VimEnter,Colorscheme * call lightline#disable() | call lightline#enable()
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
             \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() <bar> redraw!
+            \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() | redraw!
     augroup END
 else
     augroup lightline_hl
@@ -5301,8 +5316,8 @@ else
     augroup indent_blankline_hl
         au!
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
-            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable <bar> redraw!
+            \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
+            \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
         " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
     augroup END
 endif
@@ -5314,8 +5329,8 @@ if exists('g:_use_indent_guides')
         " au BufEnter,BufWritePost,VimEnter * silent execute ":normal! \<Plug>IndentGuidesEnable"
         " autocmd BufEnter <buffer> call feedkeys("\<Plug>IndentGuidesEnable", x)
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
-            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested :IndentGuidesEnable
+            \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
+            \BufReadPost,BufWritePost,ColorScheme * ++nested :IndentGuidesEnable
     augroup END
 endif
 
@@ -5339,6 +5354,11 @@ endif
 " augroup END
 
 " execute ':ReloadScript ' . g:map_keys_plugin
+
+" https://stackoverflow.com/questions/31595411/how-to-clear-the-screen-after-exit-vim
+augroup clear_terminal | au!
+    au VimLeave * :!clear
+augroup END
 
 " "keep above code block at the very end of the file ___________________________________________________________"
 
