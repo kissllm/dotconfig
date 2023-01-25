@@ -14,9 +14,9 @@ else
 fi
 
 if [ "$(/usr/bin/whoami)" = "root" ]; then
-    copy="rsync -aqz"
+    copy="rsync -aqz --delete-after"
 else
-    copy="doas rsync -aqz"
+    copy="doas rsync -aqz --delete-after"
 fi
 
 [ -d "${BACKUP_ROOT}" ] || \mkdir -p "${BACKUP_ROOT}"

@@ -1,57 +1,5 @@
 #!/bin/sh
 
-# In busybox, default SHELL=-ash
-command -v "${SHELL}" > /dev/null 2>&1 ||
-export SHELL=$(which ash)
-
-export _PATH_BSHELL=$(which ash)
-
-# Set font when running in console. For hidpi screen
-{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "${TMUX+x}" ]; } && {
-    tty_name="$(tty)"
-    case $tty_name in
-        *"tty"*)
-            # consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
-            consolefonts_dir="/usr/share/consolefonts"
-            # terminus-font
-            if [ -f "${consolefonts_dir}/ter-124b.psf.gz" ]; then
-                setfont "${consolefonts_dir}/ter-124b.psf.gz"
-            elif [ -f "/mnt/setfont/consolefonts/ter-124b.psf.gz" ]; then
-                setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
-                # Use default font
-            elif [ -f "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz" ]; then
-                setfont "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz"
-            fi
-    esac
-}
-
-[ ! -z "${CC+x}" ]  || CC=/usr/bin/clang
-[ ! -z "${CXX+x}" ] || CXX=/usr/bin/clang++
-
-search_config="/usr/include/c++/v1/__config"
-[ ! -f "$search_config" ] ||
-# search_config="$(grep -L "experimental" $(find /usr/include -type f -name "__config"))"
-search_config="$(find /usr/include -type f -name "__config" | grep -v "experimental")"
-# /usr/include/c++/v1/__config
-# search_config="$(find /usr/include -type f -name "__config" -exec echo {} +)"
-# /usr/include/c++/v1/experimental/__config
-# /usr/include/c++/v1/__config
-for config_file in $search_config; do
-    [ ! -f "$config_file" ] || {
-        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " | awk '{print $3}');
-        [ -z "${_LIBCPP_VERSION+x}" ] || {
-            export _LIBCPP_VERSION="$_LIBCPP_VERSION"
-            break
-        }
-    }
-done
-
-[ ! -z "${OSTYPE+x}" ] ||
-OSTYPE=$(ldd --version 2>&1 | grep musl | awk '{print $1}')
-! expr "$OSTYPE" : "musl" 1>/dev/null ||
-CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 $CXXFLAGS"
-# CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 -D_LIBCPP_HAS_MUSL_LIBC=1 $CXXFLAGS"
-
 # https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
 # https://tldp.org/LDP/abs/html/parameter-substitution.html
 # "grep -q" "$? -eq 0" could be a good solution?
@@ -135,6 +83,63 @@ path_prepend () {
     [ -z "${extend##*:$2:*}" ] || eval "export $1=$2\${$1:+\":\$$1\"}"
 }
 
+path_prepend PATH "$SHARE_PREFIX/init"
+
+[ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
+
+# In busybox, default SHELL=-ash
+command -v "${SHELL}" > /dev/null 2>&1 ||
+export SHELL=$(which ash)
+
+export _PATH_BSHELL=$(which ash)
+
+# Set font when running in console. For hidpi screen
+{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "${TMUX+x}" ]; } && {
+    tty_name="$(tty)"
+    case $tty_name in
+        *"tty"*)
+            # consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
+            consolefonts_dir="/usr/share/consolefonts"
+            # terminus-font
+            if [ -f "${consolefonts_dir}/ter-124b.psf.gz" ]; then
+                setfont "${consolefonts_dir}/ter-124b.psf.gz"
+            elif [ -f "/mnt/setfont/consolefonts/ter-124b.psf.gz" ]; then
+                setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
+                # Use default font
+            elif [ -f "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz" ]; then
+                setfont "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz"
+            fi
+    esac
+}
+
+[ ! -z "${CC+x}" ]  || CC=/usr/bin/clang
+[ ! -z "${CXX+x}" ] || CXX=/usr/bin/clang++
+
+search_config="/usr/include/c++/v1/__config"
+[ ! -f "$search_config" ] ||
+# search_config="$(grep -L "experimental" $(find /usr/include -type f -name "__config"))"
+search_config="$(find /usr/include -type f -name "__config" | grep -v "experimental")"
+# /usr/include/c++/v1/__config
+# search_config="$(find /usr/include -type f -name "__config" -exec echo {} +)"
+# /usr/include/c++/v1/experimental/__config
+# /usr/include/c++/v1/__config
+for config_file in $search_config; do
+    [ ! -f "$config_file" ] || {
+        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " | awk '{print $3}');
+        [ -z "${_LIBCPP_VERSION+x}" ] || {
+            export _LIBCPP_VERSION="$_LIBCPP_VERSION"
+            break
+        }
+    }
+done
+
+[ ! -z "${OSTYPE+x}" ] ||
+OSTYPE=$(ldd --version 2>&1 | grep musl | awk '{print $1}')
+! expr "$OSTYPE" : "musl" 1>/dev/null ||
+CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 $CXXFLAGS"
+# CXXFLAGS="-DLIBCXX_HAS_MUSL_LIBC=1 -D_LIBCPP_HAS_MUSL_LIBC=1 $CXXFLAGS"
+
+
 path_prepend PATH "/build/os"
 
 # path_prepend PATH $macPortsDir/sbin
@@ -156,15 +161,6 @@ path_prepend PATH "/usr/lib/ccache/bin"
 
 # # For chroot tools I put it there
 # path_prepend PATH "/mnt"
-
-# share folder initialization
-if [ -d "/mnt/init" ]; then
-    export SHARE_PREFIX="/mnt"
-    path_prepend PATH "/mnt/init"
-elif [ -d "/opt/init" ]; then
-    export SHARE_PREFIX="/opt"
-    path_prepend PATH "/opt/init"
-fi
 
 path_prepend PATH "${SHARE_PREFIX}/local/bin"
 
@@ -318,10 +314,9 @@ fi
 
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
-export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$(id -u)"
-# export TMUX_TMPDIR="${TMPDIR}-${HOSTNAME}"
+# export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$(id -u)"
+export TMUX_TMPDIR="${TMPDIR}-${HOSTNAME}"
 # export TMUX_TMPDIR="${TMPDIR}"
-# if [ ! -d "${TMUX_TMPDIR}" ]; then command mkdir -p "${TMUX_TMPDIR}"; fi
 # If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
 alias tmux='command rm -f "$HOME/tmux*.log"; \
 [ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"; \
@@ -404,17 +399,6 @@ export MOZ_WEBRENDER=1
 export MOZ_USE_XINPUT2=1
 export MOZ_DBUS_REMOTE=1
 
-# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
-# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
-# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
-# XDG_RUNTIME_DIR defined in /etc/profile.d/xdg_runtime_dir.sh
-[ -e "$HOME/.wayland_display" ] || touch "$HOME/.wayland_display"
-if [ ! -z "${WAYLAND_DISPLAY+x}" ] && [ -z "$(cat $HOME/.wayland_display)" ]; then
-    printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
-elif [ -n "$(cat $HOME/.wayland_display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
-    export WAYLAND_DISPLAY="$(cat $HOME/.wayland_display)"
-fi
-
 export XDG_SCREENSHOTS_DIR=$HOME/pictures/screenshots
 export XDG_PICTURES_DIR=$HOME/pictures/screenshots
 
@@ -451,17 +435,15 @@ export XKB_DEFAULT_MODEL=pc101
 export XKB_DEFAULT_OPTIONS=grp:win_space_toggle
 
 
-# vinit
-export VINIT_HOME_DIR="${SHARE_PREFIX}/vinit"
-# tinit
-export TINIT_HOME_DIR="${SHARE_PREFIX}/tinit"
+# vim/nvim init
+export VINIT_HOME_DIR="${SHARE_PREFIX}/init/editor"
+# tmux init
+export TINIT_HOME_DIR="${SHARE_PREFIX}/init/terminal"
 export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
 # export TMUX_DIR=$HOME/.tmux
-export TMUX_DIR=${SHARE_PREFIX}/tinit/tmux
+export TMUX_DIR=${SHARE_PREFIX}/init/terminal
 
 [ ! -d "${SHARE_PREFIX}/.void-packages" ] || export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
-
-[ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
 
 
 # https://github.com/caenrique/nvim-toggle-terminal
@@ -482,51 +464,5 @@ export EDITOR=v
 
 export INITRAMFS=/build/os/initramfs
 export PIP_CERT=$HOME/.cert/python-cert.pem
-
-# https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
-export pwd_length=13
-export TRIMMED='printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$pwd_length})|\1...\2|"'
-
-# https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
-# If not running interactively, don't do anything
-[ ! -z "${PS1+x}" ] || return
-# set a fancy prompt (non-color, overwrite the one in /etc/profile)
-if [ $(id -u) -eq 0 ]; then
-    # root user
-    # export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
-    # export PS1='\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
-    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;39m[\w]\e[m \$ "
-    # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-    # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
-    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;24m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-else
-    # non root
-    # export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
-    # export PS1='\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
-    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;32m[\w]\e[m \$ "
-    # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-    # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;17m\][$(eval $TRIMMED)]\[\e[m\] \$ '
-    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;32m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
-fi
-
-# How do tell I'm runing in a chroot?
-# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
-
-# No root needed
-# [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ]
-# root permission needed
-# if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
-#     echo "We are chrooted!"
-# else
-#     echo "Business as usual"
-# fi
-
-# [ $(id -u) -eq 0 ] ||
-[ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ] ||
-[ ! -z "${TMUX+x}" ] ||
-{ { [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]; } && [ $tty_num = "1" ]; } ||
-exec tmux new -As .
 
 # set ts=4 sw=4 tw=0 et :

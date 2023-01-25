@@ -5,9 +5,12 @@
 [ ! -z "${LOGNAME+x}" ] ||
 export LOGNAME="$(/usr/bin/whoami)"
 
-[ ! -z "${HOME+x}" ] ||
-export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" '{if ($1==v) print $6}' /etc/passwd)"
-
+# echo "Original \$HOME = $HOME"
+[ ! -z "${HOME:+x}" ] || {
+    export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" '{if ($1==v) print $6}' /etc/passwd)"
+    echo "Fixed \$HOME = $HOME"
+}
+export HOME=$HOME
 export LLVM_IAS=1
 export LLVM=1
 

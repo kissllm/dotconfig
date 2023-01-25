@@ -68,7 +68,11 @@
 #   ln -sf ${SHARE_PREFIX}/init/shell/zsh/zprofile ${HOME}/.zprofile
 # fi
 
-. /etc/profile.d/xdg_runtime_dir.sh
+[ ! -f "$HOME/.xdg_runtime_dir" ] ||
+\rm -f "$HOME/.xdg_runtime_dir"
+[ "$(readlink "$HOME/.xdg_runtime_dir")" = "${SHARE_PREFIX}/init/xdg_runtime_dir" ] ||
+\ln -sf "${SHARE_PREFIX}/init/xdg_runtime_dir" "$HOME/.xdg_runtime_dir"
+. "$HOME/.xdg_runtime_dir"
 
 # ${XDG_CONFIG_HOME}/wayland/env -> ${SHARE_PREFIX}/init/wayland/env
 [ ! -f "${XDG_CONFIG_HOME}/wayland/env" ] ||

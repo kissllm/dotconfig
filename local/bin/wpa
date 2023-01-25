@@ -1,5 +1,6 @@
 #!/bin/sh
 
+[ $(id -u) -ne 0 ] || { echo "We don't save hardcoded config files in root user's folder"; exit 1; }
 config="$1"
 [ ! -z "$1" ] ||
 config=$HOME/.config/wpa_supplicant/wpa_supplicant.conf
