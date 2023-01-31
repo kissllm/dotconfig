@@ -9,12 +9,13 @@ GRUB_DISABLE_RECOVERY=true
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 "
 
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro loglevel=4 slub_debug=P page_poison=1 "
-GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nouveau.modeset=0 selinux=0 pci=nommconf "
+# GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nouveau.modeset=0 selinux=0 pci=nommconf "
+GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 "
 
 # nvidia-drm and nouveau modeset leads CPU throttles
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nvidia-drm.modeset=1 nouveau.modeset=0"
 # GRUB_CMDLINE_LINUX=" console=ttyS1,19200n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
-GRUB_CMDLINE_LINUX=" console=ttyS1,19200n8 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
+GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
 # GRUB_CMDLINE_LINUX=" console=ttyS0,38400n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
 # GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
 

@@ -133,6 +133,7 @@ local use_rocks = nil
 local config_packer = {}
 -- https://github.com/wbthomason/packer.nvim/issues/4
 local function init()
+    -- $ nvim ~/.cache/nvim/plugin/packer_compiled.lua
     if packer == nil then
         packer = require("packer")
         util   = require("packer.util")
@@ -404,8 +405,10 @@ local function init()
     --     end,
     -- })
 
+    -- needs bash
     use {
         "vimpostor/vim-tpipeline",
+        opt = true,
         disable = true
     }
 
@@ -1044,55 +1047,55 @@ local function init()
         config = function()
             -- init.lua
             vim.g.symbols_outline = {
-                highlight_hovered_item = true,
-                show_guides = true,
-                auto_preview = true,
-                position = "right",
-                relative_width = true,
-                width = 25,
-                auto_close = false,
-                show_numbers = false,
-                show_relative_numbers = false,
-                show_symbol_details = true,
-                preview_bg_highlight = "Pmenu",
+                highlight_hovered_item  = true,
+                show_guides             = true,
+                auto_preview            = true,
+                position                = "right",
+                relative_width          = true,
+                width                   = 25,
+                auto_close              = false,
+                show_numbers            = false,
+                show_relative_numbers   = false,
+                show_symbol_details     = true,
+                preview_bg_highlight    = "Pmenu",
                 keymaps = { -- These keymaps can be a string or a table for multiple keys
-                    close = { "<Esc>", "q" },
-                    goto_location = "<Cr>",
-                    focus_location = "o",
-                    hover_symbol = "<C-space>",
-                    toggle_preview = "K",
-                    rename_symbol = "r",
-                    code_actions = "a",
+                    close           = { "<Esc>", "q" },
+                    goto_location   = "<Cr>",
+                    focus_location  = "o",
+                    hover_symbol    = "<C-space>",
+                    toggle_preview  = "K",
+                    rename_symbol   = "r",
+                    code_actions    = "a",
                 },
                 lsp_blacklist = {},
                 symbol_blacklist = {},
                 symbols = {
-                    File = { icon = "", hl = "TSURI" },
-                    Module = { icon = "", hl = "TSNamespace" },
-                    Namespace = { icon = "", hl = "TSNamespace" },
-                    Package = { icon = "", hl = "TSNamespace" },
-                    Class = { icon = "𝓒", hl = "TSType" },
-                    Method = { icon = "ƒ", hl = "TSMethod" },
-                    Property = { icon = "", hl = "TSMethod" },
-                    Field = { icon = "", hl = "TSField" },
-                    Constructor = { icon = "", hl = "TSConstructor" },
-                    Enum = { icon = "ℰ", hl = "TSType" },
-                    Interface = { icon = "ﰮ", hl = "TSType" },
-                    Function = { icon = "", hl = "TSFunction" },
-                    Variable = { icon = "", hl = "TSConstant" },
-                    Constant = { icon = "", hl = "TSConstant" },
-                    String = { icon = "𝓐", hl = "TSString" },
-                    Number = { icon = "#", hl = "TSNumber" },
-                    Boolean = { icon = "⊨", hl = "TSBoolean" },
-                    Array = { icon = "", hl = "TSConstant" },
-                    Object = { icon = "⦿", hl = "TSType" },
-                    Key = { icon = "🔐", hl = "TSType" },
-                    Null = { icon = "NULL", hl = "TSType" },
-                    EnumMember = { icon = "", hl = "TSField" },
-                    Struct = { icon = "𝓢", hl = "TSType" },
-                    Event = { icon = "🗲", hl = "TSType" },
-                    Operator = { icon = "+", hl = "TSOperator" },
-                    TypeParameter = { icon = "𝙏", hl = "TSParameter" },
+                    File           = { icon  = "", hl     = "TSURI" },
+                    Module         = { icon  = "", hl     = "TSNamespace" },
+                    Namespace      = { icon  = "", hl     = "TSNamespace" },
+                    Package        = { icon  = "", hl     = "TSNamespace" },
+                    Class          = { icon  = "𝓒", hl     = "TSType" },
+                    Method         = { icon  = "ƒ", hl     = "TSMethod" },
+                    Property       = { icon  = "", hl     = "TSMethod" },
+                    Field          = { icon  = "", hl     = "TSField" },
+                    Constructor    = { icon  = "", hl     = "TSConstructor" },
+                    Enum           = { icon  = "ℰ", hl     = "TSType" },
+                    Interface      = { icon  = "ﰮ", hl     = "TSType" },
+                    Function       = { icon  = "", hl     = "TSFunction" },
+                    Variable       = { icon  = "", hl     = "TSConstant" },
+                    Constant       = { icon  = "", hl     = "TSConstant" },
+                    String         = { icon  = "𝓐", hl     = "TSString" },
+                    Number         = { icon  = "#", hl     = "TSNumber" },
+                    Boolean        = { icon  = "⊨", hl     = "TSBoolean" },
+                    Array          = { icon  = "", hl     = "TSConstant" },
+                    Object         = { icon  = "⦿", hl     = "TSType" },
+                    Key            = { icon  = "🔐", hl    = "TSType" },
+                    Null           = { icon  = "NULL", hl  = "TSType" },
+                    EnumMember     = { icon  = "", hl     = "TSField" },
+                    Struct         = { icon  = "𝓢", hl     = "TSType" },
+                    Event          = { icon  = "🗲", hl     = "TSType" },
+                    Operator       = { icon  = "+", hl     = "TSOperator" },
+                    TypeParameter  = { icon  = "𝙏", hl     = "TSParameter" },
                 },
             }
         end,
@@ -1127,6 +1130,47 @@ local function init()
         "antoinemadec/FixCursorHold.nvim",
         -- disable = true,
     })
+
+    -- https://github.com/is0n/tui-nvim
+    use {
+        'is0n/tui-nvim',
+        config = function()
+            require("tui-nvim").setup ({
+                -- File that is read from
+                -- useful for file managers
+                temp     = "/tmp/tui-nvim",
+
+                -- Command used to open files
+                method   = "edit",
+
+                -- Example of a mapping
+                mappings = {
+                    { "<ESC>", "<C-\\><C-n>:q<CR>" }
+                },
+
+                -- Execute functions
+                -- upon open/exit
+                on_open  = {},
+                on_exit  = {},
+
+                -- Window border (see ':h nvim_open_win')
+                border   = "rounded",
+
+                -- Highlight group for window/border (see ':h winhl')
+                borderhl = "Normal",
+                winhl    = "Normal",
+
+                -- Window transparency (see ':h winblend')
+                winblend = 0,
+
+                -- Num from '0 - 1' for measurements
+                height   = 0.8,
+                width    = 0.8,
+                y        = 0.5,
+                x        = 0.5
+            })
+        end
+    }
 
     -- Automatically set up your configuration after cloning packer.nvim
     -- Put this at the end after all plugins

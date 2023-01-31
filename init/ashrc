@@ -92,8 +92,7 @@ done
 
 # [ $(id -u) -eq 0 ] ||
 [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ] ||
-[ ! -z "${TMUX+x}" ] ||
-# [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
+[ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
 [ "$parent_is_tmux" -eq "1" ] ||
 { { [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]; } && [ $tty_num = "1" ]; } ||
 exec tmux new -As .

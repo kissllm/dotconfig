@@ -1,9 +1,13 @@
 #!/bin/sh
 
+set -efE
+# trap 'Wont handle the "$FUNCNAME" at line "$LINENO"' ERR
+trap 'Wont handle the ERROR at line "$LINENO"' ERR
+
 # Host toolchain root
 HOST_ROOT=/usr
 extend=":$PATH:"
-[ -z "${extend##*:$HOST_ROOT:*}" ] || eval "export $PATH=$HOST_ROOT\${PATH:+\":\$$PATH\""
+[ -z "${extend##*:${HOST_ROOT}:*}" ] || eval "export PATH=${HOST_ROOT}\${PATH:+\":\$$PATH\"}"
 
 CFLAGS=""
 CXXFLAGS=""
@@ -35,7 +39,8 @@ export DISTDIR=${SHARE_PREFIX}/${TARGET}/make
 [ -d ${DISTDIR} ] || doas mkdir -p ${DISTDIR}
 
 export XDG_BIN=${SHARE_PREFIX}/local/bin
-[ -z "${extend##*:${XDG_BIN}:*}" ] || eval "export $PATH=${XDG_BIN}\${PATH:+\":\$$PATH\""
+extend=":$PATH:"
+[ -z "${extend##*:${XDG_BIN}:*}" ] || eval "export PATH=${XDG_BIN}\${PATH:+\":\$$PATH\"}"
 
 doas ln -sf `which lld`     $XDG_BIN/${CROSS_COMPILE}-ld
 doas ln -sf `which lld`     $XDG_BIN/${CROSS_COMPILE}-ld.lld
@@ -101,7 +106,7 @@ COMPILER_RESOURCE_DIR=$("$CC" --print-resource-dir)
 # export CXXFLAGS="$CXXFLAGS -resource-dir=${COMPILER_RESOURCE_DIR} -B${LLVM_BIN} -Os -fPIC -mcpu=x86-64"
 # x86 uses -march and -mtune instead of -mcpu.
 # https://groups.google.com/g/llvm-dev/c/2_o0Hp_b3V8/m/Xqv6UnceCgAJ
-export TOOL_CLANG_MAJOR_VERSION="$($CXX -dM -E -x c /dev/null | grep __clang_major__ | awk '{print $3}')"
+export TOOL_CLANG_MAJOR_VERSION=$($CXX -dM -E -x c /dev/null | grep __clang_major__ | awk '{print $3}')
 # HOST_CLANG_VERSION=$($CXX -v 2>&1 | grep version | awk '{print $4}')
 
 
@@ -229,7 +234,8 @@ LDFLAGS="${LDFLAGS} \
 # -stdlib=libc++ \
 
 # "uname -n" won't work in chroot
-[ "$(cat /etc/os-release | grep ^ID | awk 'BEGIN{ RS = ""; FS = "=" }{print $NF}')" = "alpine" ] || LDFLAGS="${LDFLAGS} -L/lib"
+[ "$(cat /etc/os-release | grep ^ID | awk 'BEGIN{ RS = ""; FS = "=" }{print $NF}')" = "alpine" ] ||
+LDFLAGS="${LDFLAGS} -L/lib"
 
 #     export CC=${HOST_ROOT}/bin/gcc
 #     export CXX=${HOST_ROOT}/bin/g++
@@ -247,28 +253,28 @@ CPPFLAGS="$CXXFLAGS"
 export CPPFLAGS="$CXXFLAGS"
 export LDFLAGS="${LDFLAGS}"
 
-[ -z "${USE_CMLFS+x}" ] || {
-# You may also set CFLAGS, CPPFLAGS, CXXFLAGS, and LDFLAGS
-# See build/toolchain/linux/unbundle/ in the Chromium source for more details.
-#
-# # Hack to allow clang to find the default cfi_blacklist.txt
-# export CXXFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
-# export CPPFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
-# export CFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
-# declare -A CML
-    CMLFS=${SHARE_PREFIX}/cmlfs
-    CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
-    export CMLFS=${CMLFS}
-    export CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
-    [ -d ${CML_BIN_DIR} ] || doas mkdir -p ${CML_BIN_DIR}
-
-    CML_BUILD_DIR=${BUILD_PREFIX}/toolchain/cmlfs
-    export CML_BUILD_DIR=${BUILD_PREFIX}/toolchain/cmlfs
-    [ -d ${CML_BUILD_DIR} ] || doas mkdir -p ${CML_BUILD_DIR}
-
-    CML_SRC_DIR=${SRC_PREFIX}/toolchain/cmlfs
-    export CML_SRC_DIR=${SRC_PREFIX}/toolchain/cmlfs
-}
-
-# For Chimera Linux
-[ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
+# [ -z "${USE_CMLFS+x}" ] || {
+# # You may also set CFLAGS, CPPFLAGS, CXXFLAGS, and LDFLAGS
+# # See build/toolchain/linux/unbundle/ in the Chromium source for more details.
+# #
+# # # Hack to allow clang to find the default cfi_blacklist.txt
+# # export CXXFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
+# # export CPPFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
+# # export CFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
+# # declare -A CML
+#     CMLFS=${SHARE_PREFIX}/cmlfs
+#     CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
+#     export CMLFS=${CMLFS}
+#     export CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
+#     [ -d ${CML_BIN_DIR} ] || doas mkdir -p ${CML_BIN_DIR}
+# 
+#     CML_BUILD_DIR=${BUILD_PREFIX}/toolchain/cmlfs
+#     export CML_BUILD_DIR=${BUILD_PREFIX}/toolchain/cmlfs
+#     [ -d ${CML_BUILD_DIR} ] || doas mkdir -p ${CML_BUILD_DIR}
+# 
+#     CML_SRC_DIR=${SRC_PREFIX}/toolchain/cmlfs
+#     export CML_SRC_DIR=${SRC_PREFIX}/toolchain/cmlfs
+# }
+# 
+# # For Chimera Linux
+# [ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"

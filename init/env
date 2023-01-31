@@ -414,9 +414,22 @@ export FONTCONFIG_PATH=/etc/fonts
 # https://vim.fandom.com/wiki/Using_vim_as_a_man-page_viewer_under_Unix
 # https://muru.dev/2015/08/28/vim-for-man.html
 # ~/.vim/ftplugin/man.vim
+
+# neovim is not stable and light-weight
+command -v /usr/bin/nvim > /dev/null 2>&1 ||
 export MANPAGER='/usr/bin/nvim --clean +Man!'
 export MANWIDTH=999
 
+# Unterminated quoted string
+# export MANPAGER="/bin/sh -c \"unset MANPAGER; col -b | vim -c 'set ft=man ts=4 nomod nolist nonu' -\""
+# export MANPAGER="/bin/sh -c \"unset MANPAGER; col -b -x | \
+# vim -R -c 'set ft=man ts=4 nomod nolist nonu' \
+# -c 'map q :q<cr>' -c 'map <space> <c-d>' \
+# -c 'map u <c-u> -c 'map K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>' -\""
+
+man() {
+    vim -c 'filetype plugin on' -c 'set ft=man ts=4 nomod nolist nonu' -c "Man $*"
+}
 # https://superuser.com/questions/852914/reload-all-running-zsh-instances
 TRAPUSR1() {
     [ -o INTERACTIVE ] && {

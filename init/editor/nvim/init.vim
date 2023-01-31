@@ -1840,6 +1840,26 @@ augroup END
 
 " https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
 :cabbrev h vert h
+
+" help W10
+augroup read_only | au!
+    au BufEnter,FileChangedRO * set noro
+augroup end
+
+function! s:write_generic()
+    if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
+        write
+    else
+        call s:save_file_via_doas()
+    endif
+endfunction
+
+:cabbrev w silent! call <sid>write_generic()<cr>
+" :cabbrev w
+"     \ silent! if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
+"     \ <bar> :write<cr> <bar> else
+"     \ <bar> :call <sid>save_file_via_doas()<cr> <bar> endif<cr>
+
 " if has('autocmd')
 "     function! ILikeHelpToTheRight()
 "         if !exists('w:help_is_moved') || w:help_is_moved != "right"
@@ -2523,7 +2543,8 @@ augroup END
 
 if has('nvim')
     " set shell=ash\ --login
-    silent! execute 'set shell=' . boot#chomp(system('which $SHELL')) . '\ --login'
+    " silent! execute 'set shell=' . boot#chomp(system(['which', $SHELL])) . '\ --login'
+    silent! execute 'set shell=' . $SHELL . '\ --login'
     tnoremap <esc> <C-\><C-N>
     augroup term_open
         au!
@@ -2971,8 +2992,8 @@ else
 endif
 
 " set showtabline=2 " Always display the tabline, even if there is only one tab
-set showtabline=0 " Always display the tabline, even if there is only one tab
-set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
+set showtabline=0   " Always display the tabline, even if there is only one tab
+set noshowmode      " Hide the default mode text (e.g. -- INSERT -- below the statusline)
 
 
 " https://github.com/nickjj/dotfiles/blob/0c8abec8c433f7e7394cc2de4a060f3e8e00beb9/.vimrc#L444-L499
@@ -3029,7 +3050,8 @@ set scrolloff=20       " keep 20 lines visible above and below cursor at all tim
 set sidescrolloff=30   " keep 30 columns visible left and right of the cursor at all times
 
 set scrollopt-=ver
-set showcmd
+" https://vi.stackexchange.com/questions/6730/how-to-get-rid-of-the-command-line-bar
+set noshowcmd
 set showmatch
 set spelllang=en_us
 set splitbelow
@@ -4039,9 +4061,9 @@ set autowriteall
 " cnoremap w!! exec 'w !doas dd of=' . shellescape(expand('%')) <CR> :edit<CR>
 
 " https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
-cnoremap w!! call <sid>save_file_via_sudo()<cr>
+cnoremap w!! silent! call <sid>save_file_via_doas()<cr>
 
-function! s:save_file_via_sudo() abort
+function! s:save_file_via_doas() abort
     " https://askubuntu.com/questions/454649/how-can-i-change-the-default-editor-of-the-sudoedit-command-to-be-vim
     " https://unix.stackexchange.com/questions/90866/sudoedit-vim-force-write-update-without-quit/635704#635704
     " inotifywait
@@ -4050,10 +4072,11 @@ function! s:save_file_via_sudo() abort
     " https://github.com/vim-scripts/sudo.vim
     "     (command line): vim sudo:/etc/passwd
     "     (within vim):   :e sudo:/etc/passwd
-    if executable('sudo')
+    if executable('doas')
+        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=tee doasedit ' . shellescape(expand('%')) . ' >/dev/null '
+        " execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
+    elseif executable('sudo')
         execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null '
-    elseif executable('doas')
-        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
     endif
     let &modified = v:shell_error
 endfunction

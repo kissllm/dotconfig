@@ -43,22 +43,28 @@ BRANCH_NAME=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g
 # git rev-parse --verify --quiet "$BRANCH_NAME"
 
 [ -z "$1" ] || BRANCH_NAME="$1"
-
-[ ! -z "$(git rev-parse --verify --quiet "$BRANCH_NAME")" ] || {
-    echo "Please input a valid branch name"
+# Local branch hash
+# git rev-parse --verify --quiet --symbolic-full-name master
+# git rev-parse --verify --quiet --symbolic-full-name @{push}
+# git rev-parse --verify --quiet --symbolic-full-name @{upstream}
+local_branch=$(git rev-parse --verify --quiet --symbolic-full-name "$BRANCH_NAME")
+local_branch=${local_branch##*/}
+[ "$local_branch" = "$BRANCH_NAME" ] || {
+    echo "Branch name you provided is not valid locally. Please input a valid branch name"
     exit 1
 }
 
-remote_hash=$(git ls-remote --heads origin "$BRANCH_NAME" | awk '{print $1}')
-
-[ -z "$remote_checksum" ] || {
-    echo "Please input a valid branch name"
+# Remote branch hash
+remote_branch=$(git ls-remote --heads origin "$BRANCH_NAME" | awk '{print $2}')
+remote_branch=${remote_branch##*/}
+[ "$remote_branch" = "$BRANCH_NAME" ] || {
+    echo "Branch name you provided is not valid remotely. Please input a valid branch name"
     exit 1
 }
 
+# Local remote sources
 remotes=$(git remote -v  | grep push | awk '{print $1}' | tr "\n" " ")
 
 for repo in $remotes; do
-    [ "$repo" = "upstream" ] ||
-    git push "$repo" "$BRANCH_NAME"
+    [ -z "${repo##*upstream*}" ] || git push "$repo" "$BRANCH_NAME"
 done

@@ -134,22 +134,21 @@ fi
 [ ! -d "${XDG_DATA_HOME}/nvim/site/pack" ] ||
 \rm -rf "${XDG_DATA_HOME}/nvim/site/pack"
 
-# if [ 1 = ${HAS_LIBCXX} ]; then
-if expr "$OSTYPE" : "musl" 1>/dev/null; then
-    [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" = \
-    "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" ] || {
-        [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
-        \ln -sf "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" \
-        "${XDG_DATA_HOME}/nvim/site/pack"
-    }
-else
+# if expr "$OSTYPE" : "musl" 1>/dev/null; then
+#     [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" = \
+#     "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" ] || {
+#         [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
+#         \ln -sf "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" \
+#         "${XDG_DATA_HOME}/nvim/site/pack"
+#     }
+# else
     [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" = \
     "${SHARE_PREFIX}/init/editor/nvim/site/pack" ] || {
         [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
         \ln -sf "${SHARE_PREFIX}/init/editor/nvim/site/pack" \
         "${XDG_DATA_HOME}/nvim/site/pack"
     }
-fi
+# fi
 
 [ ! -L "${XDG_DATA_HOME}/nvim/site/parser" ] ||
 \rm -f "${XDG_DATA_HOME}/nvim/site/parser"
