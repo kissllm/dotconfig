@@ -9,7 +9,7 @@ elif [ -d "/opt/init" ]; then
     export SHARE_PREFIX="/opt"
 fi
 
-[ ! -d "${SHARE_PREFIX}/init" ] || . ${SHARE_PREFIX}/init/env
+[ ! -d "${SHARE_PREFIX}/init" ] || [ ! -f "${SHARE_PREFIX}/init/env" ] || . ${SHARE_PREFIX}/init/env
 
 tty_num=$(tty | sed -e "s/.*tty\(.*\)/\1/")
 export tty_num=$tty_num

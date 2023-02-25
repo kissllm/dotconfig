@@ -1854,7 +1854,8 @@ function! s:write_generic()
     endif
 endfunction
 
-:cabbrev w silent! call <sid>write_generic()<cr>
+:cabbrev w silent! call <sid>write_generic()
+
 " :cabbrev w
 "     \ silent! if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
 "     \ <bar> :write<cr> <bar> else
@@ -2964,7 +2965,8 @@ set noequalalways
 " let &statusline = s:statusline_expr()
 
 " https://github.com/spf13/spf13-vim/issues/540
-set syntax=on
+" set syntax=on
+syntax on
 
 set nomore
 
@@ -3029,7 +3031,7 @@ function! AppendModeline()
 endfunction
 nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
 
-set noerrorbells visualbell t_vb=
+set noerrorbells novisualbell t_vb=
 set noshiftround
 set nospell
 set nostartofline

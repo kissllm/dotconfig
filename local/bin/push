@@ -5,7 +5,7 @@
 # Or, for current branch
 # push
 
-BRANCH_NAME=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g' | sed 's/\]//g')
+branch_name=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g' | sed 's/\]//g')
 
 # https://stackoverflow.com/questions/39518124/check-if-directory-is-git-repository-without-having-to-cd-into-it
 # git -C <path> rev-parse
@@ -24,40 +24,40 @@ BRANCH_NAME=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g
 }
 
 # https://stackoverflow.com/questions/5167957/is-there-a-better-way-to-find-out-if-a-local-git-branch-exists
-# BRANCH_NAME=mybranch
-# SHOW_ALL=`git show-branch --all | grep -w $BRANCH_NAME`
-# [ $? == 0 ] && echo "$BRANCH_NAME exists" || echo "$BRANCH_NAME not exists"
-# BRANCH_NAME=mybranch
-# if grep -Fqe $BRANCH_NAME << EOF
+# branch_name=mybranch
+# SHOW_ALL=`git show-branch --all | grep -w $branch_name`
+# [ $? == 0 ] && echo "$branch_name exists" || echo "$branch_name not exists"
+# branch_name=mybranch
+# if grep -Fqe $branch_name << EOF
 # `git show-branch --all`
 # EOF
 # then
-#    echo "$BRANCH_NAME exists"
+#    echo "$branch_name exists"
 # else
-#    echo "$BRANCH_NAME not exists"
+#    echo "$branch_name not exists"
 # fi
 
 # https://gist.github.com/tennisonchan/e00212e3ed5498060c50d390233a3e1f
 # https://dev.to/iridiumcao/how-to-check-if-a-git-branch-exists-in-the-local-remote-repository-3gkd
-# git ls-remote --heads origin "$BRANCH_NAME" | awk '{print $1}'
-# git rev-parse --verify --quiet "$BRANCH_NAME"
+# git ls-remote --heads origin "$branch_name" | awk '{print $1}'
+# git rev-parse --verify --quiet "$branch_name"
 
-[ -z "$1" ] || BRANCH_NAME="$1"
+[ -z "$1" ] || branch_name="$1"
 # Local branch hash
 # git rev-parse --verify --quiet --symbolic-full-name master
 # git rev-parse --verify --quiet --symbolic-full-name @{push}
 # git rev-parse --verify --quiet --symbolic-full-name @{upstream}
-local_branch=$(git rev-parse --verify --quiet --symbolic-full-name "$BRANCH_NAME")
+local_branch=$(git rev-parse --verify --quiet --symbolic-full-name "$branch_name")
 local_branch=${local_branch##*/}
-[ "$local_branch" = "$BRANCH_NAME" ] || {
+[ "$local_branch" = "$branch_name" ] || {
     echo "Branch name you provided is not valid locally. Please input a valid branch name"
     exit 1
 }
 
 # Remote branch hash
-remote_branch=$(git ls-remote --heads origin "$BRANCH_NAME" | awk '{print $2}')
+remote_branch=$(git ls-remote --heads origin "$branch_name" | awk '{print $2}')
 remote_branch=${remote_branch##*/}
-[ "$remote_branch" = "$BRANCH_NAME" ] || {
+[ "$remote_branch" = "$branch_name" ] || {
     echo "Branch name you provided is not valid remotely. Please input a valid branch name"
     exit 1
 }
@@ -66,5 +66,5 @@ remote_branch=${remote_branch##*/}
 remotes=$(git remote -v  | grep push | awk '{print $1}' | tr "\n" " ")
 
 for repo in $remotes; do
-    [ -z "${repo##*upstream*}" ] || git push "$repo" "$BRANCH_NAME"
+    [ -z "${repo##*upstream*}" ] || git push "$repo" "$branch_name"
 done
