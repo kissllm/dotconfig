@@ -42,7 +42,7 @@ fi
 
 cd  "${KISS_ROOT}/usr"
 for dir in $(doas \ls -1 "${KISS_ROOT}/usr"); do
-    [ ! -d "$dir" ] || [ "$dir" = "src" ] || {
+    [ ! -d "$dir" ] || [ "$dir" = "src" ] || [ -L "$dir" ] || {
         if ! eval '$copy "${KISS_ROOT}/usr/$dir" "${BACKUP_ROOT}/usr/"'; then
             echo "Failed to copy '${KISS_ROOT}/usr/$dir'"
             exit 1

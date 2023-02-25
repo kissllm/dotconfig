@@ -358,8 +358,8 @@ export QT_SCALE_FACTOR=1
 # GDK_SCALE allows only Integer values, GDK_DPI_SCALE=x allows decimal values such as . GDK_DPI_SCALE=0.66
 # export GDK_SCALE=0
 export GDK_SCALE=2.0
-# export GDK_DPI_SCALE=0
-export GDK_DPI_SCALE=0.75
+export GDK_DPI_SCALE=2.0
+# export GDK_DPI_SCALE=0.75
 
 
 # https://forum.obarun.org/viewtopic.php?id=855
