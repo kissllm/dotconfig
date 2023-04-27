@@ -18,7 +18,7 @@ XKB_DEFAULT_LAYOUT=us
 
 # export XKB_DEFAULT_VARIANT=us
 # LIBSEAT_BACKEND=logind
-# WLR_DRM_DEVICES=/dev/dri/card0
+WLR_DRM_DEVICES=/dev/dri/card0
 # Running sway without xwayland
 # https://github.com/swaywm/sway/issues/676
 WLC_XWAYLAND=0

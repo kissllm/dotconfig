@@ -1,6 +1,6 @@
 # GRUB boot loader configuration
 
-GRUB_DEFAULT=0
+GRUB_DEFAULT=saved
 GRUB_TIMEOUT=5
 GRUB_DISTRIBUTOR="KISS"
 GRUB_DISABLE_SUBMENU=y
@@ -10,12 +10,18 @@ GRUB_DISABLE_RECOVERY=true
 
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro loglevel=4 slub_debug=P page_poison=1 "
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nouveau.modeset=0 selinux=0 pci=nommconf "
-GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 "
+GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 "
 
 # nvidia-drm and nouveau modeset leads CPU throttles
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nvidia-drm.modeset=1 nouveau.modeset=0"
 # GRUB_CMDLINE_LINUX=" console=ttyS1,19200n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
-GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
+# https://forums.centos.org/viewtopic.php?t=68800
+# Will panic
+# GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 rd.driver.blacklist=nouveau nouveau.modeset=0"
+# console will redirect kernel message to different tty
+# GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 "
+# https://askubuntu.com/questions/248/how-can-i-show-or-hide-boot-messages-when-ubuntu-starts
+GRUB_CMDLINE_LINUX=" modules=sd-mod,usb-storage,ext4 rootfstype=ext4 "
 # GRUB_CMDLINE_LINUX=" console=ttyS0,38400n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
 # GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
 
@@ -45,7 +51,8 @@ GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 
 # Uncomment if you want GRUB to pass to the Linux kernel the old parameter
 # format "root=/dev/xxx" instead of "root=/dev/disk/by-uuid/xxx"
-#GRUB_DISABLE_LINUX_UUID=true
+GRUB_DISABLE_LINUX_UUID=true
+GRUB_FORCE_PARTUUID=false
 
 # Uncomment to disable generation of recovery mode menu entries
 #GRUB_DISABLE_RECOVERY=true
@@ -64,5 +71,5 @@ GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 
 # Uncomment to make GRUB remember the last selection. This requires to
 # set 'GRUB_DEFAULT=saved' above.
-#GRUB_SAVEDEFAULT="true"
+GRUB_SAVEDEFAULT="true"
 GRUB_DISABLE_OS_PROBER=false

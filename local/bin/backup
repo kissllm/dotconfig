@@ -54,6 +54,13 @@ done
 
 [ -d "${BACKUP_ROOT}/var/db/kiss/installed" ] || \mkdir -p "${BACKUP_ROOT}/var/db/kiss/installed"
 
+# Don't delete system database
+if [ "$(/usr/bin/whoami)" = "root" ]; then
+    copy="rsync -aqz"
+else
+    copy="doas rsync -aqz"
+fi
+
 if ! eval '$copy "${KISS_ROOT}/var/db/kiss/installed" "${BACKUP_ROOT}/var/db/kiss/"'; then
     echo "Failed to copy '${KISS_ROOT}/var/db/kiss/installed'"
     exit 1

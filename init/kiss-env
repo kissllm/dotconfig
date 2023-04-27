@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# Initialize the environment variables/flags/repositories
 export LOGNAME=$(/usr/bin/whoami)
 
 KISS_PATH=''
@@ -124,13 +124,14 @@ export REPO_ROOT="/var/db/kiss"
 export REPO_MAIN="$REPO_ROOT/lm"
 
 if [ -z "${KISS_PATH:+x}" ]; then
-    KISS_PATH=$REPO_MAIN/fonts
+    KISS_PATH=$REPO_MAIN/extra
 else
-    KISS_PATH=$REPO_MAIN/fonts:$KISS_PATH
+    KISS_PATH=$REPO_MAIN/extra:$KISS_PATH
 fi
+
+KISS_PATH=$REPO_MAIN/fonts:$KISS_PATH
 KISS_PATH=$REPO_MAIN/wayland:$KISS_PATH
 KISS_PATH=$REPO_MAIN/system:$KISS_PATH
-KISS_PATH=$REPO_MAIN/extra:$KISS_PATH
 KISS_PATH=$REPO_MAIN/core:$KISS_PATH
 
 # Static version will remove dynamic libraries
@@ -173,9 +174,10 @@ export CXXFLAGS="$CXXFLAGS"
 export CPPFLAGS="$CXXFLAGS"
 
 export MAKEFLAGS="-j $(($(nproc) + 1))"
-export KISS_PROMPT=0
-export KISS_TMPDIR="/tmp$HOME/kiss"
-[ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
+[ -z "${KISS_PROMPT+x}" ] || unset KISS_PROMPT
+# export KISS_PROMPT=0
+# export KISS_TMPDIR="/tmp/$(/usr/bin/whoami)/kiss"
+# [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
 export KISS_SRC_ROOT="/working/kiss"
 [ -d "$KISS_SRC_ROOT" ] || \mkdir -p "$KISS_SRC_ROOT"
-git config --global --add safe.directory "$KISS_SRC_ROOT"
+# git config --global --add safe.directory "$KISS_SRC_ROOT"

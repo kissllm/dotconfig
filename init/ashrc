@@ -37,9 +37,15 @@ elif [ -n "$(cat /tmp/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
     export WAYLAND_DISPLAY="$(cat /tmp/wayland/.display)"
 fi
 
-[ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
+# [ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
 
 # [ ! -f "${SHARE_PREFIX}/toolchain/env" ] || . ${SHARE_PREFIX}/toolchain/env
+
+[ "$(/usr/bin/whoami)" = "root" ] ||
+[ -f "/tmp/wpa.lock" ] ||
+[ -x "/mnt/local/bin/wpa" ] ||
+! command -v "/mnt/local/bin/wpa" > /dev/null 2>&1 ||
+"/mnt/local/bin/wpa" >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
 
 # https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
 export pwd_length=13
@@ -49,12 +55,13 @@ export TRIMMED='printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$pwd_length})|\1..
 # If not running interactively, don't do anything
 [ ! -z "${PS1+x}" ] || return
 # set a fancy prompt (non-color, overwrite the one in /etc/profile)
-if [ $(id -u) -eq 0 ]; then
+if [ "$(id -u)" -eq "0" ]; then
     # root user
     # export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
     # export PS1='\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
     # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;39m[\w]\e[m \$ "
     # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
+    # https://superuser.com/questions/301353/escape-non-printing-characters-in-a-function-for-a-bash-prompt/301355
     # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
     # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
     export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;24m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
@@ -90,7 +97,7 @@ do
     parent_id=$(IFS=$'\n'; for item in $(ps auxft -o pid,ppid | grep $parent_id); do IFS=$' ' read -r _1 _2 < <(echo $item); [ "$_2" = "$parent_id" ] || echo $_2; done)
 done
 
-# [ $(id -u) -eq 0 ] ||
+# [ "$(id -u)" -eq "0" ] ||
 [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ] ||
 [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
 [ "$parent_is_tmux" -eq "1" ] ||
@@ -106,4 +113,7 @@ exec tmux new -As .
 # fi
 
 # set ts=4 sw=4 tw=0 et :
+
+
+# [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
 

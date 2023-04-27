@@ -68,9 +68,11 @@ path_append () {
     local extend=":$(eval "echo \$$1"):"
     # echo "\$2 = $2"
     # echo "test=${extend##*:$2:*}"
-    [ ! -d "$2" ] ||
-    # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-    [ -z "${extend##*:$2:*}" ] || eval "export $1=\${$1:+\"\$$1:\"}$2"
+    [ ! -d "$2" ] || {
+        # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+        [ -z "${extend:+x}" ] && eval "export $1=$2" ||
+        [ -z "${extend##*:$2:*}" ] || eval "export $1=\$$1:$2"
+    }
 }
 
 # add to front of path
@@ -78,9 +80,11 @@ path_prepend () {
     local extend=":$(eval "echo \$$1"):"
     # echo "\$2 = $2"
     # echo "test=${extend##*:$2:*}"
-    [ ! -d "$2" ] ||
-    # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-    [ -z "${extend##*:$2:*}" ] || eval "export $1=$2\${$1:+\":\$$1\"}"
+    [ ! -d "$2" ] || {
+        # eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+        [ -z "${extend:+x}" ] && eval "export $1=$2" ||
+        [ -z "${extend##*:$2:*}" ] || eval "export $1=$2:\$$1"
+    }
 }
 
 path_prepend PATH "$SHARE_PREFIX/init"
@@ -94,20 +98,21 @@ export SHELL=$(which ash)
 export _PATH_BSHELL=$(which ash)
 
 # Set font when running in console. For hidpi screen
-{ { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } && [ -z "${TMUX+x}" ]; } && {
+! { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } || [ -n "${TMUX+x}" ] || {
     tty_name="$(tty)"
     case $tty_name in
         *"tty"*)
-            # consolefonts_dir="$(find /usr/share -type d -name "consolefonts")"
-            consolefonts_dir="/usr/share/consolefonts"
+            consolefonts="$(find /usr/share -type d -name "consolefonts")"
+            # consolefonts="/usr/share/consolefonts"
             # terminus-font
-            if [ -f "${consolefonts_dir}/ter-124b.psf.gz" ]; then
-                setfont "${consolefonts_dir}/ter-124b.psf.gz"
-            elif [ -f "/mnt/setfont/consolefonts/ter-124b.psf.gz" ]; then
-                setfont /mnt/setfont/consolefonts/ter-124b.psf.gz
+            if [ -f "${consolefonts}/ter-v24b.psf.gz" ]; then
+                setfont "${consolefonts}/ter-v24b.psf.gz"
+                # setfont "${consolefonts}/ter-v28b.psf.gz"
+            elif [ -f "/mnt/setfont/consolefonts/ter-v24b.psf.gz" ]; then
+                setfont /mnt/setfont/consolefonts/ter-v24b.psf.gz
                 # Use default font
-            elif [ -f "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz" ]; then
-                setfont "${consolefonts_dir}/LatGrkCyr-12x22.psfu.gz"
+            elif [ -f "${consolefonts}/LatGrkCyr-12x22.psfu.gz" ]; then
+                setfont "${consolefonts}/LatGrkCyr-12x22.psfu.gz"
             fi
     esac
 }
@@ -190,14 +195,13 @@ export LC_ALL="en_US.UTF-8"
 
 export LESS="-RX"
 
-[ ! -d "${TMP}" ] && mkdir "${TMP}"
+[ -d "${TMP}" ] || mkdir "${TMP}"
 
 if [ -f "/etc/hostname" ]; then
     export HOSTNAME=$(cat /etc/hostname)
 else
-    [ -f "/etc/os-release" ] && {
+    [ ! -f "/etc/os-release" ] ||
         export HOSTNAME=$(cat /etc/os-release | grep ^ID | sed 's/ID=//' | sed 's/"//g')
-    }
 fi
 
 
@@ -206,11 +210,9 @@ path_prepend PATH "${HOME}/bin"
 # https://firefox-source-docs.mozilla.org/setup/linux_build.html
 # ${HOME}/.local
 PYTHON_BASE="$(python3 -m site --user-base)"
-# PYTHON_BASE_REFINED=$(echo "${PYTHON_BASE}" | sed 's#/#\\/#g' | sed 's#\.#\\.#g')
-# [ "${PATH}" = "${PATH/${PYTHON_BASE_REFINED}\/bin/}" ] && [ -d "${PYTHON_BASE}/bin" ] && {
-#     export PATH="${PYTHON_BASE}/bin:$PATH"
-# }
+PYTHON_BASE_REFINED=$(echo "${PYTHON_BASE}" | sed 's#/#\\/#g' | sed 's#\.#\\.#g')
 path_prepend PATH "${PYTHON_BASE}/bin"
+path_prepend PATH "${PYTHON_BASE_REFINED}/bin"
 path_prepend PATH "${HOME}/.local/bin"
 path_prepend PATH "${HOME}/.emacs.d/bin"
 
@@ -223,18 +225,22 @@ SHARE_PREFIX_REFINED=$(echo "${SHARE_PREFIX}" | sed 's#/#\\/#g' | sed 's#\.#\\.#
     export DENO_INSTALL="${SHARE_PREFIX}/deno"
     path_prepend PATH "${SHARE_PREFIX}/deno/bin"
 }
+export RUSTFLAGS="-Clink-arg=-Wl,--dynamic-linker=/usr/lib/libc.so"
+[ "$(id -u)" -ne "0" ] || {
+    [ ! -f "${HOME}/.cargo/env" ] || . "${HOME}/.cargo/env"
+    [ ! -f "${HOME}/.local/share/cargo/env" ] || . "${HOME}/.local/share/cargo/env"
 
-[ ! -f "${HOME}/.cargo/env" ] || . "${HOME}/.cargo/env"
-[ ! -f "${HOME}/.local/share/cargo/env" ] || . "${HOME}/.local/share/cargo/env"
+    export CARGO_HOME="$XDG_DATA_HOME"/cargo
+    [ -d "${CARGO_HOME}" ] || \mkdir -p "${CARGO_HOME}"
 
-export CARGO_HOME="$XDG_DATA_HOME"/cargo
-[ -d "${CARGO_HOME}" ] || \mkdir -p "${CARGO_HOME}"
-path_prepend PATH "${HOME}/.cargo/bin"
-path_prepend PATH "${HOME}/.local/share/cargo/bin"
+    [ ! -d  "${HOME}/.cargo/bin" ] ||
+    path_prepend PATH "${HOME}/.cargo/bin"
+    [ ! -d "${HOME}/.local/share/cargo/bin" ] ||
+    path_prepend PATH "${HOME}/.local/share/cargo/bin"
+}
 
-
-# command -v /usr/bin/luarocks > /dev/null 2>&1 && {
-#     [ ! -d "${HOME}/.cache/luarocks" ] && mkdir -p "${HOME}/.cache/luarocks"
+# ! command -v /usr/bin/luarocks > /dev/null 2>&1 || {
+#     [ -d "${HOME}/.cache/luarocks" ] || mkdir -p "${HOME}/.cache/luarocks"
 #     # https://github.com/luarocks/luarocks/wiki/Using-LuaRocks
 #     # eval $(luarocks path)
 #     # eval "$(luarocks-5.1 path --bin)"
@@ -329,7 +335,7 @@ alias history="history 1 -1"
 
 # https://stackoverflow.com/questions/3701809/how-to-detect-using-of-wildcard-asterisk-as-parameter-for-shell-script
 glob_stop() {
-    [ "$2" = "*" ] && {
+    [ "$2" != "*" ] || {
         echo "You can not use a wildcard"
         return
     }
@@ -404,7 +410,7 @@ export XDG_SCREENSHOTS_DIR=$HOME/pictures/screenshots
 export XDG_PICTURES_DIR=$HOME/pictures/screenshots
 
 # # https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
-# [ -n "$DESKTOP_SESSION" ] && {
+# [ -z "${DESKTOP_SESSION:+x}" ] || {
 #     eval $(gnome-keyring-daemon --start)
 #     export SSH_AUTH_SOCK
 # }
@@ -433,7 +439,7 @@ man() {
 }
 # https://superuser.com/questions/852914/reload-all-running-zsh-instances
 TRAPUSR1() {
-    [ -o INTERACTIVE ] && {
+    [ ! -o INTERACTIVE ] || {
         # {echo; echo execute a new shell instance } 1>&2
         exec "${SHELL}"
     }

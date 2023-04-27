@@ -263,14 +263,59 @@ local function init()
 
     use ({
         "nvim-telescope/telescope.nvim",
-        disable = true,
+        -- disable = true,
         -- disable telescope will delete plenary?
         requires = { { "nvim-lua/plenary.nvim", opt = true } },
+        config = function()
+            require('telescope').setup{
+                defaults = {
+                    -- Default configuration for telescope goes here:
+                    layout_config = {
+                        -- vertical = { width = 0.5 }
+                        horizontal = { width = 0.3 }
+                        -- other layout configuration here
+                    },
+                    -- other defaults configuration here
+                    -- config_key = value,
+                    mappings = {
+                        i = {
+                            -- map actions.which_key to <C-h> (default: <C-/>)
+                            -- actions.which_key shows the mappings for your picker,
+                            -- e.g. git_{create, delete, ...}_branch for the git_branches picker
+                            ["<C-h>"] = "which_key",
+                            ["?"] = action_layout.toggle_preview,
+                        }
+                    }
+                },
+                pickers = {
+                    -- Default configuration for builtin pickers goes here:
+                    -- picker_name = {
+                    --   picker_config_key = value,
+                    --   ...
+                    -- }
+                    -- Now the picker_config_key will be applied every time you call this
+                    -- builtin picker
+                },
+                extensions = {
+                    -- Your extension configuration goes here:
+                    -- extension_name = {
+                    --   extension_config_key = value,
+                    -- }
+                    -- please take a look at the readme of the extension you want to configure
+                }
+            }
+            require('telescope.builtin').find_files({layout_strategy='vertical',layout_config={width=0.5}})
+            local builtin = require('telescope.builtin')
+            vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+            vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+            vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+            vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+        end,
     })
 
     use ({
         "nvim-telescope/telescope-file-browser.nvim",
-        disable = true,
+        -- disable = true,
     })
 
     -- use init.lua to initialie vim-lua-format
@@ -450,12 +495,13 @@ local function init()
         -- disable = true
     })
 
+    -- Conflicts with vim-eunuch
     -- Simple plugins can be specified as strings
     -- use '9mm/vim-closer'
-    use ({
-        "rstacruz/vim-closer",
-        -- disable = true
-    })
+    -- use ({
+    --     "rstacruz/vim-closer",
+    --     -- disable = true
+    -- })
 
     -- Lazy loading:
     -- Load on specific commands
@@ -658,32 +704,34 @@ local function init()
     use {
         "nvim-treesitter/nvim-treesitter-refactor",
         -- disable = true,
-        require'nvim-treesitter.configs'.setup {
-            refactor = {
-                highlight_definitions = {
-                    enable = true,
-                    -- Set to false if you have an `updatetime` of ~100.
-                    clear_on_cursor_move = true,
-                },
-                highlight_current_scope = { enable = true },
-                smart_rename = {
-                    enable = true,
-                    keymaps = {
-                        smart_rename = "grr",
+        config = function()
+            require'nvim-treesitter.configs'.setup {
+                refactor = {
+                    highlight_definitions = {
+                        enable = true,
+                        -- Set to false if you have an `updatetime` of ~100.
+                        clear_on_cursor_move = true,
+                    },
+                    highlight_current_scope = { enable = true },
+                    smart_rename = {
+                        enable = true,
+                        keymaps = {
+                            smart_rename = "grr",
+                        },
+                    },
+                    navigation = {
+                        enable = true,
+                        keymaps = {
+                            goto_definition = "gnd",
+                            list_definitions = "gnD",
+                            list_definitions_toc = "gO",
+                            goto_next_usage = "<a-*>",
+                            goto_previous_usage = "<a-#>",
+                        },
                     },
                 },
-                navigation = {
-                    enable = true,
-                    keymaps = {
-                        goto_definition = "gnd",
-                        list_definitions = "gnD",
-                        list_definitions_toc = "gO",
-                        goto_next_usage = "<a-*>",
-                        goto_previous_usage = "<a-#>",
-                    },
-                },
-            },
-        }
+            }
+        end,
     }
 
     -- https://github.com/nvim-treesitter/nvim-treesitter#advanced-setup

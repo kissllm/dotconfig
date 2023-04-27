@@ -10,7 +10,7 @@ endif
 " filetype indent plugin on | syn on
 filetype indent plugin on
 " syntax enable
-" syntax on   " enable highlight
+syntax on   " enable highlight
 
 " if 1 == $HAS_LIBCXX
 "     let $XDG_DATA_HOME = "$HOME/.local/share/clang"
@@ -497,6 +497,7 @@ nnoremap <silent> <leader> :WhichKey '\' <cr>
 set timeoutlen=500
 " set timeoutlen=100
 
+" Write buffer will enable navigation keys work again while someties it was in a bugging trap of vim-tmux-navigator
 " User defined key maps
 function! s:keys_reload()
     " packadd keys
@@ -606,6 +607,7 @@ let g:vim_packages_use['lifepillar/vim-mucomplete']                       = { 't
 let g:vim_packages_use['Shougo/ddc.vim']                                  = { 'type' : 'opt' }
 let g:vim_packages_use['vim-denops/denops.vim']                           = { 'type' : 'opt' }
 let g:vim_packages_use['roman/golden-ratio']                              = { 'type' : 'opt' }  " File format
+let g:vim_packages_use['marklcrns/vim-smartq']                            = { 'type' : 'opt' }
 
 " Randerig not stable.
 let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'opt' }
@@ -715,6 +717,8 @@ let g:vim_packages_use['editorconfig/editorconfig-vim']                   = { 't
 let g:vim_packages_use['vim-autoformat/vim-autoformat']                   = { 'type' : 'start' }  " File format
 let g:vim_packages_use['junegunn/vim-easy-align']                         = { 'type' : 'start' }  " File format
 let g:vim_packages_use['rhysd/vim-clang-format']                          = { 'type' : 'start' }  " File format
+let g:vim_packages_use['liuchengxu/vim-clap']                             = { 'type' : 'start', 'do': ':Clap install-binary' }  " File format
+
 let g:vim_packages_use['godlygeek/tabular']                               = { 'type' : 'start' }  " File format
 let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']                 = { 'type' : 'start' }
 let g:vim_packages_use['itchyny/vim-qfedit']                              = { 'type' : 'start' }
@@ -792,7 +796,6 @@ let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 't
 let g:vim_packages_use['sheerun/vim-polyglot']                            = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']             = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                       = { 'type' : 'start' }
-let g:vim_packages_use['marklcrns/vim-smartq']                            = { 'type' : 'start' }
 " let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
 let g:vim_packages_use['tpope/vim-unimpaired']                            = { 'type' : 'start' }
 let g:vim_packages_use['justinmk/vim-dirvish']                            = { 'type' : 'start' }
@@ -951,7 +954,7 @@ endfunction
 let g:_use_setup_packager  = 1
 
 " syntax disable
-syntax off
+" syntax off
 
 if exists('g:_use_setup_minpac')
 
@@ -1221,6 +1224,8 @@ if exists('g:_use_setup_packager')
     " command! -nargs=* -bar PackagerInstall call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
     "             \ | call packager#install(<args>)
 
+
+    " How to use PackagerInstall ['vim-scripts/a.vim']
     command! -nargs=* -bar PackagerInstall
         \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
         \ | call packager#install(s:adjust_hook_helper(<args>,
@@ -1234,6 +1239,8 @@ if exists('g:_use_setup_packager')
 
     " command! -nargs=* -bar PackagerUpdate call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
     "             \ | call packager#update(<args>)
+
+    " How to use PackagerUpdate ['vim-scripts/a.vim']
     command! -nargs=* -bar PackagerUpdate
         \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
         \ | call packager#update(s:adjust_hook_helper(<args>,
@@ -1446,6 +1453,9 @@ if has('nvim')
 
     let g:golden_ratio_exclude_nonmodifiable = 1
 
+    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown({}))<cr>
+    " Change an option
+    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown({ winblend = 10 }))<cr>
 endif " has('nvim')
 
 " "End vim-packager Scripts ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -1854,12 +1864,94 @@ function! s:write_generic()
     endif
 endfunction
 
-:cabbrev w silent! call <sid>write_generic()
+:cnoreabbrev w silent! call <sid>write_generic()
 
 " :cabbrev w
 "     \ silent! if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
 "     \ <bar> :write<cr> <bar> else
 "     \ <bar> :call <sid>save_file_via_doas()<cr> <bar> endif<cr>
+
+let g:sudo_no_gui = 1
+
+" https://github.com/quanhengzhuang/vim-sudowriter/blob/master/plugin/sudowriter.vim
+" " Will erase the current buffer completely!
+" function! s:sudowrite()
+"     let current = getpos('.')
+"     execute '!sudo tee %'
+"     edit
+"     call setpos('.', current)
+" endfunction
+
+set autowriteall
+
+" https://www.reddit.com/r/vim/comments/25g5mc/is_there_an_alternative_to_w_sudo_tee_devnull/
+" sudo -e
+" https://github.com/ncaq/auto-sudoedit
+" auto-sudoedit in lisp
+
+" https://vi.stackexchange.com/questions/3561/settings-and-plugins-when-root-sudo-vim
+" command! -nargs=0 W silent! w !doas tee > /dev/null %  feedkeys("l", 't') :e
+" command! -nargs=0 W silent! w !doas tee > /dev/null %
+" command! -nargs=0 W :call <sid>sudowrite()<cr>
+" command! -nargs=0 W :call <sid>save_file_via_doas()<cr>
+
+" Won't work
+" command! -nargs=0 W silent! :SudoWrite<CR>
+
+" cmap w!! %!sudo tee > /dev/null %
+" Allow saving of files as sudo when I forgot to start vim using sudo.
+" Doesn't need comfirmation
+" cmap w!! w !sudo tee > /dev/null %
+
+" cnoremap w!! execute 'silent! write !sudo /usr/bin/tee "%" >/dev/null' <CR> <bar> call feedkeys('l', 't') <CR> <bar> :edit <CR>
+
+" cnoremap w!! write !doas tee % > /dev/null <CR> :edit<CR>
+
+" cnoremap w!! exec 'w !sudo dd of=' . shellescape(expand('%')) <CR> :edit<CR>
+" cnoremap w!! exec 'w !doas dd of=' . shellescape(expand('%')) <CR> :edit<CR>
+
+" https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
+cnoremap w!! silent! call <sid>save_file_via_doas()<cr>
+
+function! s:save_file_via_doas() abort
+    " https://askubuntu.com/questions/454649/how-can-i-change-the-default-editor-of-the-sudoedit-command-to-be-vim
+    " https://unix.stackexchange.com/questions/90866/sudoedit-vim-force-write-update-without-quit/635704#635704
+    " inotifywait
+    " https://github.com/lambdalisue/suda.vim
+    " echo executable('sudo')
+    " https://github.com/vim-scripts/sudo.vim
+    "     (command line): vim sudo:/etc/passwd
+    "     (within vim):   :e sudo:/etc/passwd
+    if executable('doas')
+        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=tee doasedit ' . shellescape(expand('%')) . ' >/dev/null '
+        " execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
+    elseif executable('sudo')
+        execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null '
+    endif
+    let &modified = v:shell_error
+endfunction
+
+
+" cnoremap w!! w !sudo sh -c "cat > %" <CR> feedkeys('l', 't') <CR> :edit<CR>
+" cnoremap w!! execute 'silent! write !SUDO_ASKPASS=`which ssh-askpass` sudo tee % >/dev/null' <bar> edit!
+" cmap w!! let current = getpos('.') <bar> %!sudo tee > /dev/null %<CR>:edit!<CR> <bar> call setpos('.', current) <CR>
+
+" cnoremap w!! :call <sid>sudowrite()<cr>
+
+" cmap w!! w !doas tee > /dev/null %
+" cmap w!! w !sudo sh -c "cat > %"
+" cmap w!! w !sudo dd of=% > /dev/null
+" Won't work
+" cmap w!! silent! :SudoWrite<CR>
+
+" https://github.com/tpope/vim-eunuch
+" v +SudoEdit $SHARE_PREFIX/gentoo/root/test.cpp
+" https://github.com/lambdalisue/suda.vim  " removed
+" " Will erase buffers (not just current one) automatically if you don't have write permission
+" let g:suda_smart_edit = 1  " for suda.vim
+" For both vim-eunuch and suda.vim (change SudoWrite to SudaWrite)
+" noremap  <silent> <C-s> :SudoWrite<CR>
+" inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
 " if has('autocmd')
 "     function! ILikeHelpToTheRight()
@@ -1879,19 +1971,21 @@ endfunction
 " make window 80 + some for numbers wide
 
 
-
-
 if ! exists("g:_use_terminal_transparent")
-    let g:insert_enter_fg_gui = 'DarkYellow'
+    " let g:insert_enter_fg_gui = 'DarkYellow'
+    let g:insert_enter_fg_gui = '94'
     let g:insert_enter_fg_cterm = 'DarkYellow'
     let g:insert_enter_bg_gui = 'Black'
-    let g:insert_enter_bg_cterm = 'Black'
+    " let g:insert_enter_bg_cterm = 'Black'
+    let g:insert_enter_bg_cterm = '107'
 
     let g:insert_leave_fg_gui   = 'darkgray'
-    let g:insert_leave_fg_cterm = '080808'
+    " let g:insert_leave_fg_cterm = '080808'
+    let g:insert_leave_fg_cterm = '104'
 
 
-    let g:nontext_fg_cterm = 241
+    " let g:nontext_fg_cterm = 241
+    let g:nontext_fg_cterm = '94'
     let g:nontext_fg_gui = 'gray'
 else
     let g:insert_enter_fg_gui = 'NONE'
@@ -1908,10 +2002,17 @@ endif
 
 if 'linux' == $TERM
     if exists("g:_use_terminal_transparent")
-        let g:insert_leave_bg_gui   = 'Brown'
+        " Cursor line/column color
+        " let g:insert_leave_bg_gui   = 'Brown'
+        let g:insert_leave_bg_gui   = 'Blue'
+        " let g:insert_leave_bg_gui   = 'Yellow'
+        " let g:insert_leave_bg_gui   = 'white'
+        " let g:insert_leave_bg_gui   = 'Black'
+
         " Warning: Color name "Background" is not defined.
         " "NONE" is not a eligile argument for cterm colors
-        let g:insert_leave_bg_cterm = 8
+        " let g:insert_leave_bg_cterm = 8
+        let g:insert_leave_bg_cterm = '107'
     else
         let g:insert_leave_bg_gui   = 'NONE'
         let g:insert_leave_bg_cterm = 'NONE'
@@ -1924,7 +2025,8 @@ else
         let g:insert_leave_bg_gui   = '#36323d'
         " let g:insert_leave_bg_gui   = '#82868a'
 
-        let g:insert_leave_bg_cterm = 4
+        " let g:insert_leave_bg_cterm = 4
+        let g:insert_leave_bg_cterm = '94'
         " let g:insert_leave_bg_cterm = 8
 
     else
@@ -1940,7 +2042,8 @@ endif
 " :let _rock_medium = '#36323d'
 let g:hl_insert_leave =
     \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_leave_bg_gui .
-    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . '136' . ' cterm=NONE gui=NONE term=NONE'
+    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . '104' . ' cterm=NONE gui=NONE term=NONE'
+    " \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . '136' . ' cterm=NONE gui=NONE term=NONE'
 let g:hl_insert_enter =
     \ ' guifg=' . g:insert_enter_fg_gui . ' guibg=' . g:insert_enter_bg_gui .
     \ ' ctermfg=' . g:insert_enter_fg_cterm . ' ctermbg=' . g:insert_enter_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
@@ -2001,7 +2104,8 @@ highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
 
 " vim-ShowTrailingWhitespace. works under pure terminal emulator without window managers
-highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
+" highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
+highlight ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
 
 highlight SpecialKey ctermfg=NONE guifg=NONE
 
@@ -2172,7 +2276,6 @@ set linespace =0
 
 " let g:scheme_name = "onehalfdark"
 " let g:scheme_name = "onehalflight"
-" silent! exe 'colorscheme ' . g:scheme_name
 " let g:scheme_name = "tabula"
 
 
@@ -2196,9 +2299,11 @@ set linespace =0
 " let g:scheme_name = "sunbather"
 " let g:scheme_name = "fogbell"
 " let g:scheme_name = "pencil"
-" let g:scheme_name = "two-firewatch"
-" let g:two_firewatch_italics = 1
-let g:scheme_name = "lucid"
+" Nice on tty
+let g:scheme_name = "two-firewatch"
+let g:two_firewatch_italics = 1
+
+" let g:scheme_name = "lucid"
 
 
 if "pencil" == g:scheme_name
@@ -2224,19 +2329,21 @@ endif
 
 augroup color_scheme_refresh | au!
     " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
-    autocmd VimEnter *
-        \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
-        \ silent! execute 'colorscheme ' . g:scheme_name |
-        \ endif
+    " autocmd VimEnter *
+    "     \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
+    "     \ silent! execute 'colorscheme ' . g:scheme_name |
+    "     \ endif
 
     " E492: Not an editor command: ++nested colorscheme lucid
     " autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
+    " Conflicted with syntax on?
     autocmd VimEnter * silent! execute 'colorscheme ' . g:scheme_name
 augroup END
 
-set background=dark
 silent! execute 'colorscheme ' . g:scheme_name
 
+" set background=light
+set background=dark
 
 if exists('g:_use_gitgutter')
     " vim-gitgutter
@@ -2853,7 +2960,7 @@ nnoremap X D
 " "auto update content when changed elsewhere $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 " https://www.generacodice.com/en/articolo/465677/How+does+Vim%27s+autoread+work%3F
 
-:set autoread   " doesn't work
+set autoread   " doesn't work
 " autocmd FileChangedShellPost *
 "   \ echohl WarningMsg | echo "Buffer changed!" | echohl None
 "
@@ -2966,7 +3073,7 @@ set noequalalways
 
 " https://github.com/spf13/spf13-vim/issues/540
 " set syntax=on
-syntax on
+" syntax on
 
 set nomore
 
@@ -3043,8 +3150,8 @@ set number relativenumber
 " set nornu  " turn off rnu
 
 
-" set regexpengine=1
-set regexpengine=0
+set regexpengine=2
+" set regexpengine=0
 
 " set scrolloff=3
 " https://stackoverflow.com/questions/43915661/how-to-move-screen-left-right-or-center-it-horizontally-without-moving-cursor-in?noredirect=1&lq=1
@@ -4024,86 +4131,6 @@ if exists('$TMUX')
 
 endif | " exists('$TMUX')
 
-let g:sudo_no_gui = 1
-
-" https://github.com/quanhengzhuang/vim-sudowriter/blob/master/plugin/sudowriter.vim
-" " Will erase the current buffer completely!
-" function! s:sudowrite()
-"     let current = getpos('.')
-"     execute '!sudo tee %'
-"     edit
-"     call setpos('.', current)
-" endfunction
-
-set autowriteall
-" https://www.reddit.com/r/vim/comments/25g5mc/is_there_an_alternative_to_w_sudo_tee_devnull/
-" sudo -e
-" https://github.com/ncaq/auto-sudoedit
-" auto-sudoedit in lisp
-
-" https://vi.stackexchange.com/questions/3561/settings-and-plugins-when-root-sudo-vim
-" command! -nargs=0 W silent! w !doas tee > /dev/null %  feedkeys("l", 't') :e
-" command! -nargs=0 W silent! w !doas tee > /dev/null %
-" command! -nargs=0 W :call <sid>sudowrite()<cr>
-" command! -nargs=0 W :call <sid>save_file_via_doas()<cr>
-
-" Won't work
-" command! -nargs=0 W silent! :SudoWrite<CR>
-
-" cmap w!! %!sudo tee > /dev/null %
-" Allow saving of files as sudo when I forgot to start vim using sudo.
-" Doesn't need comfirmation
-" cmap w!! w !sudo tee > /dev/null %
-
-" cnoremap w!! execute 'silent! write !sudo /usr/bin/tee "%" >/dev/null' <CR> <bar> call feedkeys('l', 't') <CR> <bar> :edit <CR>
-
-" cnoremap w!! write !doas tee % > /dev/null <CR> :edit<CR>
-
-" cnoremap w!! exec 'w !sudo dd of=' . shellescape(expand('%')) <CR> :edit<CR>
-" cnoremap w!! exec 'w !doas dd of=' . shellescape(expand('%')) <CR> :edit<CR>
-
-" https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
-cnoremap w!! silent! call <sid>save_file_via_doas()<cr>
-
-function! s:save_file_via_doas() abort
-    " https://askubuntu.com/questions/454649/how-can-i-change-the-default-editor-of-the-sudoedit-command-to-be-vim
-    " https://unix.stackexchange.com/questions/90866/sudoedit-vim-force-write-update-without-quit/635704#635704
-    " inotifywait
-    " https://github.com/lambdalisue/suda.vim
-    " echo executable('sudo')
-    " https://github.com/vim-scripts/sudo.vim
-    "     (command line): vim sudo:/etc/passwd
-    "     (within vim):   :e sudo:/etc/passwd
-    if executable('doas')
-        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=tee doasedit ' . shellescape(expand('%')) . ' >/dev/null '
-        " execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
-    elseif executable('sudo')
-        execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null '
-    endif
-    let &modified = v:shell_error
-endfunction
-
-
-" cnoremap w!! w !sudo sh -c "cat > %" <CR> feedkeys('l', 't') <CR> :edit<CR>
-" cnoremap w!! execute 'silent! write !SUDO_ASKPASS=`which ssh-askpass` sudo tee % >/dev/null' <bar> edit!
-" cmap w!! let current = getpos('.') <bar> %!sudo tee > /dev/null %<CR>:edit!<CR> <bar> call setpos('.', current) <CR>
-
-" cnoremap w!! :call <sid>sudowrite()<cr>
-
-" cmap w!! w !doas tee > /dev/null %
-" cmap w!! w !sudo sh -c "cat > %"
-" cmap w!! w !sudo dd of=% > /dev/null
-" Won't work
-" cmap w!! silent! :SudoWrite<CR>
-
-" https://github.com/tpope/vim-eunuch
-" v +SudoEdit $SHARE_PREFIX/gentoo/root/test.cpp
-" https://github.com/lambdalisue/suda.vim  " removed
-" " Will erase buffers (not just current one) automatically if you don't have write permission
-" let g:suda_smart_edit = 1  " for suda.vim
-" For both vim-eunuch and suda.vim (change SudoWrite to SudaWrite)
-" noremap  <silent> <C-s> :SudoWrite<CR>
-" inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
 if has('nvim')
     " https://github.com/kyazdani42/nvim-tree.lua
@@ -4871,42 +4898,44 @@ let g:buffergator_split_size=100
 
 " "tab management ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))"
 
-" Default Settings
-" -----
+if exists('g:smartq_loaded')
+    " Default Settings
+    " -----
 
-" Default mappings:
-" Remaps normal mode macro record q to Q
-" nnoremap Q q
-" nmap q        <Plug>(smartq_this)
-" nmap <C-q>    <Plug>(smartq_this_force)
-let g:smartq_default_mappings = 1
+    " Default mappings:
+    " Remaps normal mode macro record q to Q
+    " nnoremap Q q
+    " nmap q        <Plug>(smartq_this)
+    " nmap <C-q>    <Plug>(smartq_this_force)
+    let g:smartq_default_mappings = 1
 
-" Excluded buffers to disable SmartQ and to preserve windows when closing splits
-" on excluded buffers. Non-modifiable buffers are preserved by default.
-let g:smartq_exclude_filetypes = [
-    \ 'fugitive'
-    \ ]
-let g:smartq_exclude_buftypes= [
-    \ ''
-    \ ]
+    " Excluded buffers to disable SmartQ and to preserve windows when closing splits
+    " on excluded buffers. Non-modifiable buffers are preserved by default.
+    let g:smartq_exclude_filetypes = [
+        \ 'fugitive'
+        \ ]
+    let g:smartq_exclude_buftypes= [
+        \ ''
+        \ ]
 
-" Quit buffers using :q command. Non-modifiable and readonly file uses :q
-let g:smartq_q_filetypes = [
-    \ 'diff', 'git', 'gina-status', 'gina-commit', 'snippets',
-    \ 'floaterm'
-    \ ]
-let g:smartq_q_buftypes = [
-    \ 'quickfix', 'nofile'
-    \ ]
+    " Quit buffers using :q command. Non-modifiable and readonly file uses :q
+    let g:smartq_q_filetypes = [
+        \ 'diff', 'git', 'gina-status', 'gina-commit', 'snippets',
+        \ 'floaterm'
+        \ ]
+    let g:smartq_q_buftypes = [
+        \ 'quickfix', 'nofile'
+        \ ]
 
-" Wipe buffers using :bw command. Wiped buffers are removed from jumplist
-" Default :bd
-let g:smartq_bw_filetypes = [
-    \ ''
-    \ ]
-let g:smartq_bw_buftypes = [
-    \ ''
-    \ ]
+    " Wipe buffers using :bw command. Wiped buffers are removed from jumplist
+    " Default :bd
+    let g:smartq_bw_filetypes = [
+        \ ''
+        \ ]
+    let g:smartq_bw_buftypes = [
+        \ ''
+        \ ]
+endif
 
 " "session operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
@@ -4927,7 +4956,8 @@ let g:smartq_bw_buftypes = [
 
 " https://github.com/vim/vim/issues/2790
 " :set redrawtime=10000
-:set redrawtime=1000
+set redrawtime=1000
+set lazyredraw
 " e. It selects the default regular expression engine.
 " https://www.reddit.com/r/vim/comments/8ggdqn/undocumented_tips_make_your_vim_1020x_times_faster/
 " vim hangs when I open a typescript file
@@ -5273,7 +5303,8 @@ let g:reload_on_write = 1
 
 augroup reload_vimrc
     autocmd!
-    autocmd BufEnter * ++nested syntax sync fromstart
+    " The following comand will shut off syntax and enable it again!!!
+    " autocmd BufEnter * ++nested syntax sync fromstart
 
     " if has('nvim')
     "     autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
@@ -5300,10 +5331,12 @@ augroup END
 " https://stackoverflow.com/questions/14779299/syntax-highlighting-randomly-disappears-during-file-saving
 augroup reset_syntax
     au!
+    " The following comand will shut off syntax and enable it again!!!
     autocmd SourcePost,BufReadPost,BufWritePost *
         \ doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
-    " syntax enable
 augroup END
+syntax enable
+syntax on
 
 " "keep above code block at the end of the file ________________________________________________________________"
 
@@ -5338,13 +5371,14 @@ else
 
     " lua lualine =  require('lualine')
 
-    augroup indent_blankline_hl
-        au!
-        autocmd VimEnter,WinEnter,BufEnter,BufDelete,
-            \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
-            \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
-        " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
-    augroup END
+    " augroup indent_blankline_hl
+    "     au!
+    "     " The following comand will shut off syntax and enable it again!!!
+    "     autocmd VimEnter,WinEnter,BufEnter,BufDelete,
+    "         \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
+    "         \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
+    "     " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
+    " augroup END
 endif
 
 
