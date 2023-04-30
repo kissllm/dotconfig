@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash?page=1&tab=votes#tab-top
@@ -60,8 +60,8 @@ done
 
 if [ $verbose > 0 ]; then
 
-   # print out all the parameters we read in
-   cat <<EOM
+    # print out all the parameters we read in
+    cat <<EOM
     GROUP_RENAME        = $GROUP_RENAME
     OTHERS_INCLUDE      = $OTHERS_INCLUDE
     time                = $time_str
@@ -296,7 +296,7 @@ permition () {
 }
 
 # function post_update(){
-if [ "$SHELL" = "$SHELL/zsh/" ]; then
+if [ "$SHELL" = "${SHELL/zsh/}" ]; then
     command doas find "${ZINIT[COMPLETIONS_DIR]}" -mindepth 1 -delete
     # command doas \chmod -R --quiet go+rX "${ZINIT[HOME_DIR]}"
     # command doas \chmod -R --quiet go+rX "${VINIT[HOME_DIR]}"
@@ -318,7 +318,7 @@ if [ -d "${1}" ]; then
     # working_path="${1}"
     permition "${1}" &
 else
-    echo "${1}, no such file or directory"
+    echo "${1}, No such file or directory [$0]"
 #     if [ $SHELL = "zsh" ]; then
 #         working_path="${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
 #     else

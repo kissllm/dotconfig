@@ -1,3 +1,10 @@
-#!/usr/bin/env sh
+#!/bin/sh
+
+doas modprobe cfg80211
+# modprobe iwlmvm
+
 wifi_mod="$(lsmod | grep "iwlmvm" | awk '{print $1}')"
-[ -z "$wifi_mod" ] && modprobe iwlmvm
+[ -n "$wifi_mod" ] || {
+    doas modprobe iwlmvm
+    doas modprobe iwlwifi 
+}

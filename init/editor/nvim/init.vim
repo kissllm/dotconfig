@@ -363,7 +363,7 @@ endfor
 
 exe 'set packpath^='. &runtimepath
 
-if ! exists('g:boot_loaded')
+if ! exists('g:loaded_boot')
     let boot_load_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/start/boot'
     let boot_load_file = boot_load_path . '/autoload/boot.vim'
     exe 'set runtimepath+='. boot_load_path
@@ -503,14 +503,14 @@ function! s:keys_reload()
     " packadd keys
     " Don't do this manually before all plugins loaded, keys.vim will not notice vim-tmux-navigator
     " correctly -- even you put it after vim-tmux-navigator
-    " if ! exists('g:keys_loaded')
+    " if ! exists('g:loaded_keys')
     "     let keys_load_path = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
     "     execute "source " .   keys_load_path
     "     execute "runtime! " . keys_load_path
     " endif
 
-    if exists('g:keys_loaded')
-        unlet g:keys_loaded
+    if exists('g:loaded_keys')
+        unlet g:loaded_keys
     endif
     " let g:debug_keys    = 1
     let keys_load_path  = g:plugin_dir['vim'] . '/pack/packager/start/keys/after/keys.vim'
@@ -518,7 +518,7 @@ function! s:keys_reload()
     silent! execute "runtime! " . keys_load_path
 endfunction
 
-command! -nargs=0 KL :call s:keys_reload()
+command! -nargs=0 KR :call s:keys_reload()
 
 
 
@@ -1856,15 +1856,8 @@ augroup read_only | au!
     au BufEnter,FileChangedRO * set noro
 augroup end
 
-function! s:write_generic()
-    if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
-        write
-    else
-        call s:save_file_via_doas()
-    endif
-endfunction
-
-:cnoreabbrev w silent! call <sid>write_generic()
+" :cnoreabbrev w silent! call <sid>write_generic()
+" :cnoreabbrev w silent! call boot#write_generic()
 
 " :cabbrev w
 "     \ silent! if system(['whoami']) == system(['stat', '-c', '%U', expand('%')])
@@ -1909,28 +1902,6 @@ set autowriteall
 
 " cnoremap w!! exec 'w !sudo dd of=' . shellescape(expand('%')) <CR> :edit<CR>
 " cnoremap w!! exec 'w !doas dd of=' . shellescape(expand('%')) <CR> :edit<CR>
-
-" https://unix.stackexchange.com/questions/249221/vim-sudo-hack-auto-reload
-cnoremap w!! silent! call <sid>save_file_via_doas()<cr>
-
-function! s:save_file_via_doas() abort
-    " https://askubuntu.com/questions/454649/how-can-i-change-the-default-editor-of-the-sudoedit-command-to-be-vim
-    " https://unix.stackexchange.com/questions/90866/sudoedit-vim-force-write-update-without-quit/635704#635704
-    " inotifywait
-    " https://github.com/lambdalisue/suda.vim
-    " echo executable('sudo')
-    " https://github.com/vim-scripts/sudo.vim
-    "     (command line): vim sudo:/etc/passwd
-    "     (within vim):   :e sudo:/etc/passwd
-    if executable('doas')
-        execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=tee doasedit ' . shellescape(expand('%')) . ' >/dev/null '
-        " execute (has('gui_running') ? '' : 'silent') 'write !env EDITOR=doasedit doas -e ' . shellescape(expand('%')) . ' >/dev/null '
-    elseif executable('sudo')
-        execute (has('gui_running') ? '' : 'silent') 'write !env SUDO_EDITOR=tee sudo -e ' . shellescape(expand('%')) . ' >/dev/null '
-    endif
-    let &modified = v:shell_error
-endfunction
-
 
 " cnoremap w!! w !sudo sh -c "cat > %" <CR> feedkeys('l', 't') <CR> :edit<CR>
 " cnoremap w!! execute 'silent! write !SUDO_ASKPASS=`which ssh-askpass` sudo tee % >/dev/null' <bar> edit!
@@ -2068,13 +2039,6 @@ hi SpellLocal cterm=underline ctermfg=9
 hi SpellRare  cterm=underline ctermfg=9
 hi SpellCap   cterm=underline
 
-if ! exists("g:_use_terminal_transparent")
-    " :help highlight-groups
-    " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
-    " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
-    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
-endif
-
 highlight FileStyleIgnorePattern guibg=bg ctermbg=0
 " highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
 " https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
@@ -2145,7 +2109,12 @@ highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
 " highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
 silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
 
-
+if exists("g:_use_terminal_transparent")
+    " :help highlight-groups
+    " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
+    " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
+    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
+endif
 
 if exists("g:_use_terminal_transparent")
 
@@ -2192,27 +2161,30 @@ if exists("g:_use_terminal_transparent")
 
             " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
             " Workaround for creating transparent bg
-            if ! exists("g:_use_terminal_transparent")
-                autocmd SourcePost *
-                    \ highlight Normal ctermbg=0 guibg=NONE
-                    \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
-                    \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                    \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-            else
-                autocmd SourcePost *
-                    \ highlight Normal ctermbg=NONE guibg=NONE
-                    \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
-                    \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                    \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-            endif
+            autocmd SourcePost *
+                \ highlight Normal ctermbg=NONE guibg=NONE
+                \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
+
         augroup END
         augroup buffer_ending
             au!
             autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
         augroup end
     endif
+else
+    if exists('g:_use_dynamic_color')
+        augroup cursor_theme
+            au!
+            autocmd SourcePost *
+                \ highlight Normal ctermbg=0 guibg=NONE
+                \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
 
-
+        augroup end
+    endif
 endif
 
 
@@ -2327,18 +2299,6 @@ endif
 "     autocmd ColorScheme sierra call s:sdjust_solarized()
 " augroup END
 
-augroup color_scheme_refresh | au!
-    " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
-    " autocmd VimEnter *
-    "     \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
-    "     \ silent! execute 'colorscheme ' . g:scheme_name |
-    "     \ endif
-
-    " E492: Not an editor command: ++nested colorscheme lucid
-    " autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
-    " Conflicted with syntax on?
-    autocmd VimEnter * silent! execute 'colorscheme ' . g:scheme_name
-augroup END
 
 silent! execute 'colorscheme ' . g:scheme_name
 
@@ -3149,9 +3109,6 @@ set number relativenumber
 " set invrelativenumber " rnu
 " set nornu  " turn off rnu
 
-
-set regexpengine=2
-" set regexpengine=0
 
 " set scrolloff=3
 " https://stackoverflow.com/questions/43915661/how-to-move-screen-left-right-or-center-it-horizontally-without-moving-cursor-in?noredirect=1&lq=1
@@ -5329,14 +5286,35 @@ augroup END
 " "keep following code at the end of the file __________________________________________________________________"
 
 " https://stackoverflow.com/questions/14779299/syntax-highlighting-randomly-disappears-during-file-saving
-augroup reset_syntax
-    au!
-    " The following comand will shut off syntax and enable it again!!!
-    autocmd SourcePost,BufReadPost,BufWritePost *
-        \ doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
-augroup END
+" augroup reset_syntax
+"     au!
+"     " The following comand will shut off syntax and enable it again!!!
+"     autocmd SourcePost,BufReadPost,BufWritePost *
+"         \ doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
+" 
+" augroup END
+
+" redrawtime exceeded, "syntax highlighting" disabled
+" set regexpengine=2
+set regexpengine=1
+" set regexpengine=0
+" Search for the keyword "conflicted" to find setting conflictions of "syntax on" /  "syntax highlighting"
 syntax enable
 syntax on
+
+augroup color_scheme_refresh | au!
+    " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
+    " autocmd VimEnter *
+    "     \ if ! exists('g:colors_name') || g:colors_name !=# g:scheme_name |
+    "     \ silent! execute 'colorscheme ' . g:scheme_name |
+    "     \ endif
+
+    " E492: Not an editor command: ++nested colorscheme lucid
+    " autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
+    " "conflicted" with "syntax on"? -- Yes. It will override dynamic color settings
+    " Furthermore, it can seriously slow down your editor!!!
+    " autocmd VimEnter * silent! execute 'colorscheme ' . g:scheme_name
+augroup END
 
 " "keep above code block at the end of the file ________________________________________________________________"
 

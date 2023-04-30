@@ -1,4 +1,4 @@
-# #!/usr/bin/env sh
+# #!/bin/sh
 
 # How to use
 # share -s /opt -h $HOME
