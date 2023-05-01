@@ -2,14 +2,15 @@
 
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.profile"
 
-[ ! -z "${LOGNAME+x}" ] ||
+[ -n "${LOGNAME+x}" ] ||
 export LOGNAME="$(/usr/bin/whoami)"
 
 # echo "Original \$HOME = $HOME"
-[ ! -z "${HOME:+x}" ] || {
-    export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" '{if ($1==v) print $6}' /etc/passwd)"
+[ -n "${HOME:+x}" ] || {
+    export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
     echo "Fixed \$HOME = $HOME"
 }
+
 export HOME=$HOME
 export LLVM_IAS=1
 export LLVM=1
@@ -21,12 +22,10 @@ export SSL_CERT_FILE=$HOME/.cert/cacert.pem
 
 # echo "\$loaded_profile = $loaded_profile"
 # [ ! -z "${loaded_profile+x}" ] ||
-[ ! -f /etc/profile ] ||
-. /etc/profile
+[ ! -f /etc/profile ] || . /etc/profile
 
 # [ "${SHELL}" = "${0}" ] || export SHELL=$0
-command -v "${SHELL}" > /dev/null 2>&1 ||
-export SHELL=$(which ash)
+command -v "${SHELL}" > /dev/null 2>&1 || export SHELL=$(which ash)
 
 [ ! -f $HOME/.ashrc ] || . $HOME/.ashrc
 

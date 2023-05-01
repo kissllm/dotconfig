@@ -1,5 +1,8 @@
-#!/usr/bin/env sh
+#!/bin/sh
 # doas root /mnt/alpine /bin/ash
+set -eE
+trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+# shellcheck source=/mnt/lib/mount_smart
 . /mnt/lib/mount_smart
 # des = /mnt/gentoo # or some absolute path
 
@@ -11,12 +14,12 @@ fi
 des=$1
 # echo "In chroot.sh, \$des = $des"
 
-[ -n $2 ] && shell=$2
+[ -z $2 ] || shell=$2
 
 smart_rbind () {
     dir=$1
     # echo "In smart_rbind, \$des = $des"
-    [ "$(target_exists "$des/$dir")" -eq "0" ] && [ -d "/$dir" ] && {
+    target_exists "$des/$dir" && [ -d "/$dir" ] && {
     # [ ! -d "$des/$dir" ] && {
         mount --rbind /$dir $des/$dir
         mount --make-rslave $des/$dir

@@ -1,86 +1,92 @@
-#!/usr/bin/env sh
+#!/bin/sh --
 
 # mount_smart target source
+set -eE
+trace_line() {
+    local func_name="$1"
+    local lineo="$2"
+    echo "Error on function '$func_name' at '$lineo'"
+}
 
 target_exists () {
-    des=$1
+    set -eE
+    trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+    local des="$1"
     # echo "In target_exists, \$des = $des"
     # alredy_mounts="$(lsblk|grep $des | rev | cut -d" " -f1 | rev | tr '\n' ' ')"
     # https://stackoverflow.com/questions/9422461/check-if-directory-mounted-with-bash
-    alredy_mounts=$(mount | grep $des)
-    found=0
-    [ "" != "$alredy_mounts" ] && {
-        for I in $alredy_mounts;
-        do
-            [ "$I" = "$des" ] && found=$(( $found + 1 ))
+    local found=0
+    local result=1
+    for I in $(mount | grep "$des" | awk "{print \$3}"); do
+        [ "$I" != "$des" ] || found=$(( $found + 1 ))
+    done
+    [ "$found" -eq "0" ] || result=0
+    echo "$des found $found time(s)"
+    return "$result"
+}
+
+# "src" mounted
+src_mounted () {
+    set -eE
+    trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+    local src="${1:?"Must has first parameter"}"
+    local result=1
+    # [ -z "$src" ] && return "$result" ||
+    [ -z "$(df "${src}" 2>/dev/null | grep -v "Filesystem" | \
+        grep "${src}" | awk "{print \$1}")" ] ||
+        # echo $(df ${src} | grep ${src} | awk '{print $1}')
+    result=0
+    return "$result"
+}
+
+# "src" mounted and target match "des"
+dev_mounted_target () {
+    set -eE
+    trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+    local des="${1:?"Must not empty"}"
+    local src="${2:?"Must not empty"}"
+
+    local des_mounted_target=
+    local result=1
+
+    # https://stackoverflow.com/questions/762631/find-out-if-a-command-exists-on-posix-system
+
+    command -v findmnt > /dev/null && {
+        # mapped=("${(@f)$(findmnt --kernel -n --list | \
+        # grep -v '\[' | grep $src | awk '{print $1}')}")
+        # util-linux
+        mapped="$(findmnt --kernel -n --list | \
+                grep -v '\[' | grep "$src" | awk "{print \$1}" | tr '\n' ' ')"
+
+        for I in $mapped; do
+            [ "$des" != '$I' ] || des_mounted_target="$des"
         done
     }
-    echo $found
-}
 
-src_mounted () {
-    src=$1
-    [ "" = $src ] && echo "" || {
-        echo $(df ${src} | grep ${src} | awk '{print $1}')
-    }
-}
+    [ -n "$des_mounted_target" ] ||
+    des_mounted_target="$(df "${src}" 2>/dev/null | \
+            grep -v "Filesystem" | grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
 
-dev_mounted_target () {
-    des=$1
-    src=$2
-    { [ "" = $src ] || [ "" = $des ]; } && echo "" || {
+    [ "$des" != "$des_mounted_target" ] || result=0
 
-        # https://stackoverflow.com/questions/762631/find-out-if-a-command-exists-on-posix-system
-
-        command -v findmnt > /dev/null && {
-
-            # mapped=("${(@f)$(findmnt --kernel -n --list | grep -v '\[' | grep $src | awk '{print $1}')}")
-
-            mapped="$(findmnt --kernel -n --list | grep -v '\[' | grep $src | awk '{print $1}' | tr '\n' ' ')"
-
-            # https://stackoverflow.com/questions/3162385/how-to-split-a-string-in-shell-and-get-the-last-field
-            # https://unix.stackexchange.com/questions/177138/how-do-i-test-if-an-item-is-in-a-bash-array
-            # if ! (($mapped[(Ie)$des])); then
-            #     des_mounted_target=$(df ${des} | grep ${des} | awk '{print $6}')
-            # else
-            #     des_mounted_target=$des
-            # fi
-
-            des_mounted_target=
-            for I in $mapped;
-            do
-                [ "$des" = '$I' ] && des_mounted_target=$des
-            done
-            [ "" = "$des_mounted_target" ] && des_mounted_target=$(df ${des} | grep ${des} | awk '{print $6}')
-            echo "$des_mounted_target";
-        } || echo "findmnt not found"
-    }
+    return "$result"
 }
 
 mount_smart () {
-    target=$1
-    src=$2
-    [ -z "${3}" ] && option="-o bind" || option="${3}"
-    { [ "" = $src ] || [ "" = $target ]; } && echo "Invalid input" || {
-        old_target=$(dev_mounted_target $target $src)
-        { [ "" = "$(src_mounted $src)" ] || [ "" = "$old_target" ]; } && {
-            ! [ -d "$target" ] && {
-                mkdir -p "$target"
-                chmod --quiet 0755 "$target"
-            }
-            mount $src $target
-        } || {
-            [ "findmnt not found" != $old_target ] && {
-                [ "$old_target" != "$target" ] && {
-                    echo "src=$src, target=$target"
-                    ! [ -d "$target" ] && {
-                        mkdir -p "$target"
-                        chmod --quiet 0755 "$target"
-                    }
-                    mount $option $old_target $target
-                    echo "\r\n"
-                }
-            }
-        }
+    set -eE
+    trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+    local target="${1:?"Must not empty"}"
+    local src="${2:?"Must not empty"}"
+    [ -d "$target" ] || {
+        mkdir -p "$target"
+        chmod --quiet 0755 "$target"
+    }
+    src_mounted "$src" || { mount $src $target; return 0; }
+    dev_mounted_target "$target" "$src" || {
+        [ -z "${3}" ] && local option="-o bind" || local option="${3}"
+        local des_mounted_target="$(df "${src}" 2>/dev/null | \
+                grep -v "Filesystem" | grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
+        mount $option $des_mounted_target $target
+        echo "src=$src, target=$target, binded"
     }
 }

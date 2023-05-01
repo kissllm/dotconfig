@@ -497,36 +497,8 @@ nnoremap <silent> <leader> :WhichKey '\' <cr>
 set timeoutlen=500
 " set timeoutlen=100
 
-" Write buffer will enable navigation keys work again while someties it was in a bugging trap of vim-tmux-navigator
-" User defined key maps
-function! s:keys_reload()
-    " packadd keys
-    " Don't do this manually before all plugins loaded, keys.vim will not notice vim-tmux-navigator
-    " correctly -- even you put it after vim-tmux-navigator
-    " if ! exists('g:loaded_keys')
-    "     let keys_load_path = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
-    "     execute "source " .   keys_load_path
-    "     execute "runtime! " . keys_load_path
-    " endif
-
-    if exists('g:loaded_keys')
-        unlet g:loaded_keys
-    endif
-    " let g:debug_keys    = 1
-    let keys_load_path  = g:plugin_dir['vim'] . '/pack/packager/start/keys/after/keys.vim'
-    silent! execute "source " . keys_load_path
-    silent! execute "runtime! " . keys_load_path
-endfunction
-
-command! -nargs=0 KR :call s:keys_reload()
-
-
-
 
 " "initializing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-
-
-
 
 " "Begin vim-packager Scripts vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
 " "Begin vim-packager Scripts vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
@@ -558,13 +530,9 @@ endfunction
 
 filetype off
 
-
-
-
 " https://www.reddit.com/r/vim/comments/edcgkk/do_you_recommend_using_vim_8s_new_packpath_to/
 " https://github.com/kristijanhusak/vim-packager
 " git clone https://github.com/kristijanhusak/vim-packager ~/.vim/pack/packager/opt/vim-packager
-
 
 let g:vim_packages_use = {}
 let g:vim_packages_use['morhetz/gruvbox']                                 = {}
@@ -1364,7 +1332,8 @@ if has('nvim')
         " v:lua.require'plugins'.install()
         lua require'plugins'.install()
         :PackerCompile
-        call s:keys_reload()
+        " call s:keys_reload()
+        :KR
         redraw!
     endfunction
 
@@ -2421,11 +2390,11 @@ if exists('g:_disable_direction_key')
 
     " nnoremap d <c-d>
     " Easy to wrong touch . key
-    nnoremap , <c-d>
+    " nnoremap , <c-d>
     " nnoremap mm <c-d>
     " Mapping m key will cause the cursor to jump when switching windows
     " And xx keys will not work
-    " nnoremap m <c-d>
+    nnoremap m <c-d>
 
 endif
 
@@ -4003,7 +3972,8 @@ if exists('$TMUX')
     let g:tmux_navigator_no_mappings    = 1
     " Readonly buffers will prompt errors
     " Write all buffers before navigating from Vim to tmux pane
-    let g:tmux_navigator_save_on_switch = 2
+    " Does not act as expected. See write_generic
+    " let g:tmux_navigator_save_on_switch = 2
 
     " function! s:tmux_move(direction)
     "     let wnr = winnr()
