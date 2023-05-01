@@ -2390,11 +2390,11 @@ if exists('g:_disable_direction_key')
 
     " nnoremap d <c-d>
     " Easy to wrong touch . key
-    " nnoremap , <c-d>
+    nnoremap , <c-d>
     " nnoremap mm <c-d>
     " Mapping m key will cause the cursor to jump when switching windows
     " And xx keys will not work
-    nnoremap m <c-d>
+    " nnoremap m <c-d>
 
 endif
 
@@ -3352,8 +3352,8 @@ augroup END
 
 " "cursor shape and blinking |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
-" " https://vim.fandom.com/wiki/Configuring_the_cursor
-" if &term =~ "xterm\\|rxvt\\|alacritty"
+" https://vim.fandom.com/wiki/Configuring_the_cursor
+" if &term =~ "xterm\\|rxvt\\|alacritty\\|foot"
 "     " use an orange cursor in insert mode
 "     let &t_SI = "\<Esc>]12;orange\x7"
 "     " use a red cursor otherwise

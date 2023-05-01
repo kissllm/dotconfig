@@ -1,0 +1,4 @@
+#!/bin/sh
+path="${1:?"Must give a path"}"
+for item in $(git -C "$path" status | grep "modified" | awk "{print \$2}"); do git add "$item"; done
+
