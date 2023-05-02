@@ -1768,8 +1768,8 @@ nnoremap <silent> <leader>L :call matchadd('Search', '\%'.line('.').'l')<CR>
 
 " \l to remove highlighted line
 nnoremap <silent> <leader>l :
-    \for m in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
-    \<BAR> :call matchdelete(m.id)
+    \for M in filter(getmatches(), { i, v -> has_key(l:v, 'pattern') && l:v.pattern is? '\%'.line('.').'l'} )
+    \<BAR> :call matchdelete(M.id)
     \<BAR> :endfor<CR>
 
 " au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%80v.\+', -1)
@@ -2651,8 +2651,8 @@ if 1 == g:navi_protect
     endfunction
 
     " " put a new line before or after to this line
-    " nnoremap <S-CR> m`o<Esc>``
-    " nnoremap <C-CR> m`O<Esc>``
+    " nnoremap <S-CR> M`o<Esc>``
+    " nnoremap <C-CR> M`O<Esc>``
     "
     " " reverse J command
     " nnoremap <C-J> vaW<Esc>Bi<cr><Esc>k:s/\s\+$//<cr>$
@@ -2674,16 +2674,16 @@ if 1 == g:navi_protect
     " This map will break vim user mappings and restore to the default mappings of ^H/^J/^K/^L
 
     if has('nvim')
-        nnoremap <S-CR> m`O<Esc>``
-        nnoremap <leader>[ m`O<Esc>``
-        nnoremap <C-CR> m`o<Esc>``
-        nnoremap <leader>] m`o<Esc>``
+        nnoremap <S-CR> M`O<Esc>``
+        nnoremap <leader>[ M`O<Esc>``
+        nnoremap <C-CR> M`o<Esc>``
+        nnoremap <leader>] M`o<Esc>``
     else
         " Could be enabled by 'tpope/vim-unimpaired'
         " Use [-space for shift-enter
         " And ]-space for ctrl-enter
-        nnoremap <leader>[ m`O<Esc>``
-        nnoremap <leader>] m`o<Esc>``
+        nnoremap <leader>[ M`O<Esc>``
+        nnoremap <leader>] M`o<Esc>``
     endif
 
     " nnoremap <S-CR> <NOP>
@@ -3092,6 +3092,7 @@ set spelllang=en_us
 set splitbelow
 set splitright
 set ttimeout
+set ttimeoutlen=1
 set ttyfast
 set virtualedit=block
 set whichwrap=b,s,<,>
@@ -3262,14 +3263,14 @@ if has('mouse')
 endif
 
 " https://vi.stackexchange.com/questions/12140/how-to-disable-moving-the-cursor-with-the-mouse
-nnoremap <LeftMouse> m`<LeftMouse>``
-nnoremap <LeftRelease> m`<LeftRelease>``
+nnoremap <LeftMouse> M`<LeftMouse>``
+nnoremap <LeftRelease> M`<LeftRelease>``
 
 
 augroup cursor_hold
     autocmd!
     " autocmd FocusLost * set mouse=
-    autocmd WinLeave * normal m`
+    autocmd WinLeave * normal M`
     " au FocusGained * normal 
     " au FocusGained * normal ``
     " autocmd FocusGained * call timer_start(200, 's:reenablemouse')
@@ -3368,27 +3369,39 @@ augroup END
 " Change cursor style when entering INSERT mode (works in tmux!)
 if exists('$TMUX')
     let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
     let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
     " https://github.com/vimpostor/vim-tpipeline
     let &t_fe = "\<Esc>[?1004h"
     let &t_fd = "\<Esc>[?1004l"
 else
     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_SR = "\<Esc>]50;CursorShape=2\x7"
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
-" following code will mess your vim
-" https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
-" au InsertEnter * silent! execute "! echo -en \<esc>[5 q"
-" au InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+let &t_SI = "\<esc>[5 q"
+let &t_SR = "\<esc>[5 q"
+let &t_EI = "\<esc>[2 q"
+" let &t_EI = "\<esc>[1 q"
+
 
 " https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
 augroup blink_cursor
     au!
-    autocmd VimEnter * silent! exec "! echo -ne '\e[1 q'"
-    autocmd VimLeave * silent! exec "! echo -ne '\e[3 q'"
+    " following code will mess your vim
+    " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
+    autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
+    autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+    " 1/2 block 3/4 uderscore 5/6 pipe bar
+    " blinky block
+    autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
+    autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
 augroup END
 
+if has('nvim')
+    let NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+endif
 
 " "cursor hape and blinking ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
