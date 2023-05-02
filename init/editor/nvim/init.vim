@@ -1708,6 +1708,7 @@ endif
 
 " http://www.pixelbeat.org/docs/terminal_colours/
 " :h term-dependent-settings
+" this variable must be enabled for colors to be applied properly
 set termguicolors
 let base16colorspace = 256  " Access colors present in 256 colorspace
 
@@ -1742,7 +1743,7 @@ if ! empty($TMUX)
     silent! execute '!export TERM=tmux-256color'
 endif
 
-if ! has('gui_running')
+if ! has('gui_running') && ! has('nvim')
     " https://github.com/tmux/tmux/issues/699
     set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
 endif
@@ -2045,6 +2046,7 @@ highlight SpecialKey ctermfg=NONE guifg=NONE
 " https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
 " https://jonasjacek.github.io/colors/
 hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi Cursor2 guifg=red guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 
 " "~" vertically under the line numbers
 
@@ -2072,7 +2074,7 @@ highlight SignColumn ctermbg=NONE guibg=NONE
 
 " https://gitanswer.com/vim-allow-customization-of-endofbuffer-character-vim-script-400592109
 " highlight EndOfBuffer ctermfg=0 ctermbg=NONE guifg=bg guibg=NONE
-highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
+highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE cterm=NONE
 
 " hi LineNr guibg=fg
 " highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
@@ -3365,6 +3367,8 @@ augroup END
 "     " use \003]12;gray\007 for gnome-terminal and rxvt up to version 9.21
 " endif
 
+" Check shell info
+" infocmp
 " https://vimrcfu.com/snippet/15
 " Change cursor style when entering INSERT mode (works in tmux!)
 if exists('$TMUX')
@@ -3380,19 +3384,24 @@ else
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
-let &t_SI = "\<esc>[5 q"
-let &t_SR = "\<esc>[5 q"
-let &t_EI = "\<esc>[2 q"
-" let &t_EI = "\<esc>[1 q"
-
+if ! has('nvim')
+    let &t_SI = "\<esc>[5 q"
+    let &t_SR = "\<esc>[5 q"
+    let &t_EI = "\<esc>[2 q"
+    " let &t_EI = "\<esc>[1 q"
+endif
 
 " https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
 augroup blink_cursor
     au!
     " following code will mess your vim
     " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
-    autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
-    autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+    " autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
+    " autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+
+    autocmd InsertEnter * silent! execute "! echo -en \x27[5 q"
+    autocmd InsertLeave * silent! execute "! echo -en \x27[2 q"
+
     " 1/2 block 3/4 uderscore 5/6 pipe bar
     " blinky block
     autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
@@ -3400,7 +3409,12 @@ augroup blink_cursor
 augroup END
 
 if has('nvim')
-    let NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+    " set guicursor=n-v-c:bar-Cursor/lCursor,i-ci-ve:ver25-CUrsuor2/lCursor,r-cr:hor50,o:hor50
+    " nvim: help guicursor
+    set guicursor=n-v-c:bar,i-ci-ve:ver25,r-cr:hor20,o:hor50
+        \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+        \,sm:bar-blinkwait175-blinkoff150-blinkon175
+    let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
 endif
 
 " "cursor hape and blinking ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
@@ -4145,7 +4159,6 @@ if has('nvim')
     " NvimTreeOpen, NvimTreeClose, NvimTreeFocus, NvimTreeFindFileToggle, and NvimTreeResize are also available if you need them
 endif
 
-set termguicolors " this variable must be enabled for colors to be applied properly
 
 
 " chadtree
