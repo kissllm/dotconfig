@@ -1,7 +1,10 @@
-# #!/bin/sh
+#!/bin/sh
+
+# Calling sequence
+# share->profile->shrc->env
 
 # How to use
-# share -s /opt -h $HOME
+# share -s /mnt -h $HOME
 
 # set -eu
 
@@ -37,7 +40,7 @@
 # printf '%s\n' "$@"
 
 # if [ -d "/opt/init" ]; then
-#     export SHARE_PREFIX="/opt"
+#     export SHARE_PREFIX="/mnt"
 # elif [ -d "/mnt/init" ]; then
 
 [ ! -d "/mnt/init" ] || [ ! -z "${SHARE_PREFIX+x}" ] || export SHARE_PREFIX="/mnt"
@@ -68,91 +71,53 @@
 #   ln -sf ${SHARE_PREFIX}/init/shell/zsh/zprofile ${HOME}/.zprofile
 # fi
 
-[ ! -f "$HOME/.xdg_runtime_dir" ] ||
-\rm -f "$HOME/.xdg_runtime_dir"
-[ "$(readlink "$HOME/.xdg_runtime_dir")" = "${SHARE_PREFIX}/init/xdg_runtime_dir" ] ||
-\ln -sf "${SHARE_PREFIX}/init/xdg_runtime_dir" "$HOME/.xdg_runtime_dir"
-. "$HOME/.xdg_runtime_dir"
+link_correct() {
+    local target="$1"
+    local anchor="$2"
+    [ -h "$anchor" ] ||
+        doas \rm -rf "$anchor"
 
-# ${XDG_CONFIG_HOME}/wayland/env -> ${SHARE_PREFIX}/init/wayland/env
-[ ! -f "${XDG_CONFIG_HOME}/wayland/env" ] ||
-\rm -f "${XDG_CONFIG_HOME}/wayland/env"
-
-[ "$(readlink "${XDG_CONFIG_HOME}/wayland/env")" = \
-"${SHARE_PREFIX}/init/wayland/env" ] || {
-    [ -d "${XDG_CONFIG_HOME}/wayland" ] || \mkdir -p "${XDG_CONFIG_HOME}/wayland"
-    \ln -sf "${SHARE_PREFIX}/init/wayland/env" "${XDG_CONFIG_HOME}/wayland/env"
+    [ "$(readlink -fn "$anchor")" == "$target" ] || {
+        local anchor_dir="${anchor%/*}"
+        [ -d "$anchor_dir" ] || doas \mkdir -p "$anchor_dir"
+        doas \ln -sf "$target" "$anchor"
+    }
 }
 
-[ ! -f "${HOME}/.profile" ] || \rm -f "${HOME}/.profile"
-[ "$(readlink ${HOME}/.profile)" = "${SHARE_PREFIX}/init/profile" ] ||
-\ln -sf "${SHARE_PREFIX}/init/profile" "${HOME}/.profile"
+link_correct "${SHARE_PREFIX}/init/xdg_runtime_dir" "/etc/profile.d/xdg_runtime_dir.sh"
+link_correct "${SHARE_PREFIX}/init/iwl" "/etc/profile.d/iwl.sh"
+link_correct "${SHARE_PREFIX}/init/kiss-env" "/etc/profile.d/kiss-env.sh"
 
-[ ! -f "${HOME}/.ashrc" ] || \rm -f "${HOME}/.ashrc"
-[ "$(readlink ${HOME}/.ashrc)" = "${SHARE_PREFIX}/init/ashrc" ] ||
-\ln -sf "${SHARE_PREFIX}/init/ashrc" "${HOME}/.ashrc"
+link_correct "${SHARE_PREFIX}/init/xdg_runtime_dir" "$HOME/.xdg_runtime_dir"
+[ -n "${XDG_CONFIG_HOME:+x}" ] ||
+. "$HOME/.xdg_runtime_dir"
 
-[ ! -f "${HOME}/.tmux.conf" ] || \rm -f "${HOME}/.tmux.conf"
+link_correct "${SHARE_PREFIX}/init/wayland/env" "${XDG_CONFIG_HOME}/wayland/env"
 
-[ "$(readlink ${HOME}/.tmux.conf)" = "${SHARE_PREFIX}/init/terminal/tmux.conf" ] ||
-\ln -sf "${SHARE_PREFIX}/init/terminal/tmux.conf" "${HOME}/.tmux.conf"
-
-[ ! -d "${HOME}/.tmux" ] || \rm -rf "${HOME}/.tmux"
-
-[ "$(readlink ${HOME}/.tmux)" = "${SHARE_PREFIX}/init/terminal/tmux" ] ||
-\ln -sf "${SHARE_PREFIX}/init/terminal/tmux" "${HOME}/.tmux"
-
-[ ! -f "${HOME}/.vimrc" ] || \rm -f "${HOME}/.vimrc"
-
-[ "$(readlink ${HOME}/.vimrc)" = \
-"${SHARE_PREFIX}/init/editor/nvim/init.vim" ] ||
-\ln -sf "${SHARE_PREFIX}/init/editor/nvim/init.vim" "${HOME}/.vimrc"
-
-[ ! -d "${HOME}/.vim" ] || \rm -rf "${HOME}/.vim"
-
-[ "$(readlink ${HOME}/.vim)" = "${SHARE_PREFIX}/init/editor/vim" ] ||
-\ln -sf "${SHARE_PREFIX}/init/editor/vim" "${HOME}/.vim"
-
-[ ! -d "${XDG_CONFIG_HOME}/nvim" ] || \rm -rf "${XDG_CONFIG_HOME}/nvim"
-
-if [ -f "${XDG_CONFIG_HOME}/nvim" ]; then
-    [ "$(readlink ${XDG_CONFIG_HOME}/nvim)" = \
-    "${SHARE_PREFIX}/init/editor/nvim" ] ||
-    \ln -sf "${SHARE_PREFIX}/init/editor/nvim" "${XDG_CONFIG_HOME}/nvim"
-else
-    \ln -sf "${SHARE_PREFIX}/init/editor/nvim" "${XDG_CONFIG_HOME}/nvim"
-fi
+link_correct "${SHARE_PREFIX}/init/profile" "${HOME}/.profile"
+link_correct "${SHARE_PREFIX}/init/ashrc" "${HOME}/.ashrc"
+link_correct "${SHARE_PREFIX}/init/terminal/tmux.conf" "${HOME}/.tmux.conf"
+link_correct "${SHARE_PREFIX}/init/terminal/tmux" "${HOME}/.tmux"
+link_correct "${SHARE_PREFIX}/init/editor/nvim/init.vim" "${HOME}/.vimrc"
+link_correct "${SHARE_PREFIX}/init/editor/vim" "${HOME}/.vim"
+link_correct "${SHARE_PREFIX}/init/editor/nvim" "${XDG_CONFIG_HOME}/nvim"
 
 [ ! -L "${XDG_DATA_HOME}/nvim" ] || \rm -f "${XDG_DATA_HOME}/nvim"
-
 [ -d "${XDG_DATA_HOME}/nvim" ] || mkdir -p "${XDG_DATA_HOME}/nvim"
 
 [ ! -L "${XDG_DATA_HOME}/nvim/site" ] || \rm -f "${XDG_DATA_HOME}/nvim/site"
-
 [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
 
-[ ! -d "${XDG_DATA_HOME}/nvim/site/pack" ] ||
-\rm -rf "${XDG_DATA_HOME}/nvim/site/pack"
-
-# if expr "$OSTYPE" : "musl" 1>/dev/null; then
-#     [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" = \
-#     "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" ] || {
-#         [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
-#         \ln -sf "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" \
-#         "${XDG_DATA_HOME}/nvim/site/pack"
-#     }
-# else
-    [ "$(readlink ${XDG_DATA_HOME}/nvim/site/pack)" = \
-    "${SHARE_PREFIX}/init/editor/nvim/site/pack" ] || {
-        [ -d "${XDG_DATA_HOME}/nvim/site" ] || \mkdir -p "${XDG_DATA_HOME}/nvim/site"
-        \ln -sf "${SHARE_PREFIX}/init/editor/nvim/site/pack" \
-        "${XDG_DATA_HOME}/nvim/site/pack"
-    }
-# fi
+# Default editor packages is based on musl libc on current system
+link_correct "${SHARE_PREFIX}/init/editor/nvim/site/pack" \
+    "${XDG_DATA_HOME}/nvim/site/pack"
+# If you have additional musl libc builds of the editor
+# ! expr "$KISS_XHOST_ABI" : "musl" > /dev/null 2>&1 ||
+# link_correct "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" \
+#     "${XDG_DATA_HOME}/nvim/site/pack"
 
 [ ! -L "${XDG_DATA_HOME}/nvim/site/parser" ] ||
 \rm -f "${XDG_DATA_HOME}/nvim/site/parser"
-
 [ -d "${XDG_DATA_HOME}/nvim/site/parser" ] ||
 \mkdir -p "${XDG_DATA_HOME}/nvim/site/parser"
 

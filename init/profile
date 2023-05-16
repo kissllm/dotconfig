@@ -7,18 +7,20 @@ export LOGNAME="$(/usr/bin/whoami)"
 
 # echo "Original \$HOME = $HOME"
 [ -n "${HOME:+x}" ] || {
-    export HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
+    HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
+    export HOME
     echo "Fixed \$HOME = $HOME"
 }
 
-export HOME=$HOME
-export LLVM_IAS=1
-export LLVM=1
+LLVM_IAS=1
+export LLVM_IAS
+LLVM=1
+export LLVM
 
 export SSL_CERT_FILE=$HOME/.cert/cacert.pem
 
-# For Chimera Linux
-[ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
+# For Chimera Linux development
+# [ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
 
 # echo "\$loaded_profile = $loaded_profile"
 # [ ! -z "${loaded_profile+x}" ] ||

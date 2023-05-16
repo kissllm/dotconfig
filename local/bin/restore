@@ -17,6 +17,7 @@ else
 fi
 
 cd "${BACKUP_ROOT}"
+doas chattr -i /etc/resolv.conf
 for dir in $(doas \ls -1 "${BACKUP_ROOT}"); do
     if ! eval '$copy "${BACKUP_ROOT}/$dir" "${TARET_ROOT}/"'; then
         echo "Failed to copy '${BACKUP_ROOT}/$dir'"
@@ -25,3 +26,4 @@ for dir in $(doas \ls -1 "${BACKUP_ROOT}"); do
         echo "Succeeded in copying '${BACKUP_ROOT}/$dir'"
     fi
 done
+doas chattr +i /etc/resolv.conf

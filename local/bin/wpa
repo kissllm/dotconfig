@@ -39,7 +39,8 @@
     for wpa in $wpa_list; do doas kill -9 $wpa; done
     # doas /usr/bin/find /sys/class/ -name enp2s0
     # /sys/class/net/enp2s0
-    interface="enp2s0"
+    # interface="enp2s0"
+    interface="eth0"
     doas sv restart dhcpcd
     doas /sbin/ip link set dev "$interface" up
     doas /sbin/ip address flush dev "$interface"

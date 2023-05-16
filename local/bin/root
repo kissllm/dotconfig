@@ -1,25 +1,26 @@
 #!/bin/sh
 # doas root /mnt/alpine /bin/ash
+des="${1:?"Must give a target path"}"
 set -eE
 trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
 # shellcheck source=/mnt/lib/mount_smart
 . /mnt/lib/mount_smart
 # des = /mnt/gentoo # or some absolute path
 
-if [ -z $1 ] || [ ! -d "$1" ]; then
-    echo "Please input absolute directory to chroot"
+[ -d "$des" ] || {
+    echo "Please input absolute directory to chroot to it"
     exit 1
-fi
+}
 
-des=$1
 # echo "In chroot.sh, \$des = $des"
 
-[ -z $2 ] || shell=$2
+[ -z "${2:+x}" ] || shell=$2
 
 smart_rbind () {
     dir=$1
+    [ -d  "$des/$dir" ] || \mkdir -p  "$des/$dir"
     # echo "In smart_rbind, \$des = $des"
-    target_exists "$des/$dir" && [ -d "/$dir" ] && {
+    target_exists "$des/$dir" || [ ! -d "/$dir" ] || {
     # [ ! -d "$des/$dir" ] && {
         mount --rbind /$dir $des/$dir
         mount --make-rslave $des/$dir
@@ -27,7 +28,10 @@ smart_rbind () {
 }
 
 # cp -L /etc/resolv.conf $des/etc/
-mount -t proc /proc $des/proc
+[ -d "$des/proc" ] || \mkdir -p " $des/proc"
+# mount -t proc /proc $des/proc
+        mount --rbind /proc $des/proc
+        mount --make-rslave $des/proc
 
 # [ $(target_exists "$des/tmp") -eq 0 ] && {
 #     mount --rbind /tmp $des/tmp

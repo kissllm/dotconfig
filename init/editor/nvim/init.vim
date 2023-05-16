@@ -1732,16 +1732,15 @@ if has('termguicolors')
     set termguicolors
 endif
 
-
 augroup unfold
     au!
     au BufWinEnter * normal! zv
 augroup END
 
-if ! empty($TMUX)
-    " silent! execute '!export TERM=xterm-256color'
-    silent! execute '!export TERM=tmux-256color'
-endif
+" if ! empty($TMUX)
+"     " silent! execute '!export TERM=xterm-256color'
+"     silent! execute '!export TERM=tmux-256color'
+" endif
 
 if ! has('gui_running') && ! has('nvim')
     " https://github.com/tmux/tmux/issues/699
@@ -2207,6 +2206,9 @@ set linespace =0
 " https://github.com/preservim/vim-colors-pencil
 " https://github.com/chriskempson/base16
 " https://github.com/chriskempson/base16-vim/tree/master/colors
+
+" color_scheme/color_name/g:colors_name
+
 " let g:scheme_name = "unsuck-flat"
 " let g:scheme_name = "sierra"
 " let g:scheme_name = "base16-default-dark"
@@ -3174,7 +3176,7 @@ let g:vim_indent_cont = &sw
 setl cino=e-2
 
 " https://stackoverflow.com/questions/69339050/how-to-stop-vim-pane-from-blinking-in-tmux
-set vb t_vb=
+" set vb t_vb=
 
 set hlsearch   " highlight research result
 " set ignorecase " search pattern
@@ -3254,10 +3256,10 @@ if ! has('nvim')
     endif
 endif
 
-if ! has('nvim')
-    set term=xterm-256color
-    " set term=alacritty
-endif
+" if ! has('nvim')
+"     set term=xterm-256color
+"     " set term=alacritty
+" endif
 
 if has('mouse')
     " set mouse=n
@@ -3268,16 +3270,16 @@ endif
 nnoremap <LeftMouse> M`<LeftMouse>``
 nnoremap <LeftRelease> M`<LeftRelease>``
 
-
-augroup cursor_hold
-    autocmd!
-    " autocmd FocusLost * set mouse=
-    autocmd WinLeave * normal M`
-    " au FocusGained * normal 
-    " au FocusGained * normal ``
-    " autocmd FocusGained * call timer_start(200, 's:reenablemouse')
-    autocmd WinEnter * normal ``
-augroup END
+" Change original cursor position when switch windows?
+" augroup cursor_hold
+"     autocmd!
+"     " autocmd FocusLost * set mouse=
+"     autocmd WinLeave * normal M`
+"     " au FocusGained * normal 
+"     " au FocusGained * normal ``
+"     " autocmd FocusGained * call timer_start(200, 's:reenablemouse')
+"     autocmd WinEnter * normal ``
+" augroup END
 
 " augroup NO_CURSOR_MOVE_ON_FOCUS
 "     au!
@@ -3371,25 +3373,18 @@ augroup END
 " infocmp
 " https://vimrcfu.com/snippet/15
 " Change cursor style when entering INSERT mode (works in tmux!)
-if exists('$TMUX')
-    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-    let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
-    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
-    " https://github.com/vimpostor/vim-tpipeline
-    let &t_fe = "\<Esc>[?1004h"
-    let &t_fd = "\<Esc>[?1004l"
-else
-    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-    let &t_SR = "\<Esc>]50;CursorShape=2\x7"
-    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-endif
-
-if ! has('nvim')
-    let &t_SI = "\<esc>[5 q"
-    let &t_SR = "\<esc>[5 q"
-    let &t_EI = "\<esc>[2 q"
-    " let &t_EI = "\<esc>[1 q"
-endif
+" if exists('$TMUX')
+"     let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+"     let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
+"     let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+"     " https://github.com/vimpostor/vim-tpipeline
+"     let &t_fe = "\<Esc>[?1004h"
+"     let &t_fd = "\<Esc>[?1004l"
+" else
+"     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+"     let &t_SR = "\<Esc>]50;CursorShape=2\x7"
+"     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+" endif
 
 " https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
 augroup blink_cursor
@@ -3399,13 +3394,13 @@ augroup blink_cursor
     " autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
     " autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
 
-    autocmd InsertEnter * silent! execute "! echo -en \x27[5 q"
-    autocmd InsertLeave * silent! execute "! echo -en \x27[2 q"
+    autocmd InsertEnter * let &t_ve= "\e[?25h\e[?0c"
+    autocmd WinEnter,InsertLeave,CmdlineLeave * let &t_ve= "\e[?25h\e[?16;143;255c"
 
     " 1/2 block 3/4 uderscore 5/6 pipe bar
     " blinky block
-    autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
-    autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
+    " autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
+    " autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
 augroup END
 
 if has('nvim')
@@ -3416,6 +3411,21 @@ if has('nvim')
         \,sm:bar-blinkwait175-blinkoff150-blinkon175
     let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
 endif
+
+" let &t_ve= "\e[?25h"
+" let &t_ve= "\e[?25h\e[?16;143;255c"
+let &t_ve= "\e[?25h"
+let &t_vi= "\e[?25l"
+let &t_SI= "\e[?0c"
+let &t_EI= "\e[?16;143;255c"
+
+if ! has('nvim')
+    let &t_SI = "\<esc>[5 q"
+    let &t_SR = "\<esc>[5 q"
+    let &t_EI = "\<esc>[2 q"
+    " let &t_EI = "\<esc>[1 q"
+endif
+
 
 " "cursor hape and blinking ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
@@ -3454,10 +3464,6 @@ if has("cscope")
     let g:qquickruickr_cscope_use_qf_g = 1
     let g:quickr_cscope_db_file = "cscope_quickr.out"
 endif
-
-" https://github.com/erig0/cscope_dynamic
-" nmap <F11> <Plug>CscopeDBInit
-nmap <F3> :BuffergatorToggle<cr>
 
 
 " let g:statusline_cscope_flag = ""
@@ -4839,8 +4845,18 @@ endif
 " https://www.hillelwayne.com/post/intermediate-vim/
 " set tabline=%{strftime('%c')}
 
+" https://github.com/erig0/cscope_dynamic
+" nmap <F11> <Plug>CscopeDBInit
+
+" Fx do not work in tty?
+" for x in {1..12}; do echo -n "F$x "; tput kf$x | cat -A; echo; done
+" infocmp -1 | grep "kf[1-4]"
+" /usr/include/linux/input-event-codes.h
+" evtest
+nmap <F3> :BuffergatorToggle<cr>
 " " Go to buffer. Conflict with buffergator
 " nnoremap gb :ls<cr>:b<space>
+nnoremap gb ::BuffergatorToggle<cr>
 
 let g:buffergator_autodismiss_on_select = 1
 " How to open buffergator itself
@@ -5271,7 +5287,7 @@ augroup reload_vimrc
     "     \ ' | setlocal filetype=vim' .
     "     \ ' | syntax enable'
 
-    autocmd BufWritePost $MYVIMRC :call feedkeys(":source %\<cr>") | setlocal filetype=vim | redraw!
+    autocmd BufWritePost $MYVIMRC if expand('%') == $MYVIMRC | :call feedkeys(":source $MYVIMRC\<cr>") | endif | setlocal filetype=vim | redraw!
     " endif
 augroup END
 

@@ -326,7 +326,7 @@ export TMUX_TMPDIR="${TMPDIR}-${HOSTNAME}"
 # export TMUX_TMPDIR="${TMPDIR}"
 # If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
 alias tmux='command rm -f "$HOME/tmux*.log"; \
-[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"; \
+[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"; echo -ne "$cursor_code"; \
 TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 2>&1'
 
 # alias tmux="tmux -2"
@@ -484,5 +484,9 @@ export EDITOR=v
 
 export INITRAMFS=/build/os/initramfs
 export PIP_CERT=$HOME/.cert/python-cert.pem
+
+[ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
+WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+export WAYLAND_CONFIG_HOME
 
 # set ts=4 sw=4 tw=0 et :

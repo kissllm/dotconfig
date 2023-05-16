@@ -1,4 +1,7 @@
 #!/bin/sh
+# How to use
+# cd /path/to/git-root
+# add .
 path="${1:?"Must give a path"}"
 for item in $(git -C "$path" status | grep "modified" | awk "{print \$2}"); do git add "$item"; done
 

@@ -1,5 +1,46 @@
 #!/bin/sh
 
+# Calling sequence
+# share->profile->shrc->env
+
+# cursor_code='\033[?12;0;255c'
+# cursor_code='\033[?16;143;255c'
+# cursor_code='\033[?112;0;255c'
+# cursor_code='\e[?112;0;64c'
+# cursor_code='\e[?112;0;112c'
+# cursor_code='\e[?16;143;255c'
+# cursor_code='\033[?12h'
+
+# Underscore blinking
+# cursor_code='\033[?c'
+
+# White/black bliking block
+# echo -ne '\033[?6c'
+# echo -ne '\033[?121'
+# echo -ne '\033[?121c'
+
+# Non-blink block
+# cursor_code='\033[?121;0;255c'
+# cursor_code='\e[?112c'
+# cursor_code='\033[?112c'
+
+p1="12"
+# p1="17"
+# p1="112"
+# p1="118"
+p3="64"
+# p3="200"
+# p3="255"
+
+set_cursor() { cursor_code="$(printf "\033[?${p1};%d;${p3}c" "$((~$1 & 255))")"; echo -ne "$cursor_code"; }
+# set_cursor $((0x80 | 0x8 | 0x40 | 0x6))
+set_cursor $((0x80 | 0x8 | 0x16 | 0x6))
+
+# echo -ne "$cursor_code"
+
+# infocmp | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+# infocmp linux | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
 
 # share folder initialization

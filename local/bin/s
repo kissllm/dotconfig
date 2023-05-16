@@ -1,4 +1,12 @@
 #!/bin/sh
 # How to use:
 # . s
+# share->profile->shrc->env
+# share folder initialization
+if [ -d "/mnt/init" ]; then
+    export SHARE_PREFIX="/mnt"
+elif [ -d "/opt/init" ]; then
+    export SHARE_PREFIX="/opt"
+fi
+[ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
 . $HOME/.profile

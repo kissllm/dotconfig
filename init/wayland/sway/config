@@ -611,7 +611,8 @@ client.focused_inactive $base01 $base01 $base05 $base03 $base01
 client.unfocused        $base01 $base00 $base05 $base01 $base01
 client.urgent           $base08 $base08 $base00 $base08 $base08
 client.placeholder      $base00 $base00 $base05 $base00 $base00
-client.background       $base07
+# client.background       $base07
+client.background       $base00
 
 
 #
@@ -619,20 +620,30 @@ client.background       $base07
 #
 # Read `man 5 sway-bar` for more information about this section.
 bar {
+    gaps 0
+    # mode invisible
+    # mode hide
+    # height 0
     # position top
 
     # When the status_command prints a new line to stdout, swaybar updates.
     # The default just shows the current date and time.
     # status_command while date +'%Y-%m-%d %l:%M:%S %p'; do sleep 1; done
-    swaybar_command waybar
-    # status_command i3status-rs
+    swaybar_command waybar -c ~/.config/waybar/style.css
+    # swaybar_command polybar -c ~/.config/polybar/config.ini
+    # swaybar_command swaybar
+
+    # status_command i3status-rs ~/.config/i3status-rust/config.toml
+
     # status_command i3status-rs
     # status_command i3blocks -c ~/.config/sway/i3blocks.conf
     # vim ~/.config/waybar/style.css     # for font size setting
 
     # tray_output primary
-    swaybar_command waybar
-    workspace_buttons yes
+    # swaybar_command waybar
+
+    # workspace_buttons yes
+
     # tray_padding 0
 
     strip_workspace_numbers yes
@@ -657,33 +668,33 @@ bar {
     }
 }
 
-# https://git.sr.ht/~tsdh/swayr
-# exec swayr
-exec env RUST_BACKTRACE=1 RUST_LOG=swayr=debug swayrd > /tmp/swayrd.log 2>&1
-
-bindsym $alt_mod+Space exec env RUST_BACKTRACE=1 \
-    swayr switch-window >> /tmp/swayr.log 2>&1
-
-bindsym $alt_mod+Delete exec env RUST_BACKTRACE=1 \
-    swayr quit-window >> /tmp/swayr.log 2>&1
-
-bindsym $alt_mod+Tab exec env RUST_BACKTRACE=1 \
-    swayr switch-to-urgent-or-lru-window >> /tmp/swayr.log 2>&1
-
-bindsym $alt_mod+Next exec env RUST_BACKTRACE=1 \
-    swayr next-window all-workspaces >> /tmp/swayr.log 2>&2
-
-bindsym $alt_mod+Prior exec env RUST_BACKTRACE=1 \
-    swayr prev-window all-workspaces >> /tmp/swayr.log 2>&2
-
-bindsym $alt_mod+Shift+Space exec env RUST_BACKTRACE=1 \
-    swayr switch-workspace-or-window >> /tmp/swayr.log 2>&1
-
-bindsym $alt_mod+c exec env RUST_BACKTRACE=1 \
-    swayr execute-swaymsg-command >> /tmp/swayr.log 2>&1
-
-bindsym $alt_mod+Shift+c exec env RUST_BACKTRACE=1 \
-    swayr execute-swayr-command >> /tmp/swayr.log 2>&1
+# # https://git.sr.ht/~tsdh/swayr
+# # exec swayr
+# exec env RUST_BACKTRACE=1 RUST_LOG=swayr=debug swayrd > /tmp/swayrd.log 2>&1
+# 
+# bindsym $alt_mod+Space exec env RUST_BACKTRACE=1 \
+#     swayr switch-window >> /tmp/swayr.log 2>&1
+# 
+# bindsym $alt_mod+Delete exec env RUST_BACKTRACE=1 \
+#     swayr quit-window >> /tmp/swayr.log 2>&1
+# 
+# bindsym $alt_mod+Tab exec env RUST_BACKTRACE=1 \
+#     swayr switch-to-urgent-or-lru-window >> /tmp/swayr.log 2>&1
+# 
+# bindsym $alt_mod+Next exec env RUST_BACKTRACE=1 \
+#     swayr next-window all-workspaces >> /tmp/swayr.log 2>&2
+# 
+# bindsym $alt_mod+Prior exec env RUST_BACKTRACE=1 \
+#     swayr prev-window all-workspaces >> /tmp/swayr.log 2>&2
+# 
+# bindsym $alt_mod+Shift+Space exec env RUST_BACKTRACE=1 \
+#     swayr switch-workspace-or-window >> /tmp/swayr.log 2>&1
+# 
+# bindsym $alt_mod+c exec env RUST_BACKTRACE=1 \
+#     swayr execute-swaymsg-command >> /tmp/swayr.log 2>&1
+# 
+# bindsym $alt_mod+Shift+c exec env RUST_BACKTRACE=1 \
+#     swayr execute-swayr-command >> /tmp/swayr.log 2>&1
 
 include /etc/sway/config.d/*
 
@@ -709,7 +720,9 @@ for_window [app_id="^.*"] border pixel 0
 
 # Use pactl[xtools] to adjust volume in PulseAudio[pulseaudio pipewire].
 # vpm install psmisc for killall
-set $refresh_i3status killall -SIGUSR1 i3status-rs
+
+# set $refresh_i3status killall -SIGUSR1 i3status-rs
+
 # set $refresh_i3status pkill -SIGUSR1 i3status-rs
 # How to install pactl? perform: xlocate pactl (it shows you need to install the package: pulseaudio-utils)
 # pactl list sinks
@@ -857,24 +870,26 @@ exec --no-startup-id picom -o 0 -f -cC
 # https://soyuka.me/make-screen-sharing-wayland-sway-work/
 # https://forums.gentoo.org/viewtopic-t-1124872-start-0.html
 exec --no-startup-id pipewire
-# /usr/libexec/xdg-desktop-portal-wlr -p BGRx -l DEBUG
-exec /usr/libexec/xdg-desktop-portal-wlr -l DEBUG
-exec /usr/libexec/xdg-desktop-portal --verbose -r
 
-# https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
-# $bindsym $mod+Ctrl+Shift+o exec $HOME/bin/share-screen.sh
-$bindsym $mod+Shift+o exec $HOME/bin/share-screen.sh
-$bindsym $mod+o       exec $HOME/bin/share-screen.sh stop
+# # /usr/libexec/xdg-desktop-portal-wlr -p BGRx -l DEBUG
+# exec /usr/libexec/xdg-desktop-portal-wlr -l DEBUG
+# exec /usr/libexec/xdg-desktop-portal --verbose -r
+# 
+# # https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
+# # $bindsym $mod+Ctrl+Shift+o exec $HOME/bin/share-screen.sh
+# $bindsym $mod+Shift+o exec $HOME/bin/share-screen.sh
+# $bindsym $mod+o       exec $HOME/bin/share-screen.sh stop
+# 
+# # network configuration
+# exec_always cmst -m -w 3
+# 
+# # exec --no-startup-id fcitx -d
+# # exec_always fcitx -d -r
+# exec_always wlpinyin
+# 
+# # https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
+# exec_always gnome-keyring-daemon -r -d
 
-# network configuration
-exec_always cmst -m -w 3
-
-# exec --no-startup-id fcitx -d
-# exec_always fcitx -d -r
-exec_always wlpinyin
-
-# https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
-exec_always gnome-keyring-daemon -r -d
 # exec_always strat arch fcitx -r
 # exec ibus-daemon -dr
 # exec fcitx -d -r

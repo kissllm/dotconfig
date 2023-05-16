@@ -12,7 +12,7 @@ GRUB_DISABLE_RECOVERY=true
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nouveau.modeset=0 selinux=0 pci=nommconf "
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume acpi=off tsc=unstable"
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume tsc=unstable nolapic "
-GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume tsc=unstable acpi=nomsi tpm_tis.force=1 "
+GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume tsc=unstable acpi=nomsi tpm_tis.force=1 vt.cur_default=5 vt.color=6"
 
 # nvidia-drm and nouveau modeset leads CPU throttles
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nvidia-drm.modeset=1 nouveau.modeset=0"

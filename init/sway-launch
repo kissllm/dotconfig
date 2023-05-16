@@ -3,7 +3,9 @@
 echo "Entered tty: $tty_num"
 
 # https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
-export WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+[ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
+WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+export WAYLAND_CONFIG_HOME
 
 # sway specific environment
 [ -f "${WAYLAND_CONFIG_HOME}/env" ] && {
