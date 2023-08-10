@@ -1,9 +1,11 @@
 #!/bin/sh
 # Initialize the environment variables/flags/repositories
-export LOGNAME=$(/usr/bin/whoami)
+
+: "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
 
 KISS_PATH=''
-export REPO_ROOT="/var/db/kiss"
+
+: "${REPO_ROOT="/var/db/kiss"}" && export REPO_ROOT
 
 [ -z "${KISS_DEBUG+x}" ] || {
     # Later ones have higher priority
@@ -121,7 +123,7 @@ export REPO_ROOT="/var/db/kiss"
 }
 
 
-export REPO_MAIN="$REPO_ROOT/lm"
+: "${REPO_MAIN="$REPO_ROOT/lm"}" && export REPO_MAIN
 
 if [ -z "${KISS_PATH:+x}" ]; then
     KISS_PATH=$REPO_MAIN/extra
@@ -141,43 +143,41 @@ KISS_PATH=$REPO_MAIN/core:$KISS_PATH
 # KISS_PATH=$REPO_MAIN/static/extra:$KISS_PATH
 # KISS_PATH=$REPO_MAIN/static/core:$KISS_PATH
 
-export ARCH="x86_64"
-export KISS_XHOST_ARCH="$ARCH"
-export KISS_XBUILD_ARCH="$KISS_XHOST_ARCH"
-export CLIBC="musl"
-export KISS_XHOST_ABI="$CLIBC"
-export KISS_XBUILD_ABI="$KISS_XHOST_ABI"
-export KISS_XHOST_TRIPLE="$KISS_XHOST_ARCH-linux-$KISS_XHOST_ABI"
-export KISS_XBUILD_TRIPLE="$KISS_XBUILD_ARCH-linux-$KISS_XBUILD_ABI"
+export KISS_PATH
 
+: "${ARCH:="x86_64"}" && export ARCH
+: "${KISS_XHOST_ARCH:="$ARCH"}" && export KISS_XHOST_ARCH
+: "${KISS_XBUILD_ARCH:="$KISS_XHOST_ARCH"}" && export KISS_XBUILD_ARCH
+: "${CLIBC:="musl"}" && export CLIBC
+: "${KISS_XHOST_ABI:="$CLIBC"}" && export KISS_XHOST_ABI
+: "${KISS_XBUILD_ABI:="$KISS_XHOST_ABI"}" && export KISS_XBUILD_ABI
+: "${KISS_XHOST_TRIPLE:="$KISS_XHOST_ARCH-linux-$KISS_XHOST_ABI"}" && export KISS_XHOST_TRIPLE
+: "${KISS_XBUILD_TRIPLE:="$KISS_XBUILD_ARCH-linux-$KISS_XBUILD_ABI"}" && export KISS_XBUILD_TRIPLE
 
 # For cports
-export CHOST="${KISS_XHOST_TRIPLE}"
-export CTARGET="${KISS_XHOST_TRIPLE}"
-export CBUILD="${KISS_XBUILD_TRIPLE}"
+: "${CHOST:="${KISS_XHOST_TRIPLE}"}"   && export CHOST
+: "${CTARGET:="${KISS_XHOST_TRIPLE}"}" && export CTARGET
+: "${CBUILD:="${KISS_XBUILD_TRIPLE}"}" && export CBUILD
+# KISS_ROOT=
+# export KISS_ROOT
+[ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
 
-export KISS_ROOT=
-export KISS_PATH=$KISS_PATH
-export KISS_REMOTE_REPO=$KISS_PATH
-
+: "${KISS_REMOTE_REPO="$KISS_PATH"}" && export KISS_REMOTE_REPO
 # https://github.com/glasnostlinux/glasnost/releases
 # CFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -pipe -fPIC -mtune=native --host=x86_64"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
-CFLAGS="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
-CXXFLAGS="$CFLAGS"
-CPPFLAGS="$CXXFLAGS"
+: "${CFLAGS:="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"}" && export CFLAGS
+: "${CXXFLAGS="$CFLAGS"}" && export CXXFLAGS
+: "${CPPFLAGS="$CXXFLAGS"}" && export CPPFLAGS
 
-export CFLAGS="$CFLAGS"
-export CXXFLAGS="$CXXFLAGS"
-export CPPFLAGS="$CXXFLAGS"
-
-export MAKEFLAGS="-j $(($(nproc) + 1))"
+: "${MAKEFLAGS:="-j $(($(nproc) + 1))"}" && export MAKEFLAGS
 [ -z "${KISS_PROMPT+x}" ] || unset KISS_PROMPT
 # export KISS_PROMPT=0
 # export KISS_TMPDIR="/tmp/$(/usr/bin/whoami)/kiss"
 # [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
-export KISS_SRC_ROOT="/working/kiss"
+: "${KISS_SRC_ROOT:="/working/kiss"}" && export KISS_SRC_ROOT
 [ -d "$KISS_SRC_ROOT" ] || \mkdir -p "$KISS_SRC_ROOT"
 # git config --global --add safe.directory "$KISS_SRC_ROOT"
+: "${REPO_BASE:="$REPO_MAIN/base"}" && export REPO_BASE

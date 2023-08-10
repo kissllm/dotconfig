@@ -236,57 +236,66 @@ esac
 
 # gather information about the current state of the window and its panes
 set -- $(tmux list-panes -F '#{pane_id}')
+# set -- $(tmux display '#{pane_id}')
+
 selected_pane=$(tmux display-message -p '#{pane_id}')
 historic_pane=$(tmux last-pane 2>/dev/null \;\
         display-message -p '#{pane_id}' \;\
         last-pane) ||: # exit 1 - no last pane
+
+# set -- "$selected_pane" "$historic_pane"
+
 window_height=$(tmux display-message -p '#{window_height}')
+pane_height=$(tmux display-message -p '#{pane_height}')
 window_width=$(tmux display-message -p '#{window_width}')
+pane_width=$(tmux display-message -p '#{pane_width}')
 
 # execute all tmux commands in one shot to avoid flickering and slowness
 exec tmux $({
 
-        echo select-layout even-horizontal
-        branch_width=$window_width
-        count=1
-        for pane_id; do
-            if [ $count -eq $# ]; then
-                break # skip last pane because .+1 wraps around to the first pane
-            elif [ $(( count % 2 )) -eq $modulo_hv ]; then
-                move_w=+
-                if $is_spiral && [ $(( count % 5 )) -gt 2 ]
-                then move_b=$spiral_lr
-                else move_b=$corner_lr
-                fi
-            else
-                move_w=
-                if $is_spiral && [ $(( count % 5 )) -gt 2 ]
-                then move_b=$spiral_tb
-                else move_b=$corner_tb
-                fi
-            fi
-            echo resize-pane -t $pane_id -x $window_width # make room for move
-            echo select-pane -t $pane_id # for relative pane addressing in move
-            echo move-pane -d -s .+1 -t . ${move_w:+-v} ${move_b:+-b} # move it
-            count=$(( count + 1 ))
-        done
-        count=1
-        for pane_id; do
-            if [ $count -eq $# ] && ! $is_horizontal; then
-                break # skip last pane because it will already be sized correctly
-            elif [ $(( count % 2 )) -eq 1 ]; then
-                # every other pane is a branch in the binary space partition tree
-                parent_width=$branch_width
-                # branch_height=$(( branch_height / 2 ))
-                branch_width=$(( branch_width / 2 - branch_width / 4))
-                if $is_horizontal
-                then resize_x=$parent_width
-                else resize_x=$branch_width
-                fi
-                echo resize-pane -t $pane_id -x $resize_x
-            fi
-            count=$(( count + 1 ))
-        done
+        # echo select-layout even-horizontal
+        # branch_width=$window_width
+        # count=1
+        # for pane_id; do
+        #     if [ $count -eq $# ]; then
+        #         break # skip last pane because .+1 wraps around to the first pane
+        #     elif [ $(( count % 2 )) -eq $modulo_hv ]; then
+        #         move_w=+
+        #         if $is_spiral && [ $(( count % 5 )) -gt 2 ]
+        #         then move_b=$spiral_lr
+        #         else move_b=$corner_lr
+        #         fi
+        #     else
+        #         move_w=
+        #         if $is_spiral && [ $(( count % 5 )) -gt 2 ]
+        #         then move_b=$spiral_tb
+        #         else move_b=$corner_tb
+        #         fi
+        #     fi
+        #     # echo resize-pane -t $pane_id -x $window_width # make room for move
+        #     echo resize-pane -t $pane_id -x $pane_width # make room for move
+        #     echo select-pane -t $pane_id # for relative pane addressing in move
+        #     echo move-pane -d -s .+1 -t . ${move_w:+-v} ${move_b:+-b} # move it
+        #     count=$(( count + 1 ))
+        # done
+        # count=1
+        # for pane_id; do
+        #     if [ $count -eq $# ] && ! $is_horizontal; then
+        #         break # skip last pane because it will already be sized correctly
+        #     elif [ $(( count % 2 )) -eq 0 ]; then
+        #         # every other pane is a branch in the binary space partition tree
+        #         parent_width=$branch_width
+        #         # branch_height=$(( branch_height / 2 ))
+        #         # branch_width=$(( branch_width / 2 - branch_width / 4))
+        #         # branch_width=$(( 2 * branch_width / 3 ))
+        #         if $is_horizontal
+        #         then resize_x=$parent_width
+        #         else resize_x=$branch_width
+        #         fi
+        #         echo resize-pane -t $pane_id -x $resize_x
+        #     fi
+        #     count=$(( count + 1 ))
+        # done
         # flatten current layout, stacking all panes vertically like pancakes
         echo select-layout even-vertical
 
@@ -308,27 +317,33 @@ exec tmux $({
                 else move_b=$corner_tb
                 fi
             fi
-            echo resize-pane -t $pane_id -y $window_height # make room for move
+            # echo resize-pane -t $pane_id -y $window_height # make room for move
+            echo resize-pane -t $pane_id -y $pane_height # make room for move
             echo select-pane -t $pane_id # for relative pane addressing in move
             echo move-pane -d -s .+1 -t . ${move_h:+-h} ${move_b:+-b} # move it
             count=$(( count + 1 ))
         done
 
         # divide available space evenly among panes (binary space partitions)
-        branch_height=$window_height
-        branch_width=$(( window_width / 3 ))
+        # branch_height=$window_height
+        branch_height=$(( 2 * window_height / 3 ))
+        # branch_height=$(( pane_height / 3 ))
+        branch_width=$(( 2 * window_width / 3 ))
+        # branch_width=$(( pane_width / 3 ))
         count=1
         for pane_id; do
             if [ $count -eq $# ] && ! $is_vertical; then
                 break # skip last pane because it will already be sized correctly
-            elif [ $(( count % 2 )) -eq 1 ]; then
+            elif [ $(( count % 2 )) -eq 0 ]; then
                 # every other pane is a branch in the binary space partition tree
                 parent_height=$branch_height
                 # branch_height=$(( branch_height / 2 ))
-                branch_height=$(( branch_height / 2 - branch_height / 4))
+                # branch_height=$(( branch_height / 3 ))
+                branch_height=$branch_height
                 parent_width=$branch_width
                 # branch_height=$(( branch_height / 2 ))
-                branch_width=$(( branch_width / 2 + branch_width / 4))
+                # branch_width=$(( branch_width / 3 ))
+                branch_width=$branch_width
                 if $is_vertical; then
                     resize_y=$parent_height
                     resize_x=$parent_width

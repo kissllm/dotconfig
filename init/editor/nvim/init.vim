@@ -12,6 +12,33 @@ filetype indent plugin on
 " syntax enable
 syntax on   " enable highlight
 
+if "" == $HOME || ! exists('$HOME')
+    if has('nvim')
+        let s:session_user  = system(['whoami'])
+    else
+        let s:session_user  = system('whoami')
+    endif
+    let s:session_user  =
+        \ strtrans(substitute(s:session_user, '\%(\r\n\|[\r\n]\)$', '', ''))
+    if has('nvim')
+        let s:session_user_home =
+            \ system(['/usr/bin/awk',  '-v', 'FS=:', '-v', 'user=' .
+            \ s:session_user, '{if ($1 == user) print $6}', '/etc/passwd'])
+    else
+        let s:session_user_home =
+            \ system('/usr/bin/awk -v FS=: -v user=' .
+            \ s:session_user. ' "{if (\$1 == user) print \$6}" /etc/passwd')
+    endif
+
+    let $HOME  =
+        \ strtrans(substitute(s:session_user_home, '\%(\r\n\|[\r\n]\)$', '', ''))
+
+    echohl WarningMsg
+    echom "Session \$HOME == " . $HOME
+    call feedkeys("\<CR>")
+    echohl None
+endif
+
 " if 1 == $HAS_LIBCXX
 "     let $XDG_DATA_HOME = "$HOME/.local/share/clang"
 "     if filewritable("$HOME/.local/share/clang") != 2
@@ -46,12 +73,23 @@ let g:_keys_develop              = 0
 if has("cscope")
     let g:_cscope_auto_develop   = 1
 endif
-let g:_session_auto_develop      = 1
+
+" Time consuming
+let g:_session_auto_develop      = 0
+
 let g:_fixed_tips_width          = 27
 " let g:_buffergator_develop     = 1
 " let g:_log_func_name           = 'boot#log_silent'
 let g:_use_terminal_transparent  = 1
 let g:_use_dynamic_color         = 1
+
+if exists('g:_highlight_cursor_line_column')
+    " unlet g:_highlight_cursor_line_column
+else
+    let g:_highlight_cursor_line_column
+        \ = 1
+endif
+
 let g:_disable_direction_key     = 1
 if ! has('nvim')
     let g:_use_wl_clipboard      = 1
@@ -64,6 +102,8 @@ let g:_job_start                 = has('nvim') ? 'jobstart' : 'job_start'
 let g:debug                      = 1
 let g:navi_protect               = 1
 let g:polyglot_disabled          = ['markdown']
+" let g:polyglot_disabled          = ['markdown'] " for vim-polyglot users, it loads Plasticboy's markdown
+" plugin which unfortunately interferes with mkdx list indentation.
 
 " truncate the log file
 silent! execute '!printf "\n\n"' . ' >> ' . g:_log_address . ' 2>&1 & > /dev/null'
@@ -123,15 +163,20 @@ function! s:environment.new(
     let file_name = 'init.vim'
     " let file_name = fnamemodify(resolve(expand('<sfile>:p')), ':h')  " current path ~ pwd
     " let file_name = expand('<sfile>:p')  " current path ~ pwd
-    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width . '"s: \%s\n"' . ' ' . file_name . '::object._log_address "'
+    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . file_name . '::object._log_address "'
         \ . object._log_address . '")' . ' >> ' . a:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width . '"s: \%s\n"' . ' ' . file_name . '::object._log_verbose "'
+    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . file_name . '::object._log_verbose "'
         \ . object._log_verbose . '")' . ' >> ' . a:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width . '"s: \%s\n"' . ' ' . file_name . '::object._fixed_tips_width "'
+    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . file_name . '::object._fixed_tips_width "'
         \ . object._fixed_tips_width . '")' . ' >> ' . a:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width . '"s: \%s\n"' . ' ' . file_name . '::object._is_windows "'
+    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . file_name . '::object._is_windows "'
         \ . object._is_windows . '")' . ' >> ' . a:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width . '"s: \%s\n"' . ' ' . file_name . '::object._script_develop "'
+    silent! execute '!(printf ' . '"\%-"' . a:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . file_name . '::object._script_develop "'
         \ . object._script_develop . '")' . ' >> ' . a:_log_address . ' 2>&1 &'
 
     return object
@@ -164,7 +209,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     " silent! execute '!(printf "date                                    : '
     "             \ . strftime("%c") . '\n")' . ' >> ' . g:_log_address . ' 2>&1 & > /dev/null'
 
-    silent! execute '!(printf ' . '"\%-"'. g:_fixed_tips_width . '"s: \%s\n"' . ' date "'
+    silent! execute '!(printf ' . '"\%-"'. g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' date "'
         \ . strftime("%c") . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
     if has("nvim")
         let g:init_file = resolve(stdpath('config') . '/init.vim')
@@ -182,7 +228,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         " endif
     endif
 
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:init_file "'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' g:init_file "'
         \ . g:init_file . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
     " silent! execute '!printf "g:init_file_raw: ' . g:init_file_raw .'\n"' . ' >> ' . g:_log_address . ' 2>&1 &'
     " call boot#chomped_system("printf \"\ng:init_file\t\t: \"" . g:init_file . " >> " . g:_log_address)
@@ -202,7 +249,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     endif
 
     " echom 'g:config_dir  =' . g:config_dir
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:config_dir "'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' g:config_dir "'
         \ . g:config_dir . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
     let g:plugin_dir = {}
@@ -270,7 +318,8 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
         let g:cache_root = expand($HOME . '/.cache/vim')
     endif
 
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' g:config_root "'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' g:config_root "'
         \ . g:config_root . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
     let g:package_manager['vim'] = 'packager'
@@ -286,13 +335,17 @@ if ! exists("g:config_dir") || ! exists("g:plugin_dir") || 1 == g:debug
     "     exe 'set runtimepath^='. g:plugin_dir['lua'] . '/pack/' . g:package_manager['lua']  . '/start'
     " endif
 
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['vim']") . ' "'
         \ . g:plugin_dir['vim'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['lua']") . ' "'
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . ' ' . shellescape("g:plugin_dir['lua']") . ' "'
         \ . g:plugin_dir['lua'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . " \"g:package_manager['vim']\" \""
         \ . g:package_manager['vim'] . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
-    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width . '"s: \%s\n"' . " \"g:package_manager['lua'] \" \""
+    silent! execute '!(printf ' . '"\%-"' . g:_fixed_tips_width
+        \ . '"s: \%s\n"' . " \"g:package_manager['lua'] \" \""
         \ . g:package_manager['lua']  . '")' . ' >> ' . g:_log_address . ' 2>&1 &'
 
 endif
@@ -364,7 +417,8 @@ endfor
 exe 'set packpath^='. &runtimepath
 
 if ! exists('g:loaded_boot')
-    let boot_load_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/start/boot'
+    let boot_load_path = g:plugin_dir['vim'] . '/pack/'
+        \ . g:package_manager['vim'] . '/start/boot'
     let boot_load_file = boot_load_path . '/autoload/boot.vim'
     exe 'set runtimepath+='. boot_load_path
     exe 'set packpath+='. boot_load_path
@@ -376,7 +430,8 @@ let packager_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim']
 exe 'set runtimepath+='. packager_path
 exe 'set packpath+='. packager_path
 
-let vim_packager_path = g:plugin_dir['vim'] . '/pack/' . g:package_manager['vim'] . '/opt/vim-packager'
+let vim_packager_path = g:plugin_dir['vim'] . '/pack/'
+    \ . g:package_manager['vim'] . '/opt/vim-packager'
 exe 'set runtimepath+='. vim_packager_path
 exe 'set packpath+='. vim_packager_path
 execute "runtime! OPT " . 'plugin/packager.vim'
@@ -535,7 +590,6 @@ filetype off
 " git clone https://github.com/kristijanhusak/vim-packager ~/.vim/pack/packager/opt/vim-packager
 
 let g:vim_packages_use = {}
-let g:vim_packages_use['morhetz/gruvbox']                                 = {}
 let g:vim_packages_use['majutsushi/ctags']                                = { 'type' : 'opt' }
 let g:vim_packages_use['kristijanhusak/vim-packager']                     = { 'type' : 'opt' }
 let g:vim_packages_use['vimwiki/vimwiki']                                 = { 'type' : 'opt' }
@@ -579,6 +633,26 @@ let g:vim_packages_use['marklcrns/vim-smartq']                            = { 't
 
 " Randerig not stable.
 let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'opt' }
+let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 'type' : 'opt' }
+let g:vim_packages_use['sheerun/vim-polyglot']                            = { 'type' : 'opt' }
+" Tons of errors with something not found
+let g:vim_packages_use['trailblazing/mkdx']                               = { 'type' : 'opt' }
+let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'opt', 'requires' : 'trailblazing/boot' }
+let g:vim_packages_use['joshdick/onedark.vim']                            = { 'type' : 'opt' }
+" Rust current vsersion doesn't support musl libc 1.2.4
+" "tail --line=1" to "tail -n 1" in install.sh
+let g:vim_packages_use['liuchengxu/vim-clap']                             = { 'type' : 'opt', 'do': ':Clap install-binary' }  " File format
+
+" " https://github.com/christoomey/vim-tmux-navigator
+" $SHARE_PREFIX/init/editor/vim/pack/packager/start/keys/after/plugin/keys.vim
+" "     silent! execute(a:navigate[a:direction])
+" $SHARE_PREFIX/tinit/tmux.conf
+" set -g @plugin 'christoomey/vim-tmux-navigator'
+" $SHARE_PREFIX/init/editor/nvim/init.vim
+let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'opt' }
+
+" let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']              = { 'type' : 'opt' }  " obsoleted
+
 
 if exists('g:_use_fern')
     let g:vim_packages_use['lambdalisue/fern.vim']                        = { 'type' : 'opt' }
@@ -665,10 +739,10 @@ endif
 " let g:vim_packages_use['moll/vim-bbye']                              = { 'type' : 'start' }
 " let g:vim_packages_use['lambdalisue/suda.vim']                       = { 'type' : 'start' }
 
+let g:vim_packages_use['morhetz/gruvbox']                                 = { 'type' : 'start' }
+let g:vim_packages_use['moll/vim-bbye']                                   = { 'type' : 'start' }
 let g:vim_packages_use['sbdchd/neoformat']                                = { 'type' : 'start' }
 
-" Tons of errors with something not found
-let g:vim_packages_use['trailblazing/mkdx']                               = { 'type' : 'start' }
 " Cutlass overrides the delete operations to actually just delete and not affect the current yank
 let g:vim_packages_use['svermeulen/vim-cutlass']                          = { 'type' : 'start' }
 let g:vim_packages_use['google/vim-maktaba']                              = { 'type' : 'start' }
@@ -685,7 +759,6 @@ let g:vim_packages_use['editorconfig/editorconfig-vim']                   = { 't
 let g:vim_packages_use['vim-autoformat/vim-autoformat']                   = { 'type' : 'start' }  " File format
 let g:vim_packages_use['junegunn/vim-easy-align']                         = { 'type' : 'start' }  " File format
 let g:vim_packages_use['rhysd/vim-clang-format']                          = { 'type' : 'start' }  " File format
-let g:vim_packages_use['liuchengxu/vim-clap']                             = { 'type' : 'start', 'do': ':Clap install-binary' }  " File format
 
 let g:vim_packages_use['godlygeek/tabular']                               = { 'type' : 'start' }  " File format
 let g:vim_packages_use['drmingdrmer/vim-toggle-quickfix']                 = { 'type' : 'start' }
@@ -719,7 +792,6 @@ let g:vim_packages_use['mattn/emmet-vim']                                 = { 't
 " let g:vim_packages_use['xolox/vim-misc']                             = { 'type' : 'start' }  " Debug errors pop-uping
 " let g:vim_packages_use['xolox/vim-reload']                           = { 'type' : 'start' }  " Debug errors pop-uping
 
-let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 'type' : 'start' }
 
 " let g:vim_packages_use['majutsushi/tagbar']                          = { 'type' : 'start' }
 
@@ -731,16 +803,6 @@ let g:vim_packages_use['mhinz/vim-grepper']                               = { 't
 let g:vim_packages_use['LucHermitte/vim-refactor']                        = { 'type' : 'start' }
 let g:vim_packages_use['MarcWeber/vim-addon-background-cmd']              = { 'type' : 'start' }
 
-" " https://github.com/christoomey/vim-tmux-navigator
-" $SHARE_PREFIX/init/editor/vim/pack/packager/start/keys/after/plugin/keys.vim
-" "     silent! execute(a:navigate[a:direction])
-" $SHARE_PREFIX/tinit/tmux.conf
-" set -g @plugin 'christoomey/vim-tmux-navigator'
-" $SHARE_PREFIX/init/editor/nvim/init.vim
-let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'start' }
-
-" let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']         = { 'type' : 'start' }  " obsoleted
-
 let g:vim_packages_use['RyanMillerC/better-vim-tmux-resizer']             = { 'type' : 'start' }
 let g:vim_packages_use['mhinz/vim-galore']                                = { 'type' : 'start' }
 " let g:vim_packages_use['plasticboy/vim-markdown']                         = { 'type' : 'start' }
@@ -751,7 +813,6 @@ let g:vim_packages_use['chrisbra/Recover.vim']                            = { 't
 let g:vim_packages_use['preservim/vim-textobj-quote']                     = { 'type' : 'start' }
 let g:vim_packages_use['kana/vim-textobj-user']                           = { 'type' : 'start' }
 
-let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'start', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['trailblazing/boot']                               = { 'type' : 'start' }
 let g:vim_packages_use['trailblazing/keys']                               = { 'type' : 'start' }
 " let g:vim_packages_use['trailblazing/vim-buffergator']               = { 'type' : 'start' }  " minibufexplorer
@@ -761,7 +822,6 @@ let g:vim_packages_use['skywind3000/vim-quickui']                         = { 't
 let g:vim_packages_use['itchyny/vim-gitbranch']                           = { 'type' : 'start' }
 let g:vim_packages_use['mbbill/undotree']                                 = { 'type' : 'start', 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' }
 let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 'type' : 'start' }
-let g:vim_packages_use['sheerun/vim-polyglot']                            = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']             = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                       = { 'type' : 'start' }
 " let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
@@ -883,8 +943,9 @@ function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environm
     "             \ && \chgrp -R --quiet users ' . l:packages_path . ') 2>&1 &' | redraw!
 
     " Space matters in shell scripts
-    let command = '!(set -f; command doas find ' . l:packages_path . ' -type f -name ' . shellescape('*', 1) . ' -exec sh -c ' . shellescape('
-        \set -f; for file;
+    let command = '!(set -f; command doas find ' . l:packages_path
+        \ . ' -type f -name ' . shellescape('*', 1)
+        \ . ' -exec sh -c ' . shellescape('set -f; for file;
         \    do
         \        if [ -f "$file" ]; then
         \           perm="$(stat -L -c "%A" "$file")";
@@ -914,7 +975,8 @@ function! s:adjust_attributes(plugin_list, plugin_dir, package_manager, environm
 endfunction
 
 function! s:adjust_init_helper(arg_list)
-    call { arg_list -> s:adjust_attributes(arg_list, g:plugin_dir['vim'], g:package_manager['vim'], g:_environment) }(arg_list)
+    call { arg_list -> s:adjust_attributes(arg_list, g:plugin_dir['vim'],
+        \ g:package_manager['vim'], g:_environment) }(arg_list)
 endfunction
 
 " let g:_use_setup_minpac    = 1
@@ -965,8 +1027,10 @@ if exists('g:_use_setup_minpac')
     " execute "source " . g:plugin_dir['vim'] . session_auto_local
     " execute "runtime! " . g:plugin_dir['vim'] . session_auto_local
 
-    command! PackUpdate source $MYVIMRC <bar> call s:pack_init(g:plugin_dir['vim'])  <bar> call minpac#update()
-    command! PackClean  source $MYVIMRC <bar> call s:pack_init(g:plugin_dir['vim'])  <bar> call minpac#clean()
+    command! PackUpdate source $MYVIMRC <bar>
+        \ call s:pack_init(g:plugin_dir['vim'])  <bar> call minpac#update()
+    command! PackClean  source $MYVIMRC <bar>
+        \ call s:pack_init(g:plugin_dir['vim'])  <bar> call minpac#clean()
     command! PackStatus packadd minpac  <bar> call minpac#status()
 
     function! s:pack_list(...)
@@ -975,13 +1039,15 @@ if exists('g:_use_setup_minpac')
     endfunction
 
     command! -nargs=1 -complete=custom,s:pack_list
-        \ PackOpenDir call s:pack_init(g:plugin_dir['vim'])  <bar> call term_start(&shell,
-        \    {'cwd': minpac#getpluginfo(<q-args>).dir,
-        \     'term_finish': 'close'})
+        \ PackOpenDir call s:pack_init(g:plugin_dir['vim'])
+        \ <bar> call term_start(&shell,
+        \ {'cwd': minpac#getpluginfo(<q-args>).dir,
+        \ 'term_finish': 'close'})
 
     command! -nargs=1 -complete=custom,s:pack_list
-        \ PackOpenUrl call s:pack_init(g:plugin_dir['vim'])  <bar> call openbrowser#open(
-        \    minpac#getpluginfo(<q-args>).url)
+        \ PackOpenUrl call s:pack_init(g:plugin_dir['vim'])
+        \ <bar> call openbrowser#open(
+        \ minpac#getpluginfo(<q-args>).url)
 
     call s:pack_init(g:plugin_dir['vim'])
 
@@ -1070,10 +1136,13 @@ endfunction
 
 
 " function! s:adjust_hook_helper(operating_type, plugin_list, plugin_dir, package_manager, environment)
-function! s:adjust_hook_helper(plugin_list, plugin_dir, package_manager, environment)
+function! s:adjust_hook_helper(plugin_list, plugin_dir,
+    \ package_manager, environment)
     let l:func_name = boot#function_name(expand('<SID>'), expand('<sfile>'))
     if ! exists('g:loaded_vim_packager')
-        call s:log_silent(l:func_name . '::' . "! exists('g:loaded_vim_packager')", ! exists('g:loaded_vim_packager'), a:environment)
+        call s:log_silent(l:func_name . '::'
+            \ . "! exists('g:loaded_vim_packager')",
+            \ ! exists('g:loaded_vim_packager'), a:environment)
         return
     endif
     let l:plugins_explicit_to_be_processed = []
@@ -1099,12 +1168,15 @@ function! s:adjust_hook_helper(plugin_list, plugin_dir, package_manager, environ
     "     let l:plugins_implicit_to_be_processed = filter(values(l:all_initialized_plugins), 'v:val.frozen ==? 0')
     " endif
     if !empty(a:plugin_list)
-        let l:plugins_explicit_to_be_processed = filter(l:all_initialized_plugins, 'index(a:plugin_list, v:val.name) > -1')
+        let l:plugins_explicit_to_be_processed
+            \ = filter(l:all_initialized_plugins,
+            \ 'index(a:plugin_list, v:val.name) > -1')
     endif
     let remaining_jobs = len(l:plugins_explicit_to_be_processed)
 
     " if remaining_jobs ==? 0
-    "     call s:log_silent(l:func_name . '::' . "initial::len(l:plugins_explicit_to_be_processed)", remaining_jobs, a:environment)
+    "     call s:log_silent(l:func_name . '::'
+    "     \ . "initial::len(l:plugins_explicit_to_be_processed)", remaining_jobs, a:environment)
     "     echo 'Nothing to update.'
     "     return
     " endif
@@ -1113,14 +1185,17 @@ function! s:adjust_hook_helper(plugin_list, plugin_dir, package_manager, environ
     let l:implicit_item_name = ""
     for item in l:plugins_explicit_to_be_processed
         " echo "l:plugins_explicit_to_be_processed::item = \"" item "\""
-        " call s:log_silent(l:func_name . '::' . "initial::l:plugins_explicit_to_be_processed::item", item, a:environment)
+        " call s:log_silent(l:func_name . '::'
+        " \ . "initial::l:plugins_explicit_to_be_processed::item", item, a:environment)
         let domain_removed = split(item['name'], '/')[-1]
         echohl WarningMsg
         echo "item['name'] = \"" . item['name'] . "\""
-        call s:log_silent(l:func_name . '::' . "l:plugins_explicit_to_be_processed::item['name']",
+        call s:log_silent(l:func_name . '::'
+            \ . "l:plugins_explicit_to_be_processed::item['name']",
             \ shellescape(item['name'], 1), a:environment)
         echo "domain_removed = \"" . domain_removed . "\""
-        call s:log_silent(l:func_name . '::' . "l:plugins_explicit_to_be_processed::domain_removed",
+        call s:log_silent(l:func_name . '::'
+            \ . "l:plugins_explicit_to_be_processed::domain_removed",
             \ shellescape(domain_removed, 1), a:environment)
         call add(l:explicit_item_name_list, domain_removed)
         let l:implicit_item_name = l:implicit_item_name . "'" . domain_removed . "', "
@@ -1129,19 +1204,23 @@ function! s:adjust_hook_helper(plugin_list, plugin_dir, package_manager, environ
     if len(l:plugins_explicit_to_be_processed) <= 0
         if len(l:plugins_implicit_to_be_processed) > 0
             for item in l:plugins_implicit_to_be_processed
-                call s:log_silent(l:func_name . '::' . "l:plugins_implicit_to_be_processed::item['name']",
+                call s:log_silent(l:func_name . '::'
+                    \ . "l:plugins_implicit_to_be_processed::item['name']",
                     \ shellescape(item['name'], 1), a:environment)
                 let domain_removed = split(item['name'], '/')[-1]
-                call s:log_silent(l:func_name . '::' . "l:plugins_implicit_to_be_processed::domain_removed",
+                call s:log_silent(l:func_name . '::'
+                    \ . "l:plugins_implicit_to_be_processed::domain_removed",
                     \ shellescape(domain_removed, 1), a:environment)
                 let l:implicit_item_name = l:implicit_item_name . "'" . domain_removed . "', "
             endfor
         else
             for item in l:all_initialized_plugins
-                call s:log_silent(l:func_name . '::' . "l:plugins_implicit_to_be_processed::item['name']",
+                call s:log_silent(l:func_name . '::'
+                    \ . "l:plugins_implicit_to_be_processed::item['name']",
                     \ shellescape(item['name'], 1), a:environment)
                 let domain_removed = split(item['name'], '/')[-1]
-                call s:log_silent(l:func_name . '::' . "l:plugins_implicit_to_be_processed::domain_removed",
+                call s:log_silent(l:func_name . '::'
+                    \ . "l:plugins_implicit_to_be_processed::domain_removed",
                     \ shellescape(domain_removed, 1), a:environment)
                 let l:implicit_item_name = l:implicit_item_name . "'" . domain_removed . "', "
             endfor
@@ -1193,7 +1272,8 @@ if exists('g:_use_setup_packager')
     "             \ | call packager#install(<args>)
 
 
-    " How to use PackagerInstall ['vim-scripts/a.vim']
+    " How to use
+    " PackagerInstall ['vim-scripts/a.vim', 'morhetz/gruvbox', 'joshdick/onedark.vim']
     command! -nargs=* -bar PackagerInstall
         \ call s:packager_init(g:plugin_dir['vim'], g:package_manager['vim'])
         \ | call packager#install(s:adjust_hook_helper(<args>,
@@ -1247,11 +1327,73 @@ filetype indent plugin on | syn on
 " syntax enable
 " syntax on
 
+" Because using cursorcolumn, and then using colorcolumn, the interface is too cumbersome
+" On a 320*90 screen, after dividing the screen into thirds in the horizontal directions,
+" the natural width of each screen is about 100 characters. Maturally keep the appropriate
+" width. In fact, I advocate not doing hard line breaks
+set colorcolumn=
+
+function! s:refresh_light()
+    if &filetype !~? '\v(help|txt|log)'
+        " " v:lua.require'plugins'.install()
+        " set colorcolumn=0
+        " let &colorcolumn="0,".join(range(0, 120),",")
+        " let &colorcolumn="120,".join(range(120,999),",")
+
+
+        " Without virtcol, indent line will be erased when navigated to long line
+        if &list == 0 || virtcol('.') > 80
+            setlocal list
+        endif
+        " execute ':IndentBlanklineEnable!'
+    else
+        if &list == 1
+            setlocal nolist
+        endif
+        " execute ':IndentBlanklineDisable!'
+    endif
+endfunction
+
+" E117: Unknown function: <SNR>3_refresh
+function! s:refresh()
+    set colorcolumn=
+    call s:refresh_light()
+    " if &filetype !~? '\v(help|txt|log)'
+    "     if &textwidth == 120
+    "         set textwidth=120
+    "     endif
+    "     " if &colorcolumn == ( &textwidth + 1 )
+    "     if &colorcolumn == 121
+    "         let &colorcolumn = 121
+    "     endif
+    " else
+    "     if &textwidth == 0
+    "         set textwidth=0
+    "     endif
+    "     if &colorcolumn == ""
+    "         let &colorcolumn=""
+    "     endif
+    " endif
+    " redraw!
+
+    " if &syntax != &filetype
+    syntax on
+    " endif
+endfunction
+
+augroup virc_autocmds | au!
+    au BufEnter * highlight OverLength ctermbg=DarkBlue guibg=DarkBlue ctermfg=NONE guifg=NONE
+        \ cterm=reverse gui=reverse term=reverse
+    " au BufEnter * match OverLength /\%120v.*/
+    au BufEnter,WinEnter * call matchadd('OverLength', '\%120v.\+', -1)
+augroup end
+
 if has('nvim')
 
     function! LuaFormat()
         if &filetype =~# '\v(lua)'
-            call function(g:_environment._job_start)("!doas stylua --indent-type spaces --indent-width 4 %")
+            call function(g:_environment._job_start)("!doas stylua
+                \ --indent-type spaces --indent-width 4 %")
         endif
     endfunction
 
@@ -1260,7 +1402,8 @@ if has('nvim')
     augroup lua_no_indent
         au!
         autocmd FileType lua nnoremap <buffer> <F4> :normal! LuaFormat()<cr>
-        " autocmd FileType lua nnoremap <buffer> <F4> silent! execute "!doas stylua --indent-type spaces %"<cr>
+        " autocmd FileType lua nnoremap <buffer> <F4>
+        "     \ silent! execute "!doas stylua --indent-type spaces %"<cr>
         autocmd BufWrite *.lua call LuaFormat()
         " autocmd BufWrite *.lua silent! execute "!doas stylua --indent-type spaces %"
         autocmd FileType lua setlocal nocindent nosmartindent noautoindent
@@ -1296,28 +1439,6 @@ if has('nvim')
     lua navigator = require'navigator'
     lua if vim.fn.empty(vim.inspect(navigator)) > 0 then navigator.setup() end
 
-    " E117: Unknown function: <SNR>3_refresh
-    function! s:refresh()
-        " call s:lightline_disable()
-        if &filetype !~# '\v(help|txt|log)'
-            " " v:lua.require'plugins'.install()
-            " set colorcolumn=0
-            " let &colorcolumn="0,".join(range(0, 120),",")
-            exe 'set colorcolumn="80,".join(range(120,999),",")'
-            setlocal list
-            " execute ':IndentBlanklineEnable!'
-            " lua require'plugins'.install()
-            " " :PackerCompile
-            " redraw!
-        else
-            set colorcolumn=""
-            setlocal nolist
-            " execute ':IndentBlanklineDisable!'
-            redraw!
-        endif
-        " lua windline = require('cool')
-    endfunction
-
     function! s:lua_update()
         " if $USER ==# 'root'
         lua require'plugins'.install()
@@ -1332,11 +1453,11 @@ if has('nvim')
         " v:lua.require'plugins'.install()
         lua require'plugins'.install()
         :PackerCompile
-        " call s:keys_reload()
         :KR
         redraw!
     endfunction
 
+    " lua windline = require('cool')
     " call s:lua_update()
 
     nnoremap <leader>j :call <sid>lua_update()<cr>
@@ -1389,7 +1510,8 @@ if has('nvim')
     " let g:completion_confirm_key = "\<C-y>"
     " " let g:completion_confirm_key = ""
     " " imap <expr> <cr>  pumvisible() ? complete_info()["selected"] != "-1" ?
-    " "             \ "\<Plug>(completion_confirm_completion)"  : "\<c-e>\<CR>" :  "\<CR>"
+    " "             \ "\<Plug>(completion_confirm_completion)"
+    " "             \  : "\<c-e>\<CR>" :  "\<CR>"
 
     " " possible value: "length", "alphabet", "none"
     " let g:completion_sorting = "alphabet"
@@ -1401,7 +1523,8 @@ if has('nvim')
     " augroup CompletionTriggerCharacter
     "     autocmd!
     "     autocmd BufEnter * let g:completion_trigger_character = ['.']
-    "     autocmd BufEnter *.c,*.cpp,*.cxx,*.hxx,*.inl,*.impl,*.h,*.hpp let g:completion_trigger_character = ['.', '::']
+    "     autocmd BufEnter *.c,*.cpp,*.cxx,*.hxx,*.inl,*.impl,*.h,*.hpp
+    "         \ let g:completion_trigger_character = ['.', '::']
     " augroup end
 
     " https://github.com/antoinemadec/FixCursorHold.nvim
@@ -1422,9 +1545,11 @@ if has('nvim')
 
     let g:golden_ratio_exclude_nonmodifiable = 1
 
-    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown({}))<cr>
+    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require(
+        \'telescope.themes').get_dropdown({}))<cr>
     " Change an option
-    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require('telescope.themes').get_dropdown({ winblend = 10 }))<cr>
+    nnoremap <Leader>f :lua require'telescope.builtin'.find_files(require(
+        \'telescope.themes').get_dropdown({ winblend = 10 }))<cr>
 endif " has('nvim')
 
 " "End vim-packager Scripts ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -1601,7 +1726,7 @@ if exists("g:indentLine_loaded")
     " https://github.com/Yggdroot/indentLine
     " For Yggdroot/indentLine
     let g:indentLine_setColors       = 0
-    " let g:indentLine_defaultGroup    = 'SpecialKey'
+    let g:indentLine_defaultGroup    = 'SpecialKey'
 
     " GVim
     let g:indentLine_color_gui       = '#A4E57E'
@@ -1645,13 +1770,15 @@ endif
 " " Guides not showing up the first time with colorscheme desert #109
 " let g:indent_guides_color_name_guibg_pattern = "guibg='?\zs[0-9A-Za-z]+\ze'?"
 
-let g:indent_blankline_disable_with_nolist                        = v:true
-let g:indent_blankline_show_trailing_blankline_indent             = v:false
-let g:indent_blankline_show_first_indent_level                    = v:false
-let g:indent_blankline_filetype_exclude                           = ['help', 'txt'. 'log']
-let g:indent_blankline_buftype_exclude                            = ['terminal']
-let g:indent_blankline_show_current_context_start_on_current_line = v:false
-let g:indent_blankline_viewport_buffer                            = 20
+" let g:indent_blankline_char_highlight                 = "Whitespace"
+let g:indent_blankline_disable_with_nolist            = v:true
+let g:indent_blankline_show_trailing_blankline_indent = v:false
+let g:indent_blankline_show_first_indent_level        = v:false
+let g:indent_blankline_filetype_exclude               = ['help', 'txt'. 'log']
+let g:indent_blankline_buftype_exclude                = ['terminal']
+let g:indent_blankline_viewport_buffer                = 20
+let g:indent_blankline_show_current_context_start_on_current_line
+    \ = v:false
 
 
 if has('nvim') && exists('g:_use_indent_guides')
@@ -1679,15 +1806,18 @@ if exists('g:_use_indent_guides')
     " hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
     " hi IndentGuidesEven guibg=green    ctermbg=4
 
-    " autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
-    " autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green    ctermbg=4
+    " autocmd VimEnter,ColorScheme * :hi IndentGuidesOdd  guibg=darkgrey ctermbg=3
+    " autocmd VimEnter,ColorScheme * :hi IndentGuidesEven guibg=green    ctermbg=4
 
     let indent_even       = '#ecf2dd'
     let indent_odd        = '#767966'
     let indent_even       = '#494b40'
-    let indent_color_odd  = 'hi IndentGuidesOdd  guifg=NONE guibg=' . indent_odd . '  gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE'
+    let indent_color_odd  = 'hi IndentGuidesOdd  guifg=NONE guibg='
+        \ . indent_odd . '  gui=NONE ctermfg=black ctermbg=3 cterm=NONE term=NONE'
     " let indent_color_odd  = 'hi! IndentGuidesOdd  guifg=NONE guibg=#333333 gui=NONE ctermfg=8 ctermbg=3 cterm=NONE'
-    let indent_color_even = 'hi IndentGuidesEven guifg=NONE guibg=' . indent_even . ' gui=NONE ctermfg=black ctermbg=2 cterm=NONE term=NONE'
+    let indent_color_even = 'hi IndentGuidesEven guifg=NONE guibg='
+        \ . indent_even
+        \ . ' gui=NONE ctermfg=black ctermbg=2 cterm=NONE term=NONE'
     " let indent_color_even = 'hi! IndentGuidesEven guifg=NONE guibg=#2b2b2b gui=NONE ctermfg=8 ctermbg=2 cterm=NONE'
     silent! execute indent_color_odd
     silent! execute indent_color_even
@@ -1696,8 +1826,10 @@ if exists('g:_use_indent_guides')
         au!
         " https://githubmemory.com/repo/nathanaelkane/vim-indent-guides/issues?cursor=Y3Vyc29yOnYyOpK5MjAxNi0wNy0xNFQxODoyMDoyMyswODowMM4J3b-h&pagination=next&page=3
         " https://www.titanwolf.org/Network/q/ad9924f3-2db9-4eb0-885f-bc68bffe6e3c/ynonenone
-        au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * silent! execute indent_color_odd
-        au VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme * silent! execute indent_color_even
+        au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme
+            \ * silent! execute indent_color_odd
+        au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme
+            \ * silent! execute indent_color_even
     augroup END
 
 endif
@@ -1706,10 +1838,370 @@ endif
 
 " "color settings ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
+function! s:set_color_scheme(colors_name)
+    " CPU busy on busybox
+    " let schemes = boot#chomp(system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
+    "     \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]")))
+
+
+    " https://github.com/preservim/vim-colors-pencil
+    " https://github.com/chriskempson/base16
+    " https://github.com/chriskempson/base16-vim/tree/master/colors
+
+    " color_name
+    " color_scheme/g:colors_name
+
+    let g:colorscheme_load_path = g:plugin_dir['vim'] . '/pack/'
+        \ . g:package_manager['vim'] . '/start/awesome-vim-colorschemes/colors'
+    " for item in $(\ls -1 g:colorscheme_load_path); do echo "${item%.vim}"; done
+
+
+    if "onedark" == a:colors_name
+        let g:onedark_termcolors = 256
+        let g:onedark_terminal_italics = 1
+
+        " /mnt/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/autoload/onedark.vim
+
+        let g:onedark_color_overrides = {
+            \ "red": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "black": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "green": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "yellow": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "dark_yellow": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "blue": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "cyan": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "white": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "fg": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "bg": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "comment_grey": { "gui": "#4B5263", "cterm": "238", "cterm16": "NONE" },
+            \ "gutter_fg_grey": { "gui": "#4B5263", "cterm": "238", "cterm16": "NONE" },
+            \ "cursor_grey": { "gui": "#2C323C", "cterm": "236", "cterm16": "NONE" },
+            \ "visual_grey": { "gui": "#2C323C", "cterm": "236", "cterm16": "NONE" },
+            \ "menu_grey": { "gui": "#2C323C", "cterm": "236", "cterm16": "NONE" },
+            \ "special_grey": { "gui": "#2C323C", "cterm": "236", "cterm16": "NONE" },
+            \ "vertsplit": { "gui": "#2C323C", "cterm": "236", "cterm16": "NONE" },
+            \ "purple": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "dark_red": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "foreground": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \ "background": { "gui": "NONE", "cterm": "NONE", "cterm16": "NONE" },
+            \}
+
+        if has('nvim')
+            if 'linux' == $TERM || $TERM =~? '256color'
+                function! s:reset_color()
+                    let g:terminal_color_0  = g:onedark_color_overrides.black.cterm
+                    let g:terminal_color_1  = g:onedark_color_overrides.red.cterm
+                    let g:terminal_color_2  = g:onedark_color_overrides.green.cterm
+                    let g:terminal_color_3  = g:onedark_color_overrides.yellow.cterm
+                    let g:terminal_color_4  = g:onedark_color_overrides.blue.cterm
+                    let g:terminal_color_5  = g:onedark_color_overrides.purple.cterm
+                    let g:terminal_color_6  = g:onedark_color_overrides.cyan.cterm
+                    let g:terminal_color_7  = g:onedark_color_overrides.white.cterm
+                    let g:terminal_color_8  = g:onedark_color_overrides.black.cterm
+                    let g:terminal_color_9  = g:onedark_color_overrides.red.cterm
+                    let g:terminal_color_10 = g:onedark_color_overrides.green.cterm
+                    let g:terminal_color_11 = g:onedark_color_overrides.yellow.cterm
+                    let g:terminal_color_12 = g:onedark_color_overrides.blue.cterm
+                    let g:terminal_color_13 = g:onedark_color_overrides.purple.cterm
+                    let g:terminal_color_14 = g:onedark_color_overrides.cyan.cterm
+                    let g:terminal_color_15 = g:onedark_color_overrides.white.cterm
+                    let g:terminal_color_background = g:onedark_color_overrides.bg.cterm
+                    let g:terminal_color_foreground = g:onedark_color_overrides.fg.cterm
+
+                    " let g:terminal_color_0 = s:black.cterm
+                    " let g:terminal_color_1 = s:red.cterm
+                    " let g:terminal_color_2 = s:green.cterm
+                    " let g:terminal_color_3 = s:yellow.cterm
+                    " let g:terminal_color_4 = s:blue.cterm
+                    " let g:terminal_color_5 = s:purple.cterm
+                    " let g:terminal_color_6 = s:cyan.cterm
+                    " let g:terminal_color_7 = s:white.cterm
+                    " let g:terminal_color_8 = s:black.cterm
+                    " let g:terminal_color_9 = s:red.cterm
+                    " let g:terminal_color_10 = s:green.cterm
+                    " let g:terminal_color_11 = s:yellow.cterm
+                    " let g:terminal_color_12 = s:blue.cterm
+                    " let g:terminal_color_13 = s:purple.cterm
+                    " let g:terminal_color_14 = s:cyan.cterm
+                    " let g:terminal_color_15 = s:white.cterm
+                    " let g:terminal_color_background = s:bg.cterm
+                    " let g:terminal_color_foreground = s:fg.cterm
+
+                endfunction
+            else
+                function! s:reset_color()
+                    let g:terminal_color_0  = g:onedark_color_overrides.black.gui
+                    let g:terminal_color_1  = g:onedark_color_overrides.red.gui
+                    let g:terminal_color_2  = g:onedark_color_overrides.green.gui
+                    let g:terminal_color_3  = g:onedark_color_overrides.yellow.gui
+                    let g:terminal_color_4  = g:onedark_color_overrides.blue.gui
+                    let g:terminal_color_5  = g:onedark_color_overrides.purple.gui
+                    let g:terminal_color_6  = g:onedark_color_overrides.cyan.gui
+                    let g:terminal_color_7  = g:onedark_color_overrides.white.gui
+                    let g:terminal_color_8  = g:onedark_color_overrides.black.gui
+                    let g:terminal_color_9  = g:onedark_color_overrides.red.gui
+                    let g:terminal_color_10 = g:onedark_color_overrides.green.gui
+                    let g:terminal_color_11 = g:onedark_color_overrides.yellow.gui
+                    let g:terminal_color_12 = g:onedark_color_overrides.blue.gui
+                    let g:terminal_color_13 = g:onedark_color_overrides.purple.gui
+                    let g:terminal_color_14 = g:onedark_color_overrides.cyan.gui
+                    let g:terminal_color_15 = g:onedark_color_overrides.white.gui
+                    let g:terminal_color_background = g:onedark_color_overrides.bg.gui
+                    let g:terminal_color_foreground = g:onedark_color_overrides.fg.gui
+
+                    " let g:terminal_color_0 = s:black.gui
+                    " let g:terminal_color_1 = s:red.gui
+                    " let g:terminal_color_2 = s:green.gui
+                    " let g:terminal_color_3 = s:yellow.gui
+                    " let g:terminal_color_4 = s:blue.gui
+                    " let g:terminal_color_5 = s:purple.gui
+                    " let g:terminal_color_6 = s:cyan.gui
+                    " let g:terminal_color_7 = s:white.gui
+                    " let g:terminal_color_8 = s:black.gui
+                    " let g:terminal_color_9 = s:red.gui
+                    " let g:terminal_color_10 = s:green.gui
+                    " let g:terminal_color_11 = s:yellow.gui
+                    " let g:terminal_color_12 = s:blue.gui
+                    " let g:terminal_color_13 = s:purple.gui
+                    " let g:terminal_color_14 = s:cyan.gui
+                    " let g:terminal_color_15 = s:white.gui
+                    " let g:terminal_color_background = s:bg.gui
+                    " let g:terminal_color_foreground = s:fg.gui
+                endfunction
+            endif
+            augroup onehalfdark_color | au!
+                au VimEnter * :call s:reset_color()
+            augroup end
+
+        endif
+    endif
+
+
+    if "pencil" == a:colors_name
+        " https://www.iditect.com/how-to/53501604.html
+        let g:pencil_termtrans          = 1
+        let g:pencil_termcolors         = 256
+        let g:pencil_terminal_italics   = 1
+        let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
+        let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
+        let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
+        let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
+        let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
+    endif
+
+    " function! s:sdjust_solarized()
+    "     hi! EndOfBuffer ctermbg=bg ctermfg=bg guibg=bg guifg=bg
+    " endfunction
+    "
+    " augroup sierra
+    "     autocmd!
+    "     autocmd ColorScheme sierra call s:sdjust_solarized()
+    " augroup END
+
+
+    " set background=light
+    " set background=dark
+    set background=dark
+    highlight clear
+    syntax reset
+    silent! execute 'colorscheme ' . a:colors_name
+
+endfunction
+
+" let g:scheme_name = ""
+
+" let g:scheme_name = "256_noir"
+" No selection highlight
+" let g:scheme_name = "OceanicNext"
+" let g:scheme_name = "OceanicNextLight"
+" let g:scheme_name = "PaperColor"
+" No selection highlight
+" let g:scheme_name = "abstract"
+" No selection highlight
+" let g:scheme_name = "afterglow"
+" let g:scheme_name = "alduin"
+" No selection highlight
+" let g:scheme_name = "anderson"
+" let g:scheme_name = "angr"
+" let g:scheme_name = "apprentice"
+
+" let g:scheme_name = "atom"
+" No selection highlight
+" let g:scheme_name = "ayu"
+" let g:scheme_name = "carbonized-dark"
+" let g:scheme_name = "carbonized-light"
+" No selection highlight
+" let g:scheme_name = "challenger_deep"
+" Highlight variables
+" let g:scheme_name = "deep-space"
+" let g:scheme_name = "deus"
+" No selection highlight
+" let g:scheme_name = "dogrun"
+" No selection highlight
+" let g:scheme_name = "flattened_dark"
+" let g:scheme_name = "flattened_light"
+" let g:scheme_name = "focuspoint"
+" let g:scheme_name = "fogbell"
+" let g:scheme_name = "fogbell_light"
+" let g:scheme_name = "fogbell_lite"
+" let g:scheme_name = "github"
+" No selection highlight
+" let g:scheme_name = "gotham"
+" No selection highlight
+" let g:scheme_name = "gotham256"
+" Thick indent line / Yellow quoted text
+" let g:scheme_name = "gruvbox"
+" let g:scheme_name = "happy_hacking"
+" let g:scheme_name = "hybrid"
+" let g:scheme_name = "hybrid_material"
+" Highlight variables
+" let g:scheme_name = "hybrid_reverse"
+" No color
+" let g:scheme_name = "iceberg"
+" let g:scheme_name = "jellybeans"
+" let g:scheme_name = "lightning"
+" let g:scheme_name = "lucid"
+" let g:scheme_name = "lucius"
+" let g:scheme_name = "materialbox"
+" let g:scheme_name = "meta5"
+" let g:scheme_name = "minimalist"
+" let g:scheme_name = "molokai"
+" Highlight variables
+" let g:scheme_name = "molokayo"
+" No color reverse
+" let g:scheme_name = "mountaineer-grey"
+" let g:scheme_name = "mountaineer-light"
+" let g:scheme_name = "mountaineer"
+" let g:scheme_name = "nord"
+" let g:scheme_name = "oceanic_material"
+" let g:scheme_name = "oceanic_next"
+" let g:scheme_name = "one-dark"
+" let g:scheme_name = "one"
+" let g:scheme_name = "onedark"
+
+" Got grreen comments on $TERM == linux/tmux-256color in tmux
+" Dark/thin/slime indent line
+" Green comments on TERM == linux in tmux
+" No selection highlight
+let g:scheme_name = "onehalfdark"
+
+" let g:scheme_name = "onehalflight"
+" let g:scheme_name = "orange-moon"
+" let g:scheme_name = "orbital"
+" No color reverse
+" let g:scheme_name = "paramount"
+" Highlight variables
+" let g:scheme_name = "parsec"
+" let g:scheme_name = "pink-moon"
+" Highlight variables
+" let g:scheme_name = "purify"
+" let g:scheme_name = "pyte"
+" let g:scheme_name = "rakr"
+" Highlight variables
+" let g:scheme_name = "rdark-terminal2"
+" Comments not distinguish
+" let g:scheme_name = "scheakur"
+" let g:scheme_name = "seoul256-light"
+" No color reverse
+" let g:scheme_name = "seoul256"
+" Highlight variables
+" let g:scheme_name = "sierra"
+" No color reverse
+" Comments not distinguish
+" let g:scheme_name = "snow"
+" Comments not distinguish
+" let g:scheme_name = "solarized8"
+" let g:scheme_name = "solarized8_flat"
+" let g:scheme_name = "solarized8_high"
+" let g:scheme_name = "solarized8_low"
+" Yellow
+" let g:scheme_name = "sonokai"
+" Cyan
+" Thick indent line
+" let g:scheme_name = "space-vim-dark"
+" Green
+" let g:scheme_name = "spacecamp"
+" Green
+" let g:scheme_name = "spacecamp_lite"
+" No selection highlight
+" let g:scheme_name = "stellarized"
+" Purple reverse
+" let g:scheme_name = "sunbather"
+" Yellow/green
+" let g:scheme_name = "tender"
+" Comments not distinguish
+" Thick indent line
+" let g:scheme_name = "termschool"
+
+" ColorColumn right
+" let g:scheme_name = "twilight256"
+
+" Comments not distinguish
+" let g:scheme_name = "two-firewatch"
+" Yellow
+" let g:scheme_name = "wombat256mod"
+" Comments not distinguish
+" let g:scheme_name = "yellow-moon"
+
+" let g:scheme_name = "unsuck-flat"
+" let g:scheme_name = "sierra"
+" let g:scheme_name = "base16-default-dark"
+
+
+" let g:scheme_name = "base16-flat"
+" let g:scheme_name = "badwolf"
+
+" let g:scheme_name = "tender"
+
+" let g:scheme_name = "carbonized-dark"
+
+" let g:scheme_name = "onehalfdark"
+" let g:scheme_name = "onehalflight"
+" let g:scheme_name = "tabula"
+
+
+" let g:scheme_name = "mountaineer"
+
+" let g:scheme_name = "hybrid_reverse"
+
+" let g:scheme_name = "happy_hacking"
+" Blue quotes/Cyan indent line
+" let g:scheme_name = "orbital"
+
+" let g:scheme_name = "parsec"
+" let g:scheme_name = "termschool"
+
+
+" let g:scheme_name = "minimalist"
+
+" let g:scheme_name = "meta5"
+
+" Clear style
+" let g:scheme_name = "archery"
+
+" let g:scheme_name = "afterglow"
+" let g:scheme_name = "nord"
+" let g:scheme_name = "jellybeans"
+
+" Recommend (later is better)
+" let g:scheme_name = "base16-tomorrow-night"
+" let g:scheme_name = "sunbather"
+" let g:scheme_name = "fogbell"
+" Thick indent line
+" let g:scheme_name = "pencil"
+
+" Nice on tty && TERM == default
+" Thick indent line
+" let g:scheme_name = "two-firewatch"
+" let g:two_firewatch_italics = 1
+
+" Thick indent line
+" let g:scheme_name = "lucid"
+
 " http://www.pixelbeat.org/docs/terminal_colours/
 " :h term-dependent-settings
 " this variable must be enabled for colors to be applied properly
-set termguicolors
+" set termguicolors
 let base16colorspace = 256  " Access colors present in 256 colorspace
 
 " https://www.reddit.com/r/vim/comments/f3v3lq/syntax_highlighting_changes_while_using_tmux/
@@ -1719,35 +2211,44 @@ if empty($TMUX)
     endif
     if has('termguicolors')
         set termguicolors
+    else
+        set notermguicolors
+    endif
+else
+
+    if ! has('gui_running') " && ! has('nvim')
+        " https://github.com/tmux/tmux/issues/699
+        set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
+    endif
+
+    " Enable 24-bit true colors if your terminal supports it.
+    if has('termguicolors')
+        " https://github.com/vim/vim/issues/993#issuecomment-255651605
+        if has('vim_starting') && ! has('gui_running') && ! has('nvim')
+            let &t_8f = "\e[38;2;%lu;%lu;%lum"
+            let &t_8b = "\e[48;2;%lu;%lu;%lum"
+        endif
+        set termguicolors
+    else
+        set notermguicolors
     endif
 endif
 
-" Enable 24-bit true colors if your terminal supports it.
-if has('termguicolors')
-    " https://github.com/vim/vim/issues/993#issuecomment-255651605
-    if has('vim_starting') && ! has('gui_running') && ! has('nvim')
-        let &t_8f = "\e[38;2;%lu;%lu;%lum"
-        let &t_8b = "\e[48;2;%lu;%lu;%lum"
-    endif
-    set termguicolors
-endif
+" set guicursor+=a:Cursor/lCursor
+set guicursor="disable"
 
 augroup unfold
     au!
     au BufWinEnter * normal! zv
 augroup END
 
-" if ! empty($TMUX)
-"     " silent! execute '!export TERM=xterm-256color'
-"     silent! execute '!export TERM=tmux-256color'
-" endif
+if ! empty($TMUX)
+    " silent! execute '!export TERM=xterm-256color'
+    " silent! execute '!export TERM=tmux-256color'
 
-if ! has('gui_running') && ! has('nvim')
-    " https://github.com/tmux/tmux/issues/699
-    set t_Co=256  " Note: Neovim ignores t_Co and other terminal codes.
+    " let $TERM = "screen-256color"
+    " silent! execute '!export TERM=screen-256color'
 endif
-
-
 
 function! s:delmarks()
     let l:m = join(filter(
@@ -1758,7 +2259,6 @@ function! s:delmarks()
     endif
 endfunction
 nnoremap <silent> dm :<c-u>call <sid>delmarks()<cr>
-
 
 " https://stackoverflow.com/questions/36813466/highlighting-arbitrary-lines-in-vim
 " \L to highlight a line
@@ -1774,34 +2274,21 @@ nnoremap <silent> <leader>l :
 
 " au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%80v.\+', -1)
 
-
 " cnoreabbrev <expr> help ((getcmdtype() is# ':' && getcmdline() is# 'help')?('vert help'):('help'))
 " cnoreabbrev <expr> h ((getcmdtype()    is# ':' && getcmdline() is# 'h')?('vert help'):('h'))
 
-" https://vim.fandom.com/wiki/Highlight_current_line
-" nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
-
-" https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
-set cursorline
-set cursorcolumn
-
-" Only show the cursor line in the active buffer.
-setlocal cursorline | setlocal cursorcolumn
-" setlocal cursorline
-augroup cursor_line
-    au!
-    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
-    au WinEnter * setlocal cursorline | setlocal cursorcolumn
-    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
-augroup END
-
 augroup color_background
     au!
-    au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
-        \ exe 'set colorcolumn="0,".join(range(0, 120),",")' |
-        \ else |
-        \ set colorcolumn= | setlocal nolist | redraw! |
-        \ endif
+    " au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
+
+    " au BufEnter,WinEnter * if &filetype !~? '\v(help|txt|log)' |
+    "     \ let &colorcolumn = &textwidth + 1 |
+    "     \ else |
+    "     \ setlocal nolist | let &colorcolumn="" |
+    "     \ endif
+    "     " \ let &colorcolumn="120,".join(range(120,999),",") |
+    "     " \ let &colorcolumn="0,".join(range(0, 120),",") |
+
     " \ set colorcolumn=120 | setlocal list |
     " \ | let &colorcolumn="80,".join(range(120,999),",") |
     " \ exe 'set colorcolumn="80,".join(range(120,999),",")' |
@@ -1814,7 +2301,9 @@ augroup color_background
 
     " https://stackoverflow.com/questions/7463555/how-to-get-the-help-window-to-always-open-in-the-same-position
     " autocmd FileType help :wincmd L
+
     autocmd FileType help set bufhidden=wipe
+
 augroup END
 
 " https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
@@ -1822,9 +2311,11 @@ augroup END
 
 " help W10
 augroup read_only | au!
-    au BufEnter,FileChangedRO * set noro
+    au FileChangedRO * set noro
 augroup end
 
+" write/save/general
+" Moved to boot.vim
 " :cnoreabbrev w silent! call <sid>write_generic()
 " :cnoreabbrev w silent! call boot#write_generic()
 
@@ -1893,85 +2384,194 @@ set autowriteall
 " noremap  <silent> <C-s> :SudoWrite<CR>
 " inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
-" if has('autocmd')
-"     function! ILikeHelpToTheRight()
-"         if !exists('w:help_is_moved') || w:help_is_moved != "right"
-"             wincmd L
-"             let w:help_is_moved = "right"
-"         endif
-"     endfunction
-"
-"     augroup HelpPages
-"         autocmd FileType help nested call ILikeHelpToTheRight()
-"     augroup END
-" endif
+if has('autocmd')
+    function! s:help_to_the_right()
+        if !exists('w:help_is_moved') || w:help_is_moved != "right"
+            wincmd L
+            let w:help_is_moved = "right"
+        endif
+    endfunction
+
+    augroup HelpPages | au!
+        autocmd FileType help nested call s:help_to_the_right()
+    augroup END
+endif
 
 
 " https://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
 " make window 80 + some for numbers wide
 
+call s:set_color_scheme(g:scheme_name)
 
-if ! exists("g:_use_terminal_transparent")
-    " let g:insert_enter_fg_gui = 'DarkYellow'
-    let g:insert_enter_fg_gui = '94'
-    let g:insert_enter_fg_cterm = 'DarkYellow'
-    let g:insert_enter_bg_gui = 'Black'
-    " let g:insert_enter_bg_cterm = 'Black'
-    let g:insert_enter_bg_cterm = '107'
+if exists("g:_use_terminal_transparent")
+    let g:cterm_fg_insert  = 'NONE'
+    let g:cterm_bg_insert  = '4'
 
-    let g:insert_leave_fg_gui   = 'darkgray'
-    " let g:insert_leave_fg_cterm = '080808'
-    let g:insert_leave_fg_cterm = '104'
-
+    let g:nontext_fg_cterm = 'NONE'
+    let g:nontext_fg_gui   = 'NONE'
+else
+    let g:cterm_fg_insert  = 'DarkYellow'
+    " let g:cterm_bg_insert = 'Black'
+    let g:cterm_bg_insert  = '107'
 
     " let g:nontext_fg_cterm = 241
     let g:nontext_fg_cterm = '94'
-    let g:nontext_fg_gui = 'gray'
-else
-    let g:insert_enter_fg_gui = 'NONE'
-    let g:insert_enter_fg_cterm = 'NONE'
-    let g:insert_enter_bg_gui = '#36323d'
-    let g:insert_enter_bg_cterm = '4'
-
-    let g:insert_leave_fg_gui   = 'NONE'
-    let g:insert_leave_fg_cterm = 'NONE'
-
-    let g:nontext_fg_cterm = 'NONE'
-    let g:nontext_fg_gui = 'NONE'
+    let g:nontext_fg_gui   = 'Gray'
 endif
 
-if 'linux' == $TERM
+" let g:_hl_attr_line = 'standout'
+" let g:_hl_attr_line = 'nocombine,standout,underdashed'
+" let g:_hl_attr_line = 'nocombine,standout,underdashed'
+" let g:_hl_attr_line = 'underline'
+" let g:_hl_attr_line = 'undercurl'
+" let g:_hl_attr_line = 'italic'
+let g:_hl_attr_line = 'NONE'
+" let g:_hl_attr_line = 'reverse'
+
+let g:_hl_attr_column = 'NONE'
+" let g:_hl_attr_column = 'reverse'
+" let g:_hl_attr_column = 'underline'
+" let g:_hl_attr_column = 'strikethrough'
+" let g:_hl_attr_column = 'standout'
+
+if 'linux' == $TERM || $TERM =~? '256color'
     if exists("g:_use_terminal_transparent")
+        " help *cterm-colors*/ctermbg for might be recognized color name
+        " case-insensitive
         " Cursor line/column color
-        " let g:insert_leave_bg_gui   = 'Brown'
-        let g:insert_leave_bg_gui   = 'Blue'
-        " let g:insert_leave_bg_gui   = 'Yellow'
-        " let g:insert_leave_bg_gui   = 'white'
-        " let g:insert_leave_bg_gui   = 'Black'
+        " let g:gui_bg_normal   = 'Brown'
+        " let g:gui_bg_normal   = 'Blue'
+        " let g:gui_bg_normal   = 'Yellow'
+        " let g:gui_bg_normal   = 'Cyan'
+        " let g:gui_bg_normal   = 'SkyBlue2'
+        " let g:gui_bg_normal   = 'Grey'
+        " let g:gui_bg_normal   = 'White'
+        " let g:gui_bg_normal   = "'salmon pink'"
+        " let g:gui_bg_normal   = 'DarkGrey'
+        " let g:gui_bg_normal   = 'LightYellow'
+        " let g:gui_bg_normal   = 'LightMagenta'
+        " let g:gui_bg_normal   = 'Magenta'
+        " let g:gui_bg_normal   = 'Red'
+        " let g:gui_bg_normal   = 'Purple'
+        " let g:gui_bg_normal   = 'Orange'
+        " let g:gui_bg_normal   = 'DarkBlue'
+        " let g:gui_bg_normal   = 'LightRed'
+        " let g:gui_bg_normal   = 'DarkGray'
+        " let g:gui_bg_normal   = 'Violet'
+        " let g:gui_bg_normal   = 'SkyBlue1'
+        " let g:gui_bg_normal   = 'Lightblue'
+        " let g:gui_bg_normal   = 'White'
+        let g:gui_bg_normal   = 'NONE'
+        " let g:gui_bg_normal   = 'Black'
+
+        " let g:gui_fg_normal   = 'Chartreuse1'
+        " let g:gui_fg_insert   = 'LightStateGrey'
+        " let g:gui_fg_normal   = 'Chartreuse2'
+        " let g:gui_fg_normal   = 'SkyBlue2'
+        " let g:gui_fg_normal   = 'SteelBlue1'
+        " let g:gui_fg_normal   = 'CornflowerBlue'
+        " let g:gui_fg_normal   = 'Grey'
+        " let g:gui_fg_normal   = '\e[0;34m'
+        " let g:gui_fg_normal   = '\033[0;34m'
+        " let g:gui_fg_normal   = 'Grey0'
+        " let g:gui_fg_normal   = 'Grey93'
+        " let g:gui_fg_normal   = 'Cyan'
+        " let g:gui_fg_normal   = 'LightCyan'
+        " let g:gui_fg_normal   = 'LightSteelBlue'
+        " let g:gui_fg_normal   = 'LightSkylBlue1'
+        " let g:gui_fg_normal   = 'Orange1'
+        " let g:gui_fg_normal   = 'fg'
+        " let g:gui_fg_normal   = 'bg'
+        " let g:gui_fg_normal   = 'Red3'
+        " let g:gui_fg_normal   = 'Plum2'
+        " let g:gui_fg_normal   = 'DarkOliveGreen1'
+        " let g:gui_fg_normal   = 'PaleTurquoise1'
+        " let g:gui_fg_normal   = 'Yellow2'
+        " let g:gui_fg_normal   = 'SkyBlue2'
+        " let g:gui_fg_normal   = 'NONE'
+        " let g:gui_fg_normal   = 'DarkGray'
+        " let g:gui_fg_normal   = 'DarkGrey'
+        " let g:gui_fg_normal   = 'DarkMagenta'
+        " let g:gui_fg_normal   = '#ff00ff'
+        " let g:gui_fg_normal   = 'LightSlateBlue'
+        " let g:gui_fg_normal   = 'Fuchsia'
+        let g:gui_fg_normal   = 'DarkBlue'
+        " let g:gui_fg_normal   = 'DogerBlue2'
+        " let g:gui_fg_normal   = 'Aqua'
+        " let g:gui_fg_normal   = 'Teal'
+        " let g:gui_fg_normal   = 'DarkTeal'
+        " let g:gui_fg_normal   = 'Silver'
+        " let g:gui_fg_normal   = 'Brown'
+        " let g:gui_fg_normal   = 'DarkYellow'
+        " let g:gui_fg_normal   = 'LightYellow'
+        " let g:gui_fg_normal   = 'Lime'
+        " let g:gui_fg_normal   = 'Maroon'
+        " let g:gui_fg_normal   = 'DarkRed'
+        " let g:gui_fg_normal   = 'DarkGray'
+        " let g:gui_fg_normal   = 'White'
+        " let g:gui_fg_normal   = 'GreenYellow'
+        " let g:gui_fg_normal   = 'DarkGreen'
+        " let g:gui_fg_normal   = 'Blue'
+        " let g:gui_fg_normal   = 'Yellow'
+
+
+        " let g:gui_bg_insert   = 'Chartreuse2'
+        " let g:gui_bg_insert   = 'White'
+        let g:gui_bg_insert   = 'NONE'
+
+        " let g:gui_fg_insert   = 'SkyBlue2'
+        " let g:gui_fg_insert   = 'Chartreuse1'
+        let g:gui_fg_insert   = 'NONE'
+        " let g:gui_fg_insert   = 'Yellow2'
+
 
         " Warning: Color name "Background" is not defined.
         " "NONE" is not a eligile argument for cterm colors
-        " let g:insert_leave_bg_cterm = 8
-        let g:insert_leave_bg_cterm = '107'
+        " let g:cterm_bg_normal = 8
+        " let g:cterm_bg_normal = '107'
+        " let g:cterm_bg_normal = '104'
+        " let g:cterm_bg_normal = '136'
+        " let g:cterm_bg_normal = '237'
+        let g:cterm_bg_normal = 'NONE'
+        " let g:cterm_bg_normal = '255'
+
+        " let g:cterm_fg_normal = '47'
+        let g:cterm_fg_normal = 'NONE'
+        " let g:cterm_fg_normal = '255'
     else
-        let g:insert_leave_bg_gui   = 'NONE'
-        let g:insert_leave_bg_cterm = 'NONE'
+        let g:cterm_bg_normal = 'NONE'
+
+        let g:gui_bg_normal   = 'NONE'
     endif
 else
     if exists("g:_use_terminal_transparent")
         " $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
         " :let _rock        = '#181320'
-        " let g:insert_leave_bg_gui   = '#181320'
-        let g:insert_leave_bg_gui   = '#36323d'
-        " let g:insert_leave_bg_gui   = '#82868a'
+        " let g:gui_bg_normal   = '#181320'
+        " let g:gui_bg_normal   = '#82868a'
+        let g:gui_bg_normal   = 'NONE'
+        " let g:gui_fg_normal   = '#36323d'
+        let g:gui_fg_normal   = 'NONE'
 
-        " let g:insert_leave_bg_cterm = 4
-        let g:insert_leave_bg_cterm = '94'
-        " let g:insert_leave_bg_cterm = 8
+        let g:gui_bg_insert   = '#36323d'
+        " let g:gui_bg_insert   = 'Chartreuse2'
+        let g:gui_fg_insert   = 'NONE'
+
+        let g:cterm_fg_normal = 'NONE'
+        " let g:cterm_bg_normal = 4
+        " let g:cterm_bg_normal = 8
+        let g:cterm_bg_normal = '94'
 
     else
-        let g:insert_leave_bg_gui   = 'NONE'
-        let g:insert_leave_bg_cterm = 'NONE'
+        let g:cterm_bg_normal = 'NONE'
+        let g:gui_fg_normal   = 'DarkGray'
+        let g:gui_bg_insert   = 'Black'
+        " let g:gui_fg_insert   = 'DarkYellow'
+        let g:gui_fg_insert   = '94'
+
+        let g:gui_bg_normal   = 'NONE'
+        " let g:cterm_fg_normal = '080808'
+        let g:cterm_fg_normal = '104'
     endif
 endif
 
@@ -1980,24 +2580,47 @@ endif
 " :let _gray        = '#82868a'
 " :let _turquoise   = '#3fc997'
 " :let _rock_medium = '#36323d'
-let g:hl_insert_leave =
-    \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_leave_bg_gui .
-    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . '104' . ' cterm=NONE gui=NONE term=NONE'
-    " \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . '136' . ' cterm=NONE gui=NONE term=NONE'
-let g:hl_insert_enter =
-    \ ' guifg=' . g:insert_enter_fg_gui . ' guibg=' . g:insert_enter_bg_gui .
-    \ ' ctermfg=' . g:insert_enter_fg_cterm . ' ctermbg=' . g:insert_enter_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+let g:hl_normal =
+    \ ' guifg=' . g:gui_fg_normal . ' guibg=' . g:gui_bg_normal
+    \ . ' ctermfg=' . g:cterm_fg_normal . ' ctermbg=' . g:cterm_bg_normal
+    \ . ' cterm=NONE gui=NONE term=NONE'
+
+let g:hl_insert =
+    \ ' guifg=' . g:gui_fg_insert . ' guibg=' . g:gui_bg_insert
+    \ . ' ctermfg=' . g:cterm_fg_insert . ' ctermbg=' . g:cterm_bg_insert
+    \ . ' cterm=NONE gui=NONE term=NONE'
 
 " For CursorLine, ColorColumn
 " $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
 " :let _cloud       = '#e4e0ed'
-let g:hl_insert_leave_invert =
-    \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_leave_bg_gui .
-    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
-let g:hl_insert_enter_invert =
-    \ ' guifg=' . g:insert_leave_fg_gui . ' guibg=' . g:insert_enter_bg_gui .
-    \ ' ctermfg=' . g:insert_leave_fg_cterm . ' ctermbg=' . g:insert_leave_bg_cterm . ' cterm=NONE gui=NONE term=NONE'
+let g:hl_normal_inverse =
+    \ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_normal
+    \ . ' ctermfg=' . g:cterm_bg_normal . ' ctermbg=' . g:cterm_fg_normal
+    \ . ' cterm=inverse gui=inverse term=inverse'
 
+let g:hl_insert_inverse =
+    \ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_insert
+    \ . ' ctermfg=' . g:cterm_bg_normal . ' ctermbg=' . g:cterm_fg_normal
+    \ . ' cterm=inverse gui=inverse term=inverse'
+
+let g:hl_normal_line =
+    \ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_normal
+    \ . ' ctermfg=' . g:cterm_bg_normal . ' ctermbg=' . g:cterm_fg_normal
+    \ . ' cterm=' . g:_hl_attr_line . ' gui=' . g:_hl_attr_line . ' term=' . g:_hl_attr_line
+    \ . 'start=<Esc>[27h;<Esc>[<Space>r;'
+    \ . "font='Monospace 10'"
+
+" let g:hl_normal_column =
+"     \ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_normal
+"     \ . ' ctermfg=' . g:cterm_bg_normal . ' ctermbg=' . g:cterm_fg_normal
+"     \ . ' cterm=' . g:_hl_attr_column . ' gui=' . g:_hl_attr_column . ' term=' . g:_hl_attr_column
+
+let g:hl_normal_column =
+    \ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_normal
+    \ . ' ctermfg=' . g:cterm_bg_normal . ' ctermbg=' . g:cterm_fg_normal
+    \ . ' cterm=' . g:_hl_attr_column . ' gui=' . g:_hl_attr_column . ' term=' . g:_hl_attr_column
+
+" :highlight
 if has('nvim')
     " a list of groups can be found at `:help nvim_tree_highlight`
     highlight NvimTreeFolderIcon guibg=blue
@@ -2008,7 +2631,11 @@ hi SpellLocal cterm=underline ctermfg=9
 hi SpellRare  cterm=underline ctermfg=9
 hi SpellCap   cterm=underline
 
-highlight FileStyleIgnorePattern guibg=bg ctermbg=0
+" for =bg =fg
+" When Vim knows the normal foreground and background colors, "fg" and
+" "bg" can be used as color names.  This only works after setting the
+" colors for the Normal group and for the MS-Windows console.
+highlight FileStyleIgnorePattern guibg=NONE ctermbg=0
 " highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
 " https://vi.stackexchange.com/questions/6100/remove-vim-status-bar-background-color
 highlight clear StatusLine
@@ -2016,8 +2643,10 @@ augroup statusline_highlight | au!
     " au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost *
     "     \ highlight StatusLine guifg=fg guibg=NONE ctermfg=fg ctermbg=NONE gui=NONE cterm=NONE term=NONE
 
-    au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost * highlight clear StatusLine
+    " au VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme,SourcePost * highlight clear StatusLine
+    au WinEnter * highlight clear StatusLine
 augroup END
+
 " https://vi.stackexchange.com/questions/28752/vim-terminal-interferes-with-statusline
 augroup statusline_highlight_term | au!
     autocmd ColorScheme * hi! link StatusLineTerm StatusLine
@@ -2028,41 +2657,142 @@ augroup end
 " https://vi.stackexchange.com/questions/6150/a-highlight-command-resets-previously-declared-highlights
 hi NewLineWin ctermfg=248 guifg=#999999
 match NewLineWin /\r\n/
-hi WhiteSpaceChar ctermfg=252 guifg=#999999
-2match WhiteSpaceChar / /
+
+" Break CursorColumn line
+" hi WhiteSpaceChar ctermfg=252 guifg=#999999
+" 2match WhiteSpaceChar / /
+
 " https://stackoverflow.com/questions/24232354/vim-set-color-for-listchars-tabs-and-spaces
-hi Whitespace ctermfg=DarkGray guifg=DarkGray
-match Whitespace /\s/
+
+" Made indent line thick
+" hi Whitespace ctermfg=DarkGray guifg=DarkGray
+" hi Whitespace ctermfg=NONE guifg=NONE cterm=NONE gui=NONE term=NONE
+" match Whitespace /\s/
+
 highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
 
 " vim-ShowTrailingWhitespace. works under pure terminal emulator without window managers
 " highlight ShowTrailingWhitespace ctermbg=Red guibg=Red
 highlight ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
-
 highlight SpecialKey ctermfg=NONE guifg=NONE
 
 " https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
 " https://jonasjacek.github.io/colors/
-hi Cursor guifg=bg guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi Cursor guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi Cursor2 guifg=red guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi Comment guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 
 " "~" vertically under the line numbers
 
-
 " https://newbedev.com/highlighting-the-current-line-number-in-vim
 hi clear CursorLine
-silent! execute ':hi CursorColumn'. g:hl_insert_leave
-silent! execute ':hi CursorLine'  . g:hl_insert_leave_invert
-silent! execute ':hi ColorColumn' . g:hl_insert_leave_invert
+hi clear CursorColumn
+hi clear lCursor
+
+function! s:cursor_on()
+    " https://vi.stackexchange.com/questions/666/how-to-add-indentation-guides-lines
+    " set cursorline
+    " set cursorcolumn
+
+    " Make indent line thick
+    " highlight clear
+    " syntax reset
+    " silent! execute 'colorscheme ' . g:scheme_name
+
+    hi clear CursorLine
+    hi clear CursorColumn
+    hi clear lCursor
+
+    " Wrong highlight it or clear it both make indent line thick
+    " hi clear Whitespace
+    " Wrong highlight it might break CursorColumn line
+    hi clear WhiteSpaceChar
+
+    " highlight ExtraWhitespace ctermbg=red guibg=red
+    " match ExtraWhitespace /\s\+$/
+    " hi clear ExtraWhitespace
+    " highlight ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
+
+    " highlight SpecialKey ctermfg=NONE guifg=NONE
+    " silent! execute ':hi CursorColumn' . g:hl_normal
+    silent! execute ':hi CursorColumn' . g:hl_normal_column
+    " hi CursorColumn ctermbg=red  guibg=red
+    " silent! execute ':hi CursorColumn' . g:hl_normal_inverse
+    " silent! execute ':hi CursorColumn' . g:hl_normal_line
+
+    silent! execute ':hi CursorLine'   . g:hl_normal_line
+    " silent! execute ':hi CursorLine'   . g:hl_normal_column
+    " silent! execute ':hi CursorLine'   . g:hl_normal_inverse
+
+    silent! execute ':hi lCursor'      . g:hl_normal_inverse
+
+    " https://vim.fandom.com/wiki/Highlight_current_line
+    " nnoremap <leader>c :set cursorline! cursorcolumn!<cr>
+
+    " Only show the cursor line in the active buffer.
+    " setlocal cursorline
+    setlocal cursorline | setlocal cursorcolumn
+
+    " Copied from key.vim
+    " If the following write_generic() doesn't have if statement, it will make
+    " long latency when switching to other windows from init.vim
+    " if "" == &buftype && 0 != &modified
+    "     silent! call boot#write_generic()
+    " endif
+    " syntax on
+    :call s:refresh()
+endfunction
+
+function! s:cursor_off()
+    hi clear CursorLine
+    hi clear CursorColumn
+    hi clear lCursor
+    " set nocursorline
+    " set nocursorcolumn
+    setlocal nocursorline | setlocal nocursorcolumn
+    " syntax on
+    :call s:refresh()
+endfunction
+
+augroup cursor_line
+    au!
+    " au VimEnter,WinEnter,BufWinEnter * setlocal cursorline | setlocal cursorcolumn
+    au WinEnter * setlocal cursorline | setlocal cursorcolumn
+    au WinLeave * setlocal nocursorline | setlocal nocursorcolumn
+augroup END
+
+if exists('g:_highlight_cursor_line_column')
+    call s:cursor_on()
+else
+    call s:cursor_off()
+endif
+
+" This operation will erase Visual settings, including selection highlight
+hi clear Visual
+" silent! execute ':hi Visual'. g:hl_normal_inverse
+
+" silent! execute ':hi Visual ctermbg=Blue ctermfg=NONE guifg=NONE guibg=Blue
+"     \ term=inverse cterm=inverse gui=inverse'
+
+silent! execute ':hi Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=NONE
+    \ term=inverse cterm=inverse gui=inverse'
+
+" silent! execute ':hi Visual ctermbg=4 ctermfg=NONE guifg=NONE guibg=Blue
+"     \ term=bold cterm=bold gui=bold'
+
+silent! execute ':hi ColorColumn ctermbg=' . g:gui_fg_normal . ' ctermfg=NONE guifg=NONE
+    \ guibg=' . g:gui_fg_normal . " term=NONE cterm=NONE gui=NONE'
 
 " That command should set the color of non text characters to be the same as the background color.
 " hi NonText guifg=bg
 " highlight NonText ctermfg=7 guifg=gray
-silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm .
+    \ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
 
-highlight CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+highlight CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=white
+    \ cterm=NONE gui=NONE term=NONE
 
 " hi VertSplit guibg=fg guifg=bg
 " hi! VertSplit guifg=black guibg=black ctermfg=black ctermbg=black
@@ -2077,86 +2807,147 @@ highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE cterm=NONE
 
 " hi LineNr guibg=fg
 " highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
-silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
+silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' .
+    \ 'gray' . ' guibg=NONE'
+
 
 if exists("g:_use_terminal_transparent")
+
     " :help highlight-groups
-    " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000 gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
-    " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE cterm=NONE term=NONE
-    highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE cterm=NONE term=NONE
-endif
 
-if exists("g:_use_terminal_transparent")
+    " :highlight Normal ctermfg=grey ctermbg=darkgrey guifg=white guibg=#000000
+    " \ gui=NONE ctermfg=NONE ctermbg=black cterm=NONE term=NONE
 
-    " must be before setting your colorscheme
+    " :highlight Normal guifg=fg guibg=bg ctermfg=NONE ctermbg=2 gui=NONE
+    " \ cterm=NONE term=NONE
+
+    " highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE
+    "     \ cterm=NONE term=NONE
+    highlight Identifier ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
+    highlight Keyword ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
+    highlight Function ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
+    highlight Normal ctermbg=0 guibg=NONE
+
+    " Must be placed before the setting of your colorscheme? No
     if exists('g:_use_dynamic_color')
+        augroup cursor_theme_common
+            au!
+            " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
+            " Workaround for creating transparent bg
+            autocmd SourcePost *
+                \ highlight Normal ctermbg=0 guibg=NONE
+                \ | silent! execute 'highlight LineNr ctermfg=' . '3' .
+                \ ' ctermbg=NONE guifg=' . 'Gray' . ' guibg=NONE'
+                \ | highlight SignColumn ctermbg=NONE guibg=NONE
+                \ | highlight FoldColumn ctermbg=NONE guibg=NONE
+
+        augroup end
+
         augroup nosplit
             au!
-            autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+            autocmd ColorScheme,SourcePost * highlight VertSplit ctermbg=NONE
+                \ ctermfg=NONE guibg=NONE guifg=NONE
                 \ | highlight foldcolumn ctermbg=NONE guibg=NONE
         augroup END
+
         augroup nontext_eara
             au!
             autocmd ColorScheme,SourcePost *
-                \ silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+                \ silent! execute 'highlight NonText ctermfg=' .
+                \ g:nontext_fg_cterm . ' ctermbg=NONE guifg=' . g:nontext_fg_gui .
+                \ ' guibg=NONE'
         augroup end
 
-        augroup CLClear
+        augroup CLNRSet
             au!
-            autocmd ColorScheme * highlight clear CursorLine
-            autocmd ColorScheme * silent! execute ':hi CursorLine' . g:hl_insert_leave_invert
+            autocmd ColorScheme * hi CursorLineNr ctermbg=NONE ctermfg=15
+                \ guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
+        augroup END
+
+        if exists('g:_highlight_cursor_line_column')
+            " Reference
+            " augroup CLClear
+            "     au!
+            "     autocmd ColorScheme * highlight clear CursorLine
+            "         \ silent! execute ':hi CursorLine' . g:hl_normal_inverse
+            " augroup END
+
+            " Can not highlight selection
+            augroup cursor_theme
+                au!
+
+                " Change Color when entering Insert Mode
+                " autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,ColorScheme *
+                autocmd InsertEnter * call s:cursor_off()
+                autocmd ModeChanged * if mode() =~? '\v(v|V)'
+                    \ | call s:cursor_off() | endif
+
+                " autocmd InsertEnter * if mode() =~? 'n'
+                "     \ | highlight clear CursorColumn
+                "     \ | silent! execute ':hi CursorColumn' . g:hl_insert_inverse
+                "     \ | highlight clear Visual
+                "     \ i silent! execute ':hi Visual'. g:hl_insert_inverse
+                "     \ | highlight clear lCursor
+                "     \ | silent! execute ':hi lCursor' . g:hl_insert_inverse
+                "     \ | highlight clear CursorLine
+                "     \ | silent! execute ':hi CursorLine' . g:hl_insert_inverse
+                "     \ | endif
+
+                " autocmd InsertLeave *
+                " autocmd InsertLeave,VimEnter,WinEnter,BufEnter,SourcePost,ColorScheme *
+                autocmd InsertLeave,WinEnter,SourcePost,ColorScheme,ModeChanged
+                    \ * if mode() =~? 'n' | call s:cursor_on() | endif
+
+                    " \ | set cursorline
+                    " \ | set cursorcolumn
+                    " \ | highlight clear CursorColumn
+                    " \ | silent! execute ':hi CursorColumn' . g:hl_normal_inverse
+                    " \ | highlight clear lCursor
+                    " \ | silent! execute ':hi lCursor' . g:hl_normal_inverse
+                    " \ | highlight clear CursorLine
+                    " \ | silent! execute ':hi CursorLine' . g:hl_normal_inverse
+                    " \ | endif
+                " This operation will erase Visual settings, including selection highlight
+                    " \ | highlight clear Visual
+                    " \ i silent! execute ':hi Visual'. g:hl_normal_inverse
+
+            augroup END
+        else
+            augroup cursor_theme
+                au!
+            augroup END
+
+        endif
+
+        augroup buffer_ending
+            au!
+            autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE
+                \ ctermbg=NONE guifg=NONE guibg=NONE
+        augroup end
+    else
+        augroup cursor_theme_common
+            au!
+        augroup end
+
+        augroup nosplit
+            au!
+        augroup END
+
+        augroup nontext_eara
+            au!
         augroup END
 
         augroup CLNRSet
             au!
-            autocmd ColorScheme * hi CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=white cterm=NONE gui=NONE term=NONE
         augroup END
 
-        augroup cursor_theme
-            au!
-
-            " Change Color when entering Insert Mode
-            " autocmd InsertEnter,VimEnter,WinEnter,BufEnter,BufWritePost,Colorscheme *
-            autocmd InsertEnter *
-                \ silent! execute ':hi CursorColumn' . g:hl_insert_enter
-                \ | silent! execute ':hi ColorColumn' . g:hl_insert_enter_invert
-                \ | highlight clear CursorLine
-                \ | silent! execute ':hi CursorLine' . g:hl_insert_enter_invert
-
-            autocmd InsertLeave,VimEnter,WinEnter,BufEnter,SourcePost,Colorscheme *
-                \ silent! execute ':hi CursorColumn' . g:hl_insert_leave
-                \ | silent! execute ':hi ColorColumn' . g:hl_insert_leave_invert
-                \ | highlight clear CursorLine
-                \ | silent! execute ':hi CursorLine' . g:hl_insert_leave_invert
-
-            " https://stackoverflow.com/questions/37712730/set-vim-background-transparent
-            " Workaround for creating transparent bg
-            autocmd SourcePost *
-                \ highlight Normal ctermbg=NONE guibg=NONE
-                \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
-                \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
-
-        augroup END
         augroup buffer_ending
             au!
-            autocmd ColorScheme,SourcePost * highlight EndOfBuffer ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
         augroup end
-    endif
-else
-    if exists('g:_use_dynamic_color')
-        augroup cursor_theme
-            au!
-            autocmd SourcePost *
-                \ highlight Normal ctermbg=0 guibg=NONE
-                \ | silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' . 'gray' . ' guibg=NONE'
-                \ | highlight SignColumn ctermbg=NONE guibg=NONE
-                \ | highlight foldcolumn ctermbg=NONE guibg=NONE
 
-        augroup end
     endif
+
 endif
-
 
 
 " https://stackoverflow.com/questions/2531904/how-do-i-increase-the-spacing-of-the-line-number-margin-in-vim
@@ -2168,6 +2959,7 @@ augroup allways_show_line_number | au!
     au BufWinEnter * set number relativenumber | set foldcolumn=0
     " au BufWinEnter * set number | set foldcolumn=0
 augroup END
+
 " hi foldcolumn guibg=fg
 highlight foldcolumn ctermbg=NONE guibg=NONE
 set nofoldenable    " disable folding
@@ -2181,7 +2973,9 @@ set nofoldenable    " disable folding
 " https://stackoverflow.com/questions/9001337/vim-split-bar-styling
 " Set a space followed '\ ' to the fillchars->vert option
 " From this following expressions, you do not neeed tralling spaces exposed to vim
+
 silent! execute 'set fillchars =vert:\ '
+
 " let &fillchars = 'vert:\ '
 
 " https://vi.stackexchange.com/questions/28994/can-i-change-the-ugly-indicator-after-eol
@@ -2191,92 +2985,15 @@ let &fillchars ..=',eob: '
 set linespace =0
 
 
+" highlight clear
+" syntax reset
+" call s:set_color_scheme()
 
 
 
 
 
 
-
-" CPU busy on busybox
-" let schemes = boot#chomp(system(shellescape("[$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }'
-"     \ <<<$(vpm query -f vim-colorschemes) | sed 's/.vim/,/g')]")))
-
-
-" https://github.com/preservim/vim-colors-pencil
-" https://github.com/chriskempson/base16
-" https://github.com/chriskempson/base16-vim/tree/master/colors
-
-" color_scheme/color_name/g:colors_name
-
-" let g:scheme_name = "unsuck-flat"
-" let g:scheme_name = "sierra"
-" let g:scheme_name = "base16-default-dark"
-
-
-" let g:scheme_name = "base16-flat"
-" let g:scheme_name = "badwolf"
-" let g:scheme_name = "tender"
-" let g:scheme_name = "carbonized-dark"
-
-" let g:scheme_name = "onehalfdark"
-" let g:scheme_name = "onehalflight"
-" let g:scheme_name = "tabula"
-
-
-" let g:scheme_name = "mountaineer"
-" let g:scheme_name = "hybrid_reverse"
-" let g:scheme_name = "happy_hacking"
-" let g:scheme_name = "orbital"
-" let g:scheme_name = "parsec"
-" let g:scheme_name = "termschool"
-
-
-" let g:scheme_name = "minimalist"
-" let g:scheme_name = "meta5"
-" let g:scheme_name = "archery"
-" let g:scheme_name = "afterglow"
-" let g:scheme_name = "nord"
-" let g:scheme_name = "jellybeans"
-
-" Recommend (later is better)
-" let g:scheme_name = "base16-tomorrow-night"
-" let g:scheme_name = "sunbather"
-" let g:scheme_name = "fogbell"
-" let g:scheme_name = "pencil"
-" Nice on tty
-let g:scheme_name = "two-firewatch"
-let g:two_firewatch_italics = 1
-
-" let g:scheme_name = "lucid"
-
-
-if "pencil" == g:scheme_name
-    " https://www.iditect.com/how-to/53501604.html
-    let g:pencil_termtrans          = 1
-    let g:pencil_termcolors         = 256
-    let g:pencil_terminal_italics   = 1
-    let g:pencil_spell_undercurl    = 1     " 0=underline,  1=undercurl (def)
-    let g:pencil_gutter_color       = 1     " 0=mono (def), 1=color
-    let g:pencil_neutral_code_bg    = 1     " 0=gray (def), 1=normal
-    let g:pencil_neutral_headings   = 1     " 0=blue (def), 1=normal
-    let g:pencil_higher_contrast_ui = 0     " 0=low  (def), 1=high
-endif
-
-" function! s:sdjust_solarized()
-"     hi! EndOfBuffer ctermbg=bg ctermfg=bg guibg=bg guifg=bg
-" endfunction
-"
-" augroup sierra
-"     autocmd!
-"     autocmd ColorScheme sierra call s:sdjust_solarized()
-" augroup END
-
-
-silent! execute 'colorscheme ' . g:scheme_name
-
-" set background=light
-set background=dark
 
 if exists('g:_use_gitgutter')
     " vim-gitgutter
@@ -2481,9 +3198,10 @@ set lcs=extends:>,precedes:<,nbsp:%,tab:>~
 " set list lcs=tab:\|\
 
 " Toggle visually showing all whitespace characters.
-noremap  <F7> :set list!<cr>
-inoremap <F7> <C-o>:set list!<cr>
-cnoremap <F7> <C-c>:set list!<cr>
+" noremap  <F7> :set list!<cr>
+noremap  <F7> :call <SID>refresh()<cr>
+inoremap <F7> <C-o>:call <SID>refresh()<cr>
+cnoremap <F7> <C-c>:call <SID>refresh()<cr>
 " https://vi.stackexchange.com/questions/454/whats-the-simplest-way-to-strip-trailing-whitespace-from-all-lines-in-a-file
 " Remove all trailing whitespace by pressing F5
 nnoremap <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
@@ -2504,6 +3222,7 @@ function! s:quickfix_toggle()
     endfor
 
     copen
+
 endfunction
 
 " nnoremap <silent> <leader>c :call <sid>quickfix_toggle()<cr>
@@ -2526,20 +3245,28 @@ nnoremap <F10> :call <sid>quickfix_toggle()<cr>
 " " Cancel the complete menu item like CTRL+e would.
 " inoremap <expr> <Left> pumvisible() ? "<C-e>" : "<Left>"
 
+if exists("g:_use_mkdx")
 
-if maparg('```', 'i', 'false') !~? '```<CR>```<C-o>k<C-o>A'
-    " if maparg('```', 'i', 'false') !~? '```<Enter>```kA'
-    " https://github.com/SidOfc/mkdx
-    " :h mkdx-mapping-insert-fenced-code-block
-    inoremap <buffer><silent><unique> ``` ```<Enter>```kA
+    if maparg('```', 'i', 'false') !~? '```<CR>```<C-o>k<C-o>A'
+        " if maparg('```', 'i', 'false') !~? '```<Enter>```kA'
+        " https://github.com/SidOfc/mkdx
+        " :h mkdx-mapping-insert-fenced-code-block
+        inoremap <buffer><silent><unique> ``` ```<Enter>```kA
+    endif
+
+    if maparg('~~~', 'i', 'false') !~? '\~\~\~<CR>\~\~\~<C-o>k<C-o>A'
+        inoremap <buffer><silent><unique> ~~~ ~~~<Enter>~~~kA
+    endif
+
+    " :h mkdx-setting-tokens-fence
+    let g:mkdx#settings = { 'tokens': { 'fence': '' } }
+    let g:mkdx#settings = { 'highlight': { 'enable': 1 },
+        \ 'enter': { 'shift': 1 },
+        \ 'links': { 'external': { 'enable': 1 } },
+        \ 'toc': { 'text': 'Table of Contents', 'update_on_write': 1 },
+        \ 'fold': { 'enable': 1 } }
+
 endif
-
-if maparg('~~~', 'i', 'false') !~? '\~\~\~<CR>\~\~\~<C-o>k<C-o>A'
-    inoremap <buffer><silent><unique> ~~~ ~~~<Enter>~~~kA
-endif
-
-" :h mkdx-setting-tokens-fence
-let g:mkdx#settings = { 'tokens': { 'fence': '' } }
 
 " "disable arrows key ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 " "disable arrows key ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -2568,14 +3295,17 @@ augroup guard
     autocmd FileType make setlocal noexpandtab
     autocmd FileType python setlocal noexpandtab
 
-    au VimEnter,WinEnter,BufWinEnter * setlocal expandtab
+    " au BufEnter,WinEnter,BufWinEnter * setlocal expandtab
+    au BufReadPost * setlocal expandtab
     " verbose setlocal ts? sts? et? sw?
 augroup END
 
 augroup stop_auto_indenting
     au!
     " https://vim.fandom.com/wiki/How_to_stop_auto_indenting
-    autocmd FileType * if 1 == &modifiable | setlocal formatoptions-=c formatoptions-=r formatoptions-=o | endif
+    autocmd FileType * if 1 == &modifiable
+        \ | setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+        \ | endif
 augroup END
 
 
@@ -2838,13 +3568,17 @@ set clipboard+=unnamedplus
 if exists("g:_use_wl_clipboard")
     if has('nvim')
         xnoremap "+y y:call system(['wl-copy', '@"'])<cr>
-        nnoremap "+p :let @"=substitute(system(['wl-paste', '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
-        nnoremap "*p :let @"=substitute(system(['wl-paste', '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "+p :let @"=substitute(system(['wl-paste',
+            \ '--no-newline']), '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "*p :let @"=substitute(system(['wl-paste',
+            \ '--no-newline', '--primary']), '<C-v><C-m>', '', 'g')<cr>p
     else
         " https://www.reddit.com/r/Fedora/comments/ax9p9t/vim_and_system_clipboard_under_wayland/
         xnoremap "+y y:call system("wl-copy", @")<cr>
-        nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
-        nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"), '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "+p :let @"=substitute(system("wl-paste --no-newline"),
+            \ '<C-v><C-m>', '', 'g')<cr>p
+        nnoremap "*p :let @"=substitute(system("wl-paste --no-newline --primary"),
+            \ '<C-v><C-m>', '', 'g')<cr>p
     endif
 endif
 
@@ -2901,8 +3635,8 @@ set autoread   " doesn't work
 " " Triger `autoread` when files changes on disk
 " " https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
 " " https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
-"   autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
-"           \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
+" autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
+"     \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
 "
 " " Notification after file change
 " " https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
@@ -2918,6 +3652,7 @@ augroup auto_read
     " :checktime
     au FocusGained,BufEnter *
         \ if mode() == 'n' && getcmdwintype() == '' | checktime | endif
+
     au FocusGained,BufEnter * :silent! !
 augroup END
 
@@ -3015,6 +3750,9 @@ set nomore
 set cmdheight=1
 " " Give more space for displaying messages.
 
+" "Press ENTER or type command to continue"
+" Append the folowing line
+" call feedkeys("\<CR>")
 " set shortmess+=O
 " set shortmess=a
 " https://vim.fandom.com/wiki/Avoiding_the_%22Hit_ENTER_to_continue%22_prompts
@@ -3100,6 +3838,7 @@ set ttimeoutlen=1
 set ttyfast
 set virtualedit=block
 set whichwrap=b,s,<,>
+set whichwrap+=<,>,h,l,[,]
 set wildmenu
 set wildmode=full
 
@@ -3127,7 +3866,8 @@ if has("autocmd")
     augroup vimrcEx
         au!
         " autocmd FileType text setlocal textwidth=78
-        autocmd FileType text setlocal textwidth=120 | set colorcolumn=""
+        " autocmd FileType text setlocal textwidth=120 | set colorcolumn=""
+        " autocmd FileType text setlocal textwidth=120 | let &colorcolumn = &textwidth + 1
         " jumps to the last known position in a file
         autocmd BufReadPost * ++nested
             \ if line("'\"") > 1 && line("'\"") <= line("$") |
@@ -3165,9 +3905,12 @@ set smarttab
 " https://vi.stackexchange.com/questions/18798/automatic-wraping-to-new-line
 set nowrap
 " set linebreak
-set textwidth=0
+" set textwidth=0
+set textwidth=120
 " set wrapmargin=1
+set wrapmargin=0
 set formatoptions=tcqrn1
+" set formatoptions=cqrn1
 " set formatoptions=tcqrn
 
 " https://vi.stackexchange.com/questions/10572/why-is-line-continuation-is-indented-with-12-spaces-in-vimscript
@@ -3205,14 +3948,14 @@ nnoremap <leader>ew :e <C-R>=expand("%:.:h") . "/"<cr>
 
 " https://sunaku.github.io/vim-256color-bce.html
 " https://vi.stackexchange.com/questions/238/tmux-is-changing-part-of-the-background-in-vim
-if &term =~ '256color'
+" if &term =~ '256color'
+if exists("$TMUX")
     " disable Background Color Erase (BCE) so that color schemes
     " render properly when inside 256-color tmux and GNU screen.
     " see also http://snk.tuxfamily.org/log/vim-256color-bce.html
     set t_ut=
 endif
 
-set ttyfast
 
 
 " ~/.vimrc
@@ -3248,7 +3991,6 @@ endif
 " https://github.com/alacritty/alacritty/issues/2931
 " https://github.com/alacritty/alacritty/issues/1142
 if ! has('nvim')
-
     if has("mouse_sgr")
         set ttymouse=sgr
     else
@@ -3259,6 +4001,11 @@ endif
 " if ! has('nvim')
 "     set term=xterm-256color
 "     " set term=alacritty
+" endif
+
+" if exists("$TMUX")
+"     " E518: Unknown option: term=screen-256color
+"     set term=screen-256color
 " endif
 
 if has('mouse')
@@ -3309,7 +4056,9 @@ nnoremap <LeftRelease> M`<LeftRelease>``
 "     if &modified
 "         let save_cursor = getpos(".")
 "         let n = min([250, line("$")])
-"         :silent keepjumps exe '1,' . n . 's/^\(.*L\)ast.modified.*:.*/\1ast modified: ' . strftime('%Y-%m-%d %H:%M:%S %z (PST)') . '/e'
+"         :silent keepjumps exe '1,' . n
+"             \ . 's/^\(.*L\)ast.modified.*:.*/\1ast modified: '
+"             \ . strftime('%Y-%m-%d %H:%M:%S %z (PST)') . '/e'
 "         call histdel('search', -1)
 "         call setpos('.', save_cursor)
 "     endif
@@ -3360,9 +4109,9 @@ nnoremap <LeftRelease> M`<LeftRelease>``
 " https://vim.fandom.com/wiki/Configuring_the_cursor
 " if &term =~ "xterm\\|rxvt\\|alacritty\\|foot"
 "     " use an orange cursor in insert mode
-"     let &t_SI = "\<Esc>]12;orange\x7"
+"     let &t_SI="\<Esc>]12;orange\x7"
 "     " use a red cursor otherwise
-"     let &t_EI = "\<Esc>]12;red\x7"
+"     let &t_EI="\<Esc>]12;red\x7"
 "     silent !echo -ne "\033]12;red\007"
 "     " reset cursor when vim exits
 "     autocmd VimLeave * silent !echo -ne "\033]112\007"
@@ -3373,61 +4122,141 @@ nnoremap <LeftRelease> M`<LeftRelease>``
 " infocmp
 " https://vimrcfu.com/snippet/15
 " Change cursor style when entering INSERT mode (works in tmux!)
-" if exists('$TMUX')
-"     let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-"     let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
-"     let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
-"     " https://github.com/vimpostor/vim-tpipeline
-"     let &t_fe = "\<Esc>[?1004h"
-"     let &t_fd = "\<Esc>[?1004l"
-" else
-"     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-"     let &t_SR = "\<Esc>]50;CursorShape=2\x7"
-"     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+if exists('$TMUX')
+    let &t_SI="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_SR="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
+    let &t_EI="\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    " https://github.com/vimpostor/vim-tpipeline
+    let &t_fe="\<Esc>[?1004h"
+    let &t_fd="\<Esc>[?1004l"
+else
+    let &t_SI="\<Esc>]50;CursorShape=1\x7"
+    let &t_SR="\<Esc>]50;CursorShape=2\x7"
+    let &t_EI="\<Esc>]50;CursorShape=0\x7"
+endif
+
+" if ! has('nvim')
+    " let &t_ve="\e[?25h"
+    " let &t_ve="\e[?25h\e[?16;143;255c"
+    let &t_ve="\e[?6c"
+    let &t_vi="\e[?25l"
+    let &t_SI="\e[?0c"
+    let &t_EI="\e[?16;143;255c"
+
+    " if ! has('nvim')
+    "     let &t_SI="\<esc>[5 q"
+    "     let &t_SR="\<esc>[5 q"
+    "     let &t_EI="\<esc>[2 q"
+    "     " let &t_EI="\<esc>[1 q"
+    " endif
+
+    if $TERM == "linux"
+        set t_ab=[4%p1%dm
+        set t_af=[3%p1%dm
+    endif
 " endif
-
-" https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
-augroup blink_cursor
-    au!
-    " following code will mess your vim
-    " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
-    " autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
-    " autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
-
-    autocmd InsertEnter * let &t_ve= "\e[?25h\e[?0c"
-    autocmd WinEnter,InsertLeave,CmdlineLeave * let &t_ve= "\e[?25h\e[?16;143;255c"
-
-    " 1/2 block 3/4 uderscore 5/6 pipe bar
-    " blinky block
-    " autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
-    " autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
-augroup END
 
 if has('nvim')
     " set guicursor=n-v-c:bar-Cursor/lCursor,i-ci-ve:ver25-CUrsuor2/lCursor,r-cr:hor50,o:hor50
     " nvim: help guicursor
-    set guicursor=n-v-c:bar,i-ci-ve:ver25,r-cr:hor20,o:hor50
-        \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
-        \,sm:bar-blinkwait175-blinkoff150-blinkon175
+
+    set guicursor=n-v-c-sm:bar,i-ci-ve:ver25-Cursor,r-cr-o:hor20
+"     set guicursor=n-v-c:bar,i-ci-ve:ver25,r-cr:hor20,o:hor50
+" \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+" \,sm:bar-blinkwait175-blinkoff150-blinkon175
+
+    " set guicursor=
     let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+    let $NVIM_TUI_ENABLE_TRUE_COLOR = 1
+
+    augroup blink_cursor
+        au!
+        autocmd InsertEnter,CmdlineEnter *
+            \ set guicursor=i-ci:ver100-iCursor-blinkwait300-blinkon200-blinkoff150
+        autocmd WinEnter,InsertLeave,CmdlineLeave *
+            \ set guicursor=n-v-c-sm:bar,i-ci-ve:ver25-Cursor,r-cr-o:hor20
+
+        " 1/2 block 3/4 uderscore 5/6 pipe bar
+        " blinky block
+        " autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
+        " autocmd VimEnter * silent! execute(! echo -ne '\033[ q')
+        " autocmd VimEnter * silent! execute(! echo -ne '\033[34l')
+        " autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
+        " autocmd VimLeave * silent! execute(! echo -ne '\033[ q')
+        " autocmd VimLeave * silent! execute(! echo -ne '\033[34l')
+
+        " following code will mess your vim
+        " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
+        " autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
+        " autocmd InsertEnter * silent! execute "! echo -en \\033[ q"
+        " autocmd InsertEnter * silent! execute "! echo -en \\033[34l"
+        " autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+        " autocmd InsertLeave * silent! execute "! echo -en \\033[ q"
+        " autocmd InsertLeave * silent! execute "! echo -en \\033[34l"
+
+        au VimEnter,VimResume *
+            \ set guicursor=n-v-c-sm:bar,i-ci-ve:ver25-Cursor,r-cr-o:hor20
+"             \ set guicursor=n-v-c:bar,i-ci-ve:ver25,r-cr:hor20,o:hor50
+" \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+" \,sm:bar-blinkwait175-blinkoff150-blinkon175
+
+        " au VimLeave,VimSuspend * set guicursor=a:bar-blinkon0
+        " au VimLeave,VimSuspend * set guicursor=
+        au VimLeave,VimSuspend * set guicursor=a:hor20
+        " au VimLeave,VimSuspend * set guicursor=n:bar-Cursor
+        " au VimLeave,VimSuspend * set guicursor="disable"
+
+    augroup END
+
+else
+    " https://unix.stackexchange.com/questions/433273/changing-cursor-style-based-on-mode-in-both-zsh-and-vim
+    augroup blink_cursor
+        au!
+        " vim needs this
+        " half height cursor blink
+        " autocmd InsertEnter * let &t_ve= "\e[?25h\e[?c"
+        autocmd InsertEnter,CmdlineEnter * let &t_ve="\e[?25h\e[?6c"
+        autocmd WinEnter,InsertLeave,CmdlineLeave * let &t_ve="\e[?25h\e[?16;143;255c"
+
+        " 1/2 block 3/4 uderscore 5/6 pipe bar
+        " blinky block
+        " autocmd VimEnter * silent! execute "! echo -ne '\e[1 q'"
+        " autocmd VimLeave * silent! execute "! echo -ne '\e[3 q'"
+
+        " following code will mess your vim
+        " https://vi.stackexchange.com/questions/9131/i-cant-switch-to-cursor-in-insert-mode
+        " autocmd InsertEnter * silent! execute "! echo -en \<esc>[5 q"
+        " autocmd InsertLeave * silent! execute "! echo -en \<esc>[2 q"
+
+    augroup END
+
 endif
 
-" let &t_ve= "\e[?25h"
-" let &t_ve= "\e[?25h\e[?16;143;255c"
-let &t_ve= "\e[?25h"
-let &t_vi= "\e[?25l"
-let &t_SI= "\e[?0c"
-let &t_EI= "\e[?16;143;255c"
+" https://stackoverflow.com/questions/31595411/how-to-clear-the-screen-after-exit-vim
+augroup clear_terminal | au!
+    " if has('nvim')
+    "     " au VimLeave * !clear | :call system(['printf "$cursor_code" > $(tty)'])
+    "     " au VimLeave * call nvim_cursor_set_shape("vertical-bar") | call system(['clear;', 'printf "$cursor_code" > $(tty)'])
+    "     " au VimLeave * all system(['clear', ';', 'printf %s "$cursor_code" > $(tty)'])
 
-if ! has('nvim')
-    let &t_SI = "\<esc>[5 q"
-    let &t_SR = "\<esc>[5 q"
-    let &t_EI = "\<esc>[2 q"
-    " let &t_EI = "\<esc>[1 q"
-endif
+    "     " au VimLeave * all system(['printf %s "$cursor_code" > $(tty)', 'reset'])
+    "     au VimLeave * !clear | !reset
+    "     " au VimLeave * !eval 'printf "$cursor_code" > $(tty)'
+    " else
+    "     " au VimLeave * all system('printf %s "$cursor_code" > $(tty); reset')
+    "     au VimLeave * !clear | !reset
+    " endif
+    " Change to underline cursor
+    " au VimLeave * !reset
+    " au VimLeave * !reset; . ${HOME}/.profile
+    " au VimLeave * !printf '\033[34l' | !. ${HOME}/.ashrc
+    " au VimLeave * !printf '\033[34l'
+    " au VimLeave * !printf '\033[ q'
+    " au VimLeave * !printf '\033[34l'
+augroup END
 
 
-" "cursor hape and blinking ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+" "cursor shape and blinking ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 
 
 
@@ -3440,7 +4269,8 @@ endif
 " cscope - "find usages"
 if has("fzf")
     function! s:cscope(option, query) range
-        let color = '{ x = $1; $1 = ""; z = $3; $3 = ""; printf "\033[34m%s\033[0m:\033[31m%s\033[0m\011\033[37m%s\033[0m\n", x,z,$0; }'
+        let color = '{ x = $1; $1 = ""; z = $3; $3 = "";
+            \ printf "\033[34m%s\033[0m:\033[31m%s\033[0m\011\033[37m%s\033[0m\n", x,z,$0; }'
         let opts = {
             \ 'source':  "cscope -dL" . a:option . " " . a:query . " | awk '" . color . "'",
             \ 'options': ['--ansi', '--prompt', '> ',
@@ -3479,25 +4309,6 @@ function! s:cscope_state(updating)
     execute "redrawstatus!"
 endfunction
 
-function! s:session_state(updating)
-    if a:updating
-        " packadd cscope_auto
-        " augroup cscope_auto | au!
-        "     autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
-        " augroup END
-        let g:statusline_session_flag = "S"
-    else
-        " augroup cscope_auto | au!
-        " augroup END
-        let g:statusline_session_flag = ""
-    endif
-    execute "redrawstatus!"
-endfunction
-
-augroup session_auto
-    au!
-    autocmd VimEnter * :call session_auto#setup(function("s:session_state"))
-augroup END
 
 if exists('g:use_ale')
     " ALE
@@ -3507,7 +4318,8 @@ if exists('g:use_ale')
     let g:ale_sign_column_always       = 1
     let g:ale_sign_warning             = 'W'
     let g:ale_sign_error               = 'E'
-    let g:ale_python_flake8_args       = '--ignore=C,E111,E114,E22,E201,E241,E265,E272,E3,E501,E731'
+    let g:ale_python_flake8_args
+        \  = '--ignore=C,E111,E114,E22,E201,E241,E265,E272,E3,E501,E731'
     let g:ale_python_pylint_executable = ''
 
 
@@ -3520,7 +4332,8 @@ if exists('g:use_ale')
 
     augroup UnALE
         autocmd!
-        autocmd TextChanged,TextChangedI,InsertEnter,InsertLeave * call ALEClearBuffer(bufnr('%'))
+        autocmd TextChanged,TextChangedI,InsertEnter,InsertLeave
+            \ * call ALEClearBuffer(bufnr('%'))
     augroup END
 endif
 
@@ -3808,7 +4621,8 @@ if exists('g:use_coc')
     command! -nargs=? Fold :call CocAction('fold', <f-args>)
 
     " Add `:OR` command for organize imports of the current buffer.
-    command! -nargs=0 OR   :call CocActionAsync('runCommand', 'editor.action.organizeImport')
+    command! -nargs=0 OR   :call CocActionAsync('runCommand',
+        \ 'editor.action.organizeImport')
 
     " " Add (Neo)Vim's native statusline support.
     " " NOTE: Please see `:h coc-status` for integrations with external plugins that
@@ -3848,25 +4662,30 @@ endif
 let g:vim_tags_auto_generate               = 1
 
 if has('nvim')
-    let g:vim_tags_ctags_binary                = boot#chomp(system(['which', 'ctags']))
+    let g:vim_tags_ctags_binary
+        \  = boot#chomp(system(['which', 'ctags']))
 else
-    let g:vim_tags_ctags_binary                = boot#chomp(system('which ctags'))
+    let g:vim_tags_ctags_binary
+        \  = boot#chomp(system('which ctags'))
 endif
 
-let g:vim_tags_project_tags_command        = "{CTAGS} -R {OPTIONS} {DIRECTORY} 2>/dev/null"
-let g:vim_tags_gems_tags_command           = "{CTAGS} -R {OPTIONS} `bundle show --paths` 2>/dev/null"
+let g:vim_tags_project_tags_command
+    \  = "{CTAGS} -R {OPTIONS} {DIRECTORY} 2>/dev/null"
+let g:vim_tags_gems_tags_command
+    \  = "{CTAGS} -R {OPTIONS} `bundle show --paths` 2>/dev/null"
 let g:vim_tags_use_vim_dispatch            = 0
 let g:vim_tags_use_language_field          = 1
-let g:vim_tags_ignore_files                = ['.gitignore', '.svnignore', '.cvsignore']
+let g:vim_tags_ignore_files
+    \  = ['.gitignore', '.svnignore', '.cvsignore']
 let g:vim_tags_ignore_file_comment_pattern = '^[#"]'
-let g:vim_tags_directories                 = [".git", ".hg", ".svn", ".bzr", "_darcs", "CVS"]
+let g:vim_tags_directories
+    \  = [".git", ".hg", ".svn", ".bzr", "_darcs", "CVS"]
 let g:vim_tags_main_file                   = 'tags'
 let g:vim_tags_extension                   = '.tags'
 " let g:vim_tags_cache_dir                   = expand($HOME)
 let g:vim_tags_cache_dir                   = g:cache_root
 let g:tagbar_left                          = 1
 let g:tagbar_expand                        = 1
-nmap <F2> :TagbarToggle<cr>
 
 " https://stackoverflow.com/questions/11975316/vim-ctags-tag-not-found
 " set tags=./tags,tags
@@ -3884,7 +4703,8 @@ function! s:windows_jump_retrieve(dir)
     let c = 0
     let wincount = winnr('$')
     " Find a writable buffer
-    while !empty(getbufvar(winbufnr(c + 1), "&buftype")) && c < wincount && &buftype != ''
+    while !empty(getbufvar(winbufnr(c + 1), "&buftype"))
+        \ && c < wincount && &buftype != ''
         let c = c + 1
     endwhile
     " set c as default buffer number
@@ -3892,7 +4712,8 @@ function! s:windows_jump_retrieve(dir)
     let jl = getjumplist()
     let jumplist = jl[0]
     let curjump  = jl[1]
-    let searchrange = a:dir > 0 ? range(curjump + 1, len(jumplist)) : range(curjump - 1, 0, -1)
+    let searchrange = a:dir > 0 ? range(curjump + 1, len(jumplist))
+        \ : range(curjump - 1, 0, -1)
     for i in searchrange
         if jumplist[i]["bufnr"] != bufnr('%')
             let buf_num = jumplist[i]["bufnr"]
@@ -3993,7 +4814,8 @@ let g:tslime_autoset_pane           = 1
 
 " [Redir.vim](https://gist.github.com/intuited/362802)
 " :Redir map
-command! -nargs=+ -complete=command Redir let s:reg = @@  <bar> redir @">  <bar> silent execute <q-args>
+command! -nargs=+ -complete=command Redir let s:reg = @@  <bar> redir @">
+    \  <bar> silent execute <q-args>
     \  <bar> redir END  <bar> new  <bar> pu  <bar> 1,2d_  <bar> let @@ = s:reg
 
 if exists('$TMUX')
@@ -4063,30 +4885,42 @@ if exists('$TMUX')
     augroup tmux-pane-border-format
         au!
         " https://github.com/tmux/tmux/issues/1852
-        " autocmd BufWinLeave * call system('tmux set-window-option -g pane-border-format "#{pane_index}
-        "     \ #(%!v:lua.WindLine.show(' . bufnr('#') . ',' . win_getid(bufwinnr(bufnr('#'))) . '))" && tmux refresh -S')
-        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter,BufNew,WinEnter,CursorHoldI,CursorHold *
+        " autocmd BufWinLeave * call system('tmux set-window-option
+        "     \ -g pane-border-format "#{pane_index}
+        "     \ #(%!v:lua.WindLine.show(' . bufnr('#') . ','
+        "     \ . win_getid(bufwinnr(bufnr('#'))) . '))" && tmux refresh -S')
+        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter
+        "     \,BufNew,WinEnter,CursorHoldI,CursorHold *
         "     \ call system('tmux set-window-option
         "     \ -g pane-border-format "#{pane_index} #(%!v:lua.WindLine.show(' . bufnr('%') .
         "     \ ',' . win_getid(bufwinnr(bufnr('%'))) . '))" && tmux refresh -S')
         "     " \ -g pane-border-format "#{pane_index} vim-' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
-        " " autocmd VimLeave * call system('tmux pane-border-format "#{pane_index} ' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] '"')
+        " " autocmd VimLeave * call system('tmux pane-border-format
+        " "     \ "#{pane_index} ' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] '"')
 
 
 
-        " autocmd BufWinLeave,WinLeave * silent! execute 'lua vim.g["tpipeline_statusline"] =
-        "     \ "%!v:lua.WindLine.show(' . bufnr('#') . ',' . win_getid(bufwinnr(bufnr('#'))) . ')"'
+        " autocmd BufWinLeave,WinLeave *
+        "     \ silent! execute 'lua vim.g["tpipeline_statusline"] =
+        "     \ "%!v:lua.WindLine.show(' . bufnr('#') . ','
+        "     \ . win_getid(bufwinnr(bufnr('#'))) . ')"'
 
         " " https://superuser.com/questions/517402/force-update-for-tmux-status-bar
-        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter,BufNew,WinEnter,CursorHoldI,CursorHold,FocusGained *
+        " autocmd VimEnter,BufNewFile,BufReadPost,BufEnter,BufWinEnter
+        "     \,BufNew,WinEnter,CursorHoldI,CursorHold,FocusGained *
         "     \ let &stl=&stl
-        "     \ | silent! execute 'lua vim.g["tpipeline_statusline"]= "%!v:lua.WindLine.show(' . bufnr('%') . ',' . win_getid(bufwinnr(bufnr('%'))) . ')"'
+        "     \ | silent! execute 'lua vim.g["tpipeline_statusline"]=
+        "     \ "%!v:lua.WindLine.show(' . bufnr('%') . ','
+        "     \ . win_getid(bufwinnr(bufnr('%'))) . ')"'
         "     \ | redrawstatus!
         "     \ | silent! exec '!tmux refresh-client -S'
         " " \ | silent! exec '!tmux refresh -S'
 
-        " autocmd VimLeave * call system('tmux rename-window ' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1])
-        " autocmd VimEnter,BufNewFile,BufReadPost * call system('tmux rename-window "vim-' . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
+        " autocmd VimLeave * call system('tmux rename-window '
+        "     \ . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1])
+        " autocmd VimEnter,BufNewFile,BufReadPost *
+        "     \ call system('tmux rename-window "vim-'
+        "     \ . split(substitute(getcwd(), $HOME, '~', ''), '/')[-1] . '"')
     augroup END
 
 endif | " exists('$TMUX')
@@ -4119,7 +4953,8 @@ if has('nvim')
     " Dictionary of buffer option names mapped to a list of option values that
     " indicates to the window picker that the buffer's window should not be
     " selectable.
-    let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 } " List of filenames that gets highlighted with NvimTreeSpecialFile
+    " List of filenames that gets highlighted with NvimTreeSpecialFile
+    let g:nvim_tree_special_files = { 'README.md': 1, 'Makefile': 1, 'MAKEFILE': 1 }
     let g:nvim_tree_show_icons = {
         \ 'git': 1,
         \ 'folders': 0,
@@ -4434,7 +5269,8 @@ if exists('g:_use_fern')
         nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
         nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
 
-        nmap <silent> <buffer> <expr> <Plug>(fern-quit-or-close-preview) fern_preview#smart_preview("\<Plug>(fern-action-preview:close)", ":q\<CR>")
+        nmap <silent> <buffer> <expr> <Plug>(fern-quit-or-close-preview)
+            \ fern_preview#smart_preview("\<Plug>(fern-action-preview:close)", ":q\<CR>")
         nmap <silent> <buffer> q <Plug>(fern-quit-or-close-preview)
 
         nmap <buffer><expr>
@@ -4570,7 +5406,8 @@ augroup END
 
 " " for original command
 " let g:vim_format_list   = {
-"   \ 'jenkins':{'autocmd':['*.groovy'],'cmds':[{'requirements':['goenkins-format'],'shell':'cat {input_file} | goenkins-format'}]},
+"   \ 'jenkins':{'autocmd':['*.groovy'],'cmds':[{'requirements'
+"   \:['goenkins-format'],'shell':'cat {input_file} | goenkins-format'}]},
 "   \ }
 
 if exists(":Tabularize")
@@ -4584,7 +5421,8 @@ inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
 
 function! s:align()
     let p = '^\s*|\s.*\s|\s*$'
-    if exists(':Tabularize') && getline('.') =~# '^\s*|' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+    if exists(':Tabularize') && getline('.') =~# '^\s*|'
+        \ && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
         let column = strlen(substitute(getline('.')[0:col('.')],'[^|]','','g'))
         let position = strlen(matchstr(getline('.')[0:col('.')],'.*|\s*\zs.*'))
         Tabularize/|/l1
@@ -4593,14 +5431,7 @@ function! s:align()
     endif
 endfunction
 
-let g:mkdx#settings = { 'highlight': { 'enable': 1 },
-    \ 'enter': { 'shift': 1 },
-    \ 'links': { 'external': { 'enable': 1 } },
-    \ 'toc': { 'text': 'Table of Contents', 'update_on_write': 1 },
-    \ 'fold': { 'enable': 1 } }
 
-let g:polyglot_disabled = ['markdown'] " for vim-polyglot users, it loads Plasticboy's markdown
-" plugin which unfortunately interferes with mkdx list indentation.
 
 augroup markdown
     autocmd!
@@ -4632,7 +5463,8 @@ if has("fzf")
         " this allows you to create a 'source' for fzf.
         " first we map each item (formatted for quickfix use) using the function MkdxFormatHeader()
         " then, we strip out any remaining empty headers.
-        let headers = filter(map(mkdx#QuickfixHeaders(0), function('<SID>MkdxFormatHeader')), 'v:val != ""')
+        let headers = filter(map(mkdx#QuickfixHeaders(0),
+            \ function('<SID>MkdxFormatHeader')), 'v:val != ""')
 
         " run the fzf function with the formatted data and as a 'sink' (action to execute on selected entry)
         " supply the MkdxGoToHeader() function which will parse the line, extract the line number and move the cursor to it.
@@ -4853,10 +5685,16 @@ endif
 " infocmp -1 | grep "kf[1-4]"
 " /usr/include/linux/input-event-codes.h
 " evtest
+
+nmap <F2> :TagbarToggle<cr>
 nmap <F3> :BuffergatorToggle<cr>
+
 " " Go to buffer. Conflict with buffergator
 " nnoremap gb :ls<cr>:b<space>
-nnoremap gb ::BuffergatorToggle<cr>
+
+" Multiple Neovim instances leads high CPU usage
+nnoremap <silent> <leader>l :BuffergatorToggle<cr>
+nnoremap <silent> <leader>o :TagbarToggle<cr>
 
 let g:buffergator_autodismiss_on_select = 1
 " How to open buffergator itself
@@ -4908,15 +5746,56 @@ endif
 
 " "session operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
-" if exists('g:loaded_session')
-"     " https://github.com/xolox/vim-session
-"     let g:session_autoload         = 'yes'
-"     let g:session_autosave         = 'yes'
-"     " Will generate .default.vim
-"     let g:session_autosave_to      = '.default'
-"     let g:session_verbose_messages = 0
-"     let g:session_directory        = getcwd()
-" endif
+" High CPU usage when starting neovim with no parameters
+" Troubleshooting: move session_auto.vim from folder plugin to folder after
+if ! exists("g:loaded_session_auto")    " && &readonly == 0
+    " Doesn't work?
+    " packadd session_auto
+
+    let session_auto_load_path = g:plugin_dir['vim'] . '/pack/'
+        \ . g:package_manager['vim'] . '/opt/session_auto'
+    let session_auto_load_file = session_auto_load_path . '/after/plugin/session_auto.vim'
+    exe 'set runtimepath+='. session_auto_load_path
+    exe 'set packpath+='. session_auto_load_path
+    execute "source " .   session_auto_load_file
+    execute "runtime! " . 'after/session_auto.vim'
+
+    " if exists('g:loaded_session')
+    "     " https://github.com/xolox/vim-session
+    "     let g:session_autoload         = 'yes'
+    "     let g:session_autosave         = 'yes'
+    "     " Will generate .default.vim
+    "     let g:session_autosave_to      = '.default'
+    "     let g:session_verbose_messages = 0
+    "     let g:session_directory        = getcwd()
+    " endif
+    function! s:session_state(updating)
+        if a:updating
+            " packadd cscope_auto
+            " augroup cscope_auto | au!
+            "     autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
+            " augroup END
+            let g:statusline_session_flag = "S"
+        else
+            " augroup cscope_auto | au!
+            " augroup END
+            let g:statusline_session_flag = ""
+        endif
+        execute "redrawstatus!"
+    endfunction
+
+    augroup session_auto_setup
+        au!
+        " Error detected while processing VimEnter Autocommands for "*":
+        " E117: Unknown function: session_auto#setup
+        " "packadd session_auto" hasn't work
+        autocmd VimEnter * :call session_auto#setup(function("s:session_state"))
+
+        " autocmd BufReadPre * :call session_auto#setup(function("s:session_state"))
+        " autocmd WinNew * :call session_auto#setup(function("s:session_state"))
+        " autocmd BufNew * :call session_auto#setup(function("s:session_state"))
+    augroup END
+endif
 
 " " https://github.com/xolox/vim-notes/issues/80
 " augroup reset_xolox
@@ -4975,19 +5854,23 @@ if has('nvim')
     " Buffer changes won't save until you have following settings in your .vimrc/init.vim
     " https://stackoverflow.com/questions/2902048/vim-save-a-list-of-open-files-and-later-open-all-files/2902082
     " set viminfo='5,f1,\"50,:20,%,n~/.vim/viminfo
-    silent! execute "set viminfo='5,f1,\"50,:20,%,n'" . stdpath('data') . "/viminfo"
+    silent! execute "set viminfo='5,f1,\"50,:20,%,n'" . stdpath('data')
+        \ . "/viminfo"
     let &viminfofile = expand('$XDG_DATA_HOME/nvim/shada/main.shada')
 else
     " set viminfo='5,f1,\"50,:20,%,n~/.vim/viminfo
-    silent! execute "set viminfo='5,f1,\"50,:20,%,n'" . g:plugin_dir['vim'] . "/viminfo"
+    silent! execute "set viminfo='5,f1,\"50,:20,%,n'" . g:plugin_dir['vim']
+        \ . "/viminfo"
 
 endif
 
 augroup bw
     au!
     " https://stackoverflow.com/questions/5238251/deleting-buffer-from-vim-session
-    " command! -nargs=? -bang BW :silent! argd % | bw<bang><args>
-    command! -nargs=? -bang BW :silent! argd % <bar> bw<bang><args>
+    " command! -nargs=? -bang BW :silent! argd % <bar> bw<bang><args>
+    command! -nargs=? -bang BW :silent! bprevious <bar> bdelete<bang> #
+    nnoremap <silent> <Leader>d :<C-U>bprevious <bar> bdelete #<cr>
+    nnoremap <silent> <Leader>q :Bdelete<CR>
 augroup END
 
 " https://vim.fandom.com/wiki/Make_views_automatic
@@ -5228,12 +6111,17 @@ augroup END
 
 if exists('s:_init_develop') && 1 == s:_init_develop
     function! s:log() abort
-        " silent! execute '!(printf "scriptnames\t\t: ">> '. g:_log_address . ' 2>&1 &) > /dev/null'
+        " silent! execute '!(printf "scriptnames\t\t: ">> '. g:_log_address .
+        "     \ ' 2>&1 &) > /dev/null'
         call s:log_silent("scriptnames", "", g:_environment)
-        " silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames | call s:log_silent(\'\n\') | redir END'
-        silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames | redir END | call s:log_silent("\n")'
-        silent! execute 'redir >> ' . g:_log_address . ' | silent verbose map | redir END | call s:log_silent("\n")'
-        " silent! execute 'redir! > ' . g:_log_address . ' | silent map | redir END | call s:log_silent("\n")'
+        " silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames |
+        "     \ call s:log_silent(\'\n\') | redir END'
+        silent! execute 'redir >> ' . g:_log_address . ' | silent scriptnames |
+            \ redir END | call s:log_silent("\n")'
+        silent! execute 'redir >> ' . g:_log_address . ' | silent verbose map |
+            \ redir END | call s:log_silent("\n")'
+        " silent! execute 'redir! > ' . g:_log_address . ' | silent map |
+        "     \ redir END | call s:log_silent("\n")'
         " silent! execute '!(printf \'\n\'>> '. g:_log_address . ' 2>&1 &) > /dev/null'
         " call s:log_silent("\n", "", g:_environment)
     endfunction
@@ -5268,7 +6156,7 @@ let g:reload_on_write = 1
 " endif
 " autocmd BufWritePost *vimrc,*exrc :call feedkeys(":source %\<cr>")
 
-" autocmd BufEnter * ++nested syntax sync fromstart
+" autocmd! BufEnter * ++nested syntax sync fromstart
 
 augroup reload_vimrc
     autocmd!
@@ -5276,18 +6164,25 @@ augroup reload_vimrc
     " autocmd BufEnter * ++nested syntax sync fromstart
 
     " if has('nvim')
-    "     autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim | call s:refresh()
+    " autocmd BufWritePost $MYVIMRC source $MYVIMRC | setlocal filetype=vim
+    "     \ | call s:refresh()
     " else
     " | won't work. <bar> and \| neither
     " :vert h :\bar
-    " autocmd BufWritePost $MYVIMRC source $MYVIMRC <bar> setlocal filetype=vim <bar> redraw!
+    " autocmd BufWritePost $MYVIMRC source $MYVIMRC <bar> setlocal filetype=vim
+    "     \ <bar> redraw!
 
     " autocmd BufWritePost $MYVIMRC
     "     \ execute 'source ' . $MYVIMRC .
     "     \ ' | setlocal filetype=vim' .
     "     \ ' | syntax enable'
 
-    autocmd BufWritePost $MYVIMRC if expand('%') == $MYVIMRC | :call feedkeys(":source $MYVIMRC\<cr>") | endif | setlocal filetype=vim | redraw!
+
+    " autocmd BufWritePost $MYVIMRC if expand('%') == $MYVIMRC | :call
+    "     \ feedkeys(":source $MYVIMRC\<cr>") | endif | setlocal filetype=vim | redraw!
+    autocmd BufWritePre $MYVIMRC if expand('%') == $MYVIMRC && 0 != &modified
+        \ | :call feedkeys(":source $MYVIMRC\<cr>") | endif
+        " \ | setlocal filetype=vim | call s:refresh()
     " endif
 augroup END
 
@@ -5303,16 +6198,22 @@ augroup END
 "     " The following comand will shut off syntax and enable it again!!!
 "     autocmd SourcePost,BufReadPost,BufWritePost *
 "         \ doautocmd filetypedetect BufRead "%" <bar> ++nested syntax enable
-" 
+"
 " augroup END
 
 " redrawtime exceeded, "syntax highlighting" disabled
 " set regexpengine=2
 set regexpengine=1
 " set regexpengine=0
-" Search for the keyword "conflicted" to find setting conflictions of "syntax on" /  "syntax highlighting"
-syntax enable
-syntax on
+" Search for the keyword "conflicted" to find setting conflictions of
+" "syntax on" /  "syntax highlighting"
+" syntax after colorscheme setting will load colorscheme twice
+
+" If colorscheme doesn't work, look into "cursor_line". It was moved out from
+" s:cursor_off() and s:cursor_on()
+
+" syntax enable
+" syntax on
 
 augroup color_scheme_refresh | au!
     " https://stackoverflow.com/questions/51129631/vim-8-1-garbage-printing-on-screen
@@ -5323,7 +6224,8 @@ augroup color_scheme_refresh | au!
 
     " E492: Not an editor command: ++nested colorscheme lucid
     " autocmd VimEnter * silent! execute '++nested colorscheme ' . g:scheme_name
-    " "conflicted" with "syntax on"? -- Yes. It will override dynamic color settings
+    " "conflicted" with "syntax on"?
+    " -- Yes. It will override dynamic color settings
     " Furthermore, it can seriously slow down your editor!!!
     " autocmd VimEnter * silent! execute 'colorscheme ' . g:scheme_name
 augroup END
@@ -5342,72 +6244,77 @@ if ! has('nvim') && empty($TMUX) " && (exists('g:loaded_minpac') || exists('g:lo
     augroup lightline_hl
         au!
         " https://vi.stackexchange.com/questions/31491/why-does-my-lightline-status-line-not-show-up-right-away
-        " autocmd WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
-        "             \BufReadPost,BufWritePost * ++nested call lightline#update()
+
+        " autocmd WinEnter,BufEnter,BufDelete,SessionLoadPost,
+        "     \FileChangedShellPost,BufWinEnter,
+        "     \BufReadPost,BufWritePost * ++nested call lightline#update()
+
         " autocmd VimEnter * ++nested call lightline#update()
-        " au VimEnter,Colorscheme * call lightline#disable() | call lightline#enable()
-        autocmd VimEnter,WinEnter,BufEnter,BufDelete,
-            \SessionLoadPost,FileChangedShellPost,BufWinEnter,
-            \BufReadPost,BufWritePost,ColorScheme * ++nested call lightline#highlight() | redraw!
+
+        " au VimEnter,ColorScheme * call lightline#disable() |
+        "     \ call lightline#enable()
+
+        " autocmd VimEnter,WinEnter,BufEnter,BufDelete,
+        "     \SessionLoadPost,FileChangedShellPost,BufWinEnter,
+        "     \BufReadPost,BufWritePost,ColorScheme * ++nested call
+        "     \ lightline#highlight() | redraw!
+
     augroup END
 else
     augroup lightline_hl
         au!
+
+        " lua require("slanted")
+        " lua require('plugins'):requireRel("slanted-gaps")
+
+        " lua lualine =  require('lualine')
+
     augroup END
 
-
-    " lua require("slanted")
-    " lua require('plugins'):requireRel("slanted-gaps")
-
-    " lua lualine =  require('lualine')
-
-    " augroup indent_blankline_hl
-    "     au!
-    "     " The following comand will shut off syntax and enable it again!!!
-    "     autocmd VimEnter,WinEnter,BufEnter,BufDelete,
-    "         \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
-    "         \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
-    "     " \BufWinLeave,BufReadPost,BufWritePost,ColorScheme * ++nested call s:refresh()
-    " augroup END
 endif
+
+if has('nvim')
+    augroup resized
+        au!
+
+        " The following comand will shut off syntax and enable it again!!!
+
+        " autocmd WinResized,CursorMoved * :call s:cursor_off() | :call s:cursor_on() | syntax on | setlocal list
+        " autocmd WinEnter,WinResized * :call s:cursor_off() | syntax on | setlocal list
+        autocmd WinResized * ++nested call s:refresh()
+    augroup END
+else
+    augroup indent_blankline_hl
+        au!
+        autocmd WinScrolled * ++nested call s:refresh()
+    augroup END
+endif
+
+augroup indent_blankline_hl
+    au!
+    autocmd VimEnter,WinEnter,BufEnter,BufDelete,BufLeave,WinLeave,ModeChanged,
+        \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
+        \BufReadPost,BufWritePost,ColorScheme * ++nested
+        \ call s:refresh()
+    autocmd CursorMoved * ++nested call s:refresh_light()
+    " \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
+augroup END
 
 
 if exists('g:_use_indent_guides')
     augroup indent_guides_enable
         au!
-        " au BufEnter,BufWritePost,VimEnter * silent execute ":normal! \<Plug>IndentGuidesEnable"
+        " au BufEnter,BufWritePost,VimEnter * silent execute ":normal!
+        " \ \<Plug>IndentGuidesEnable"
         " autocmd BufEnter <buffer> call feedkeys("\<Plug>IndentGuidesEnable", x)
         autocmd VimEnter,WinEnter,BufEnter,BufDelete,
             \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
-            \BufReadPost,BufWritePost,ColorScheme * ++nested :IndentGuidesEnable
+            \BufReadPost,BufWritePost,ColorScheme
+            \ * ++nested :IndentGuidesEnable
     augroup END
 endif
 
 " autocmd ColorScheme,SessionLoadPost * call lightline#highlight()
-
-" let g:map_keys_plugin = g:plugin_dir['vim'] . '/after/plugin/keys.vim'
-" execute 'source ' . g:map_keys_plugin
-" execute 'runtime! ' . g:map_keys_plugin
-
-" augroup reset_map_keys
-"     au!
-"     " autocmd BufWritePost g:map_keys_plugin ++nested silent execute 'source ' .
-"     "             \ g:map_keys_plugin | execute 'runtime! ' . g:map_keys_plugin
-"     autocmd BufWritePost * ++nested silent execute 'source ' . g:map_keys_plugin |
-"                 \ execute 'runtime! ' . g:map_keys_plugin
-"     autocmd BufWritePost * ++nested call keys#map_key_ad_hoc('k') | call keys#map_key_ad_hoc('j')
-"                 \ | call keys#map_key_ad_hoc('h') | call keys#map_key_ad_hoc('l')
-"     au! VimEnter,WinEnter,BufEnter,BufDelete,SessionLoadPost,FileChangedShellPost,BufWinEnter,
-"                 \BufReadPost,BufWritePost,ColorScheme * call keys#map_key_ad_hoc('k') |
-"                 \ call keys#map_key_ad_hoc('j') | call keys#map_key_ad_hoc('h') | call keys#map_key_ad_hoc('l')
-" augroup END
-
-" execute ':ReloadScript ' . g:map_keys_plugin
-
-" https://stackoverflow.com/questions/31595411/how-to-clear-the-screen-after-exit-vim
-augroup clear_terminal | au!
-    au VimLeave * :!clear
-augroup END
 
 " "keep above code block at the very end of the file ___________________________________________________________"
 
@@ -5417,8 +6324,10 @@ for r in regs
     call setreg(r, [])
 endfor
 
-let regs = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-"' | let i = 0 |
-    \ while (i < strlen(regs)) | exec 'let @' . regs[i] . ' = ""' | let i = i + 1 | endwhile | unlet regs
+let regs = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-"'
+    \ | let i = 0
+    \ | while (i < strlen(regs)) | exec 'let @' . regs[i] . ' = ""'
+    \ | let i = i + 1 | endwhile | unlet regs
 
 
 " set exrc
@@ -5430,5 +6339,11 @@ if exists('s:_init_develop') && 1 == s:_init_develop && bufnr(g:_log_address) < 
     " :tabedit +set\ noma|set\ ro FILE
 endif
 
-
+" Replace shada
+" time nvim -i NONE -c 'q'
+" Replace config
+" time nvim -u NORC -c 'q'
+" : > ~/.startup.log
+" nvim --startuptime ~/.startup.log ~/.startup.log
+" sort -k 2 ~/.startup.log
 " vim: set ts=4 sw=4 tw=0 et :

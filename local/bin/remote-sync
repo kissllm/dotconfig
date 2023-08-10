@@ -1,0 +1,48 @@
+#!/bin/sh
+# Usage
+# remote-sync 22 xxx.xxx.xxx.xxx
+
+port="${1:?"Must give port"}"
+address="${2:?"Must give address"}"
+pwd_origin="$PWD"
+cd "${SHARE_PREFIX:+/mnt}"
+# Target will lose dirrectories
+# scp -P $port $(git ls-tree --full-tree -r HEAD | awk "{print \$4}" | tr '\n'  ' ') root@$address:/mnt/
+# rsync -r --rsh="ssh -p $port" $(git ls-tree --full-tree -r HEAD | awk "{print \$4}" | tr '\n'  ' ') root@$address:/mnt/
+
+rsync -azR -e "ssh -p $port" $(
+    git ls-tree --full-tree -r HEAD | awk "{print \$4}" | tr '\n'  ' ') \
+    root@$address:/mnt/
+
+ssh -p $port root@$address mkdir -p \
+    /mnt/init/editor/vim/pack/packager/start \
+    /mnt/init/editor/vim/pack/packager/opt
+ssh -p $port root@$address mkdir -p \
+    /mnt/init/editor/nvim/site/pack/packer/start \
+    /mnt/init/editor/nvim/site/pack/packer/opt
+
+cd /mnt/init/editor/vim/pack/packager/start
+scp -r -P $port \
+    boot/. \
+    keys/. \
+    onehalf/. \
+    tagbar/. \
+    vim-buffergator.git/. \
+    vim-tmux/. \
+    tabular/. \
+    root@$address:/mnt/init/editor/vim/pack/packager/start/
+
+cd /mnt/init/editor/vim/pack/packager/opt
+scp -r -P $port \
+    vim-packager/. \
+    vim-tmux-navigator/. \
+    root@$address:/mnt/init/editor/vim/pack/packager/opt/
+
+cd /mnt/init/editor/nvim/site/pack/packer/start
+scp -r -P $port \
+    packer.nvim/. \
+    windline.nvim/. \
+    root@$address:/mnt/init/editor/vim/pack/packager/start/
+
+# cd /mnt/init/editor/nvim/site/pack/packer/opt
+

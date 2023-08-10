@@ -3,98 +3,522 @@
 # Calling sequence
 # share->profile->shrc->env
 
-# cursor_code='\033[?12;0;255c'
-# cursor_code='\033[?16;143;255c'
-# cursor_code='\033[?112;0;255c'
-# cursor_code='\e[?112;0;64c'
-# cursor_code='\e[?112;0;112c'
-# cursor_code='\e[?16;143;255c'
-# cursor_code='\033[?12h'
+reset_cursor_shape() {
+    setterm --cursor on
+# Disable cursor blinking
+    [ "$(id -u)" -eq "0" ] && {
+        [ "$(cat /sys/class/graphics/fbcon/cursor_blink)" -eq "0" ] ||
+        echo 0 | tee /sys/class/graphics/fbcon/cursor_blink
+    } || {
+        [ "$(cat /sys/class/graphics/fbcon/cursor_blink)" -eq "0" ] ||
+        echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
+    }
+# reset
+# printf '%s %s\n' '$TERM' "$TERM"
 
-# Underscore blinking
-# cursor_code='\033[?c'
+# ncurses
+# netbsd-curses
+# infocmp -L1 screen-256color | grep parm
+# infocmp -L1 linux | grep parm
 
-# White/black bliking block
-# echo -ne '\033[?6c'
-# echo -ne '\033[?121'
-# echo -ne '\033[?121c'
+# /usr/share/terminfo/s/screen-256color
+# TERM == linux
+# infocmp -L1 linux | grep cursor
+#         cursor_address=\E[%i%p1%d;%p2%dH,
+#         cursor_down=\n,
+#         cursor_home=\E[H,
+#         cursor_invisible=\E[?25l\E[?1c,
+#         cursor_left=^H,
+#         cursor_normal=\E[25h\E[?112c,
+#         cursor_right=\E[C,
+#         cursor_up=\E[A,
+#         cursor_visible=\E[?25h\E[?8c,
+#         parm_down_cursor=\E[%p1%dB,
+#         parm_left_cursor=\E[%p1%dD,
+#         parm_right_cursor=\E[%p1%dC,
+#         parm_up_cursor=\E[%p1%dA,
+#         restore_cursor=\E8,
+#         save_cursor=\E7,
+# ncurses 6.3
+# infocmp -L1 linux | grep cursor
+#         cursor_address=\E[%i%p1%d;%p2%dH,
+#         cursor_down=\n,
+#         cursor_home=\E[H,
+#         cursor_invisible=\E[?25l\E[?1c,
+#         cursor_left=^H,
+#         cursor_normal=\E[?25h\E[?0c,
+#         cursor_right=\E[C,
+#         cursor_up=\E[A,
+#         cursor_visible=\E[?25h\E[?8c,
+#         parm_down_cursor=\E[%p1%dB,
+#         parm_left_cursor=\E[%p1%dD,
+#         parm_right_cursor=\E[%p1%dC,
+#         parm_up_cursor=\E[%p1%dA,
+#         restore_cursor=\E8,
+#         save_cursor=\E7,
 
-# Non-blink block
-# cursor_code='\033[?121;0;255c'
-# cursor_code='\e[?112c'
-# cursor_code='\033[?112c'
+# infocmp -L1 vt102 | grep cursor
+#         cursor_address=\E[%i%p1%d;%p2%dH$<5>,
+#         cursor_down=\n,
+#         cursor_home=\E[H,
+#         cursor_left=^H,
+#         cursor_right=\E[C$<2>,
+#         cursor_up=\E[A$<2>,
+#         parm_down_cursor=\E[%p1%dB,
+#         parm_left_cursor=\E[%p1%dD,
+#         parm_right_cursor=\E[%p1%dC,
+#         parm_up_cursor=\E[%p1%dA,
+#         restore_cursor=\E8,
+#         save_cursor=\E7,
 
-p1="12"
-# p1="17"
-# p1="112"
-# p1="118"
-p3="64"
-# p3="200"
-# p3="255"
+# infocmp -L1 | grep cursor
+#         cursor_address=\E[%i%p1%d;%p2%dH,
+#         cursor_down=\n,
+#         cursor_home=\E[H,
+#         cursor_invisible=\E[?25l,
+#         cursor_left=^H,
+#         cursor_normal=\E[?12l\E[?25h,
+#         cursor_right=\E[C,
+#         cursor_up=\E[A,
+#         cursor_visible=\E[?12;25h,
+#         parm_down_cursor=\E[%p1%dB,
+#         parm_left_cursor=\E[%p1%dD,
+#         parm_right_cursor=\E[%p1%dC,
+#         parm_up_cursor=\E[%p1%dA,
+#         restore_cursor=\E8,
+#         save_cursor=\E7,
 
-set_cursor() { cursor_code="$(printf "\033[?${p1};%d;${p3}c" "$((~$1 & 255))")"; echo -ne "$cursor_code"; }
-# set_cursor $((0x80 | 0x8 | 0x40 | 0x6))
-set_cursor $((0x80 | 0x8 | 0x16 | 0x6))
+# Function keys doesn't work
+# TERM == screen-256color
+# infocmp -L1 screen-256color | grep cursor
+#     cursor_address=\E[%i%p1%d;%p2%dH,
+#     cursor_down=\n,
+#     cursor_home=\E[H,
+#     cursor_invisible=\E[?25l,
+#     cursor_left=^H,
+#     cursor_normal=\E[34h\E[?25h,
+#     cursor_right=\E[C,
+#     cursor_up=\EM,
+#     cursor_visible=\E[34l,
+#     parm_down_cursor=\E[%p1%dB,
+#     parm_left_cursor=\E[%p1%dD,
+#     parm_right_cursor=\E[%p1%dC,
+#     parm_up_cursor=\E[%p1%dA,
+#     restore_cursor=\E8,
+#     save_cursor=\E7,
 
-# echo -ne "$cursor_code"
+# infocmp -L1 linux | grep cursor
+# cursor_visible=\E[?25h\E[?8c,
 
-# infocmp | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
-# infocmp linux | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+# [ -z "${TMUX+x}" ] || { : "${TERM:="screen-256color"}" && export TERM; }
+
+# {
+#     [ "$TERM" = "linux" ] ||
+#     [ "$TERM" = "vt102" ] ||
+#     [ -z "${TERM##*"256color"*}" ]; } &&
+# {
+#     #     # cursor_code='\033[?12;0;255c'
+#     #     # cursor_code='\033[?16;143;255c'
+#     #     # cursor_code='\033[?112;0;255c'
+#     #     # cursor_code='\e[?112;0;64c'
+#     #     # cursor_code='\e[?112;0;112c'
+#     #     # cursor_code='\e[?16;143;255c'
+#     #     # cursor_code='\033[?12h'
+#     #
+#     #     # Underscore blinking
+#     #     # cursor_code='\033[?c'
+#     #
+#     #     # White/black bliking block
+#     #     # Black/white
+#     #     # cursor_code='\033[?6c'
+#     #     # Blue
+#     #     # cursor_code='\033[?121'
+#     #     # cursor_code='\033[?121c'
+#     #
+#     #     # Non-blink block
+#     #     # Black/white
+#     #     # cursor_code='\033[?121;0;255c'
+#     #     # Green
+#     #     cursor_code='\033[?112;0;64c'
+#     #
+#     #     # cursor_code='\e[?112c'
+#     #
+#     #     # Blue
+#     #     # cursor_code='\033[?112c'
+#     #
+#     #     # cursor_code='\033[34h'
+#     #     # cursor_code='\033[?25h'
+#     #
+#
+#     # cursor_code='\033[34l'
+#     # Won't work. \033 is ESC
+#     # cursor_code='\033[34h\033[?25h'
+#     # { [ "$TERM" = "linux" ] || [ "$TERM" = "vt102" ]; } &&
+#     # cursor_code='\033[25h\033[?112c'
+#     # cursor_code='\033[?25h\033[?0c'
+#
+#     cursor_code="$(infocmp -L1 "$TERM" |
+#     grep cursor_normal | sed -e 's/cursor_normal=//g' -e 's/,//g' -e 's/E/033/g')"
+#     # cursor_code="$(infocmp -L1 "$TERM" |
+#     # grep cursor_visible | sed -e 's/cursor_visible=//g' -e 's/,//g' -e 's/E/033/g')"
+#     # cursor_code="$(infocmp -L1 "$TERM" |
+#     # grep parm_left_cursor | sed -e 's/parm_left_cursor=//g' -e 's/,//g' -e 's/E/033/g')"
+#     # cursor_code="$(infocmp -L1 "$TERM" |
+#     # grep cursor_left | sed -e 's/cursor_left=//g' -e 's/,//g' -e 's/E/033/g')"
+#
+#     # [ -z "${TERM##*"256color"*}" ] && cursor_code='\033[34h\033[?25h'
+#
+#     #     # cursor_code='\033[?25h'
+#     #     # cursor_code='\033[?8c'
+#     #     # cursor_code='\033[25h'
+#     #     # cursor_code='\033[?112c'
+#     #     # cursor_code='\033[34h'
+#     #     # cursor_code='\033[25h\033[?112c'
+#     #     # cursor_code='\033[34h\033[?25h'
+#     #     # cursor_code='\033[25h'
+#     # cursor_code="$cursor_normal"
+#     # cursor_code="$cursor_left"
+#     #     # printf '%s' "$cursor_code"
+#     printf '%s' "$cursor_code"
+#     #
+#     #     # infocmp | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+#     #     # infocmp linux | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+#     #
+# } || {
+
+    # infocmp screen-256color | sed -e 's/parm_index=[^,]*//' -e 's/parm_rindex=[^,]*//' | tic -
+    # infocmp screen-256color | sed 's/indn=[^,]*//' | tic -
+
+    # infocmp -L1 screen-256color > /mnt/screen-256color.info
+    # Comment out parm_index, maybe parm_rindex also
+    # tic /mnt/screen-256color.info
+    # [ "$USER" = "root" ] ||
+    # rsync -aqzL /home/$USER/.terminfo/. /root/.terminfo/
+    # Add TERM=screen-256color to tmux env
+
+    # infocmp -L1 linux > /mnt/linux.info
+    # max_colors#0x8 -> max_colors#0x100
+    # tic /mnt/linux.info
+    # [ "$USER" = "root" ] ||
+    # rsync -aqzL /home/$USER/.terminfo/. /root/.terminfo/
+    # Remove TERM=screen-256color from tmux env
+
+    # Frequency of cursor blinking
+    # /working/kiss/sources/linux/drivers/tty/vt/vt.c
+    # /working/kiss/sources/linux/drivers/video/fbdev/core/fbcon.c
+    # 112 = 16 + 32 +64
+    # Black/white blinking
+
+    # p1="96"
+
+    # p1="88"     # 8 + 16 + 64
+    # p1="72"
+    # p1="69"     # 5 + 64
+    # p1="64"
+    # p1="32"
+    # p1="17"
+    # p1="15"
+    # p1="14"
+    # p1="13"
+    # p1="12"
+    # p1="9"
+    # p1="8"
+    # p1="7"
+    # p1="6"
+    # Half height, blinking
+    # p1="5"
+    # short height, blinking
+    # p1="99"
+    # p1="3"
+    # No cursor
+    # p1="97"
+    # p1="33"
+    # p1="1"
+    # Underscore blink
+
+    # p1="98"
+
+    # p1="2"
+    # p1="0"
+    # p1="34"
+    # Block green non-blink
+    # p1="31"
+    # p1="30"
+    # p1="29"
+    # p1="28"
+    # p1="27"
+    # p1="26"
+    # p1="25"
+    # p1="24"
+    # p1="23"
+    # p1="22"
+
+    # No cursor in $TERM == linux?
+    p1="21"
+
+    # p1="20"
+    # p1="19"
+    # p1="18"
+    # p1="17"
+    # p1="16"
+
+    # Block blue non-blink, wierd charater | No, depends on other parameters
+    # Mask characters with strange characters
+    # p1="120"    # 112 + 8
+    # p1="117"    # 112 + 5
+    # p1="116"
+    # p1="115"
+    # p1="114"
+    # p1="113"
+    # p1="112"
+    # p1="118"    # 112 + 6
+
+    # No cursor | p1="31"
+    # p3="6"
+    # p3="70"     # 6 + 64
+    # Green block | set_cursor $((0x70 | 0x10 | 0x16 | 0x6))
+    p3="64" # transparent | set_cursor 255
+    # Red block | set_cursor 255
+    # Green block | set_cursor $((0x70 | 0x10 | 0x16 | 0x6))
+    # p3="200"
+    # Special character | p1="31"
+
+    # p3="255"
+
+    set_cursor() {
+        cursor_string="$(printf "?${p1};%d;${p3}c" "$((~$1 & 255))")"
+        cursor_code="$(printf '\033[%s' "$cursor_string")"
+        # cursor_normal="$cursor_code"
+        # echo -ne "$cursor_code"
+        # printf "$cursor_code"
+    }
+
+    # $((soft block | change bg | foreground different | make them distinct))
+    # set_cursor $((0x80 | 0x8  | 0x40 | 0x6))
+    # set_cursor $((0x80 | 0x8  | 0x16 | 0x6))
+    # 0x70 == 112 == (16 + 32 + 64)
+    # set_cursor $((0x70 | 0x10 | 0x16 | 0x6))
+    set_cursor 255
+
+    # Should be set before tmux booting up
+    # [ -z "${TMUX+x}" ] || {
+    # Doesn't work
+    # printf '\033Ptmux;\033]12;grey\007\033\\'
+    # echo -en '\033Ptmux;\033]12;grey\007\033\\'
+    # echo -en '\033Ptmux;\033]12;red\007\033\\'
+    # echo -en '\033[ q'
+    # echo -en '\033[?21;0;64c'
+
+    cursor_normal_string=$(infocmp -L1 linux | grep cursor_normal |
+        awk "{print \$1}" | tr -d 'cursor_normal=' | tr -d ',' | tr -d ' ')
+    # printf '%s %s\n' '$cursor_normal_string' "$cursor_normal_string"
+
+    # Short blinking block when quit neovim in pure terminal
+    # Works
+    # Grey blinking block
+    # Work
+    # echo -en '\033[34l'
+    # cursor_code='\033[ q'
+    # cursor_code='\033[?8c'
+    # cursor_code='\033[34l'
+    # cursor_code='\033[?112c'
+    # printf "$cursor_code"
+    # infocmp linux | awk "{ sub(/cnorm=\\E\[?25h\\E\[?0c/, \"cnorm=\033\[?21;0;64c\") \
+    # Won't work
+    # infocmp linux | awk "{ sub(/cnorm=[^,]*/, \"cnorm=\\\E\[?21;0;64c\") \
+    # If cursor code is just one code, cursor_normal are two codes
+    # Doesn't work in tmux
+    # infocmp linux | awk "{ sub(/cnorm=[^,]*/, \"cnorm=\\\E\[34h\\\E\[?25h\") \
+    [ '\E[?25h\E[?0' = "$cursor_normal_string" ] || {
+        printf '%s %s\n' 'reset cursor shape to' "$cursor_normal_string"
+        infocmp linux | awk "{ sub(/cnorm=[^,]*/, \"cnorm=\\\E\[?25h\\\E\[?0c\") \
+        sub(/colors#8/, \"colors#256\") }1" | tic -
+
+        # infocmp linux | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+        # infocmp linux | sed 's/cnorm=[^,]*/cnorm=\\033[25h\\033[?112c/' | tic -
+    }
+    # }
+# }
+
+    export cursor_code
+}
+
+reset_cursor_shape
 
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
 
 # share folder initialization
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 if [ -d "/mnt/init" ]; then
-    export SHARE_PREFIX="/mnt"
+    SHARE_PREFIX="/mnt"
+    export SHARE_PREFIX
 elif [ -d "/opt/init" ]; then
-    export SHARE_PREFIX="/opt"
+    SHARE_PREFIX="/opt"
+    export SHARE_PREFIX
 fi
 
-[ ! -d "${SHARE_PREFIX}/init" ] || [ ! -f "${SHARE_PREFIX}/init/env" ] || . ${SHARE_PREFIX}/init/env
+[ ! -d "${SHARE_PREFIX}/init" ] ||
+[ ! -f "${SHARE_PREFIX}/init/env" ] || . ${SHARE_PREFIX}/init/env
 
-tty_num=$(tty | sed -e "s/.*tty\(.*\)/\1/")
-export tty_num=$tty_num
+# printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
+# printf '%s %s\n' '$DISPLAY' "$DISPLAY"
 
+# /dev/pts/? on $TERM == foot/alacritty
+# /dev/tty? on $TERM == linux
+# tty_nme might not a number on pts
+tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
+# export tty_num
+
+wayland_socket() {
+    sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
+        grep -v swc-launch | sort -rnk3 | awk "{print \$1}" | tr -d " ")"
+    # local index=0
+    for sock_id in $sock_id_list; do
+       break
+    done
+    WAYLAND_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$(id -u).$sock_id.sock"
+    [ ! -S "$WAYLAND_SOCK" ] || {
+        export WAYLAND_SOCK
+        printf '%s' "${WAYLAND_SOCK}" > /tmp/wayland/.socket
+    }
+}
+
+[ "$XDG_SESSION_TYPE" = "wayland" ] ||
 [ ! -d "${SHARE_PREFIX}/init" ] ||
 [ ! -z "${DISPLAY+x}" ] ||
 [ "1" != "$tty_num" ] ||
-[ "$(/usr/bin/whoami)" = "root" ] || {
-    ${SHARE_PREFIX}/init/sway-launch
+[ "$(id -u)" -eq "0" ] || { # [ "$(/usr/bin/whoami)" = "root" ] || {
+    # https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
+    # https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
+    # https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
+    # XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in ${SHARE_PREFIX}/init/env
+    # [ "$(id -u)" -eq "0" ] || {
+    [ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
+    # [ -e "/tmp/wayland/.display" ] || touch "/tmp/wayland/.display"
+    [ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
+    WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+    export WAYLAND_CONFIG_HOME
+    printf '%s %s\n' '$SHLVL' "$SHLVL" | tee -a ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+    # }
+
+    wayland_socket
+
+    [ ! -S "$WAYLAND_SOCK" ] &&
     # ${SHARE_PREFIX}/init/velox-launch
-    printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+    . ${SHARE_PREFIX}/init/sway-launch ||
+    swaymsg -s "$WAYLAND_SOCK" reload
+
+    # WAYLAND_DISPLAY will only be assigned inside the subshell where sway exists
+    # [ -z "${WAYLAND_DISPLAY:+x}" ] || {    }
+    wayland_socket
 }
 
-export DISPLAY=${WAYLAND_DISPLAY}
+# if [ ! -z "${WAYLAND_DISPLAY+x}" ] &&
+#     [ -z "$(cat /tmp/wayland/.display)" ] &&
+#     [ "$(id -u)" -ne "0" ]; then
 
-# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
-# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
-# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
-# XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in ${SHARE_PREFIX}/init/env
-[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
-[ -e "/tmp/wayland/.display" ] || touch "/tmp/wayland/.display"
-if [ ! -z "${WAYLAND_DISPLAY+x}" ] && [ -z "$(cat /tmp/wayland/.display)" ]; then
-    printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
-elif [ -n "$(cat /tmp/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
-    export WAYLAND_DISPLAY="$(cat /tmp/wayland/.display)"
-fi
+[ "$(id -u)" -eq "0" ] ||
+[ -z "${WAYLAND_DISPLAY+x}" ] || {
+    [ -n "$(cat /tmp/wayland/.display)" ] || {
+        printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+        export WAYLAND_DISPLAY
+        printf '%s\n' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+        printf '%s\n' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
+        DISPLAY=${WAYLAND_DISPLAY}
+        export DISPLAY
+    }
+    { [ -n "$(cat /tmp/wayland/.socket)" ] &&
+        [ ! -z "${WAYLAND_SOCK:+x}" ]; } || wayland_socket
+}
+
+# elif [ -n "$(cat /tmp/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
+#     # Not a reliable operation
+#     export WAYLAND_DISPLAY="$(cat /tmp/wayland/.display)"
+# fi
 
 # [ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
 
 # [ ! -f "${SHARE_PREFIX}/toolchain/env" ] || . ${SHARE_PREFIX}/toolchain/env
 
-[ "$(/usr/bin/whoami)" = "root" ] ||
-[ -f "/tmp/wpa.lock" ] ||
-[ -x "/mnt/local/bin/wpa" ] ||
-! command -v "/mnt/local/bin/wpa" > /dev/null 2>&1 ||
-"/mnt/local/bin/wpa" >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+# Default wireless link might be not what you want
+# [ "$(id -u)" -eq "0" ] ||
+# [ -f "/tmp/wpa.lock" ] ||
+# # [ ! -x "/mnt/local/bin/wpa" ] ||
+# ! command -v "/mnt/local/bin/wpa" > /dev/null 2>&1 ||
+# "/mnt/local/bin/wpa" >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+
+# Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
+# export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
+# export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$(id -u)"
+export TMUX_TMPDIR="${TMPDIR}-${HOSTNAME}"
+# export TMUX_TMPDIR="${TMPDIR}"
+# If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
+_tmux() {
+    command rm -f "$HOME/tmux*.log"
+    [ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
+
+    # printf '%s' "$cursor_code"
+
+    # Got grreen comments on $TERM == linux/tmux-256color in tmux
+    # env TERM="xterm-256color" \
+    # env TERM="tmux-256color" \
+    # env TERM="screen-256color" \
+    # exec env TERM="screen-256color" \
+        # TERM="screen-256color" \
+    exec env \
+        COLORTERM="truecolor" \
+        TMUX_TMPDIR="${TMUX_TMPDIR}" \
+        TINIT_HOME_DIR="$TINIT_HOME_DIR" \
+        TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
+        TMUX_DIR="$TMUX_DIR" \
+        \tmux -T UTF-8 -T 256 new -As . 2>&1 || :
+    #     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
+    # ENV=$HOME/.profile sh -$-l > /dev/tty
+
+    # command tmux -2 -u 2>&1
+}
+
+[ ! -z "${TMUX+x}" ] &&
+case "$(type "tmux" 2>/dev/null)" in *"alias"*) unalias tmux ;; esac ||
+# unalias tmux ||
+alias tmux='_tmux'
+
+# alias tmux="tmux -2"
 
 # https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
-export pwd_length=13
-export TRIMMED='printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$pwd_length})|\1...\2|"'
+: "${PWD_LENGTH:=13}" && export PWD_LENGTH
+# TRIMMED='tmux source-file ${HOME}/.tmux.conf; tmux select-pane -T "#{pane_title}";
+# printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$PWD_LENGTH})|\1...\2|"'
+# : ${TRIMMED:='printf "$cursor_code"; printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$PWD_LENGTH})|\1...\2|"'}
+# : ${TRIMMED:='printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$PWD_LENGTH})|\1...\2|"'}
+: ${TRIMMED:='printf "%s" $PWD'}
+[ -z "${TMUX:+x}" ] ||
+# Without tmux resize-pane, shell outputs will erase $PS1!
+# No line continuation here!
+TRIMMED=$TRIMMED'; command tmux refresh-client -S'
+# TRIMMED=$TRIMMED'; command tmux select-pane -T "#{pane_title}";
+# # command tmux resize-pane -t $(command tmux display-message -p '#{pane_id}')
+# -y $(tmux display-message -p '#{pane_height}') -x $(tmux display-message -p '#{pane_width}')'
+# command tmux capturep -e -J -p -S- -E-'
+
+export TRIMMED
+
+# Prompt left/right alignment test
+# length_trim="$(eval $TRIMMED | wc -m)"
+# margin=$((length_trim - 25 > 0 ? length_trim - 25 : 25 - length_trim))
+# export margin
+# printf '%s %s\n' '$margin' "$margin"
 
 # https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
 # If not running interactively, don't do anything
 [ ! -z "${PS1+x}" ] || return
+environment_prompt() {
+    case "$(type kiss)" in
+        *"/usr/bin/kiss"*) printf %2.2d%s "${SHLVL}" " " ;;
+        *) printf %2.2s%s "//" " " ;;
+    esac
+    [ -z "${TMUX:+x}" ] || command tmux refresh-client -S
+}
 # set a fancy prompt (non-color, overwrite the one in /etc/profile)
 if [ "$(id -u)" -eq "0" ]; then
     # root user
@@ -104,8 +528,55 @@ if [ "$(id -u)" -eq "0" ]; then
     # export PS1="[\e[1;31m\u\e[m@\e[1;24m${HOSTNAME}\e[m] \e[0;39m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
     # https://superuser.com/questions/301353/escape-non-printing-characters-in-a-function-for-a-bash-prompt/301355
     # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][$(eval $TRIMMED)]\[\e[m\] \$ '
-    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;24m\]${HOSTNAME}\[\e[m\]] \[\e[0;39m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
+
+    # If you want a \ output, you need \\\\
+    # Left/right alignment simultaneously
+#     export PS1='\[\e[1;91m\]\u\[\e[m\]@\[\e[1;31m\]${HOSTNAME}\[\e[m\]:\
+# \[\e[0;33m\]$(eval $TRIMMED)\[\e[m\]\
+# $(printf "%$(($(tput cols) - 14 - $(eval $TRIMMED | wc -m)))s" \
+# " -- $(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)") \[\e[1;5m\]#$(printf %2.2d $SHLVL)\[\e[m\]\n'
+
+#     export PS1='\[\e[1;5m\]#$(printf %2.2d $SHLVL)\[\e[m\] \
+# -- $(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)\n\
+# \[\e[1;91m\]\u\[\e[m\]@\[\e[1;31m\]${HOSTNAME}\[\e[m\]:\
+# \[\e[0;33m\]$(eval $TRIMMED)\[\e[m\]\n'
+
+# date moved to tmux border
+#     export PS1='\[\e[1;5m\]#$(printf "%s " "$(curl http://ipinfo.io/ip 2>/dev/null)"
+#     printf %2.2d "$SHLVL"; command tmux refresh-client -S)\[\e[m\] \
+
+#     export PS1='\[\e[1;5m\]#$(printf %2.2d "$SHLVL"; [ -z "${TMUX:+x}" ] || command tmux refresh-client -S)\[\e[m\] \
+# \[\e[0;91m\]\u\[\e[m\]@\[\e[0;31m\]${HOSTNAME}\[\e[m\]:\
+# \[\e[0;33m\]\w\[\e[m\]\n'
+
+# \[\e[0;33m\]$(eval $TRIMMED)\[\e[m\]\n'
+
+    # export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;24m\]${HOSTNAME}\[\e[m\]] \
+    # \[\e[0;39m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n$(printf %s "$cursor_code")"
+
+    # printf %2.2d%s "${SHLVL}" " "
+    # "sh: environment_prompt: not found" when tmux kill-server
+    # export PS1='\[\033[1;101m\]#$(environment_prompt)\[\033[m\]\
+    export PS1='\[\033[1;101m\]#$(
+        [ -z "${TMUX:+x}" ] &&
+            printf %1.1s " " || {
+            command tmux refresh-client -S
+            printf %1.1s "t"
+        }
+        case "$(type kiss)" in
+            *"/usr/bin/kiss"*)
+                printf %s " " ;;
+            *)
+                printf %1.1s "k"
+        esac
+        printf %2.2d%s "${SHLVL}" " "
+        # printf "\033[?8c"
+        # printf \033[34l
+        # printf "\033[ q"
+        # printf "$cursor_code"
+)\[\033[m\]\
+\[\033[1;101m\]\u@${HOSTNAME}:\[\033[m\]\
+\[\033[1;101m\]\w \[\033[m\]\n'
 else
     # non root
     # export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
@@ -113,11 +584,49 @@ else
     # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\e[0;32m[\w]\e[m \$ "
     # export PS1="[\e[1;36m\u\e[m@\e[1;33m${HOSTNAME}\e[m] \e[0;32m[\w]\e[m [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
     # https://stackoverflow.com/questions/19092488/custom-bash-prompt-is-overwriting-itself
-    # export PS1='[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;17m\][$(eval $TRIMMED)]\[\e[m\] \$ '
-    export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \[\e[0;32m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n\$ "
+
+#     export PS1='\[\e[1;5m\]#$(printf %2.2d $SHLVL)\[\e[m\] \
+# -- $(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)\n\
+# \[\e[1;96m\]\u\[\e[m\]@\[\e[1;94m\]${HOSTNAME}\[\e[m\]:\
+# \[\e[0;32m\]$(eval $TRIMMED)\[\e[m\]\n'
+
+# date moved to tmux border
+#     export PS1='\[\e[1;5m\]#$(printf "%s " "$(curl http://ipinfo.io/ip 2>/dev/null)"
+#     printf %2.2d "$SHLVL"; command tmux refresh-client -S)\[\e[m\] \
+
+#     export PS1='\[\e[1;5m\]#$(printf %2.2d "$SHLVL"; [ -z "${TMUX:+x}" ] || command tmux refresh-client -S)\[\e[m\] \
+# \[\e[0;92m\]\u\[\e[m\]@\[\e[0;32m\]${HOSTNAME}\[\e[m\]:\
+# \[\e[0;94m\]\w\[\e[m\]\n'
+
+# \[\e[0;32m\]$(eval $TRIMMED)\[\e[m\]\n'
+
+    # export PS1="[\[\e[1;5m\]\u\[\e[m\]@\[\e[1;33m\]${HOSTNAME}\[\e[m\]] \
+    # \[\e[0;32m\][\w]\[\e[m\] [\$(date +%a\ %b\ %d,\ %H:%M:%S\ %Z\ %Y)]\n$(printf %s "$cursor_code")"
+
+    # printf %2.2d%s "${SHLVL}" " "
+    export PS1='\[\033[1;7m\]#$(
+        [ -z "${TMUX:+x}" ] &&
+            printf %1.1s " " || {
+            command tmux refresh-client -S
+            printf %1.1s "t"
+        }
+        case "$(type kiss)" in
+            *"/usr/bin/kiss"*)
+                printf %s " " ;;
+            *)
+                printf %1.1s "k"
+        esac
+        printf %2.2d%s "${SHLVL}" " "
+        # printf "\033[?8c"
+        # printf \033[34l
+        # printf "\033[ q"
+        # printf "$cursor_code"
+)\[\033[m\]\
+\[\033[1;7m\]\u@${HOSTNAME}:\[\033[m\]\
+\[\033[1;7m\]\w \[\033[m\]\n'
 fi
 
-# How do tell I'm runing in a chroot?
+# How do I tell I'm runing in a chroot?
 # https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
 
 # No root needed
@@ -129,21 +638,83 @@ fi
 #     echo "Business as usual"
 # fi
 
+
+# tmux init
+export TINIT_HOME_DIR="${SHARE_PREFIX}/init/terminal"
+export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
+# export TMUX_DIR=$HOME/.tmux
+export TMUX_DIR=${SHARE_PREFIX}/init/terminal
+
 parent_is_tmux=0
 parent_id="$PPID"
 while [ "$parent_id" -ne "1" ]
 do
-    process_name=$(ps auxft | grep $parent_id | grep -v "grep")
-    [ "${process_name##*tmux*}" != "" ] || { parent_is_tmux=1; break; }
-    parent_id=$(IFS=$'\n'; for item in $(ps auxft -o pid,ppid | grep $parent_id); do IFS=$' ' read -r _1 _2 < <(echo $item); [ "$_2" = "$parent_id" ] || echo $_2; done)
+    # process_name="$(ps auxft | grep $parent_id | grep -v "grep")"
+    # process_name="$(ps -ef | grep $parent_id | grep -v "grep")"
+    # doesn't work for void
+    # process_name="$(ps -efo pid,args | awk "\$1 == $parent_id {print}")"
+    process_name="$(ps ax -o pid,args | awk "\$1 == $parent_id {print}")"
+
+    [ ! -z "${process_name##*tmux*}" ] || { parent_is_tmux=1; break; }
+    # parent_id=$(IFS=$'\n'; for item in $(ps ax -o pid,ppid | grep $parent_id); do
+    #     IFS=$' ' read -r _1 _2 < <(echo $item); [ "$_2" = "$parent_id" ] || echo $_2; done)
+    # Works both on void and kiss
+    parent_id="$(ps ax -o pid,ppid | awk "\$1 == $parent_id {print \$2}")"
 done
 
-# [ "$(id -u)" -eq "0" ] ||
-[ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ] ||
+# Function keys doesn't work when using tmux/screen as TERM
+# In tmux.conf
+# set-option -g default-command "env TERM=linux ${SHELL} -l"
+# echo "\$tty_num = $tty_num"
+# read -r
+[ "$(id -u)" -eq "0" ] ||
+[ -z "${tty_num:+x}" ] || [ "1" = "$tty_num" ] ||
+# Try to tell I'm runing in a chroot?
+[ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] ||
 [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
 [ "$parent_is_tmux" -eq "1" ] ||
-{ { [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]; } && [ $tty_num = "1" ]; } ||
-exec tmux new -As .
+{ { [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]; } && [ $tty_num = "1" ]; } || {
+    command rm -f "$HOME/tmux*.log"
+    [ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
+
+    # printf '%s' "$cursor_code"
+
+    # TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 -u 2>&1
+
+# default-terminal terminal
+#         Set the default terminal for new windows created in this session
+#         - the default value of the TERM environment variable.  For tmux
+#         to work correctly, this must be set to `screen', `tmux' or a
+#         derivative of them.
+
+    # env TERM="screen-256color" sh -c "exec tmux new -As ."
+
+    # TERM="screen-256color"
+    # export TERM
+    # env TERM="tmux-256color" sh -c "exec tmux new -As ."
+
+    # tmux-256color won't work correctly on cursor displaying:
+    # Got green comments on $TERM == linux/tmux-256color in tmux
+    # exec env TERM="xterm-256color" \
+    # exec env TERM="tmux-256color" \
+    # exec env TERM="screen-256color" \
+        # TERM="screen-256color" \
+    exec env \
+        COLORTERM="truecolor" \
+        TMUX_TMPDIR="$TMUX_TMPDIR" \
+        TINIT_HOME_DIR="$TINIT_HOME_DIR" \
+        TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
+        TMUX_DIR="$TMUX_DIR" \
+        \tmux -T UTF-8 -T 256 new -As . 2>&1 || :
+    #     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
+    # ENV=$HOME/.profile sh -$-l > /dev/tty
+
+        # tmux new -As .
+        # tmux -2u new -As . 2>&1
+}
+
+# Endless creating new panes
+# tmux split-window -t _
 
 # [ -d "/tmp/tmux" ] || mkdir -p "/tmp/tmux"
 # [ -e "/tmp/tmux/.lock" ] || touch "/tmp/tmux/.lock"

@@ -42,8 +42,9 @@
 #   exec dbus-update-activation-environment --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=gnome
 # https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
 #   XDG_CURRENT_DESKTOP=gnome
-exec hash dbus-update-activation-environment --all 2>/dev/null
-exec dbus-update-activation-environment DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway↴
+
+# exec hash dbus-update-activation-environment --all 2>/dev/null
+# exec dbus-update-activation-environment DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway↴
 
 ### Variables
 #
@@ -144,7 +145,7 @@ set $menu sh -c 'BEMENU_BACKEND=wayland PATH=$XDG_DATA_HOME/applications:$PATH b
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 output * bg #000000 solid_color
-exec_always swaybg -c #000000
+# exec_always swaybg -c #000000
 # output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fit
 # output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 # output * bg /share/$USER/pictures/wallpaper/10.jpg fill
@@ -154,7 +155,9 @@ output * bg /share/$USER/pictures/wallpaper/curves.jpg fill
 # $XDG_CONFIG_HOME/wf-shell.ini
 # exec_always wf-background
 # https://www.reddit.com/r/swaywm/comments/qq74gv/how_do_i_set_correctly_the_cursor_theme/
-exec_always import-gsettings
+
+# exec_always import-gsettings
+
 # seat seat0 xcursor_theme Vimix-cursors 32
 
 # Example configuration:
@@ -322,18 +325,20 @@ mode "nag" {
 # Basics:
 #
     # Start a terminal
-    $bindsym $mod+Return exec $term
-    $bindsym $mod+Shift+Return exec alacritty
-    # $bindsym $mod+Shift+Return exec st
+    $bindsym $mod+return exec $term
+    $bindsym $mod+shift+return exec alacritty
+    # $bindsym $mod+shift+return exec st
 
+    # If you happened to trigger this key combination in tmux, $mod+shift+q in wayland will save you
+    # bind-key    -T prefix       C-z                  suspend-client
     # How to quickly switch fonts of terminal?
-    # $mod+Shift+q will kill current window but tmux keeps it. Open it in tmux again and the fonts changed
+    # $mod+shift+q will kill current window but tmux keeps it. Open it in tmux again and the fonts changed
     # One hand operations
     $bindsym $mod+t exec $term -o shell="doas ash -l"
     $bindsym $alt_mod+t exec $term
 
     # Kill focused window
-    $bindsym $mod+Shift+q kill
+    $bindsym $mod+shift+q kill
 
     # Start your launcher
     $bindsym $mod+d exec $menu
@@ -346,18 +351,18 @@ mode "nag" {
     floating_modifier $mod normal
 
     # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-    $bindsym $mod+Shift+R restart
+    $bindsym $mod+shift+r restart
 
     # Reload the configuration file
-    $bindsym $mod+Shift+c reload
+    $bindsym $mod+shift+c reload
 
     # Exit sway (logs you out of your Wayland session)
 
-    #   $bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
-    #   $bindsym $mod+Shift+e exec "i3-msg exit"
-    #   $bindsym $mod+Shift+e exec "swaymsg exit"
+    #   $bindsym $mod+shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+    #   $bindsym $mod+shift+e exec "i3-msg exit"
+    #   $bindsym $mod+shift+e exec "swaymsg exit"
     # https://www.reddit.com/r/swaywm/comments/qcxcw0/what_can_you_do_to_exit_sway_but_without_exit/
-    $bindsym $mod+Shift+e exec "sway exit"
+    $bindsym $mod+shift+e exec "sway exit"
 #
 # Moving around:
 #
@@ -365,7 +370,7 @@ mode "nag" {
     $bindsym $mod+$left focus left
 # https://git.mjanja.ch/alanorth/dotfiles/commit/246fb98c01e44dff836f9be869ccff78b6ca58ea
 # https://git.mjanja.ch/alanorth/dotfiles/raw/commit/246fb98c01e44dff836f9be869ccff78b6ca58ea/sway/config
-    $bindsym $mod+Shift+Tab focus left
+    $bindsym $mod+shift+Tab focus left
     $bindsym $mod+$down focus down
     $bindsym $mod+$up focus up
     $bindsym $mod+$right focus right
@@ -376,16 +381,16 @@ mode "nag" {
     $bindsym $mod+Up focus up
     $bindsym $mod+Right focus right
 
-    # Move the focused window with the same, but add Shift
-    $bindsym $mod+Shift+$left move left
-    $bindsym $mod+Shift+$down move down
-    $bindsym $mod+Shift+$up move up
-    $bindsym $mod+Shift+$right move right
+    # Move the focused window with the same, but add shift
+    $bindsym $mod+shift+$left move left
+    $bindsym $mod+shift+$down move down
+    $bindsym $mod+shift+$up move up
+    $bindsym $mod+shift+$right move right
     # Ditto, with arrow keys
-    $bindsym $mod+Shift+Left move left
-    $bindsym $mod+Shift+Down move down
-    $bindsym $mod+Shift+Up move up
-    $bindsym $mod+Shift+Right move right
+    $bindsym $mod+shift+Left move left
+    $bindsym $mod+shift+Down move down
+    $bindsym $mod+shift+Up move up
+    $bindsym $mod+shift+Right move right
 
 
 # workspace-edit
@@ -524,16 +529,16 @@ mode "nag" {
     $bindsym $mod+8 workspace number $ws8
     $bindsym $mod+9 workspace number $ws9
     # Move focused container to workspace
-    $bindsym $mod+Shift+0 move container to workspace number $ws0
-    $bindsym $mod+Shift+1 move container to workspace number $ws1
-    $bindsym $mod+Shift+2 move container to workspace number $ws2
-    $bindsym $mod+Shift+3 move container to workspace number $ws3
-    $bindsym $mod+Shift+4 move container to workspace number $ws4
-    $bindsym $mod+Shift+5 move container to workspace number $ws5
-    $bindsym $mod+Shift+6 move container to workspace number $ws6
-    $bindsym $mod+Shift+7 move container to workspace number $ws7
-    $bindsym $mod+Shift+8 move container to workspace number $ws8
-    $bindsym $mod+Shift+9 move container to workspace number $ws9
+    $bindsym $mod+shift+0 move container to workspace number $ws0
+    $bindsym $mod+shift+1 move container to workspace number $ws1
+    $bindsym $mod+shift+2 move container to workspace number $ws2
+    $bindsym $mod+shift+3 move container to workspace number $ws3
+    $bindsym $mod+shift+4 move container to workspace number $ws4
+    $bindsym $mod+shift+5 move container to workspace number $ws5
+    $bindsym $mod+shift+6 move container to workspace number $ws6
+    $bindsym $mod+shift+7 move container to workspace number $ws7
+    $bindsym $mod+shift+8 move container to workspace number $ws8
+    $bindsym $mod+shift+9 move container to workspace number $ws9
     # Note: workspaces can have any name you want, not just numbers.
     # We just use 1-10 as the default.
 #
@@ -554,7 +559,7 @@ mode "nag" {
     $bindsym $mod+f fullscreen
 
     # Toggle the current focus between tiling and floating mode
-    $bindsym $mod+Shift+space floating toggle
+    $bindsym $mod+shift+space floating toggle
 
     # Swap focus between the tiling area and the floating area
     $bindsym $mod+space focus mode_toggle
@@ -568,7 +573,7 @@ mode "nag" {
     # You can send windows there and get them back later.
 
     # Move the currently focused window to the scratchpad
-    $bindsym $mod+Shift+minus move scratchpad
+    $bindsym $mod+shift+minus move scratchpad
 
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
@@ -687,13 +692,13 @@ bar {
 # bindsym $alt_mod+Prior exec env RUST_BACKTRACE=1 \
 #     swayr prev-window all-workspaces >> /tmp/swayr.log 2>&2
 # 
-# bindsym $alt_mod+Shift+Space exec env RUST_BACKTRACE=1 \
+# bindsym $alt_mod+shift+Space exec env RUST_BACKTRACE=1 \
 #     swayr switch-workspace-or-window >> /tmp/swayr.log 2>&1
 # 
 # bindsym $alt_mod+c exec env RUST_BACKTRACE=1 \
 #     swayr execute-swaymsg-command >> /tmp/swayr.log 2>&1
 # 
-# bindsym $alt_mod+Shift+c exec env RUST_BACKTRACE=1 \
+# bindsym $alt_mod+shift+c exec env RUST_BACKTRACE=1 \
 #     swayr execute-swayr-command >> /tmp/swayr.log 2>&1
 
 include /etc/sway/config.d/*
@@ -876,8 +881,8 @@ exec --no-startup-id pipewire
 # exec /usr/libexec/xdg-desktop-portal --verbose -r
 # 
 # # https://www.reddit.com/r/swaywm/comments/m55y1r/state_of_zoom_screensharing_in_2021/
-# # $bindsym $mod+Ctrl+Shift+o exec $HOME/bin/share-screen.sh
-# $bindsym $mod+Shift+o exec $HOME/bin/share-screen.sh
+# # $bindsym $mod+Ctrl+shift+o exec $HOME/bin/share-screen.sh
+# $bindsym $mod+shift+o exec $HOME/bin/share-screen.sh
 # $bindsym $mod+o       exec $HOME/bin/share-screen.sh stop
 # 
 # # network configuration
@@ -937,10 +942,10 @@ $bindsym $mod+g exec ~/.config/sway/scripts/load_layout.sh
 # #   set $src /d/screenshot
 # $bindsym {
 #     #   ...
-#     Shift+Print  exec grimshot save active   $scr/$(date + "%F_%T_grimshot.png")
+#     shift+print  exec grimshot save active   $scr/$(date + "%F_%T_grimshot.png")
 #     #   ...
 #     $mod+p       exec grimshot save active $src/$(date + "%F_%T_grimshot.png")
-#     $mod+Shift+p exec grimshot save area $src/$(date + "%F_%T_grimshot.png")
+#     $mod+shift+p exec grimshot save area $src/$(date + "%F_%T_grimshot.png")
 #     # Logo key. Use Mod1 for Alt.
 #     $mod+$alt_mod+p  exec grimshot save output $src/$(date + "%F_%T_grimshot.png")
 #     $mod+Ctrl+p  exec grimshot save window $src/$(date + "%F_%T_grimshot.png")
@@ -948,7 +953,7 @@ $bindsym $mod+g exec ~/.config/sway/scripts/load_layout.sh
 
 # Screenshots:
 # Super+P: Current window
-# Super+Shift+p: Select area
+# Super+shift+p: Select area
 # Super+Alt+p Current output
 # Super+Ctrl+p Select a window
 
@@ -960,7 +965,7 @@ exec wl-paste -t text --watch clipman store --no-persist
 # export XDG_PICTURES_DIR=$HOME/pictures/screenshots
 
 bindsym $mod+p       exec grimshot --notify save active
-bindsym $mod+Shift+p exec grimshot --notify save area
+bindsym $mod+shift+p exec grimshot --notify save area
 # Logo key. Use Mod1 for Alt.
 bindsym $mod+$alt_mod+p  exec grimshot --notify save output
 bindsym $mod+Ctrl+p  exec grimshot --notify save window

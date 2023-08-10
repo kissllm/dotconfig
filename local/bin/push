@@ -66,5 +66,5 @@ remote_branch=${remote_branch##*/}
 remotes=$(git remote -v  | grep push | awk '{print $1}' | tr "\n" " ")
 
 for repo in $remotes; do
-    [ -z "${repo##*upstream*}" ] || git push "$repo" "$branch_name"
+    [ -z "${repo##*upstream*}" ] || git push -u "$repo" "$branch_name"
 done

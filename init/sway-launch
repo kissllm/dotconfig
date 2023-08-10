@@ -6,9 +6,11 @@ echo "Entered tty: $tty_num"
 [ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
 WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
 export WAYLAND_CONFIG_HOME
+[ -d "${WAYLAND_CONFIG_HOME}" ] || mkdir -p "$WAYLAND_CONFIG_HOME"
 
+# "${SHARE_PREFIX}/init/share" has the file structure
 # sway specific environment
-[ -f "${WAYLAND_CONFIG_HOME}/env" ] && {
+[ ! -f "${WAYLAND_CONFIG_HOME}/env" ] || {
     set -a
     # shellcheck disable=SC1090
     . "${WAYLAND_CONFIG_HOME}/env"
@@ -22,11 +24,29 @@ export WAYLAND_CONFIG_HOME
 # swc-launch is used in preference to dbus
 swc=$(which swc-launch)
 command -v "$swc" > /dev/null 2>&1 && {
-    exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
+    # exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
+    nohup swc-launch -t /dev/tty7 -- /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
 } || {
     dbus=$(which dbus-run-session)
     command -v "$dbus" > /dev/null 2>&1 && {
         # dbus-launch --sh-syntax --exit-with-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
         exec dbus-run-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
+        # nohup dbus-run-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
     }
 }
+
+# printf '%s %s\n' '$SHLVL' "$SHLVL" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+# printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+# export WAYLAND_DISPLAY
+# printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+# printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
+#
+# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
+#     grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
+# WAYLAND_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$(id -u).$sock_id.sock"
+# [ ! -S "$WAYLAND_SOCK" ] || {
+#     export WAYLAND_SOCK
+#     printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.socket
+# }
+# DISPLAY=${WAYLAND_DISPLAY}
+# export DISPLAY

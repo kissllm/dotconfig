@@ -2,29 +2,31 @@
 
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.profile"
 
-[ -n "${LOGNAME+x}" ] ||
-export LOGNAME="$(/usr/bin/whoami)"
+: "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
 
 # echo "Original \$HOME = $HOME"
-[ -n "${HOME:+x}" ] || {
-    HOME="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
+# [ -n "${HOME:+x}" ] || {
+home="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
+[ "$home" = "$HOME" ] || {
+    HOME="$home"
     export HOME
     echo "Fixed \$HOME = $HOME"
 }
 
-LLVM_IAS=1
-export LLVM_IAS
-LLVM=1
-export LLVM
+: "${LLVM_IAS=1}" && export LLVM_IAS
+: "${LLVM=1}" && export LLVM
 
-export SSL_CERT_FILE=$HOME/.cert/cacert.pem
+: "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
+# awesome-vim-colorschemes
+: "${HOMEBREW_GITHUB_API_TOKEN="$SSL_CERT_FILE"}" &&
+export HOMEBREW_GITHUB_API_TOKEN
 
 # For Chimera Linux development
 # [ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
 
 # echo "\$loaded_profile = $loaded_profile"
-# [ ! -z "${loaded_profile+x}" ] ||
-[ ! -f /etc/profile ] || . /etc/profile
+[ ! -z "${loaded_profile+x}" ] ||
+[ ! -e /etc/profile ] || . /etc/profile
 
 # [ "${SHELL}" = "${0}" ] || export SHELL=$0
 command -v "${SHELL}" > /dev/null 2>&1 || export SHELL=$(which ash)

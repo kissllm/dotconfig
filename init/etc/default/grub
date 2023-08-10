@@ -5,6 +5,8 @@ GRUB_TIMEOUT=5
 GRUB_DISTRIBUTOR="KISS"
 GRUB_DISABLE_SUBMENU=y
 GRUB_DISABLE_RECOVERY=true
+
+# GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 vga=0x318 fbcon=font:FONT_TER16x32"
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 "
 
@@ -12,23 +14,34 @@ GRUB_DISABLE_RECOVERY=true
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nouveau.modeset=0 selinux=0 pci=nommconf "
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume acpi=off tsc=unstable"
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume tsc=unstable nolapic "
-GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 noplymouth slub_debug=P page_poison=1 noresume tsc=unstable acpi=nomsi tpm_tis.force=1 vt.cur_default=5 vt.color=6"
+GRUB_CMDLINE_LINUX_DEFAULT=" ro loglevel=4 noplymouth slub_debug=P page_poison=1 \
+"
+# noresume tsc=unstable acpi=nomsi tpm_tis.force=1 \
+# intel_idle.max_cstate=1 nosplash acpi_osi=Linux video=SVIDEO-1:d \
+
+# noresume tsc=unstable acpi=nomsi tpm_tis.force=1 vt.cur_default=5 vt.color=6 tpm_tis.force=1 video=SVIDEO-1:d \
+# noapic noacpi nosplash irqpoll \
+# nouveau.blacklist=1 modprobe.blacklist=nouveau \
+# acpi=off pci=noacpi acpi=strict acpi_osi=Linux i915.enable_guc=7 nouveau.noaccl=1 "
+# noapic noacpi nosplash irqpoll pci=noacpi acpi=strict nomodeset acpi_osi=Linux debug.acpi.disabled=\"thermal\" "
 
 # nvidia-drm and nouveau modeset leads CPU throttles
-# GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nvidia-drm.modeset=1 nouveau.modeset=0"
-# GRUB_CMDLINE_LINUX=" console=ttyS1,19200n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
+# GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 nvidia-drm.modeset=1 nouveau.modeset=0 "
+
 # https://forums.centos.org/viewtopic.php?t=68800
 # Will panic
-# GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 rd.driver.blacklist=nouveau nouveau.modeset=0"
+# GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 rd.driver.blacklist=nouveau nouveau.modeset=0 "
 # console will redirect kernel message to different tty
 # GRUB_CMDLINE_LINUX=" console=ttyS1,38400n8 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 "
 # https://askubuntu.com/questions/248/how-can-i-show-or-hide-boot-messages-when-ubuntu-starts
 
-# GRUB_CMDLINE_LINUX=" modules=sd-mod,usb-storage,ext4 rootfstype=ext4 "
-GRUB_CMDLINE_LINUX=" modules=sd-mod,usb-storage,ext4 rootfstype=ext4 tpm_tis.interrupts=0 "
-
+# GRUB_CMDLINE_LINUX=" console=ttyS1,19200n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
 # GRUB_CMDLINE_LINUX=" console=ttyS0,38400n8 net.ifnames=0 modules=sd-mod,usb-storage,ext4 quiet rootfstype=ext4 "
-# GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
+# GRUB_CMDLINE_LINUX=" net.ifnames=0 modules=sd-mod,usb-storage,ext4 rootfstype=ext4 tpm_tis.interrupts=0 "
+GRUB_CMDLINE_LINUX=" rootfstype=ext4 modules=sd-mod,usb-storage,ext4 quiet \
+"
+# tpm_tis.interrupts=0 \
+
 
 # Preload both GPT and MBR modules so that they are not missed
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
