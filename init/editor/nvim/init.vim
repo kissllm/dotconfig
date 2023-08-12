@@ -75,19 +75,20 @@ if has("cscope")
 endif
 
 " Time consuming
-let g:_session_auto_develop      = 0
+let g:_session_auto_develop      = 1
 
 let g:_fixed_tips_width          = 27
 " let g:_buffergator_develop     = 1
 " let g:_log_func_name           = 'boot#log_silent'
 let g:_use_terminal_transparent  = 1
 let g:_use_dynamic_color         = 1
-
+let g:restore_each_buffer_view   = 1
 if exists('g:_highlight_cursor_line_column')
-    " unlet g:_highlight_cursor_line_column
-else
-    let g:_highlight_cursor_line_column
-        \ = 1
+    unlet g:_highlight_cursor_line_column
+" Heavy CPU usage if both enabled cursorcolumn/cursorline and indent-blankline
+" else
+"     let g:_highlight_cursor_line_column
+"         \ = 1
 endif
 
 let g:_disable_direction_key     = 1
@@ -637,7 +638,6 @@ let g:vim_packages_use['mattolenik/vim-projectrc']                        = { 't
 let g:vim_packages_use['sheerun/vim-polyglot']                            = { 'type' : 'opt' }
 " Tons of errors with something not found
 let g:vim_packages_use['trailblazing/mkdx']                               = { 'type' : 'opt' }
-let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'opt', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['joshdick/onedark.vim']                            = { 'type' : 'opt' }
 " Rust current vsersion doesn't support musl libc 1.2.4
 " "tail --line=1" to "tail -n 1" in install.sh
@@ -649,6 +649,7 @@ let g:vim_packages_use['liuchengxu/vim-clap']                             = { 't
 " $SHARE_PREFIX/tinit/tmux.conf
 " set -g @plugin 'christoomey/vim-tmux-navigator'
 " $SHARE_PREFIX/init/editor/nvim/init.vim
+let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'opt', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'opt' }
 
 " let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']              = { 'type' : 'opt' }  " obsoleted
@@ -1342,15 +1343,20 @@ function! s:refresh_light()
 
 
         " Without virtcol, indent line will be erased when navigated to long line
-        if &list == 0 || virtcol('.') > 80
-            setlocal list
+        " if &list == 0 || virtcol('.') > 80
+        "     setlocal list
+        " else
+        if exists('g:loaded_indent_blankline')
+            :IndentBlanklineRefresh
         endif
-        " execute ':IndentBlanklineEnable!'
+            " :IndentBlanklineEnable!
+        " endif
     else
-        if &list == 1
-            setlocal nolist
-        endif
-        " execute ':IndentBlanklineDisable!'
+        " if &list == 1
+        "     setlocal nolist
+        " else
+            " :IndentBlanklineDisable!
+        " endif
     endif
 endfunction
 
@@ -1771,6 +1777,7 @@ endif
 " let g:indent_guides_color_name_guibg_pattern = "guibg='?\zs[0-9A-Za-z]+\ze'?"
 
 " let g:indent_blankline_char_highlight                 = "Whitespace"
+let g:indent_blankline_show_current_context           = v:true
 let g:indent_blankline_disable_with_nolist            = v:true
 let g:indent_blankline_show_trailing_blankline_indent = v:false
 let g:indent_blankline_show_first_indent_level        = v:false
@@ -1779,7 +1786,6 @@ let g:indent_blankline_buftype_exclude                = ['terminal']
 let g:indent_blankline_viewport_buffer                = 20
 let g:indent_blankline_show_current_context_start_on_current_line
     \ = v:false
-
 
 if has('nvim') && exists('g:_use_indent_guides')
     unlet g:_use_indent_guides
@@ -2306,9 +2312,6 @@ augroup color_background
 
 augroup END
 
-" https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
-:cabbrev h vert h
-
 " help W10
 augroup read_only | au!
     au FileChangedRO * set noro
@@ -2385,16 +2388,25 @@ set autowriteall
 " inoremap <silent> <C-s> <ESC>:SudoWrite<CR>i
 
 if has('autocmd')
-    function! s:help_to_the_right()
-        if !exists('w:help_is_moved') || w:help_is_moved != "right"
-            wincmd L
-            let w:help_is_moved = "right"
-        endif
-    endfunction
+    " function! s:help_to_the_right()
+    "     if !exists('w:help_is_moved') || w:help_is_moved != "right"
+    "         wincmd L
+    "         let w:help_is_moved = "right"
+    "     endif
+    " endfunction
 
-    augroup HelpPages | au!
-        autocmd FileType help nested call s:help_to_the_right()
-    augroup END
+    " augroup HelpPages | au!
+    "     autocmd FileType help nested call s:help_to_the_right()
+    " augroup END
+
+    " Open help in most right current window
+    " Usage: H topic
+    command! -nargs=1 -complete=help H :wincmd l |
+        \ :enew | :set buftype=help | :keepalt h <args>
+
+    " https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
+    " :cabbrev h vert h
+
 endif
 
 
@@ -2824,6 +2836,8 @@ if exists("g:_use_terminal_transparent")
     " highlight Normal guifg=fg guibg=NONE ctermfg=grey ctermbg=NONE gui=NONE
     "     \ cterm=NONE term=NONE
     highlight Identifier ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
+    highlight Search ctermbg=NONE guibg=NONE guifg=NONE ctermfg=6 cterm=inverse term=inverse gui=inverse
+    highlight IncSearch ctermbg=NONE guibg=NONE guifg=NONE ctermfg=6 cterm=inverse term=inverse gui=inverse
     highlight Keyword ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
     highlight Function ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
     highlight Normal ctermbg=0 guibg=NONE
@@ -5760,42 +5774,43 @@ if ! exists("g:loaded_session_auto")    " && &readonly == 0
     execute "source " .   session_auto_load_file
     execute "runtime! " . 'after/session_auto.vim'
 
-    " if exists('g:loaded_session')
-    "     " https://github.com/xolox/vim-session
-    "     let g:session_autoload         = 'yes'
-    "     let g:session_autosave         = 'yes'
-    "     " Will generate .default.vim
-    "     let g:session_autosave_to      = '.default'
-    "     let g:session_verbose_messages = 0
-    "     let g:session_directory        = getcwd()
-    " endif
-    function! s:session_state(updating)
-        if a:updating
-            " packadd cscope_auto
-            " augroup cscope_auto | au!
-            "     autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
-            " augroup END
-            let g:statusline_session_flag = "S"
-        else
-            " augroup cscope_auto | au!
-            " augroup END
-            let g:statusline_session_flag = ""
-        endif
-        execute "redrawstatus!"
-    endfunction
-
-    augroup session_auto_setup
-        au!
-        " Error detected while processing VimEnter Autocommands for "*":
-        " E117: Unknown function: session_auto#setup
-        " "packadd session_auto" hasn't work
-        autocmd VimEnter * :call session_auto#setup(function("s:session_state"))
-
-        " autocmd BufReadPre * :call session_auto#setup(function("s:session_state"))
-        " autocmd WinNew * :call session_auto#setup(function("s:session_state"))
-        " autocmd BufNew * :call session_auto#setup(function("s:session_state"))
-    augroup END
 endif
+
+" if exists('g:loaded_session')
+"     " https://github.com/xolox/vim-session
+"     let g:session_autoload         = 'yes'
+"     let g:session_autosave         = 'yes'
+"     " Will generate .default.vim
+"     let g:session_autosave_to      = '.default'
+"     let g:session_verbose_messages = 0
+"     let g:session_directory        = getcwd()
+" endif
+function! s:session_state(updating)
+    if a:updating
+        " packadd cscope_auto
+        " augroup cscope_auto | au!
+        "     autocmd BufEnter * :call cscope_auto#setup(function("s:cscope_state"))
+        " augroup END
+        let g:statusline_session_flag = "S"
+    else
+        " augroup cscope_auto | au!
+        " augroup END
+        let g:statusline_session_flag = ""
+    endif
+    execute "redrawstatus!"
+endfunction
+
+augroup session_auto_setup
+    au!
+    " Error detected while processing VimEnter Autocommands for "*":
+    " E117: Unknown function: session_auto#setup
+    " "packadd session_auto" hasn't work
+    autocmd VimEnter * :call session_auto#setup(function("s:session_state"))
+
+    " autocmd BufReadPre * :call session_auto#setup(function("s:session_state"))
+    " autocmd WinNew * :call session_auto#setup(function("s:session_state"))
+    " autocmd BufNew * :call session_auto#setup(function("s:session_state"))
+augroup END
 
 " " https://github.com/xolox/vim-notes/issues/80
 " augroup reset_xolox
@@ -6292,11 +6307,18 @@ endif
 
 augroup indent_blankline_hl
     au!
-    autocmd VimEnter,WinEnter,BufEnter,BufDelete,BufLeave,WinLeave,ModeChanged,
-        \SessionLoadPost,FileChangedShellPost,BufWinEnter,BufWinLeave,
+    " Leave event trigering refresh will highlight cursor line/column
+    " autocmd VimEnter,WinEnter,BufEnter,BufDelete,BufLeave,WinLeave,BufWinLeave,ModeChanged,
+    autocmd VimEnter,WinEnter,BufEnter,ModeChanged,
+        \SessionLoadPost,FileChangedShellPost,BufWinEnter,
         \BufReadPost,BufWritePost,ColorScheme * ++nested
         \ call s:refresh()
-    autocmd CursorMoved * ++nested call s:refresh_light()
+
+    " Heavy CPU usage if both enabled cursorcolumn/cursorline and indent-blankline
+    " Already defined in:
+    " /mnt/init/editor/nvim/site/pack/packer/start/indent-blankline.nvim/lua/indent_blankline/init.lua
+    " autocmd CursorMoved * ++nested call s:refresh_light()
+
     " \BufReadPost,BufWritePost,ColorScheme * ++nested syntax enable | redraw!
 augroup END
 
