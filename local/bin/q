@@ -11,47 +11,47 @@
 
 # do not use single quotes for $1 in []
 if [ -z "${1}" ]; then
-    printf "Input target pls\n"; exit 1;
+	printf "Input target pls\n"; exit 1;
 else
-    index=0
-    target="${1}"
-    selected=
-    ver_selected=
-    sub_ver_selected=
-    packages="$(find "/var/db/kiss" \( -type d -o -type l \) -name "${target}")"
-    for pack in $packages
-    do
-        [ -d "$pack" ] && [ -f "$pack/version" ] && {
-            read -r ver sub_ver 2>/dev/null < "$pack/version" || {
-                printf "%s\n" "Failed to read version file ($pack/version)"
-                exit 1
-            }
-            printf "%-4d %-9s %-4s %s\n" $((index)) "$ver" "$sub_ver" "$pack"
-            if [ -n "$2" ] && [ $index = $2 ]; then
-                selected="$pack"
-                ver_selected="$ver"
-                sub_ver_selected="$sub_ver"
-            fi
-            index=$(($index + 1))
-        }
-    done
-    if [ -n "$selected" ]; then
-        printf "\n%s\n%-4d %-9s %-4s %s\n\n" "Selected package:" $2  "$ver_selected" "$sub_ver_selected" "$selected"
-        dir="$(dirname "$selected")"
-        base="$(basename "$selected")"
-        if [ -z "${USE_GMAKE}" ]; then
-            printf "\n%s\n\n" "BSD make used"
-        else
-            printf "\n%s\n\n" "GNU make used"
-            build_root="${HOME}/.cache/kiss/proc/$base"
-            [ ! -d "${build_root}/bin" ] && mkdir -p "${build_root}/bin"
-            [ "$(readlink "${build_root}/bin/gunzip")" != "/usr/bin/pigz"  ] && \ln -sf "/usr/bin/pigz"  "${build_root}/bin/gunzip"
-            [ "$(readlink "${build_root}/bin/make")"   != "/usr/bin/gmake" ] && \ln -sf "/usr/bin/gmake" "${build_root}/bin/make"
-            export PATH="${build_root}/bin:$PATH"
-        fi
-        export KISS_PATH=$dir
-        /usr/bin/kiss c $base 2>&1 > /dev/stderr &&
-        /usr/bin/kiss b $base 2>&1 > /dev/stderr &&
-        /usr/bin/kiss i $base
-    fi
+	index=0
+	target="${1}"
+	selected=
+	ver_selected=
+	sub_ver_selected=
+	packages="$(doas find -L "/var/db/kiss" \( -type d -o -type l \) -name "${target}")"
+	for pack in $packages
+	do
+		[ -d "$pack" ] && [ -f "$pack/version" ] && {
+			read -r ver sub_ver 2>/dev/null < "$pack/version" || {
+				printf "%s\n" "Failed to read version file ($pack/version)"
+				exit 1
+			}
+			printf "%-4d %-9s %-4s %s\n" $((index)) "$ver" "$sub_ver" "$pack"
+			if [ -n "$2" ] && [ $index = $2 ]; then
+				selected="$pack"
+				ver_selected="$ver"
+				sub_ver_selected="$sub_ver"
+			fi
+			index=$(($index + 1))
+		}
+	done
+	if [ -n "$selected" ]; then
+		printf "\n%s\n%-4d %-9s %-4s %s\n\n" "Selected package:" $2  "$ver_selected" "$sub_ver_selected" "$selected"
+		dir="$(dirname "$selected")"
+		base="$(basename "$selected")"
+		if [ -z "${USE_GMAKE}" ]; then
+			printf "\n%s\n\n" "BSD make used"
+		else
+			printf "\n%s\n\n" "GNU make used"
+			build_root="${HOME}/.cache/kiss/proc/$base"
+			[ ! -d "${build_root}/bin" ] && mkdir -p "${build_root}/bin"
+			[ "$(readlink "${build_root}/bin/gunzip")" != "/usr/bin/pigz"  ] && \ln -sf "/usr/bin/pigz"  "${build_root}/bin/gunzip"
+			[ "$(readlink "${build_root}/bin/make")"   != "/usr/bin/gmake" ] && \ln -sf "/usr/bin/gmake" "${build_root}/bin/make"
+			export PATH="${build_root}/bin:$PATH"
+		fi
+		export KISS_PATH=$dir
+		/usr/bin/kiss c $base 2>&1 > /dev/stderr &&
+		/usr/bin/kiss b $base 2>&1 > /dev/stderr &&
+		/usr/bin/kiss i $base
+	fi
 fi

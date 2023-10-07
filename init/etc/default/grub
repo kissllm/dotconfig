@@ -69,7 +69,8 @@ GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 
 # Uncomment if you want GRUB to pass to the Linux kernel the old parameter
 # format "root=/dev/xxx" instead of "root=/dev/disk/by-uuid/xxx"
-GRUB_DISABLE_LINUX_UUID=true
+# GRUB_DISABLE_LINUX_UUID=true
+GRUB_DISABLE_LINUX_UUID=false
 GRUB_FORCE_PARTUUID=false
 
 # Uncomment to disable generation of recovery mode menu entries

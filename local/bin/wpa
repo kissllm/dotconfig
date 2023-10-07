@@ -1,65 +1,65 @@
 #!/bin/sh
 
 { [ -z "$1" ] || [ "$1" != "down" ]; } && {
-    [ $(id -u) -ne "0" ] || { echo "We don't save hardcoded config files in root user's folder"; exit 1; }
-    config="$1"
-    [ -n "$1" ] && [ -e "$1" ] ||
-    config=$HOME/.config/wpa_supplicant/wpa_supplicant.conf
-    echo "\$config = $config"
-    [ -f "$config" ] ||
-    { echo "Input valid \$1 for switch, please"; exit 1; }
+	[ $(id -u) -ne "0" ] || { echo "We don't save hardcoded config files in root user's folder"; exit 1; }
+	config="$1"
+	[ -n "$1" ] && [ -e "$1" ] ||
+	config=$HOME/.config/wpa_supplicant/wpa_supplicant.conf
+	echo "\$config = $config"
+	[ -f "$config" ] ||
+	{ echo "Input valid \$1 for switch, please"; exit 1; }
 
 
-    address="$(lspci -nnk | grep wifi | awk "{print \$1}")"
-    # 00:14.3
-    for item in $(ls -1 /sys/class/net); do
-        real_name="$(doas readlink -f "/sys/class/net/${item%\@}")"
-        [ -n "${real_name##*"$address"*}" ] || interface="${item%\@}"
-    done
+	address="$(lspci -nnk | grep wifi | awk "{print \$1}")"
+	# 00:14.3
+	for item in $(ls -1 /sys/class/net); do
+		real_name="$(doas readlink -f "/sys/class/net/${item%\@}")"
+		[ -n "${real_name##*"$address"*}" ] || interface="${item%\@}"
+	done
 
-    # interface=$(\ls /sys/class/ieee80211/*/device/net > /dev/null)
+	# interface=$(\ls /sys/class/ieee80211/*/device/net > /dev/null)
 
-    [ -n "$interface" ] || interface=$(iw dev | awk '$1=="Interface"{print $2}')
-    echo "\$interface = $interface"
-    wpa_list="$(ps -ef | grep wpa_supplicant | grep -v grep | grep -v $$ | awk "{print \$1}" | tr -d ' ')"
-    for wpa in $wpa_list; do doas kill -9 $wpa; done
+	[ -n "$interface" ] || interface=$(iw dev | awk '$1=="Interface"{print $2}')
+	echo "\$interface = $interface"
+	wpa_list="$(ps -ef | grep wpa_supplicant | grep -v grep | grep -v $$ | awk "{print \$1}" | tr -d ' ')"
+	for wpa in $wpa_list; do doas kill -9 $wpa; done
 
-    # https://www.linuxquestions.org/questions/slackware-14/wpa_supplicant-failed-to-initialize-driver-4175668012/
-    # bring up the ethernet adapter
-    doas /sbin/ip link set dev $interface up >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+	# https://www.linuxquestions.org/questions/slackware-14/wpa_supplicant-failed-to-initialize-driver-4175668012/
+	# bring up the ethernet adapter
+	doas /sbin/ip link set dev $interface up >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
 
-    # flush its configuration
-    doas /sbin/ip address flush dev $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+	# flush its configuration
+	doas /sbin/ip address flush dev $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
 
-    # you might need an IP address before doing the IEEE 802.1X authentication with wpa_supplicant
-    # /sbin/dhclient eth0
-    doas su dhcpcd /sbin/dhcpcd $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+	# you might need an IP address before doing the IEEE 802.1X authentication with wpa_supplicant
+	# /sbin/dhclient eth0
+	doas su dhcpcd /sbin/dhcpcd $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
 
-    doas touch /tmp/wpa.lock
-    # then run wpa_supplicant
-    # doas wpa_supplicant -D nl80211 -B -i $interface -c $HOME/.config/wpa_supplicant/wpa_supplicant.conf
-    doas wpa_supplicant -D nl80211 -B -i $interface -c $config > $HOME/.config/wpa_supplicant/.wpa.log 2>&1 &
-    sleep 3s
-    doas su dhcpcd /sbin/dhcpcd $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
-    iwconfig
-    :
+	doas touch /tmp/wpa.lock
+	# then run wpa_supplicant
+	# doas wpa_supplicant -D nl80211 -B -i $interface -c $HOME/.config/wpa_supplicant/wpa_supplicant.conf
+	doas wpa_supplicant -D nl80211 -B -i $interface -c $config > $HOME/.config/wpa_supplicant/.wpa.log 2>&1 &
+	sleep 3s
+	doas su dhcpcd /sbin/dhcpcd $interface >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+	iwconfig
+	:
 } || {
-    wpa_list="$(ps -ef | grep wpa_supplicant | grep -v grep | awk "{print \$1}" | tr -d ' ')"
-    for wpa in $wpa_list; do doas kill -9 $wpa; done
-    # doas /usr/bin/find /sys/class/ -name enp2s0
-    # /sys/class/net/enp2s0
-    # interface="enp2s0"
-    address="$(lspci -nnk | grep alx | awk "{print \$1}")"
-    # 02:00.0
-    for item in $(ls -1 /sys/class/net); do
-        real_name="$(doas readlink -f "/sys/class/net/${item%\@}")"
-        [ -n "${real_name##*"$address"*}" ] || interface="${item%\@}"
-    done
-    # interface="eth0"
-    echo "\$interface = $interface"
-    doas sv restart dhcpcd
-    doas /sbin/ip link set dev "$interface" up
-    doas /sbin/ip address flush dev "$interface"
-    doas su dhcpcd /sbin/dhcpcd "$interface"
-    ifconfig -a
+	wpa_list="$(ps -ef | grep wpa_supplicant | grep -v grep | awk "{print \$1}" | tr -d ' ')"
+	for wpa in $wpa_list; do doas kill -9 $wpa; done
+	# doas /usr/bin/find /sys/class/ -name enp2s0
+	# /sys/class/net/enp2s0
+	# interface="enp2s0"
+	address="$(lspci -nnk | grep alx | awk "{print \$1}")"
+	# 02:00.0
+	for item in $(ls -1 /sys/class/net); do
+		real_name="$(doas readlink -f "/sys/class/net/${item%\@}")"
+		[ -n "${real_name##*"$address"*}" ] || interface="${item%\@}"
+	done
+	# interface="eth0"
+	echo "\$interface = $interface"
+	doas sv restart dhcpcd
+	doas /sbin/ip link set dev "$interface" up
+	doas /sbin/ip address flush dev "$interface"
+	doas su dhcpcd /sbin/dhcpcd "$interface"
+	ifconfig -a
 }

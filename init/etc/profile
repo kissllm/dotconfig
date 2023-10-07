@@ -1,0 +1,86 @@
+# /etc/profile
+#
+# System wide environment and startup programs.
+
+# set -x
+
+# Set default path (/usr/sbin:/sbin:/bin included for non-KISS Linux chroots).
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
+
+# Set default umask.
+umask 022
+
+alias /='eval'
+
+_env_reset() {
+	local env_key_name="${1:?"Must give a key"}"
+	local env_value="${2:?"Must give a value"}"
+	/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
+		# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
+		/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
+	}
+}
+alias env_reset='_env_reset'
+env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
+# : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
+# : ${os_name:="$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release)"}
+env_reset os_pretty_name "$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"")"
+# : ${os_pretty_name:="$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release)"}
+
+case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*)
+	IS_KISS= && export IS_KISS
+	# Will repeat shell errors report
+	# trap '"${LINENO-}" "${FUNCNAME-}" "${0-}"' ERR || :
+esac
+
+# : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
+env_reset LOGNAME "$(/usr/bin/whoami)"
+# [ -n "${LOGNAME+x}" ] || export LOGNAME="$(/usr/bin/whoami)"
+#
+# : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+#   "\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
+env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+	"\$1 == v {print \$6}" /etc/passwd)"
+
+# home="$(/usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
+# [ "$home" = "$HOME" ] || {
+#     HOME="$home" && export HOME
+#     echo "Fixed \$HOME = $HOME"
+# }
+
+# share folder initialization
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
+if [ -d "/mnt/init" ]; then
+	SHARE_PREFIX="/mnt"
+	export SHARE_PREFIX
+elif [ -d "/opt/init" ]; then
+	SHARE_PREFIX="/opt"
+	export SHARE_PREFIX
+else
+	printf '%s %s\n' '$SHARE_PREFIX' "is not defined"
+fi
+
+env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
+
+[ ! -z "${loaded_share+x}" ] ||
+[ ! -f "$LAYOUT_INIT" ] || {
+	printf '%s %s\n' "$LAYOUT_INIT" "is sourced"
+	. "$LAYOUT_INIT"
+}
+
+# Load profiles from /etc/profile.d
+for file in /etc/profile.d/*.sh; do
+	# [ ! -r "$file" ] && {
+	#   [ ! -f "$SHARE_PREFIX/init/etc/profile.d/share" ] || {
+	#       . "$SHARE_PREFIX/init/etc/profile.d/share"
+	#       [ ! -r "$file" ] &&
+	#           printf '%s %s\n' "$file" "can't be recovered" && continue ||
+	#           . "$file"
+	#   }
+	# } ||
+		. "$file"
+done
+# setterm -initialize
+# echo 5 | doas tee /sys/module/vt/parameters/cur_default
+unset file
+export loaded_profile=

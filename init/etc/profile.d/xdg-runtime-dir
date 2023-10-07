@@ -1,0 +1,63 @@
+#! /bin/sh
+
+# : ${UID="$(id -u)"} && export UID
+env_reset UID "$(id -u)"
+[ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "$UID"
+
+# : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
+env_reset LOGNAME "$(/usr/bin/whoami)"
+# : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+#	"\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
+env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+	"\$1 == v {print \$6}" /etc/passwd)"
+
+# home="$(/usr/bin/awk -F ":" -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
+# [ "$home" = "$HOME" ] || {
+#	  HOME="$home"
+#	  export HOME
+#	  echo "Fixed \$HOME = $HOME"
+# }
+[ -n "${LOGNAME:+x}" ] ||
+printf '%s %s\n' '$LOGNAME' "$LOGNAME"
+[ -n "${HOME:+x}" ] ||
+printf '%s %s\n' '$HOME' "$HOME"
+
+# : ${XDG_DATA_HOME:="$HOME/.local/share"} && export XDG_DATA_HOME
+env_reset XDG_DATA_HOME "$HOME/.local/share"
+[ -d "${XDG_DATA_HOME}" ]	|| \mkdir -p "${XDG_DATA_HOME}"
+
+# : ${XDG_CACHE_HOME:="$HOME/.cache"} && export XDG_CACHE_HOME
+env_reset XDG_CACHE_HOME "$HOME/.cache"
+[ -d "${XDG_CACHE_HOME}" ]	|| \mkdir -p "${XDG_CACHE_HOME}"
+
+# : ${XDG_CONFIG_HOME:="$HOME/.config"} && export XDG_CONFIG_HOME
+env_reset XDG_CONFIG_HOME "$HOME/.config"
+[ -d "${XDG_CONFIG_HOME}" ] || \mkdir -p "${XDG_CONFIG_HOME}"
+
+# expect_xdg_runtime_dir="/run/user/$UID"
+# [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
+# # [ ! -z "${XDG_RUNTIME_DIR+x}" ] || {
+# #
+# : ${XDG_RUNTIME_DIR="/run/user/$UID"} && export XDG_RUNTIME_DIR
+# [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
+# XDG_RUNTIME_DIR="/run/user/$UID" && export XDG_RUNTIME_DIR
+env_reset XDG_RUNTIME_DIR "/run/user/$UID"
+
+# [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
+# printf '%s %s\n' '$XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
+
+[ -d "${XDG_RUNTIME_DIR}" ] || doas mkdir -p "${XDG_RUNTIME_DIR}"
+
+[ "$(stat -L -c '%u' "$XDG_RUNTIME_DIR")" = "$UID" ] ||
+	doas chown -R $UID:users "${XDG_RUNTIME_DIR}"
+
+# perm="$(stat -L -c '%A' "$XDG_RUNTIME_DIR")"
+[ "$(stat -L -c '%A' "$XDG_RUNTIME_DIR")" = "drwx------" ] ||
+	doas chmod 0700 "${XDG_RUNTIME_DIR}"
+
+# [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
+# : ${DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"} &&
+# export DBUS_SESSION_BUS_ADDRESS
+env_reset DBUS_SESSION_BUS_ADDRESS "unix:path=$XDG_RUNTIME_DIR/bus"
+
+# }

@@ -8,8 +8,8 @@ trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
 # des = /mnt/gentoo # or some absolute path
 
 [ -d "$des" ] || {
-    echo "Please input absolute directory to chroot to it"
-    exit 1
+	echo "Please input absolute directory to chroot to it"
+	exit 1
 }
 
 # echo "In chroot.sh, \$des = $des"
@@ -17,32 +17,33 @@ trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
 [ -z "${2:+x}" ] || shell=$2
 
 smart_rbind () {
-    dir=$1
-    [ -d  "$des/$dir" ] || \mkdir -p  "$des/$dir"
-    # echo "In smart_rbind, \$des = $des"
-    target_exists "$des/$dir" || [ ! -d "/$dir" ] || {
-    # [ ! -d "$des/$dir" ] && {
-        mount --rbind /$dir $des/$dir
-        mount --make-rslave $des/$dir
-    }
+	dir=$1
+	[ -d  "$des/$dir" ] || \mkdir -p  "$des/$dir"
+	# echo "In smart_rbind, \$des = $des"
+	target_exists "$des/$dir" || [ ! -d "/$dir" ] || {
+	# [ ! -d "$des/$dir" ] && {
+		mount --rbind /$dir $des/$dir
+		mount --make-rslave $des/$dir
+	}
 }
 
 # cp -L /etc/resolv.conf $des/etc/
 [ -d "$des/proc" ] || \mkdir -p " $des/proc"
 # mount -t proc /proc $des/proc
-        mount --rbind /proc $des/proc
-        mount --make-rslave $des/proc
+		mount --rbind /proc $des/proc
+		mount --make-rslave $des/proc
 
 # [ $(target_exists "$des/tmp") -eq 0 ] && {
-#     mount --rbind /tmp $des/tmp
-#     mount --make-rslave $des/tmp
+#	  mount --rbind /tmp $des/tmp
+#	  mount --make-rslave $des/tmp
 # }
 
 for I in sys sys/kernel/security dev dev/pts dev/shm run; do
-    smart_rbind "$I"
+	smart_rbind "$I"
 done
 
-smart_rbind "tmp"
+# Will point to host "root_partition/tmp" if root does not have a seperate tmp device
+# smart_rbind "tmp"
 
 # mount --rbind /sys $des/sys
 # mount --make-rslave $des/sys
@@ -80,13 +81,13 @@ mount --bind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
 # chroot $des /bin/env -i TERM=$TERM /bin/bash
 # chroot $des /bin/env -i TERM=$TERM $SHELL
 
-if ! [ -z $2 ]; then
-    # env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des /bin/bash
-    env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des $shell
+if [ ! -z $2 ]; then
+	# env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des /bin/bash
+	env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des $shell
 else
-    env -i TERM=$TERM SHELL=$(which sh) HOME=$HOME $(which chroot) $des /bin/env -i TERM=$TERM $SHELL
+	env -i TERM=$TERM SHELL=$(which sh) HOME=$HOME $(which chroot) $des /bin/env -i TERM=$TERM $SHELL
 fi
-# source /etc/profile
+# . /etc/profile
 # gentoo
 # env-update && source /etc/profile
 # export PS1="(chroot) $PS1"

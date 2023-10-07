@@ -1,0 +1,36 @@
+## Base16 Default Dark
+# Author: Chris Kempson (http://chriskempson.com)
+
+# set $base00 #181818
+# set $base01 #282828
+# set $base02 #383838
+# set $base03 #585858
+# set $base04 #b8b8b8
+# set $base05 #d8d8d8
+# set $base06 #e8e8e8
+# set $base07 #f8f8f8
+# set $base08 #ab4642
+# set $base09 #dc9656
+# set $base0A #f7ca88
+# set $base0B #a1b56c
+# set $base0C #86c1b9
+# set $base0D #7cafc2
+# set $base0E #ba8baf
+# set $base0F #a16946
+# Copied from alacritty
+set $base00 #212121
+set $base01 #c30771
+set $base02 #10a778
+set $base03 #a89c14
+set $base04 #008ec4
+set $base05 #523c79
+set $base06 #20a5ba
+set $base07 #e0e0e0
+set $base08 #818181
+set $base09 #fb007a
+set $base0A #5fd7af
+set $base0B #f3e430
+set $base0C #20bbfc
+set $base0D #6855de
+set $base0E #4fb8cc
+set $base0F #f1f1f1

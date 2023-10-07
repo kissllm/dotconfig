@@ -1,0 +1,9 @@
+#!/bin/sh
+[ -n "${XDG_RUNTIME_DIR:+x}" ] || exit 1
+[ -n "${WAYLAND_DISPLAY:+x}" ] || exit 1
+fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+[ -n "${WAYLAND_SOCK:+x}" ] || exit 1
+# swaymsg -s /run/user/1000/sway-ipc.1000.4742.sock reload
+swaymsg -s "$WAYLAND_SOCK" reload
+# socket finding
+# ps -ef | grep "sway -d" | grep -v grep | grep -v swc-launch | awk "{print \$1}" | tr -d " "

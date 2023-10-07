@@ -19,8 +19,8 @@ branch_name=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g
 
 # https://stackoverflow.com/questions/2180270/check-if-current-directory-is-a-git-repository
 [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ] || {
-    echo "Change directory to a git repository, please"
-    exit 1
+	echo "Change directory to a git repository, please"
+	exit 1
 }
 
 # https://stackoverflow.com/questions/5167957/is-there-a-better-way-to-find-out-if-a-local-git-branch-exists
@@ -50,21 +50,21 @@ branch_name=$(git show-branch --list | grep \* | awk '{print $2}' | sed 's/\[//g
 local_branch=$(git rev-parse --verify --quiet --symbolic-full-name "$branch_name")
 local_branch=${local_branch##*/}
 [ "$local_branch" = "$branch_name" ] || {
-    echo "Branch name you provided is not valid locally. Please input a valid branch name"
-    exit 1
+	echo "Branch name you provided is not valid locally. Please input a valid branch name"
+	exit 1
 }
 
 # Remote branch hash
 remote_branch=$(git ls-remote --heads origin "$branch_name" | awk '{print $2}')
 remote_branch=${remote_branch##*/}
 [ "$remote_branch" = "$branch_name" ] || {
-    echo "Branch name you provided is not valid remotely. Please input a valid branch name"
-    exit 1
+	echo "Branch name you provided is not valid remotely. Please input a valid branch name"
+	exit 1
 }
 
 # Local remote sources
 remotes=$(git remote -v  | grep push | awk '{print $1}' | tr "\n" " ")
 
 for repo in $remotes; do
-    [ -z "${repo##*upstream*}" ] || git push -u "$repo" "$branch_name"
+	[ -z "${repo##*upstream*}" ] || git push -u "$repo" "$branch_name"
 done

@@ -6,19 +6,21 @@ WLR_NO_HARDWARE_CURSORS=1
 # Session XDG specification
 # XDG_SESSION_TYPE=wayland
 XDG_SESSION_TYPE=wayland
+
 # XDG_SESSION_DESKTOP=sway
-XDG_SESSION_DESKTOP=wayland
 # XDG_CURRENT_DESKTOP=sway
-XDG_CURRENT_DESKTOP=wayland
 # DESKTOP_SESSION=sway
+XDG_SESSION_DESKTOP=wayland
+XDG_CURRENT_DESKTOP=wayland
 DESKTOP_SESSION=wayland
 
-# XKB
 XKB_DEFAULT_LAYOUT=us
 
 # export XKB_DEFAULT_VARIANT=us
 LIBSEAT_BACKEND=logind
-WLR_DRM_DEVICES=/dev/dri/card0
+#
+# WLR_DRM_DEVICES=/dev/dri/card0
+#
 # Running sway without xwayland
 # https://github.com/swaywm/sway/issues/676
 WLC_XWAYLAND=0
@@ -29,7 +31,11 @@ BEMENU_BACKEND=wayland
 # QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
 QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 QT_QPA_PLATFORM=wayland-egl
-GDK_BACKEND=wayland
+#
+# cannot open display: :0 on Wayland session #19614
+# https://github.com/keybase/client/issues/19614
+# GDK_BACKEND=wayland
+#
 # MOZ_ENABLE_WAYLAND=1
 MOZ_ENABLE_WAYLAND=1
 # CLUTTER_BACKEND=wayland

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+[ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
+    != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+
+    nouveau_mod="$(lsmod | grep "nouveau" | awk '{print $1}')"
+
+    [ -n "$nouveau_mod" ] || doas modprobe nouveau
+}

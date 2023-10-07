@@ -1,1 +1,1 @@
-/mnt/local/bin/s
+init/bin/s

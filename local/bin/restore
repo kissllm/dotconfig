@@ -1,29 +1,29 @@
-#!/bin/sh
+#! /bin/sh
 
 BACKUP_ROOT="$HOME/downloads/linux/kissllm/chroot-x86_64"
 
 TARET_ROOT="/mnt/kiss"
 
 if [ "${HOSTNAME}" = "kiss" ]; then
-    TARET_ROOT=""
+	TARET_ROOT=""
 else
-    doas /mnt/load-kiss
+	doas /mnt/load-kiss
 fi
 
 if [ "$(/usr/bin/whoami)" = "root" ]; then
-    copy="rsync -aqz"
+	copy="rsync -aqz"
 else
-    copy="doas rsync -aqz"
+	copy="doas rsync -aqz"
 fi
 
 cd "${BACKUP_ROOT}"
 doas chattr -i /etc/resolv.conf
 for dir in $(doas \ls -1 "${BACKUP_ROOT}"); do
-    if ! eval '$copy "${BACKUP_ROOT}/$dir" "${TARET_ROOT}/"'; then
-        echo "Failed to copy '${BACKUP_ROOT}/$dir'"
-        exit 1
-    else
-        echo "Succeeded in copying '${BACKUP_ROOT}/$dir'"
-    fi
+	if ! eval '$copy "${BACKUP_ROOT}/$dir" "${TARET_ROOT}/"'; then
+		echo "Failed to copy '${BACKUP_ROOT}/$dir'"
+		exit 1
+	else
+		echo "Succeeded in copying '${BACKUP_ROOT}/$dir'"
+	fi
 done
 doas chattr +i /etc/resolv.conf

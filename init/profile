@@ -1,25 +1,71 @@
-#!/bin/sh
-
+#! /bin/sh
+# set -x
+# Definition sequence
+# doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
+#
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.profile"
+#
 
-: "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
+# [ ! -z "${loaded_share+x}" ] ||
+# [ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
 
-# echo "Original \$HOME = $HOME"
-# [ -n "${HOME:+x}" ] || {
-home="$(/usr/bin/awk -F: -v v="${LOGNAME}" "{if (\$1==v) print \$6}" /etc/passwd)"
-[ "$home" = "$HOME" ] || {
-    HOME="$home"
-    export HOME
-    echo "Fixed \$HOME = $HOME"
+# In busybox, default SHELL=-ash
+# Change default shell to busybox
+current_sh="${SHELL##*/}"
+current_sh="${current_sh##"-"}"
+expect_ash="/usr/bin/ash"
+[ -f "$expect_ash" ] || [ -h "$expect_ash" ] || expect_ash="$(which ash)"
+! command -v "$expect_ash" > /dev/null 2>&1 &&
+	printf '%s\n' "Install busybox(ash), please" ||
+command -v "${SHELL}" > /dev/null 2>&1 &&
+[ -z "${expect_ash##*"${current_sh}"*}" ] || {
+	printf '%s %s\n' '$current_sh' "$current_sh"
+	# [ "${SHELL}" = "${0}"] || export SHELL=$0
+	app_name="${0##*/}"
+	app_name="${app_name##"-"}"
+	command -v "$app_name" > /dev/null 2>&1 &&
+		[ "$app_name" = "ash" ] || [ "$app_name" = "sh" ] ||
+		"$expect_ash" || :
+
+	export SHELL="$expect_ash"
+	export _PATH_BSHELL="$expect_ash"
+	printf '%s %s\n' '$SHELL' "$SHELL"
 }
 
-: "${LLVM_IAS=1}" && export LLVM_IAS
-: "${LLVM=1}" && export LLVM
+# : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
+env_reset LOGNAME "$(/usr/bin/whoami)"
+# [ ! -z "${LOGNAME:+x}" ] || {
+#   printf '%s %s\n' '$LOGNAME' "$LOGNAME"
+#   exit 1
+# }
 
-: "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
+# : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
+env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+	"\$1 == v {print \$6}" /etc/passwd)"
+
+# home="$( \
+#   /usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
+# [ -z "${home:+x}" ] && {
+#   printf '%s %s\n' '$HOME' "$HOME [profile]"
+#   exit 1
+# } || [ "$home" = "$HOME" ] || {
+#   HOME="$home" && export HOME
+#   # echo "Fixed \$HOME = $HOME in profile"
+#   printf '%s %s\n' '$HOME' "$HOME [profile]"
+# }
+
+# : "${LLVM_IAS=1}" && export LLVM_IAS
+env_reset LLVM_IAS 1
+# : "${LLVM=1}" && export LLVM
+env_reset LLVM 1
+
+# : "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
+env_reset SSL_CERT_FILE "$HOME/.cert/cacert.pem"
+
 # awesome-vim-colorschemes
-: "${HOMEBREW_GITHUB_API_TOKEN="$SSL_CERT_FILE"}" &&
-export HOMEBREW_GITHUB_API_TOKEN
+# : "${HOMEBREW_GITHUB_API_TOKEN="$SSL_CERT_FILE"}" &&
+# export HOMEBREW_GITHUB_API_TOKEN
+env_reset HOMEBREW_GITHUB_API_TOKEN "$SSL_CERT_FILE"
 
 # For Chimera Linux development
 # [ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
@@ -27,9 +73,6 @@ export HOMEBREW_GITHUB_API_TOKEN
 # echo "\$loaded_profile = $loaded_profile"
 [ ! -z "${loaded_profile+x}" ] ||
 [ ! -e /etc/profile ] || . /etc/profile
-
-# [ "${SHELL}" = "${0}" ] || export SHELL=$0
-command -v "${SHELL}" > /dev/null 2>&1 || export SHELL=$(which ash)
 
 [ ! -f $HOME/.ashrc ] || . $HOME/.ashrc
 
