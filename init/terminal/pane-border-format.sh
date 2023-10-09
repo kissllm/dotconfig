@@ -115,7 +115,7 @@ git_prompt () {
 }
 
 # final output
-echo " $PRETTY_PATH $(cd $pane_current_path && git_prompt)"
+echo "$PRETTY_PATH $(cd $pane_current_path && git_prompt)"
 # echo "$(cd $pane_current_path && git_prompt)"
 # https://github.com/tmux/tmux/issues/1852
 tmux refresh-client -S

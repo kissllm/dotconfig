@@ -108,6 +108,23 @@ set $font_pango_package pango:Courier Prime 16
 # set $font_pango_package pango:MesloLGS NF 14
 # set $font_pango_package pango:MesloLGS Nerd Font 14
 
+# font pango:Source Code Pro Medium 10
+
+# font pango:WenQuanYi Micro Hei Mono Light 13
+# font $font_pango_name 13
+# font pango:DejaVu Serif 13
+# font pango:Noto Sans Mono Thin 13
+# font $font_pango_package
+# fc-list | grep DejaVu | grep Regular
+# /usr/share/fonts/TTF/DejaVuMathTeXGyre.ttf: DejaVu Math TeX Gyre:style=Regular
+# /usr/share/fonts/NerdFonts/ttf/DejaVuSansMNerdFont-Regular.ttf: DejaVuSansM Nerd Font:style=Regular
+# /usr/share/fonts/NerdFonts/ttf/DejaVuSansMNerdFontMono-Regular.ttf: DejaVuSansM Nerd Font Mono:style=Regular
+# /usr/share/fonts/NerdFonts/ttf/DejaVuSansMNerdFontPropo-Regular.ttf: DejaVuSansM Nerd Font Propo:style=Regular
+
+# font pango:DejaVu Serif 13
+font pango:DejaVu Math TeX Gyre 13
+
+
 # Your preferred application launcher
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -187,15 +204,6 @@ bindswitch --locked lid:off output $laptop enable
 # Suspend when lib close (according to the definition of lid:on)
 # bindswitch --locked lid:on exec 'sh -c "doas pm-suspend"'
 bindswitch --locked lid:on exec 'sh -c "doas zzz"'
-
-# font pango:Source Code Pro Medium 10
-
-# font pango:WenQuanYi Micro Hei Mono Light 13
-# font $font_pango_name 13
-# font pango:DejaVu Serif 13
-# font pango:Noto Sans Mono Thin 13
-# font $font_pango_package
-font pango:DejaVu Serif 13
 
 ### Idle configuration
 #

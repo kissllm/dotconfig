@@ -45,6 +45,9 @@ SDL_VIDEODRIVER=wayland
 # EGL_PALTFORM=wayland
 EWOL_BACKEND=wayland
 
+GDK_SCALE=2.0
+GDK_DPI_SCALE=0.75
+
 # https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
 # https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
 # https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user

@@ -4880,7 +4880,7 @@ let g:tagbar_expand                        = 1
 " set tags=./tags,tags
 set tags=./tags,tags;$HOME
 " set tags=tags
-
+" H current-directory
 " set autochdir
 " set switchbuf=useopen,split " make quickfix open in a new split buffer
 set switchbuf=uselast " make quickfix open in a new split buffer

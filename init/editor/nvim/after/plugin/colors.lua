@@ -10,9 +10,13 @@ let g:nontext_fg_cterm = 'NONE'
 " let g:nontext_fg_gui   = 'NONE'
 let g:nontext_fg_gui   = '#222222'
 
+" Inspect check highlight group of current cursor
+
 hi Visual ctermbg=NONE ctermfg=NONE guifg=Teal guibg=NONE term=inverse cterm=inverse gui=inverse
+
 silent! execute 'highlight! NonText ctermfg=' . g:nontext_fg_cterm .
 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+
 hi! SignColumn  ctermbg=NONE guibg=NONE
 hi! Identifier  ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
 hi! Search      ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45 cterm=inverse term=inverse gui=inverse
@@ -22,10 +26,17 @@ hi! manItalic   ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45
 hi! Keyword     ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
 hi! Function    ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
 hi! Normal      ctermbg=0 guibg=NONE
+
 silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm .
 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
 hi NvimTreeFolderIcon guibg=blue
+hi! Define cterm=NONE gui=NONE guifg=#00ff00 guibg=NONE
+hi! link Type Define
+hi! link Tag  Define
+
+hi! Character  cterm=NONE gui=NONE guifg=#00ff00 guibg=#ff00ff ctermfg=45 ctermbg=NONE
+
 hi SpellBad   cterm=underline ctermfg=9
 hi SpellLocal cterm=underline ctermfg=9
 hi SpellRare  cterm=underline ctermfg=9
@@ -44,12 +55,20 @@ hi @text.emphasis    cterm=NONE gui=NONE guifg=#61afef guibg=NONE
 " @constant          ctermfg=9 gui=NONE guifg=#56b6c2
 hi @constant         cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#56b6c2 guibg=NONE
 
-hi Cursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi TermCursor guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi lCursor    guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi Cursor2    guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi! Comment   guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
-" hi Comment    guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+" hi Comment         guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+" hi @comment        cterm=italic gui=italic guifg=#5c6370
+" hi @comment        cterm=NONE gui=NONE guifg=DarkGray
+hi! Cursor         guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi! Comment        guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hi! SpecialComment guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hi! @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
+hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hi! @parameter     guifg=#22aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
+
 highlight FileStyleIgnorePattern guibg=NONE ctermbg=0
 hi NewLineWin ctermfg=248 guifg=#999999
 match NewLineWin /\r\n/
@@ -78,8 +97,6 @@ let &fillchars ..=',eob: '
 hi EndOfBuffer       ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE cterm=NONE
 " NvimInternalError  ctermfg=237 ctermbg=13 guifg=Red guibg=Red
 hi NvimInternalError ctermfg=237 ctermbg=13 guifg=#ffffff guibg=Brown
-" @comment           cterm=italic gui=italic guifg=#5c6370
-hi @comment          cterm=NONE gui=NONE guifg=DarkGray
 " ErrorMsg           cterm=reverse ctermfg=167 ctermbg=234 gui=reverse guifg=#d75f5f guibg=#1c1c1c
 hi ErrorMsg          cterm=NONE ctermfg=167 ctermbg=234 gui=NONE guifg=#d75f5f guibg=#1c1c1c
 
