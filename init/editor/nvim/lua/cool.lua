@@ -1,31 +1,31 @@
 local api = vim.api
 -- local lu = require("luaunit")
 -- if type(_G.WindLine) == 'function' then
---	   log_file:write(lu.prettystr(_G.WindLine()) .. "\n")
+--     log_file:write(lu.prettystr(_G.WindLine()) .. "\n")
 -- elseif type(_G.WindLine) == 'table' then
---	   log_file:write(lu.prettystr(_G.WindLine) .. "\n")
+--     log_file:write(lu.prettystr(_G.WindLine) .. "\n")
 -- end
 
 -- if type(_G.WindLine) ~= "table" then
---	   _G.WindLine = {}
---	   -- local M = {}
---	   _G.WindLine.state = {
---		   mode = {}, -- vim mode {normal insert}
---		   comp = {}, -- component state it will reset on begin render
---		   config = {},
---		   runtime_colors = {}, -- some colors name added by function add_component
---	   }
---	   -- else
---	   -- local M = _G.WindLine or {}
+--     _G.WindLine = {}
+--     -- local M = {}
+--     _G.WindLine.state = {
+--         mode = {}, -- vim mode {normal insert}
+--         comp = {}, -- component state it will reset on begin render
+--         config = {},
+--         runtime_colors = {}, -- some colors name added by function add_component
+--     }
+--     -- else
+--     -- local M = _G.WindLine or {}
 -- end
 
 -- _G.WindLine.state = _G.WindLine.state
---	   or {
---		   mode = {}, -- vim mode {normal insert}
---		   comp = {}, -- component state it will reset on begin render
---		   config = {},
---		   runtime_colors = {}, -- some colors name added by function add_component
---	   }
+--     or {
+--         mode = {}, -- vim mode {normal insert}
+--         comp = {}, -- component state it will reset on begin render
+--         config = {},
+--         runtime_colors = {}, -- some colors name added by function add_component
+--     }
 
 local windline = require("windline")
 local helper = require("windline.helpers")
@@ -55,36 +55,36 @@ basic.bg = { " ", "StatusLine" }
 
 -- stylua: ignore
 utils.change_mode_name({
-	['n']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['no']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['nov']  = { ' -- Visual -- '	, 'Visual'	} ,
-	['noV']  = { ' -- Visual -- '	, 'Visual'	} ,
-	['no'] = { ' -- Visual -- '	, 'Visual'	} ,
-	['niI']  = { ' -- Normal -- '	, 'Normal'	} ,
-	['niR']  = { ' -- Normal -- '	, 'Normal'	} ,
-	['niV']  = { ' -- Normal -- '	, 'Normal'	} ,
-	['v']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['V']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['s']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['S']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['']	 = { ' -- Visual -- '	, 'Visual'	} ,
-	['i']	 = { ' -- Insert -- '	, 'Insert'	} ,
-	['ic']	 = { ' -- Insert -- '	, 'Insert'	} ,
-	['ix']	 = { ' -- Insert -- '	, 'Insert'	} ,
-	['R']	 = { ' -- Replace -- '	, 'Replace' } ,
-	['Rc']	 = { ' -- Replace -- '	, 'Replace' } ,
-	['Rv']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['Rx']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['c']	 = { ' -- Commmand -- ' , 'Command' } ,
-	['cv']	 = { ' -- Commmand -- ' , 'Command' } ,
-	['ce']	 = { ' -- Commmand -- ' , 'Command' } ,
-	['r']	 = { ' -- Replace -- '	, 'Replace' } ,
-	['rm']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['r?']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['!']	 = { ' -- Normal -- '	, 'Normal'	} ,
-	['t']	 = { ' -- Normal -- '	, 'Command' } ,
-	['nt']	 = { ' -- Terminal -- ' , 'Command' } ,
+	['n']    = { ' -- Normal -- '   , 'Normal'  } ,
+	['no']   = { ' -- Visual -- '   , 'Visual'  } ,
+	['nov']  = { ' -- Visual -- '   , 'Visual'  } ,
+	['noV']  = { ' -- Visual -- '   , 'Visual'  } ,
+	['no'] = { ' -- Visual -- '   , 'Visual'  } ,
+	['niI']  = { ' -- Normal -- '   , 'Normal'  } ,
+	['niR']  = { ' -- Normal -- '   , 'Normal'  } ,
+	['niV']  = { ' -- Normal -- '   , 'Normal'  } ,
+	['v']    = { ' -- Visual -- '   , 'Visual'  } ,
+	['V']    = { ' -- Visual -- '   , 'Visual'  } ,
+	['']   = { ' -- Visual -- '   , 'Visual'  } ,
+	['s']    = { ' -- Visual -- '   , 'Visual'  } ,
+	['S']    = { ' -- Visual -- '   , 'Visual'  } ,
+	['']   = { ' -- Visual -- '   , 'Visual'  } ,
+	['i']    = { ' -- Insert -- '   , 'Insert'  } ,
+	['ic']   = { ' -- Insert -- '   , 'Insert'  } ,
+	['ix']   = { ' -- Insert -- '   , 'Insert'  } ,
+	['R']    = { ' -- Replace -- '  , 'Replace' } ,
+	['Rc']   = { ' -- Replace -- '  , 'Replace' } ,
+	['Rv']   = { ' -- Normal -- '   , 'Normal'  } ,
+	['Rx']   = { ' -- Normal -- '   , 'Normal'  } ,
+	['c']    = { ' -- Commmand -- ' , 'Command' } ,
+	['cv']   = { ' -- Commmand -- ' , 'Command' } ,
+	['ce']   = { ' -- Commmand -- ' , 'Command' } ,
+	['r']    = { ' -- Replace -- '  , 'Replace' } ,
+	['rm']   = { ' -- Normal -- '   , 'Normal'  } ,
+	['r?']   = { ' -- Normal -- '   , 'Normal'  } ,
+	['!']    = { ' -- Normal -- '   , 'Normal'  } ,
+	['t']    = { ' -- Normal -- '   , 'Command' } ,
+	['nt']   = { ' -- Terminal -- ' , 'Command' } ,
 })
 
 local colors_mode = {
@@ -174,44 +174,44 @@ basic.lsp_name = {
 }
 
 -- basic.lsp_diagnos = {
---	   name = "diagnostic",
---	   -- hl_colors = hl_list.default,
---	   hl_colors = {
---		   red = { "red", "black" },
---		   yellow = { "yellow", "black" },
---		   blue = { "blue", "black" },
---	   },
---	   width = large_width,
---	   text = function(bufnr)
---		   if lsp_comps.check_lsp(bufnr) then
---			   -- stylua: ignore
---			   return {
---				   { lsp_comps.lsp_error({ format = '  %s', show_zero = true }), '' },
---				   { lsp_comps.lsp_warning({ format = '  %s', show_zero = true }), '' },
---			   }
---		   end
---		   return ""
---	   end,
+--     name = "diagnostic",
+--     -- hl_colors = hl_list.default,
+--     hl_colors = {
+--         red = { "red", "black" },
+--         yellow = { "yellow", "black" },
+--         blue = { "blue", "black" },
+--     },
+--     width = large_width,
+--     text = function(bufnr)
+--         if lsp_comps.check_lsp(bufnr) then
+--             -- stylua: ignore
+--             return {
+--                 { lsp_comps.lsp_error({ format = '  %s', show_zero = true }), '' },
+--                 { lsp_comps.lsp_warning({ format = '  %s', show_zero = true }), '' },
+--             }
+--         end
+--         return ""
+--     end,
 -- }
 
 -- basic.lsp_diagnos = {
---	   name = "diagnostic",
---	   hl_colors = {
---		   red = { "red", "black" },
---		   yellow = { "yellow", "black" },
---		   blue = { "blue", "black" },
---	   },
---	   width = breakpoint_width,
---	   text = function(bufnr)
---		   if lsp_comps.check_lsp(bufnr) then
---			   return {
---				   { lsp_comps.lsp_error({ format = "  %s", show_zero = true }), "red" },
---				   { lsp_comps.lsp_warning({ format = "  %s", show_zero = true }), "yellow" },
---				   { lsp_comps.lsp_hint({ format = "  %s", show_zero = true }), "blue" },
---			   }
---		   end
---		   return ""
---	   end,
+--     name = "diagnostic",
+--     hl_colors = {
+--         red = { "red", "black" },
+--         yellow = { "yellow", "black" },
+--         blue = { "blue", "black" },
+--     },
+--     width = breakpoint_width,
+--     text = function(bufnr)
+--         if lsp_comps.check_lsp(bufnr) then
+--             return {
+--                 { lsp_comps.lsp_error({ format = "  %s", show_zero = true }), "red" },
+--                 { lsp_comps.lsp_warning({ format = "  %s", show_zero = true }), "yellow" },
+--                 { lsp_comps.lsp_hint({ format = "  %s", show_zero = true }), "blue" },
+--             }
+--         end
+--         return ""
+--     end,
 -- }
 
 basic.lsp_diagnos = {
@@ -277,10 +277,10 @@ basic.git = {
 
 -- -- syntax using table
 -- local git_branch = {
---	   text = git_comps.git_branch(),
---	   hl_colors = { "white", "transparent" },
---	   --- component not visible if window width is less than 100
---	   width = 100,
+--     text = git_comps.git_branch(),
+--     hl_colors = { "white", "transparent" },
+--     --- component not visible if window width is less than 100
+--     width = 100,
 -- }
 
 basic.git_branch = {
@@ -359,12 +359,12 @@ local explorer = {
 
 local color_name = vim.g.colors_name
 -- if color_name then
---	   -- Check if there's a theme for current colorscheme
---	   -- If there is load that instead of genarating a new one
---	   local ok, theme = pcall(loader.load_theme, color_name)
---	   if ok and theme then
---		   return theme
---	   end
+--     -- Check if there's a theme for current colorscheme
+--     -- If there is load that instead of genarating a new one
+--     local ok, theme = pcall(loader.load_theme, color_name)
+--     if ok and theme then
+--         return theme
+--     end
 -- end
 
 ---------------
@@ -460,29 +460,29 @@ end
 -- https://github.com/windwp/windline.nvim
 -- sample
 local colors = {
-	black		  = "",  -- terminal_color_0,
-	red			  = "",  -- terminal_color_1,
-	green		  = "",  -- terminal_color_2,
-	yellow		  = "",  -- terminal_color_3,
-	blue		  = "",  -- terminal_color_4,
-	magenta		  = "",  -- terminal_color_5,
-	cyan		  = "",  -- terminal_color_6,
-	white		  = "",  -- terminal_color_7,
+	black         = "",  -- terminal_color_0,
+	red           = "",  -- terminal_color_1,
+	green         = "",  -- terminal_color_2,
+	yellow        = "",  -- terminal_color_3,
+	blue          = "",  -- terminal_color_4,
+	magenta       = "",  -- terminal_color_5,
+	cyan          = "",  -- terminal_color_6,
+	white         = "",  -- terminal_color_7,
 	black_light   = "",  -- terminal_color_8,
-	red_light	  = "",  -- terminal_color_9,
+	red_light     = "",  -- terminal_color_9,
 	green_light   = "",  -- terminal_color_10,
 	yellow_light  = "",  -- terminal_color_11,
-	blue_light	  = "",  -- terminal_color_12,
+	blue_light    = "",  -- terminal_color_12,
 	magenta_light = "",  -- terminal_color_13,
-	cyan_light	  = "",  -- terminal_color_14,
+	cyan_light    = "",  -- terminal_color_14,
 	white_light   = "",  -- terminal_color_15,
 
-	NormalFg	  = "",  -- hightlight Normal fg
-	NormalBg	  = "",  -- hightlight Normal bg
-	ActiveFg	  = "",  -- hightlight StatusLine fg
-	ActiveBg	  = "",  -- hightlight StatusLine bg
-	InactiveFg	  = "",  -- hightlight StatusLineNc fg
-	InactiveBg	  = "",  -- hightlight StatusLineNc bg
+	NormalFg      = "",  -- hightlight Normal fg
+	NormalBg      = "",  -- hightlight Normal bg
+	ActiveFg      = "",  -- hightlight StatusLine fg
+	ActiveBg      = "",  -- hightlight StatusLine bg
+	InactiveFg    = "",  -- hightlight StatusLineNc fg
+	InactiveBg    = "",  -- hightlight StatusLineNc bg
 }
 
 -- return colors
@@ -490,14 +490,14 @@ local colors = {
 -- -- Get the colors to create theme
 -- -- stylua: ignore
 -- local auto_colors = {
---	   normal  = utils.extract_color_from_hllist('bg', { 'PmenuSel', 'PmenuThumb', 'TabLineSel' }, '#000000'),
---	   insert  = utils.extract_color_from_hllist('fg', { 'String', 'MoreMsg' }, '#000000'),
---	   replace = utils.extract_color_from_hllist('fg', { 'Number', 'Type' }, '#000000'),
---	   visual  = utils.extract_color_from_hllist('fg', { 'Special', 'Boolean', 'Constant' }, '#000000'),
---	   command = utils.extract_color_from_hllist('fg', { 'Identifier' }, '#000000'),
---	   back1   = utils.extract_color_from_hllist('bg', { 'Normal', 'StatusLineNC' }, '#000000'),
---	   fore    = utils.extract_color_from_hllist('fg', { 'Normal', 'StatusLine' }, '#000000'),
---	   back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, '#000000'),
+--     normal  = utils.extract_color_from_hllist('bg', { 'PmenuSel', 'PmenuThumb', 'TabLineSel' }, '#000000'),
+--     insert  = utils.extract_color_from_hllist('fg', { 'String', 'MoreMsg' }, '#000000'),
+--     replace = utils.extract_color_from_hllist('fg', { 'Number', 'Type' }, '#000000'),
+--     visual  = utils.extract_color_from_hllist('fg', { 'Special', 'Boolean', 'Constant' }, '#000000'),
+--     command = utils.extract_color_from_hllist('fg', { 'Identifier' }, '#000000'),
+--     back1   = utils.extract_color_from_hllist('bg', { 'Normal', 'StatusLineNC' }, '#000000'),
+--     fore    = utils.extract_color_from_hllist('fg', { 'Normal', 'StatusLine' }, '#000000'),
+--     back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, '#000000'),
 -- }
 
 local theme = {
@@ -525,11 +525,11 @@ local theme = {
 
 -- local empty = require('lualine.component'):extend()
 -- function empty:draw(default_highlight)
---	   self.status = ''
---	   self.applied_separator = ''
---	   self:apply_highlights(default_highlight)
---	   self:apply_section_separators()
---	   return self.status
+--     self.status = ''
+--     self.applied_separator = ''
+--     self:apply_highlights(default_highlight)
+--     self:apply_section_separators()
+--     return self.status
 -- end
 
 -- Put proper separators and gaps between components in sections
@@ -583,17 +583,17 @@ end
 local icon_comp = b_components.cache_file_icon({ default = "", hl_colors = { "white", "transparent" } })
 
 -- basic.file = {
---	   hl_colors = {
---		   default = { "white", "transparent" },
---	   },
---	   text = function(bufnr)
---		   return {
---			   -- return a string
---			   { b_components.cache_file_icon({ default = "" }), "default" },
---			   -- return a table
---			   icon_comp(bufnr),
---		   }
---	   end,
+--     hl_colors = {
+--         default = { "white", "transparent" },
+--     },
+--     text = function(bufnr)
+--         return {
+--             -- return a string
+--             { b_components.cache_file_icon({ default = "" }), "default" },
+--             -- return a table
+--             icon_comp(bufnr),
+--         }
+--     end,
 -- }
 
 basic.file = {
@@ -686,28 +686,28 @@ basic.file_name = {
 -- https://github.com/windwp/windline.nvim
 
 -- local default = {
---	   filetypes = { "default" },
---	   active = {
---		   basic.square_mode,
---		   basic.vi_mode,
---		   basic.file,
---		   basic.lsp_diagnos,
---		   basic.divider,
---		   basic.file_right,
---		   basic.lsp_name,
---		   basic.git,
---		   { git_comps.git_branch(), { "magenta", "black" }, breakpoint_width },
---		   { " ", hl_list.Black },
---		   basic.square_mode,
---	   },
---	   inactive = {
---		   { b_components.full_file_name, hl_list.Inactive },
---		   basic.file_name_inactive,
---		   basic.divider,
---		   basic.divider,
---		   { b_components.line_col, hl_list.Inactive },
---		   { b_components.progress, hl_list.Inactive },
---	   },
+--     filetypes = { "default" },
+--     active = {
+--         basic.square_mode,
+--         basic.vi_mode,
+--         basic.file,
+--         basic.lsp_diagnos,
+--         basic.divider,
+--         basic.file_right,
+--         basic.lsp_name,
+--         basic.git,
+--         { git_comps.git_branch(), { "magenta", "black" }, breakpoint_width },
+--         { " ", hl_list.Black },
+--         basic.square_mode,
+--     },
+--     inactive = {
+--         { b_components.full_file_name, hl_list.Inactive },
+--         basic.file_name_inactive,
+--         basic.divider,
+--         basic.divider,
+--         { b_components.line_col, hl_list.Inactive },
+--         { b_components.progress, hl_list.Inactive },
+--     },
 -- }
 
 local default = {
@@ -771,16 +771,16 @@ local repl = {}
 local dashboard = {}
 
 -- windline.setup({
---	   colors_name = function(colors)
---		   -- print(vim.inspect(colors))
---		   -- ADD MORE COLOR HERE ----
---		   return colors
---	   end,
---	   statuslines = {
---		   default,
---		   quickfix,
---		   explorer,
---	   },
+--     colors_name = function(colors)
+--         -- print(vim.inspect(colors))
+--         -- ADD MORE COLOR HERE ----
+--         return colors
+--     end,
+--     statuslines = {
+--         default,
+--         quickfix,
+--         explorer,
+--     },
 -- })
 
 windline.setup({
@@ -795,7 +795,7 @@ windline.setup({
 		-- ADD MORE COLOR HERE ----
 		colors.transparent = "none" -- this is the issue
 		colors.grey = "#3d3d3d"
-		-- colors.orange	= "#d8a657"
+		-- colors.orange    = "#d8a657"
 		colors.debug_yellow = "#eae611"
 		colors.debug_red = "#ff6902"
 
@@ -864,71 +864,71 @@ windline.setup({
 	end,
 	statuslines = {
 		-- options = {
-		--	   icons_enabled = true,
-		--	   theme = theme,
-		--	   component_separators = '',
-		--	   -- component_separators = { left = '🭦🭀', right = '🭦🭀' },
-		--	   -- section_separators = { left = '🭀', right = '🭦' },
-		--	   -- section_separators = left and { left = '🭦🭀' } or { right = '🭦🭀' },
-		--	   section_separators = { left = "🭦🭀", right = "🭦🭀" },
-		--	   disabled_filetypes = {},
-		--	   always_divide_middle = true,
+		--     icons_enabled = true,
+		--     theme = theme,
+		--     component_separators = '',
+		--     -- component_separators = { left = '🭦🭀', right = '🭦🭀' },
+		--     -- section_separators = { left = '🭀', right = '🭦' },
+		--     -- section_separators = left and { left = '🭦🭀' } or { right = '🭦🭀' },
+		--     section_separators = { left = "🭦🭀", right = "🭦🭀" },
+		--     disabled_filetypes = {},
+		--     always_divide_middle = true,
 		-- },
 		-- sections = process_sections {
-		--	   lualine_a = { 'mode' },
-		--	   lualine_b = {
-		--		   'branch',
-		--		   'diff',
-		--		   {
-		--			   'diagnostics',
-		--			   source = { 'nvim' },
-		--			   sections = { 'error' },
-		--			   -- diagnostics_color = { error = { bg = colors.red, fg = colors.white } },
-		--			   -- diagnostics_color = { error = { bg = colors.red, fg = colors.NONE } },
-		--			   diagnostics_color = { error = { fg = colors.red, bg = colors.NONE } },
-		--		   },
-		--		   {
-		--			   'diagnostics',
-		--			   source = { 'nvim' },
-		--			   sections = { 'warn' },
-		--			   -- diagnostics_color = { warn = { bg = colors.orange, fg = colors.white } },
-		--			   -- diagnostics_color = { warn = { bg = colors.orange, fg = colors.NONE } },
-		--			   diagnostics_color = { warn = { fg = colors.orange, bg = colors.NONE } },
-		--		   },
-		--		   { 'filename', file_status = false, path = 1 },
-		--		   -- { modified, color = { bg = colors.red } },
-		--		   { modified, color = { fg = colors.red } },
-		--		   {
-		--			   '%w',
-		--			   cond = function()
-		--				   return vim.wo.previewwindow
-		--			   end,
-		--		   },
-		--		   {
-		--			   '%r',
-		--			   cond = function()
-		--				   return vim.bo.readonly
-		--			   end,
-		--		   },
-		--		   {
-		--			   '%q',
-		--			   cond = function()
-		--				   return vim.bo.buftype == 'quickfix'
-		--			   end,
-		--		   },
-		--	   },
-		--	   lualine_c = {},
-		--	   lualine_x = {},
-		--	   lualine_y = { search_result, 'filetype' },
-		--	   lualine_z = { '%l:%c', '%p%%/%L' },
+		--     lualine_a = { 'mode' },
+		--     lualine_b = {
+		--         'branch',
+		--         'diff',
+		--         {
+		--             'diagnostics',
+		--             source = { 'nvim' },
+		--             sections = { 'error' },
+		--             -- diagnostics_color = { error = { bg = colors.red, fg = colors.white } },
+		--             -- diagnostics_color = { error = { bg = colors.red, fg = colors.NONE } },
+		--             diagnostics_color = { error = { fg = colors.red, bg = colors.NONE } },
+		--         },
+		--         {
+		--             'diagnostics',
+		--             source = { 'nvim' },
+		--             sections = { 'warn' },
+		--             -- diagnostics_color = { warn = { bg = colors.orange, fg = colors.white } },
+		--             -- diagnostics_color = { warn = { bg = colors.orange, fg = colors.NONE } },
+		--             diagnostics_color = { warn = { fg = colors.orange, bg = colors.NONE } },
+		--         },
+		--         { 'filename', file_status = false, path = 1 },
+		--         -- { modified, color = { bg = colors.red } },
+		--         { modified, color = { fg = colors.red } },
+		--         {
+		--             '%w',
+		--             cond = function()
+		--                 return vim.wo.previewwindow
+		--             end,
+		--         },
+		--         {
+		--             '%r',
+		--             cond = function()
+		--                 return vim.bo.readonly
+		--             end,
+		--         },
+		--         {
+		--             '%q',
+		--             cond = function()
+		--                 return vim.bo.buftype == 'quickfix'
+		--             end,
+		--         },
+		--     },
+		--     lualine_c = {},
+		--     lualine_x = {},
+		--     lualine_y = { search_result, 'filetype' },
+		--     lualine_z = { '%l:%c', '%p%%/%L' },
 		-- },
 		-- inactive_sections = {
-		--	   lualine_a = {},
-		--	   lualine_b = {},
-		--	   lualine_c = { '%f %y %m' },
-		--	   lualine_x = {},
-		--	   lualine_y = {},
-		--	   lualine_z = {}
+		--     lualine_a = {},
+		--     lualine_b = {},
+		--     lualine_c = { '%f %y %m' },
+		--     lualine_x = {},
+		--     lualine_y = {},
+		--     lualine_z = {}
 		-- },
 		-- tabline = {},
 		-- extensions = {'quickfix'},
@@ -1006,57 +1006,57 @@ end
 -- -- you can write your own effect
 -- local HSL = require('wlanimation.hsl')
 -- animation.animation({
---		   data = {
---			   -- {'red', effects.wrap(function(color)
---			   {'red', wrap(function(color)
---				   return HSL.new(color.H + 1, color.S, color.L)
---			   end)},
---		   },
---		   timeout = 100,
---		   delay = 200,
---		   interval = 100,
---	   })
+--         data = {
+--             -- {'red', effects.wrap(function(color)
+--             {'red', wrap(function(color)
+--                 return HSL.new(color.H + 1, color.S, color.L)
+--             end)},
+--         },
+--         timeout = 100,
+--         delay = 200,
+--         interval = 100,
+--     })
 
 -- -- Change brightness of auto_colors
 -- -- darken incase of light theme lighten incase of dark theme
 --
 -- local normal_color = utils.extract_highlight_colors('Normal', 'bg')
 -- if normal_color ~= nil then
---	   if get_color_brightness(normal_color) > 0.5 then
---		   brightness_modifier_parameter = -brightness_modifier_parameter
---	   end
---	   for name, color in pairs(colors) do
---		   auto_colors[name] = brightness_modifier(color, brightness_modifier_parameter)
---	   end
+--     if get_color_brightness(normal_color) > 0.5 then
+--         brightness_modifier_parameter = -brightness_modifier_parameter
+--     end
+--     for name, color in pairs(colors) do
+--         auto_colors[name] = brightness_modifier(color, brightness_modifier_parameter)
+--     end
 -- end
 
 -- -- basic theme defination
 -- local M = {
---	   normal = {
---		   a = { bg = auto_colors.normal,  fg = auto_colors.back1, gui = 'bold' },
---		   b = { bg = auto_colors.back1,   fg = auto_colors.normal },
---		   c = { bg = auto_colors.back2,   fg = auto_colors.fore },
---	   },
---	   insert = {
---		   a = { bg = auto_colors.insert,  fg = auto_colors.back1, gui = 'bold' },
---		   b = { bg = auto_colors.back1,   fg = auto_colors.insert },
---		   c = { bg = auto_colors.back2,   fg = auto_colors.fore },
---	   },
---	   replace = {
---		   a = { bg = auto_colors.replace, fg = auto_colors.back1, gui = 'bold' },
---		   b = { bg = auto_colors.back1,   fg = auto_colors.replace },
---		   c = { bg = auto_colors.back2,   fg = auto_colors.fore },
---	   },
---	   visual = {
---		   a = { bg = auto_colors.visual,  fg = auto_colors.back1, gui = 'bold' },
---		   b = { bg = auto_colors.back1,   fg = auto_colors.visual },
---		   c = { bg = auto_colors.back2,   fg = auto_colors.fore },
---	   },
---	   command = {
---		   a = { bg = auto_colors.command, fg = auto_colors.back1, gui = 'bold' },
---		   b = { bg = auto_colors.back1,   fg = auto_colors.command },
---		   c = { bg = auto_colors.back2,   fg = auto_colors.fore },
---	   },
+--     normal = {
+--         a = { bg = auto_colors.normal,  fg = auto_colors.back1, gui = 'bold' },
+--         b = { bg = auto_colors.back1,   fg = auto_colors.normal },
+--         c = { bg = auto_colors.back2,   fg = auto_colors.fore },
+--     },
+--     insert = {
+--         a = { bg = auto_colors.insert,  fg = auto_colors.back1, gui = 'bold' },
+--         b = { bg = auto_colors.back1,   fg = auto_colors.insert },
+--         c = { bg = auto_colors.back2,   fg = auto_colors.fore },
+--     },
+--     replace = {
+--         a = { bg = auto_colors.replace, fg = auto_colors.back1, gui = 'bold' },
+--         b = { bg = auto_colors.back1,   fg = auto_colors.replace },
+--         c = { bg = auto_colors.back2,   fg = auto_colors.fore },
+--     },
+--     visual = {
+--         a = { bg = auto_colors.visual,  fg = auto_colors.back1, gui = 'bold' },
+--         b = { bg = auto_colors.back1,   fg = auto_colors.visual },
+--         c = { bg = auto_colors.back2,   fg = auto_colors.fore },
+--     },
+--     command = {
+--         a = { bg = auto_colors.command, fg = auto_colors.back1, gui = 'bold' },
+--         b = { bg = auto_colors.back1,   fg = auto_colors.command },
+--         c = { bg = auto_colors.back2,   fg = auto_colors.fore },
+--     },
 -- }
 --
 
@@ -1065,9 +1065,9 @@ end
 --
 -- -- Apply prpper contrast so text is readable
 -- for _, section in pairs(M) do
---	   for _, highlight in pairs(section) do
---		   apply_contrast(highlight)
---	   end
+--     for _, highlight in pairs(section) do
+--         apply_contrast(highlight)
+--     end
 -- end
 --
 -- -- return M
@@ -1075,26 +1075,26 @@ end
 -- local M = {}
 --
 -- M.setup = function()
---	   windline.setup({
---		   colors_name = function(colors)
---			   colors.StatusFg = colors.ActiveFg
---			   colors.StatusBg = colors.ActiveBg
---			   return colors
---		   end,
---		   statuslines = {
---			   default,
---			   explorer,
---		   },
---	   })
+--     windline.setup({
+--         colors_name = function(colors)
+--             colors.StatusFg = colors.ActiveFg
+--             colors.StatusBg = colors.ActiveBg
+--             return colors
+--         end,
+--         statuslines = {
+--             default,
+--             explorer,
+--         },
+--     })
 -- end
 --
 -- M.setup()
 
 -- M.change_color = function(bgcolor, fgcolor)
---	   local colors = windline.get_colors()
---	   colors.StatusFg = fgcolor or colors.StatusFg
---	   colors.StatusBg = bgcolor or colors.StatusBg
---	   windline.on_colorscheme(colors)
+--     local colors = windline.get_colors()
+--     colors.StatusFg = fgcolor or colors.StatusFg
+--     colors.StatusBg = bgcolor or colors.StatusBg
+--     windline.on_colorscheme(colors)
 -- end
 
 -- return M

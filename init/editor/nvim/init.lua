@@ -4,8 +4,8 @@ local log_address = vim.fn.stdpath('config') .. "/lua/?.lua"
 -- local log_address = os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/?.lua"
 -- if not string.find(package.path, log_address) then
 -- if not string.match("*;" .. package.path .. ";*", "*;" .. log_address .. ";*") then
---	print("Not found" .. log_address)
---	package.path = package.path .. ";" .. log_address
+--  print("Not found" .. log_address)
+--  package.path = package.path .. ";" .. log_address
 -- end
 local path_list = vim.split(package.path, ";")
 local found = false
@@ -22,7 +22,7 @@ end
 
 local log = require("log")
 
--- local home	 = os.getenv("HOME")
+-- local home    = os.getenv("HOME")
 if log == nil then
 	print("What")
 else
@@ -36,7 +36,7 @@ if log.home == nil then
 end
 log.os_execute('ls')
 -- print("local home: "  .. home)
--- print("log.home: "	  .. log.home)
+-- print("log.home: "     .. log.home)
 print("log.address: " .. log.address)
 
 local file = io.open(log.address, "w+a")
@@ -47,15 +47,15 @@ file:write("\npackage.path:\n" .. serialize(runtime_path) .. "\n")
 -- file:write("environment package.cpath: " .. package.cpath .. "\n")
 file:write("\npackage.cpath:\n" .. serialize(runtime_cpath) .. "\n")
 file:write("\n")
--- file:write("home:		 " .. home .. "\n")
+-- file:write("home:         " .. home .. "\n")
 local config_root  = vim.fn.stdpath 'config'
 file:write("config_root:  " .. config_root .. "\n")
 local cache_root   = vim.fn.stdpath("cache")
 file:write("cache_root:   " .. cache_root .. "\n")
 local data_root    = vim.fn.stdpath 'data'
-file:write("data_root:	  " .. data_root .. "\n")
-local execute	   = vim.api.nvim_command
-local fn		   = vim.fn
+file:write("data_root:    " .. data_root .. "\n")
+local execute      = vim.api.nvim_command
+local fn           = vim.fn
 local packages_root = data_root .. "/lazy"
 file:write("packages_root: " .. packages_root .. "\n")
 local manager_perse_path = packages_root .. "/lazy.nvim"
@@ -142,7 +142,7 @@ end
 package.path = path_insert(package.path, config_root  .. "/lua/?.lua", "append")
 package.path = path_insert(package.path, config_root  .. "/lua/plugins/?.lua", "append")
 
-local runtime_path	= vim.split(package.path, ";")
+local runtime_path  = vim.split(package.path, ";")
 local runtime_cpath = vim.split(package.cpath, ";")
 -- table.insert(runtime_path, "lua/?.lua")
 -- Oneline command: :lua print(serialize(vim.split(package.path, ";")))
@@ -155,9 +155,9 @@ if not lazy_config then
 	return
 end
 -- lazy.nvim might overwrite keybindings
-keybindings = require("keybindings")
-if not keybindings then
-	file:write("keybindings initialization failed")
+keybindings_again = require("keybindings")
+if not keybindings_again then
+	file:write("keybindings_again initialization failed")
 	return
 end
 file:write("\n\n")

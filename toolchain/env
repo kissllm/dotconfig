@@ -146,7 +146,9 @@ search_config="$(find /usr/include -type f -name "__config" | grep -v "experimen
 # /usr/include/c++/v1/__config
 for config_file in $search_config; do
     [ ! -f "$config_file" ] || {
-        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " | awk '{print $3}');
+        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" |
+        $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " |
+        awk '{print $3}');
         [ -z "${_LIBCPP_VERSION+x}" ] || {
             export _LIBCPP_VERSION="$_LIBCPP_VERSION"
             break

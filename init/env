@@ -3,7 +3,11 @@
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
 
-# alias /='eval'
+newline="
+"
+
+alias /='eval'
+alias //='lineno="$LINENO"'
 
 # env_reset() {
 #   local env_key_name="${1:?"Must give a key"}"

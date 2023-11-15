@@ -14,13 +14,18 @@ reset_cursor_shape() {
 		# tabstop
 		setterm --regtabs 4
 	}
-# Disable cursor blinking
+	# Disable cursor blinking
+	local cursor_blink_key="/sys/class/graphics/fbcon/cursor_blink"
 	[ "$UID" -eq "0" ] && {
-		[ "$(cat /sys/class/graphics/fbcon/cursor_blink)" -eq "0" ] ||
-		echo 0 | tee /sys/class/graphics/fbcon/cursor_blink
+		[ ! -f "$cursor_blink_key" ] ||
+		[ "$(cat $cursor_blink_key)" -eq "0" ] ||
+		echo 0 | tee $cursor_blink_key
 	} || {
-		[ "$(cat /sys/class/graphics/fbcon/cursor_blink)" -eq "0" ] ||
-		echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
+		[ ! -f "$cursor_blink_key" ] ||
+		[ "$(cat $cursor_blink_key)" -eq "0" ] || {
+			! command -v "/usr/bin/doas" > /dev/null 2>&1 ||
+			echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
+		}
 	}
 # reset
 # printf '%s %s\n' '$TERM' "$TERM"
@@ -432,8 +437,9 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 #     [ -z "$(cat /tmp/wayland/.display)" ] &&
 #     [ "$UID" -ne "0" ]; then
 
-[ "1" != "$tty_num" ] ||
-[ "$UID" -eq "0" ] || {
+# [ "$UID" -eq "0" ] ||
+[ "1" != "$tty_num" ] || {
+
 	# [ ! -z "${WAYLAND_DISPLAY+x}" ] || {
 	#   WAYLAND_DISPLAY="$(cat /tmp/wayland/.display 2> /dev/null)"
 	#   [ -z "${WAYLAND_DISPLAY+x}" ] || export WAYLAND_DISPLAY
@@ -492,6 +498,14 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 # # [ ! -x "/mnt/local/bin/wpa" ] ||
 # ! command -v "/mnt/local/bin/wpa" > /dev/null 2>&1 ||
 # "/mnt/local/bin/wpa" >> $HOME/.config/wpa_supplicant/.wpa.log 2>&1
+#
+
+# tmux init
+export TINIT_HOME_DIR="${SHARE_PREFIX}/init/terminal"
+export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
+# export TMUX_DIR=$HOME/.tmux
+export TMUX_DIR=${SHARE_PREFIX}/init/terminal
+
 : "${HOSTNAME="$(cat /etc/hostname)"}" && export HOSTNAME
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
@@ -504,7 +518,22 @@ _tmux() {
 	[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
 
 	# printf '%s' "$cursor_code"
+	#
+	# TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 -u 2>&1
+	#
+	# default-terminal terminal
+	#         Set the default terminal for new windows created in this session
+	#         - the default value of the TERM environment variable.  For tmux
+	#         to work correctly, this must be set to `screen', `tmux' or a
+	#         derivative of them.
 
+	# env TERM="screen-256color" sh -c "exec tmux new -As ."
+
+	# TERM="screen-256color"
+	# export TERM
+	# env TERM="tmux-256color" sh -c "exec tmux new -As ."
+
+	# tmux-256color won't work correctly on cursor displaying:
 	# Got grreen comments on $TERM == linux/tmux-256color in tmux
 	# env TERM="xterm-256color" \
 	# env TERM="tmux-256color" \
@@ -512,7 +541,7 @@ _tmux() {
 	# exec env TERM="screen-256color" \
 		# TERM="screen-256color" \
 	exec env \
-		VISUAL=vi \
+		VISUAL="vi" \
 		TERM="linux" \
 		COLORTERM="truecolor" \
 		TMUX_TMPDIR="${TMUX_TMPDIR}" \
@@ -524,6 +553,8 @@ _tmux() {
 	#     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
 	# ENV=$HOME/.profile sh -$-l > /dev/tty
 
+	# tmux new -As .
+	# tmux -2u new -As . 2>&1
 	# command tmux -2 -u 2>&1
 }
 
@@ -724,24 +755,6 @@ else
 
 fi
 
-# How do I tell I'm runing in a chroot?
-# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
-
-# No root needed. Equal means not in a chroot
-# [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ]
-# root permission needed
-# if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
-#     echo "We are chrooted!"
-# else
-#     echo "Business as usual"
-# fi
-
-
-# tmux init
-export TINIT_HOME_DIR="${SHARE_PREFIX}/init/terminal"
-export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
-# export TMUX_DIR=$HOME/.tmux
-export TMUX_DIR=${SHARE_PREFIX}/init/terminal
 
 parent_is_tmux() {
 	local result=1
@@ -768,62 +781,62 @@ parent_is_tmux() {
 # set-option -g default-command "env TERM=linux ${SHELL} -l"
 # echo "\$tty_num = $tty_num"
 # read -r
-[ "$UID" -eq "0" ] ||
-	[ -z "${tty_num:+x}" ] || [ "1" = "$tty_num" ] ||
-	# Try to tell I'm runing in a chroot. Equal means not in a chroot
-[ \
-	"$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)" -ne \
-	"$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)" ] ||
-	# [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
+
+[ ! -z "${-:+x}" ] && [ ! -z "${-##*i*}" ] ||
+# [ "$UID" -eq "0" ] ||
+[ -z "${tty_num:+x}" ] || [ "1" = "$tty_num" ] ||
 [ "${TERM_PROGRAM-}" = "tmux" ] || parent_is_tmux ||
-	#   {
+is_chrooted ||
+# [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
+#   {
 #       {
 #           [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]
 #       } &&
 #           [ $tty_num = "1" ]
 #       } ||
-{
-	command rm -f "$HOME/tmux*.log"
-	[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
-
-	# printf '%s' "$cursor_code"
-
-	# TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 -u 2>&1
-
-# default-terminal terminal
-#         Set the default terminal for new windows created in this session
-#         - the default value of the TERM environment variable.  For tmux
-#         to work correctly, this must be set to `screen', `tmux' or a
-#         derivative of them.
-
-	# env TERM="screen-256color" sh -c "exec tmux new -As ."
-
-	# TERM="screen-256color"
-	# export TERM
-	# env TERM="tmux-256color" sh -c "exec tmux new -As ."
-
-	# tmux-256color won't work correctly on cursor displaying:
-	# Got green comments on $TERM == linux/tmux-256color in tmux
-	# exec env TERM="xterm-256color" \
-	# exec env TERM="tmux-256color" \
-	# exec env TERM="screen-256color" \
-		# TERM="screen-256color" \
-	exec env \
-		VISUAL=vi \
-		TERM="linux" \
-		COLORTERM="truecolor" \
-		TMUX_TMPDIR="$TMUX_TMPDIR" \
-		TINIT_HOME_DIR="$TINIT_HOME_DIR" \
-		TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
-		TMUX_DIR="$TMUX_DIR" \
-		WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
-		\tmux -T UTF-8 -T 256 new -As . 2>&1 || :
-	#     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
-	# ENV=$HOME/.profile sh -$-l > /dev/tty
-
-		# tmux new -As .
-		# tmux -2u new -As . 2>&1
-}
+_tmux
+# {
+#   command rm -f "$HOME/tmux*.log"
+#   [ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
+#
+#   # printf '%s' "$cursor_code"
+#
+#   # TMUX_TMPDIR="${TMUX_TMPDIR}" command tmux -2 -u 2>&1
+#
+# # default-terminal terminal
+# #         Set the default terminal for new windows created in this session
+# #         - the default value of the TERM environment variable.  For tmux
+# #         to work correctly, this must be set to `screen', `tmux' or a
+# #         derivative of them.
+#
+#   # env TERM="screen-256color" sh -c "exec tmux new -As ."
+#
+#   # TERM="screen-256color"
+#   # export TERM
+#   # env TERM="tmux-256color" sh -c "exec tmux new -As ."
+#
+#   # tmux-256color won't work correctly on cursor displaying:
+#   # Got green comments on $TERM == linux/tmux-256color in tmux
+#   # exec env TERM="xterm-256color" \
+#   # exec env TERM="tmux-256color" \
+#   # exec env TERM="screen-256color" \
+#       # TERM="screen-256color" \
+#   exec env \
+#       VISUAL="vi" \
+#       TERM="linux" \
+#       COLORTERM="truecolor" \
+#       TMUX_TMPDIR="$TMUX_TMPDIR" \
+#       TINIT_HOME_DIR="$TINIT_HOME_DIR" \
+#       TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
+#       TMUX_DIR="$TMUX_DIR" \
+#       WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+#       \tmux -T UTF-8 -T 256 new -As . 2>&1 || :
+#   #     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
+#   # ENV=$HOME/.profile sh -$-l > /dev/tty
+#
+#       # tmux new -As .
+#       # tmux -2u new -As . 2>&1
+# }
 
 # Endless creating new panes
 # tmux split-window -t _

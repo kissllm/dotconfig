@@ -1,15 +1,25 @@
+
+
+UID="$(id -u)"
+
+XDG_RUNTIME_DIR="/run/user/$UID"
+
 # https://github.com/swaywm/wlroots/issues/3189
+
 WLR_NO_HARDWARE_CURSORS=1
+
 # export WLR_NO_HARDWARE_CURSORS=${WLR_NO_HARDWARE_CURSORS}
 # export WLR_NO_HARDWARE_CURSORS=1
 
 # Session XDG specification
 # XDG_SESSION_TYPE=wayland
+
 XDG_SESSION_TYPE=wayland
 
 # XDG_SESSION_DESKTOP=sway
 # XDG_CURRENT_DESKTOP=sway
 # DESKTOP_SESSION=sway
+
 XDG_SESSION_DESKTOP=wayland
 XDG_CURRENT_DESKTOP=wayland
 DESKTOP_SESSION=wayland
@@ -17,32 +27,45 @@ DESKTOP_SESSION=wayland
 XKB_DEFAULT_LAYOUT=us
 
 # export XKB_DEFAULT_VARIANT=us
+
 LIBSEAT_BACKEND=logind
+
 #
 # WLR_DRM_DEVICES=/dev/dri/card0
 #
 # Running sway without xwayland
 # https://github.com/swaywm/sway/issues/676
+
 WLC_XWAYLAND=0
 
 BEMENU_BACKEND=wayland
+
 # export WAYLAND_DISPLAY=wayland
 # QT
 # QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+
 QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 QT_QPA_PLATFORM=wayland-egl
+
 #
 # cannot open display: :0 on Wayland session #19614
 # https://github.com/keybase/client/issues/19614
 # GDK_BACKEND=wayland
 #
 # MOZ_ENABLE_WAYLAND=1
+
 MOZ_ENABLE_WAYLAND=1
+
 # CLUTTER_BACKEND=wayland
+
 CLUTTER_BACKEND=wayland
+
 # SDL_VIDEODRIVER=wayland
+
 SDL_VIDEODRIVER=wayland
+
 # EGL_PALTFORM=wayland
+
 EWOL_BACKEND=wayland
 
 GDK_SCALE=2.0

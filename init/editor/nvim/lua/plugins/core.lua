@@ -1,3 +1,5 @@
+
+
 local function on_attach(bufnr)
 	local api = require "nvim-tree.api"
 
@@ -15,7 +17,7 @@ end
 
 return {
 	{
-		"tpope/vim-repeat",
+		"trailblazing/vim-repeat",
 		event = "VeryLazy"
 	},
 
@@ -90,7 +92,8 @@ return {
 				filters = {
 					-- dotfiles = false,
 					dotfiles = true,
-					custom = {}
+					custom = {"^\\.git"},
+					-- custom = {}
 				},
 				git = {
 					enable = true,
@@ -107,7 +110,7 @@ return {
 				view = {
 					width = 50,
 					-- height = 30,
-					hide_root_folder = false,
+					-- hide_root_folder = false,
 					side = 'left',
 					-- auto_resize = false,
 					-- mappings = {
@@ -246,9 +249,33 @@ return {
 		event = "VeryLazy",
 		lazy = true,
 	},
+	-- Telescope (Fuzzy Finder)
+	-- Added these plugins to install Telescope
+	-- {
+	-- 	'nvim-telescope/telescope.nvim',
+	-- 	event = "VeryLazy",
+	-- 	lazy = true,
+	-- 	-- lazy = false,
+	-- 	dependencies = {
+	-- 		{'nvim-lua/plenary.nvim'},
+	-- 		{'BurntSushi/ripgrep'},
+	-- 		{'sharkdp/fd'},
+	-- 		{'nvim-telescope/telescope-fzf-native.nvim'},
+	-- 	},
+	-- 	after = {
+	-- 		'nvim-lspconfig',
+	-- 		'nvim-treesitter',
+	-- 	},
+	-- 	cmd = 'Telescope',
+	-- 	module = "telescope",
+	-- 	-- config = function() require("telescope").setup() end,
+	-- },
 
 	{
 		"vimwiki/vimwiki",
+		dependencies = {
+			{'Konfekt/FastFold'},
+		},
 		-- "lervag/wiki.vim",
 		-- https://www.reddit.com/r/neovim/comments/ksyydr/how_to_convert_vimwiki_list_variable_to_lua/
 		config = function()
@@ -309,7 +336,7 @@ return {
 	--
 	-- Rainbow Highlighting
 	{
-		"HiPhish/nvim-ts-rainbow2",
+		"HiPhish/rainbow-delimiters.nvim",
 		event = "VeryLazy",
 		lazy = true,
 	},
@@ -325,5 +352,54 @@ return {
 		event = "VeryLazy",
 		lazy = true,
 	},
+
+	{
+		"folke/neodev.nvim",
+		opts = {},
+		event = "VeryLazy",
+		lazy = true,
+	},
+
+	-- Copy from nvim to tmux [TextYankPost]
+	-- set.clipboard = set.clipboard + "unnamedplus"
+	-- [TextYankPost], needs "lazy = false,"
+	{
+		"roxma/vim-tmux-clipboard",
+		dependencies = {
+			{'tmux-plugins/vim-tmux-focus-events'},
+		},
+		opts = {},
+		-- event = "VeryLazy",
+		lazy = false,
+		config = function() end,
+	},
+
+    -- proper syntax highlighting
+    -- commentstring - so that plugins like vim-commentary work as intended
+    -- K - jumps to the *exact* place in man tmux where the word under cursor is explained (a helluva time saver). This should work correctly on practically anything in .tmux.conf.
+    -- :make - invokes tmux source .tmux.conf and places all the errors (if any) in quicklist
+    -- g! - executes lines as tmux commands. Works on visual selection or as a motion. g!! executes just the current line.
+	{
+		"tmux-plugins/vim-tmux",
+		opts = {},
+		-- event = "VeryLazy",
+		lazy = true,
+		config = true,
+	},
+
+	-- Copy from nvim to tmux ? [TextYankPost]
+	-- As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
+	-- set.clipboard = set.clipboard + "unnamedplus"
+	-- "show-buffer -s" error
+	{
+		"aserowy/tmux.nvim",
+		cond = false,
+		opts = {},
+		event = "VeryLazy",
+		lazy = true,
+		config = function() return require("tmux").setup() end,
+	},
+
+
 
 }

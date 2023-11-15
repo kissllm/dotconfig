@@ -1,4 +1,20 @@
+
+local hl = vim.api.nvim_set_hl
+
+-- Inspect check highlight group of current cursor
+
+-- " hi! Search      ctermfg=237  ctermbg=13
+-- " hi! Search      ctermbg=NONE guibg=#56b6c2 guifg=#22aa77 ctermfg=45 cterm=inverse term=inverse gui=inverse
+-- " hi! Search      ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45 cterm=inverse term=inverse gui=inverse
+-- " hi! Search      ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45
+-- " hi! IncSearch   ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45 cterm=inverse term=inverse gui=inverse
+-- hl(0, 'Search',    { fg = 'NONE', bg = '#56b6c2', reverse = true })
+-- hl(0, 'Search',    { fg = 'Black', bg = '#56b6c2' })
+hl(0, 'Search',    { fg = '#ffffff', bg = 'Brown' })
+
+
 vim.cmd([[
+
 " colorscheme onehalf-lua
 " colorscheme onehalf-lush
 " colorscheme onehalf-lush-dark
@@ -12,19 +28,20 @@ let g:nontext_fg_gui   = '#222222'
 
 " Inspect check highlight group of current cursor
 
-hi Visual ctermbg=NONE ctermfg=NONE guifg=Teal guibg=NONE term=inverse cterm=inverse gui=inverse
+" hi Visual ctermbg=NONE ctermfg=NONE guifg=Teal guibg=NONE term=inverse cterm=inverse gui=inverse
+hi! Visual ctermbg=NONE ctermfg=NONE guifg=Blue guibg=NONE term=NONE cterm=NONE gui=NONE
 
 silent! execute 'highlight! NonText ctermfg=' . g:nontext_fg_cterm .
 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
+" indent_blankline
 hi! SignColumn  ctermbg=NONE guibg=NONE
-hi! Identifier  ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
-hi! Search      ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45 cterm=inverse term=inverse gui=inverse
-hi! IncSearch   ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45 cterm=inverse term=inverse gui=inverse
-hi! rstEmphasis ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45
-hi! manItalic   ctermbg=NONE guibg=NONE guifg=Teal ctermfg=45
-hi! Keyword     ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
-hi! Function    ctermbg=NONE guibg=NONE guifg=Teal ctermfg=6
+" hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=Teal ctermfg=6
+hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=6
+hi! IncSearch   ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45
+hi! rstEmphasis ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
+hi! manItalic   ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
+hi! Keyword     ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
 hi! Normal      ctermbg=0 guibg=NONE
 
 silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm .
@@ -47,8 +64,6 @@ hi SpellCap   cterm=underline
 hi PmenuSel          cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#61afef guibg=NONE
 " @symbol            cterm=italic gui=italic guifg=#56b6c2
 hi @symbol           cterm=NONE gui=NONE guifg=#56b6c2 guibg=NONE
-" @variable.builtin  cterm=italic gui=italic guifg=#56b6c2
-hi @variable.builtin cterm=NONE gui=NONE guifg=#56b6c2 guibg=NONE
 " @text.emphasis     cterm=italic gui=italic guifg=#61afef
 hi @text.emphasis    cterm=NONE gui=NONE guifg=#61afef guibg=NONE
 " @constant          cterm=NONE ctermfg=9
@@ -56,18 +71,18 @@ hi @text.emphasis    cterm=NONE gui=NONE guifg=#61afef guibg=NONE
 hi @constant         cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#56b6c2 guibg=NONE
 
 " hi Comment         guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+" hi! Comment        guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 " hi @comment        cterm=italic gui=italic guifg=#5c6370
 " hi @comment        cterm=NONE gui=NONE guifg=DarkGray
+" hi! @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
 hi! Cursor         guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi! Comment        guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 hi! SpecialComment guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
-hi! @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
-hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+" hi! Comment        guifg=#ffffff guibg=#000000 ctermfg=DarkGray ctermbg=NONE cterm=inverse term=inverse gui=inverse
+" hi! @comment       guifg=#ffffff guibg=#000000 ctermfg=45 ctermbg=NONE cterm=inverse term=inverse gui=inverse
 hi! @parameter     guifg=#22aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
-hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
 
 highlight FileStyleIgnorePattern guibg=NONE ctermbg=0
 hi NewLineWin ctermfg=248 guifg=#999999
@@ -81,6 +96,8 @@ hi! ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
 hi! VertSplit    guifg=#222222 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 " hi! link SpecialKey VertSplit
 hi! WinSeparator guifg=#222222 guibg=NONE ctermfg=DarkRed  ctermbg=NONE cterm=NONE gui=NONE term=NONE
+
+" indent_blankline
 " hi! SignColumn     ctermbg=NONE guibg=NONE
 hi! link SignColumn WinSeparator
 hi! link SpecialKey WinSeparator
@@ -100,7 +117,6 @@ hi NvimInternalError ctermfg=237 ctermbg=13 guifg=#ffffff guibg=Brown
 " ErrorMsg           cterm=reverse ctermfg=167 ctermbg=234 gui=reverse guifg=#d75f5f guibg=#1c1c1c
 hi ErrorMsg          cterm=NONE ctermfg=167 ctermbg=234 gui=NONE guifg=#d75f5f guibg=#1c1c1c
 
-hi Search                   ctermfg=237 ctermbg=13
 hi MatchParen               cterm=underline
 hi SyntasticWarning         ctermbg=yellow ctermfg=black
 hi ALEWarning               ctermbg=yellow ctermfg=black
@@ -117,7 +133,66 @@ hi CocInlayHint             guibg=NONE guifg=#6F7378 ctermbg=NONE ctermfg=DarkGr
 
 hi CtrlSpaceSelected        term=reverse ctermfg=187  ctermbg=23  cterm=bold
 hi CtrlSpaceNormal          term=NONE    ctermfg=244  ctermbg=232 cterm=NONE
-hi CtrlSpaceSearch          ctermfg=220  ctermbg=NONE cterm=bold
+hi CtrlSpaceSearch          ctermfg=220  ctermbg=NONE cterm=bold guibg=#56b6c2
 hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 
 ]])
+-- TSCurrentScope use CursorLine
+-- hl(0, 'CursorLine',    { cterm=underline, guibg=#282736, })
+hl(0, 'CursorLine', { bg = 'NONE' })
+-- hl(0, 'CursorLine', { fg = 'NONE' })
+
+-- Whitespace     xxx guifg=#615e5e
+hl(0, 'Whitespace', { fg = 'NONE', })
+
+-- hl(0, 'Comment',    { fg = 'DarkGray', bg = 'NONE', reverse = true })
+hl(0, 'Comment',    { fg = 'DarkGray', bg = 'Black', reverse = true })
+-- hl(0, '@comment',   { fg = 'DarkGray', bg = 'NONE', reverse = true })
+hl(0, '@comment',   { fg = 'DarkGray', bg = 'Black', reverse = true })
+--
+-- Control the highlight guides
+-- CursorColumn   xxx guibg=#313640
+-- indent_blankline
+hl(0, 'WinSeparator',   { fg = '#444444', bg = 'NONE', })
+--
+-- SignColumn     xxx guifg=#dcdfe4
+--                    links to WinSeparator
+-- hl(0, 'CursorColumn',   { bg = '#202020', fg = 'NONE', italic = true })
+-- hl(0, 'CursorColumn',   { bg = '#606090', fg = 'NONE', })
+-- hl(0, 'CursorColumn',   { fg = 'DarkGray', bg = 'NONE', reverse = true })
+-- indent_blankline
+hl(0, 'CursorColumn',   { fg = 'NONE', reverse = true })
+-- hl(0, 'CursorColumn',   { fg = 'DarkBlue', bg = 'NONE', italic = true })
+-- hl(0, 'CursorColumn',   { fg = 'Gray', bg = 'NONE', italic = true })
+-- vim_lsp_references
+
+
+hl(0, 'LspReferenceText', { bg = 'NONE' })
+
+-- " @variable.builtin  cterm=italic gui=italic guifg=#56b6c2
+-- hi @variable.builtin cterm=NONE gui=NONE guifg=#56b6c2 guibg=NONE
+-- @variable      xxx guifg=#dcdfe4
+-- hl(0, '@variable', { fg = 'Orange', bg = 'NONE' })
+hl(0, '@variable', { fg = '#ff4444', bg = 'NONE' })
+hl(0, '@variable.builtin', { fg = '#cbbf66', bg = 'NONE' })
+
+-- " hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- " hi! @string        guifg=Magenta guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- " hi! @string        guifg=Orange guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hl(0, '@string', { fg = '#cbbf66', bg = 'NONE' })
+
+-- " hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- " @function      xxx guifg=#61afef
+-- hi! @function.call guifg=#56b6c2 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hl(0, '@function', { fg = '#56b6c2', bg = 'NONE' })
+hl(0, '@function.call', { fg = '#56b6c2', bg = 'NONE' })
+
+-- hi! Function    ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
+hl(0, 'Function', { fg = '#56b6c2', bg = 'NONE' })
+
+
+
+
+
+

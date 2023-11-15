@@ -2,10 +2,10 @@ local log = {}
 -- https://www.domoticz.com/forum/viewtopic.php?t=27630
 -- local function osExecute(cmd)
 log.osExecute = function(cmd)
-	local fileHandle	 = assert(io.popen(cmd, 'r'))
+	local fileHandle     = assert(io.popen(cmd, 'r'))
 	local commandOutput  = assert(fileHandle:read('*a'))
-	local returnTable	 = {fileHandle:close()}
-	return commandOutput,returnTable[3]			   -- rc[3] contains returnCode
+	local returnTable    = {fileHandle:close()}
+	return commandOutput,returnTable[3]            -- rc[3] contains returnCode
 end
 
 -- https://stackoverflow.com/questions/9676113/lua-os-execute-return-value
@@ -48,7 +48,7 @@ end
 -- https://zserge.com/posts/luash/
 -- https://github.com/mnemnion/luash
 -- luarocks install --server=http://luarocks.org/dev luash
--- doas luarocks --lua-version 5.1 install	--server=http://luarocks.org/dev luash
+-- doas luarocks --lua-version 5.1 install  --server=http://luarocks.org/dev luash
 
 -- lua-realpath
 -- https://luarocks.org/modules/mah0x211/realpath
@@ -63,17 +63,17 @@ end
 -- Just process integers
 -- https://stackoverflow.com/questions/23177573/format-string-to-number-with-minimum-length-in-lua
 function format(num, width)
-    -- local p = math.ceil(math.log10(num))
-    -- local prec = num <= 1 and wwidth - 1 or p > width and 0 or width - p
-    -- return string.format('%.' .. prec .. 'f', num)
+	-- local p = math.ceil(math.log10(num))
+	-- local prec = num <= 1 and wwidth - 1 or p > width and 0 or width - p
+	-- return string.format('%.' .. prec .. 'f', num)
 	--
-    -- get number of digits before decimal
-    -- local intWidth = math.ceil(math.log10(num))
-    local intWidth = #tostring(num)
-    -- if intWidth > width then ... end -- may need this
-    -- local fmt='%'.. width .. '.' .. (width - intWidth) .. 'd'
-    local fmt='%'.. width .. '.' .. (width - intWidth) .. 'd'
-    return string.format(fmt, num)
+	-- get number of digits before decimal
+	-- local intWidth = math.ceil(math.log10(num))
+	local intWidth = #tostring(num)
+	-- if intWidth > width then ... end -- may need this
+	-- local fmt='%'.. width .. '.' .. (width - intWidth) .. 'd'
+	local fmt='%'.. width .. '.' .. (width - intWidth) .. 'd'
+	return string.format(fmt, num)
 end
 
 -- https://stackoverflow.com/questions/41942289/display-contents-of-tables-in-lua
@@ -94,7 +94,7 @@ function serialize(tbl, indent)
 		if (type(k) == "number") then
 			toprint = toprint .. "[" .. format(k, len) .. "] = "
 		elseif (type(k) == "string") then
-			toprint = toprint  .. k ..	"= "
+			toprint = toprint  .. k ..  "= "
 		end
 		if (type(v) == "number") then
 			toprint = toprint .. v .. ",\r\n"

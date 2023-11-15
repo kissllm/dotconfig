@@ -1,17 +1,26 @@
-U = require('utils')
+local U = require('utils')
 
-local function map(mode, lhs, rhs, opts)
-	local options = { }
-	if opts then
-		options = vim.tbl_extend("force", options, opts)
-	end
-	-- local original_definition =
-	-- vim.api.nvim_exec("call maparg('" .. lhs .. "', '" ..  mode .. "', " .. "v:false" .. ")", "false")
-	-- if original_definition then
-	-- 	vim.cmd(mode .. "unmap " .. lhs)
-	-- end
-	vim.keymap.set(mode, lhs, rhs, options)
-end
+-- local function map(mode, lhs, rhs, opts)
+-- 	local options = { }
+-- 	if opts then
+-- 		options = vim.tbl_extend("force", options, opts)
+-- 	end
+-- 	-- local original_definition =
+-- 	-- vim.api.nvim_exec("call maparg('" .. lhs .. "', '" ..  mode .. "', " .. "v:false" .. ")", "false")
+-- 	-- if original_definition then
+-- 	--  vim.cmd(mode .. "unmap " .. lhs)
+-- 	-- end
+-- 	vim.keymap.set(mode, lhs, rhs, options)
+-- end
+
+local map = U.map
+
+-- local function map(...)
+-- 	return U.map(...)
+-- end
+--
+-- Check definitions
+-- :verbose map =
 
 -- * mode - the editor mode for the mapping (e.g., i for "insert" mode).
 -- * lhs - the keybinding to detect.
@@ -31,16 +40,16 @@ map("",  "<leader>p",    ":bp<CR>")
 --
 -- map("t", "<ESC>",        "<C-\\><C-n>")
 --
-map("n", "[g",           vim.diagnostic.goto_prev, { silent = true })
-map("n", "]g",           vim.diagnostic.goto_next, { silent = true })
-map("",  "<C-/><C-/>",   "<C-_><C-_>",             { remap = true })
-map("",  "<C-_><C-_>",   "cc",                     { remap = true })
-map("v", "<C-_><C-_>",   "gc",                     { remap = true })
-map("n", "<leader>t",    ":TestNearest<CR>",       { silent = true })
-map("n", "<leader>T",    ":TestFile<CR>",          { silent = true })
-map("n", "<leader>A",    ":TestSuite<CR>",         { silent = true })
-map("n", "<leader>l",    ":TestLast<CR>",          { silent = true })
-map("n", "<leader>g",    ":TestVisit<CR>",         { silent = true })
+map("n", "[g",           vim.diagnostic.goto_prev, { silent  = true })
+map("n", "]g",           vim.diagnostic.goto_next, { silent  = true })
+map("",  "<C-/><C-/>",   "<C-_><C-_>",             { noremap = true })
+map("",  "<C-_><C-_>",   "cc",                     { noremap = true })
+map("v", "<C-_><C-_>",   "gc",                     { noremap = true })
+map("n", "<leader>t",    ":TestNearest<CR>",       { silent  = true })
+map("n", "<leader>T",    ":TestFile<CR>",          { silent  = true })
+map("n", "<leader>A",    ":TestSuite<CR>",         { silent  = true })
+map("n", "<leader>l",    ":TestLast<CR>",          { silent  = true })
+map("n", "<leader>g",    ":TestVisit<CR>",         { silent  = true })
 --
 map("n", ",",            "<PageDown>")
 map("n", "m",            "<PageDown>")
@@ -131,33 +140,49 @@ map("n", "<leader>qt",  ":Tclose!<CR>", { silent = true })
 map("n", "ea",          "<Plug>(EasyAlign)")
 map("x", "ea",          "<Plug>(EasyAlign)")
 --  Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
-map("v", "<Enter>",     "<Plug>(EasyAlign)", { remap = true })
+map("v", "<Enter>",     "<Plug>(EasyAlign)", { noremap = true })
 -- Start interactive EasyAlign for a motion/text object (e.g. gaip)
-map("n", "ga",          "<Plug>(EasyAlign)", { remap = true })
-
--- local telescope = require('telescope.builtin')
--- map("n", "<C-p>", telescope.find_files)
--- map("n", "<leader>rg", telescope.live_grep)
--- map("n", "<C-Space>", telescope.buffers)
+map("n", "ga",          "<Plug>(EasyAlign)", { noremap = true })
 
 vim.api.nvim_create_autocmd('LspAttach', {
-	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+	group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
+	pattern = "*",
 	callback = function(ev)
 		local opts = { buffer = ev.buf }
 		map("n", "<leader>a", vim.lsp.buf.code_action, opts)
-		-- map("n", "gd", telescope.lsp_definitions, opts)
-		-- map("n", "gy", telescope.lsp_type_definitions, opts)
-		-- map("n", "gr", telescope.lsp_references, opts)
+
+		local builtin = require("telescope.builtin")
+		local cwd = require("lazy.core.config").options.root
+
+		map("n", "gd", function() builtin.lsp_definitions({ cwd = cwd }) end, opts)
+		map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, opts)
+		map("n", "gr", function() builtin.lsp_references({ cwd = cwd }) end, opts)
+
+		map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end, opts)
+		map("n", "<leader>fg", function() builtin.live_grep({ cwd = cwd }) end, opts)
+		map("n", "<leader>fb", function() builtin.buffers({ cwd = cwd }) end, opts)
+		map("n", "<leader>fh", function() builtin.help_tags({ cwd = cwd }) end, opts)
+
 		map({ "n", "x" }, "<leader>f", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
 		map({ "n", "x" }, "gq", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
 		map("n", "K", vim.lsp.buf.hover, opts)
 		map("i", "<C-k>", vim.lsp.buf.signature_help, opts)
 		map("n", "<leader>r", vim.lsp.buf.rename, opts)
-	end
+	end,
 })
 
 
 
+-- local builtin = require('telescope.builtin')
+-- map("n", "<C-p>", builtin.find_files)
+-- map("n", "<leader>rg", builtin.live_grep)
+-- map("n", "<C-Space>", builtin.buffers)
+
+-- local builtin = require('telescope.builtin')
+-- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+-- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+-- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+-- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 
 

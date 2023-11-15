@@ -1,5 +1,5 @@
-local U       = require("utils")
--- local cmd     = vim.cmd -- execute Vim commands
+local U        = require("utils")
+-- local cmd   = vim.cmd -- execute Vim commands
 local exec     = vim.api.nvim_exec -- execute Vimscript
 local api      = vim.api           -- neovim commands
 local autocmd  = vim.api.nvim_create_autocmd -- execute autocommands
@@ -9,16 +9,27 @@ local setlocal = vim.opt_local -- global options
 local cmd      = vim.api.nvim_command -- execute Vim commands
 local fn       = vim.fn
 
+cmd[[
+set omnifunc=v:lua.vim.lsp.omnifunc
+]]
+set.omnifunc  = "v:lua.vim.lsp.omnifunc"
 -- vim.opt.guifont -- need to be determined
 -- set.clipboard     = "unnamed,unnamedplus"
+--
+-- E353: Nothing in register "
+-- set.clipboard = "unnamed"
 -- set.clipboard = set.clipboard + "unnamedplus"
+--
 set.ignorecase   = true
+-- https://github.com/hrsh7th/nvim-cmp/blob/51260c02a8ffded8e16162dcf41a23ec90cfba62/lua/cmp/view/custom_entries_view.lua#L152
 -- Default is 0 -- no limitation
 -- set.pumheight     = 10 -- maybe too big ?
+set.pumheight    = 0 -- maybe too big ?
 set.swapfile     = false -- not sure
 set.timeoutlen   = 300
 -- vim.g.mapleader      = "<Space>"
-vim.g.mapleader     = ' '
+vim.g.mapleader      = ' '
+vim.g.maplocalleader = ' '
 set.termguicolors   = true
 set.bg              = 'dark'
 set.background      = 'dark'
@@ -74,7 +85,7 @@ set.cursorline      = false
 set.cursorcolumn    = false
 
 -- set.cmdheight       = 1
-set.cmdheight        = 0
+set.cmdheight       = 0
 set.ruler           = false
 set.laststatus      = 0
 set.showtabline     = 0          -- Always display the tabline, even if there is only one tab
@@ -150,6 +161,8 @@ set.undofile        = true
 -- set.conceallevel = 1
 set.conceallevel    = 0
 set.fillchars       = "vert:│,horiz:_,eob: "
+set.secure          = true
+
 -- https://github.com/numirias/security/blob/master/doc/2019-06-04_ace-vim-neovim.md
 -- set.modelineexpr = false
 --
@@ -187,8 +200,9 @@ set.listchars = {
 	-- tab      = '▷─',
 	-- tab      = '>-',
 	-- tab      = ' U+FF3F',
-	tab         = ' \'',
+	-- tab         = ' \'',
 	tab         = '│ ',
+	-- tab         = '▎ ',
 	-- tab      = ' _',
 	-- trail    = '•',
 	trail       = '·',
@@ -275,7 +289,11 @@ vim.api.nvim_create_autocmd({"OptionSet"}, {
 		if vim.o.background == 'dark' then
 			print('late dark')
 			-- vim.cmd("colorscheme modus-vivendi")
+			--
 			vim.cmd("colorscheme onehalf-lush-dark")
+			-- vim.cmd("colorscheme no-clown-fiesta")
+			-- vim.cmd("colorscheme nebulous")
+
 			-- vim.cmd("colorscheme dracula")
 		else
 			print('late light')
@@ -340,6 +358,7 @@ filetype_autocmd("typescript", "setlocal", "ts=4 sts=4 sw=4")
 -- pip install black
 filetype_autocmd("python", "setlocal", "ts=4 sts=4 sw=4 formatprg=black\\ -q\\ -")
 filetype_autocmd("yaml", "setlocal", "ts=2 sts=2 sw=2")
+filetype_autocmd("cmake", "setlocal", "ts=2 sts=2 sw=2 et")
 filetype_autocmd("css", "setlocal", "ts=4 noet sw=4")
 filetype_autocmd("scss", "setlocal", "ts=4 noet sw=4 omnifunc=csscomplete#CompleteCSS")
 filetype_autocmd("vue", "syntax", "sync fromstart")
@@ -424,27 +443,30 @@ vim.g.vimwiki_filetypes = { "markdown" }
 --  { detach = true }
 -- )
 
--- -- Works
-local vim_markdown_path = os.getenv("XDG_DATA_HOME") .. "/nvim/lazy/vim-markdown/ftplugin"
-if vim.loop.fs_stat(vim_markdown_path) then
-	local job = vim.fn.jobstart(
-		-- fn.system(
-		{
-			'sed', '-i', '-e',
-			's/b:Markdown_GetUrlForPosition/s:Markdown_GetUrlForPosition/g',
-			vim_markdown_path .. "/mkd.vim"
-		}
-		-- )
-		,
-		{
-			cwd = vim_markdown_path,
-			on_exit = '',
-			on_stdout = '',
-			on_stderr = '',
-			detach = true,
-		}
-	)
-end
+-- Works
+-- Update
+-- git reset --hard origin/master
+-- Chnaged to version = false in lazy-config.lua
+-- local vim_markdown_path = os.getenv("XDG_DATA_HOME") .. "/nvim/lazy/vim-markdown/ftplugin"
+-- if vim.loop.fs_stat(vim_markdown_path) then
+--  local job = vim.fn.jobstart(
+--      -- fn.system(
+--      {
+--          'sed', '-i', '-e',
+--          's/b:Markdown_GetUrlForPosition/s:Markdown_GetUrlForPosition/g',
+--          vim_markdown_path .. "/mkd.vim"
+--      }
+--      -- )
+--      ,
+--      {
+--          cwd = vim_markdown_path,
+--          on_exit = '',
+--          on_stdout = '',
+--          on_stderr = '',
+--          detach = true,
+--      }
+--  )
+-- end
 
 -- will run before jobstart
 -- vim.api.nvim_cmd(
@@ -455,35 +477,36 @@ end
 --  {}  -- { mods = { silent = true } }
 -- )
 
-local vim_repeat_path = os.getenv("XDG_DATA_HOME") .. "/nvim/lazy/vim-repeat/autoload"
-if vim.loop.fs_stat(vim_repeat_path) then
-	local job = vim.fn.jobstart(
-		-- fn.system(
-		{
-			'sed', '-i', '-e',
-			-- 's/nmap u <Plug>(RepeatUndo)/nmap <c-u> <Plug>(RepeatUndo)/g',
-			's/nmap u <Plug>(RepeatUndo)/nmap <c-u> <Undo>/g',
-			'-e',
-			's/repeat#wrap(\'u\',v:count)/repeat#wrap(\'<c-u>\',v:count)/g',
-			vim_repeat_path .. "/repeat.vim"
-		}
-		-- )
-		,
-		{
-			cwd = vim_repeat_path,
-			on_exit = '',
-			on_stdout = '',
-			on_stderr = '',
-			detach = true,
-		}
-	)
-end
+-- local vim_repeat_path = os.getenv("XDG_DATA_HOME") .. "/nvim/lazy/vim-repeat/autoload"
+-- if vim.loop.fs_stat(vim_repeat_path) then
+--  local job = vim.fn.jobstart(
+--      -- fn.system(
+--      {
+--          'sed', '-i', '-e',
+--          -- 's/nmap u <Plug>(RepeatUndo)/nmap <c-u> <Plug>(RepeatUndo)/g',
+--          's/nmap u <Plug>(RepeatUndo)/nmap <c-u> <Undo>/g',
+--          '-e',
+--          's/repeat#wrap(\'u\',v:count)/repeat#wrap(\'<c-u>\',v:count)/g',
+--          vim_repeat_path .. "/repeat.vim"
+--      }
+--      -- )
+--      ,
+--      {
+--          cwd = vim_repeat_path,
+--          on_exit = '',
+--          on_stdout = '',
+--          on_stderr = '',
+--          detach = true,
+--      }
+--  )
+-- end
 
 --
 -- https://stackoverflow.com/questions/65549814/setting-vimwiki-list-in-a-lua-init-file
 vim.g.vimwiki_ext2syntax = {['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown'}
 
 vim.cmd([[
+let g:restore_each_buffer_view = 1
 " echom "\$HOME = " . $HOME
 let g:buffergator_use_new_keymap = 1
 " https://github.com/preservim/vim-markdown
@@ -579,72 +602,54 @@ vim.api.nvim_create_user_command(
 	-- end,
 	{ nargs = 1, complete = help }
 )
+--
+-- Synchronizing between the modified same files
 -- Neovim automatically supports auto read by default
 
--- LspUninstall marksman solved it
--- Spawning language server with cmd: `marksman` failed. The language server is either not installed, missing from PATH, or not executable.
--- https://github.com/neovim/neovim/issues/20745
--- local function filter_diagnostics(diagnostic)
---  -- Filter out all diagnostics from sumneko_lua
---  if diagnostic.source:find('marksman', 1, true) then
---      return false
---  end
---  return true
--- end
--- -- Doesn't work
--- vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
---  function(_, result, ctx, config)
---      filter(result.diagnostics, filter_diagnostics)
---      vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
---  end,
---  {}
--- )
 --
--- -- Doesn't work
--- local client = vim.lsp.get_active_clients({ name = 'marksman' })[1]
--- if client then
---  local ns = vim.lsp.diagnostic.get_namespace(client.id)
---  vim.diagnostic.disable(nil, ns)
--- end
---
--- -- Semantic Highlighting in Neovim
--- -- https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
--- -- Doesn't work
--- vim.api.nvim_set_hl(0, '@lsp.type.function.marksman', {})
---
--- local function show_unconst_caps(args)
---  local client = vim.lsp.get_client_by_id(args.data.client_id)
---  if client.name ~= "marksman" then return end
---
---  local token = args.data.token
---  -- etc
--- end
---
--- vim.api.nvim_create_autocmd("LspTokenUpdate", {
---  pattern = {"*.md", "*.markdown"},
---  callback = show_unconst_caps,
--- })
---
--- -- require('lspconfig').marksman.setup {
--- --   on_attach = function(client, buffer)
--- --       vim.api.nvim_create_autocmd("LspTokenUpdate", {
--- --           buffer = buffer,
--- --           callback = show_unconst_caps,
--- --       })
--- --
--- --       -- other on_attach logic
--- --   end
--- -- }
---
--- vim.api.nvim_create_autocmd("LspAttach", {
---  callback = function(args)
---      local client = vim.lsp.get_client_by_id(args.data.client_id)
---      if client.name ~= "marksman" then return end
---
---      vim.api.nvim_create_autocmd("LspTokenUpdate", {
---          buffer = args.buf,
---          callback = show_unconst_caps,
---      })
---  end
--- })
+-- There is no lazyvim here
+-- https://github.com/LazyVim/LazyVim/discussions/616
+-- require("lazyvim.util").on_attach(function(_, buffer)
+--  -- create the autocmd to show diagnostics
+--  vim.api.nvim_create_autocmd("CursorHold", {
+--      group = vim.api.nvim_create_augroup("_auto_diag", { clear = true }),
+--      buffer = buffer,
+--      callback = function()
+--          local opts = {
+--              focusable = false,
+--              close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+--              border = "rounded",
+--              source = "always",
+--              prefix = " ",
+--              scope = "cursor",
+--          }
+--          vim.diagnostic.open_float(nil, opts)
+--      end,
+--  })
+-- end)
 
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("lsp_attach_auto_diag", { clear = true }),
+	callback = function(args)
+		-- the buffer where the lsp attached
+		---@type number
+		local buffer = args.buf
+
+		-- create the autocmd to show diagnostics
+		vim.api.nvim_create_autocmd("CursorHold", {
+			group = vim.api.nvim_create_augroup("_auto_diag", { clear = true }),
+			buffer = buffer,
+			callback = function()
+				local opts = {
+					focusable = false,
+					close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+					border = "rounded",
+					source = "always",
+					prefix = " ",
+					scope = "cursor",
+				}
+				vim.diagnostic.open_float(nil, opts)
+			end,
+		})
+	end,
+})

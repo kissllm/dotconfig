@@ -38,7 +38,7 @@ smart_rbind () {
 #	  mount --make-rslave $des/tmp
 # }
 
-for I in sys sys/kernel/security dev dev/pts dev/shm run; do
+for I in sys sys/kernel/security sys/dev/block dev dev/pts dev/shm run; do
 	smart_rbind "$I"
 done
 
@@ -67,8 +67,9 @@ chmod 1777 /dev/shm
 
 # mount --rbind /run $des/run
 # mount --make-rslave $des/run
-
-mount --bind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
+[ -d "$des/sys/firmware/efi/efivars" ] || \mkdir -p "$des/sys/firmware/efi/efivars"
+mount --rbind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
+mount --make-rslave $des/sys/firmware/efi/efivars
 # mount -o bind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
 # mount -t efivarfs /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
 # smart_mount $des/sys/firmware/efi/efivars /sys/firmware/efi/efivars

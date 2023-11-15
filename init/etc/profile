@@ -68,7 +68,38 @@ env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
 	. "$LAYOUT_INIT"
 }
 
+# How do I tell I'm runing in a chroot?
+# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
+
+# No root needed. Equal means not in a chroot
+# [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ]
+# root permission needed
+# if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+#     echo "We are chrooted!"
+# else
+#     echo "Business as usual"
+# fi
+
+# Try to tell I'm runing in a chroot. Equal means not in a chroot
+# Not equal means in a chroot, then ignore the tmux application, etc.
+is_chrooted() {
+	local being_in_chroot=0
+	[ ! -f "/proc/1/mountinfo" ] ||
+	[ ! -f "/proc/$$/mountinfo" ] ||
+	[ \
+	"$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)" -ne \
+	"$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)" ] ||
+	being_in_chroot=1
+	return $being_in_chroot
+}
+
 # Load profiles from /etc/profile.d
+is_chrooted && {
+	[ ! -f "${SHARE_PREFIX}/init/etc/profile.d/kiss-env" ] ||
+	. "${SHARE_PREFIX}/init/etc/profile.d/kiss-env"
+	[ ! -f "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir" ] ||
+	. "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir"
+} ||
 for file in /etc/profile.d/*.sh; do
 	# [ ! -r "$file" ] && {
 	#   [ ! -f "$SHARE_PREFIX/init/etc/profile.d/share" ] || {
@@ -78,7 +109,7 @@ for file in /etc/profile.d/*.sh; do
 	#           . "$file"
 	#   }
 	# } ||
-		. "$file"
+	. "$file"
 done
 # setterm -initialize
 # echo 5 | doas tee /sys/module/vt/parameters/cur_default
