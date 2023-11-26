@@ -11,6 +11,11 @@ local hl = vim.api.nvim_set_hl
 -- hl(0, 'Search',    { fg = 'NONE', bg = '#56b6c2', reverse = true })
 -- hl(0, 'Search',    { fg = 'Black', bg = '#56b6c2' })
 hl(0, 'Search',    { fg = '#ffffff', bg = 'Brown' })
+-- shVariable links to Identifier
+-- " hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=Teal ctermfg=6
+-- hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=6
+-- hl(0, 'Identifier',    { fg = '#56b6c2', bg = 'Brown' })
+hl(0, 'Identifier',    { fg = '#56b6c2', bg = 'NONE' })
 
 
 vim.cmd([[
@@ -29,15 +34,13 @@ let g:nontext_fg_gui   = '#222222'
 " Inspect check highlight group of current cursor
 
 " hi Visual ctermbg=NONE ctermfg=NONE guifg=Teal guibg=NONE term=inverse cterm=inverse gui=inverse
-hi! Visual ctermbg=NONE ctermfg=NONE guifg=Blue guibg=NONE term=NONE cterm=NONE gui=NONE
+hi! Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=#22aa77 term=NONE cterm=NONE gui=NONE
 
 silent! execute 'highlight! NonText ctermfg=' . g:nontext_fg_cterm .
 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
 " indent_blankline
 hi! SignColumn  ctermbg=NONE guibg=NONE
-" hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=Teal ctermfg=6
-hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=6
 hi! IncSearch   ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45
 hi! rstEmphasis ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
 hi! manItalic   ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
@@ -75,7 +78,10 @@ hi @constant         cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#56b6c2
 " hi @comment        cterm=italic gui=italic guifg=#5c6370
 " hi @comment        cterm=NONE gui=NONE guifg=DarkGray
 " hi! @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
-hi! Cursor         guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+
+:highlight! Cursor gui=reverse guifg=NONE guibg=NONE
+" :highlight! Cursor gui=NONE guifg=bg guibg=fg
+" hi! Cursor         guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
@@ -181,6 +187,7 @@ hl(0, '@variable.builtin', { fg = '#cbbf66', bg = 'NONE' })
 -- " hi! @string        guifg=Orange guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 hl(0, '@string', { fg = '#cbbf66', bg = 'NONE' })
+hl(0, 'String', { fg = '#cbbf66', bg = 'NONE' })
 
 -- " hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " @function      xxx guifg=#61afef
@@ -190,6 +197,38 @@ hl(0, '@function.call', { fg = '#56b6c2', bg = 'NONE' })
 
 -- hi! Function    ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
 hl(0, 'Function', { fg = '#56b6c2', bg = 'NONE' })
+--
+-- shIf
+-- shDoubleQuote links to String
+-- shDerefSimple links to PreProc
+hl(0, 'PreProc', { fg = 'Yellow', bg = 'NONE' })
+-- hl(0, 'shDerefSimple', { bg = '#eeaa77', fg = 'NONE' })
+hl(0, 'shDerefSimple', { fg = 'yellow', bg = 'NONE' })
+hl(0, 'shDerefVar', { fg = 'Blue', bg = 'NONE' })
+-- htmlItalic
+-- htmlItalic     xxx cterm=italic gui=italic
+-- wiki uses it
+hl(0, 'htmlItalic', { fg = 'Blue', bg = 'NONE' })
+
+-- :highlight! Cursor gui=reverse guifg=NONE guibg=NONE
+-- hl(0, 'Cursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 0, nocombine = true })
+hl(0, 'Cursor', { bg = 'Brown', fg = 'NONE', reverse = true, blend = 10, nocombine = true })
+
+-- hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+-- hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+-- hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hl(0, 'TermCursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+hl(0, 'lCursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+hl(0, 'Cursor2', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+
+
+
+
+
+
+
+
+
 
 
 

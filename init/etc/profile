@@ -64,7 +64,7 @@ env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
 
 [ ! -z "${loaded_share+x}" ] ||
 [ ! -f "$LAYOUT_INIT" ] || {
-	printf '%s %s\n' "$LAYOUT_INIT" "is sourced"
+	printf '%s %s %s\n' '$LAYOUT_INIT' "$LAYOUT_INIT" "is sourced"
 	. "$LAYOUT_INIT"
 }
 

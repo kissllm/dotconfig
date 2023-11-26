@@ -20,7 +20,8 @@ smart_rbind () {
 	dir=$1
 	[ -d  "$des/$dir" ] || \mkdir -p  "$des/$dir"
 	# echo "In smart_rbind, \$des = $des"
-	target_exists "$des/$dir" || [ ! -d "/$dir" ] || {
+	# target_exists "$des/$dir" || [ ! -d "/$dir" ] ||
+	{
 	# [ ! -d "$des/$dir" ] && {
 		mount --rbind /$dir $des/$dir
 		mount --make-rslave $des/$dir

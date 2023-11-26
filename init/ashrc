@@ -7,13 +7,17 @@
 env_reset UID "$(id -u)"
 
 reset_cursor_shape() {
-	[ "$TERM" != "linux" ] ||
+
+	[ ! -z "$TERM:+x}" ] &&
+	[ ! -z "$TERM##*"linux"*}" ] &&
+	[ ! -z "$TERM##*"tmux"*}" ] ||
 	! command -v "/usr/bin/setterm" > /dev/null 2>&1 || {
 		# util-linux-misc
 		setterm --term "linux" --cursor on
 		# tabstop
 		setterm --regtabs 4
 	}
+
 	# Disable cursor blinking
 	local cursor_blink_key="/sys/class/graphics/fbcon/cursor_blink"
 	[ "$UID" -eq "0" ] && {
@@ -539,7 +543,13 @@ _tmux() {
 	# env TERM="tmux-256color" \
 	# env TERM="screen-256color" \
 	# exec env TERM="screen-256color" \
-		# TERM="screen-256color" \
+	# TERM="screen-256color" \
+		
+	# TERM == linux version
+	# TERM="linux" \
+
+	# TERM == tmux version
+	# TERM="tmux-256color" \
 	exec env \
 		VISUAL="vi" \
 		TERM="linux" \

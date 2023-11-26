@@ -5,31 +5,43 @@ local api      = vim.api           -- neovim commands
 local autocmd  = vim.api.nvim_create_autocmd -- execute autocommands
 local augroup  = vim.api.nvim_create_augroup -- group autocommands
 local set      = vim.opt -- global options
-local setlocal = vim.opt_local -- global options
+local setlocal = vim.opt_local -- local options
 local cmd      = vim.api.nvim_command -- execute Vim commands
 local fn       = vim.fn
+
+
+set.syntax     = 'false'
 
 cmd[[
 set omnifunc=v:lua.vim.lsp.omnifunc
 ]]
-set.omnifunc  = "v:lua.vim.lsp.omnifunc"
+set.omnifunc   = "v:lua.vim.lsp.omnifunc"
 -- vim.opt.guifont -- need to be determined
 -- set.clipboard     = "unnamed,unnamedplus"
 --
 -- E353: Nothing in register "
 -- set.clipboard = "unnamed"
+-- set.clipboard = "unnamed"
 -- set.clipboard = set.clipboard + "unnamedplus"
+-- set.clipboard  = "unnamedplus"
 --
+-- set.guicursor    = ""
+-- set.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50\
+-- ,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor\
+-- ,sm:block-blinkwait175-blinkoff150-blinkon175"
+set.guicursor = "n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20"
+-- set.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
+-- set.gcr       = ""
 set.ignorecase   = true
 -- https://github.com/hrsh7th/nvim-cmp/blob/51260c02a8ffded8e16162dcf41a23ec90cfba62/lua/cmp/view/custom_entries_view.lua#L152
 -- Default is 0 -- no limitation
 -- set.pumheight     = 10 -- maybe too big ?
 set.pumheight    = 0 -- maybe too big ?
-set.swapfile     = false -- not sure
 set.timeoutlen   = 300
 -- vim.g.mapleader      = "<Space>"
 vim.g.mapleader      = ' '
 vim.g.maplocalleader = ' '
+vim.g.NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
 set.termguicolors   = true
 set.bg              = 'dark'
 set.background      = 'dark'
@@ -82,8 +94,8 @@ set.eadirection     = "ver"
 set.equalalways     = false
 -- set.cursorline      = true
 set.cursorline      = false
+-- set.cursorcolumn    = true
 set.cursorcolumn    = false
-
 -- set.cmdheight       = 1
 set.cmdheight       = 0
 set.ruler           = false
@@ -147,16 +159,31 @@ set.completeopt     = set.completeopt + 'noinsert,noselect'
 set.completeopt     = set.completeopt - 'preview'
 set.belloff         = set.belloff + 'ctrlg'
 set.redrawtime      = 1000
-set.lazyredraw      = true
-set.sessionoptions  = 'blank,buffers,curdir,help,tabpages,winsize,terminal'
+-- set.lazyredraw      = true
+-- set.sessionoptions  = 'blank,buffers,curdir,help,tabpages,winsize,terminal,options,localoptions'
+-- set.sessionoptions  = 'blank,buffers,curdir,help,tabpages,winsize,terminal'
+-- set.sessionoptions  = ''
+set.sessionoptions  = 'buffers,curdir,tabpages,winsize,terminal,options,localoptions'
+-- set.sessionoptions  = set.sessionoptions - 'buffers'
+set.sessionoptions  = set.sessionoptions - 'localoptions'
 set.sessionoptions  = set.sessionoptions - 'options'
-set.sessionoptions  = set.sessionoptions - 'blank'
-set.sessionoptions  = set.sessionoptions - 'help'
+-- set.sessionoptions  = set.sessionoptions - 'curdir'
+-- set.sessionoptions  = set.sessionoptions - 'tabpages'
+-- set.sessionoptions  = set.sessionoptions - 'winsize'
+-- set.sessionoptions  = set.sessionoptions - 'terminal'
+-- set.sessionoptions  = set.sessionoptions - 'blank'
+--
+-- set.sessionoptions  = set.sessionoptions - 'help'
 -- set.sessionoptions   = set.sessionoptions + 'buffers'
 -- This "options" will include deprecated maps
 -- set.sessionoptions   = set.sessionoptions + 'options'
 set.viewoptions     = 'folds,cursor,unix,slash'
+
+-- Do you have alternatives?
+-- set.swapfile     = false
+set.swapfile        = true
 set.undofile        = true
+
 -- set.conceallevel = 2
 -- set.conceallevel = 1
 set.conceallevel    = 0
@@ -178,9 +205,10 @@ vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "Visual" })
 -- undercurl
 vim.cmd([[let &t_Cs = "\e[4:3m"]])
 vim.cmd([[let &t_Ce = "\e[4:0m"]])
-
-
-
+-- https://stackoverflow.com/questions/5017009/confusion-about-vim-folding-how-to-disable
+-- https://www.reddit.com/r/neovim/comments/xtnc54/how_do_i_disable_all_folding_in_all_documents/
+vim.api.nvim_set_var('vimwiki_folding', 'custom')
+set.foldenable      = false
 
 
 
@@ -241,9 +269,9 @@ autocmd("BufEnter", {
 vim.api.nvim_create_user_command(
 	"RT",
 	function()
-		set.expandtab = true
-		vim.cmd("retab")
-		set.expandtab = false
+		-- set.expandtab = true
+		-- vim.cmd("retab")
+		-- set.expandtab = false
 		vim.cmd("RetabIndent")
 		-- vim.cmd("write " .. vim.fn.expand('%'))
 		vim.cmd("W")
@@ -319,6 +347,19 @@ vim.api.nvim_create_autocmd({"RecordingLeave"}, {
 	end,
 })
 
+-- https://stackoverflow.com/questions/5017009/confusion-about-vim-folding-how-to-disable
+-- " Tweak the event and filetypes matched to your liking. 
+-- " Note, perl automatically sets foldmethod in the syntax file
+-- autocmd Syntax c,cpp,vim,xml,html,xhtml setlocal foldmethod=syntax
+-- autocmd Syntax c,cpp,vim,xml,html,xhtml,perl normal zR
+
+vim.api.nvim_create_autocmd({"FileType"}, {
+	callback = function()
+		vim.cmd("normal zR")
+	end,
+})
+
+
 -- vim.cmd([[
 -- function! SessionState(updating)
 --     if a:updating
@@ -351,27 +392,27 @@ set.title = true
 -- set.updatetime = 100
 set.updatetime = 1000
 
-filetype_autocmd("html", "setlocal", "ts=4 sts=4 sw=4 omnifunc=htmlcomplete#CompleteTags")
-filetype_autocmd("xml", "set", "omnifunc=xmlcomplete#CompleteTags")
+filetype_autocmd("html",       "setlocal", "ts=4 sts=4 sw=4 omnifunc=htmlcomplete#CompleteTags")
+filetype_autocmd("xml",        "set", "omnifunc=xmlcomplete#CompleteTags")
 filetype_autocmd("javascript", "setlocal", "ts=4 sts=4 sw=4")
 filetype_autocmd("typescript", "setlocal", "ts=4 sts=4 sw=4")
 -- pip install black
 filetype_autocmd("python", "setlocal", "ts=4 sts=4 sw=4 formatprg=black\\ -q\\ -")
-filetype_autocmd("yaml", "setlocal", "ts=2 sts=2 sw=2")
-filetype_autocmd("cmake", "setlocal", "ts=2 sts=2 sw=2 et")
-filetype_autocmd("css", "setlocal", "ts=4 noet sw=4")
-filetype_autocmd("scss", "setlocal", "ts=4 noet sw=4 omnifunc=csscomplete#CompleteCSS")
-filetype_autocmd("vue", "syntax", "sync fromstart")
+filetype_autocmd("yaml",   "setlocal", "ts=2 sts=2 sw=2")
+filetype_autocmd("cmake",  "setlocal", "ts=2 sts=2 sw=2 et")
+filetype_autocmd("css",    "setlocal", "ts=4 noet sw=4")
+filetype_autocmd("scss",   "setlocal", "ts=4 noet sw=4 omnifunc=csscomplete#CompleteCSS")
+filetype_autocmd("vue",    "syntax", "sync fromstart")
 filetype_autocmd("elixir", "setlocal", "formatprg=mix\\ format\\ -")
-buffer_autocmd("*.coffee", "set", "ft=coffee")
-buffer_autocmd("*.less", "set", "ft=less")
-buffer_autocmd("*.md", "set", "ft=markdown")
-buffer_autocmd("Cakefile", "set", "ft=coffee")
-buffer_autocmd("*.pp", "set", "ft=ruby")
-buffer_autocmd("*.conf", "set", "ft=dosini")
-buffer_autocmd("*.tsx", "set", "ft=typescript.tsx")
-buffer_autocmd("*.cls", "set", "ft=apex syntax=java")
-buffer_autocmd("*.trigger", "set", "ft=apex syntax=java")
+buffer_autocmd("*.coffee",         "set", "ft=coffee")
+buffer_autocmd("*.less",           "set", "ft=less")
+buffer_autocmd("*.md",             "set", "ft=markdown")
+buffer_autocmd("Cakefile",         "set", "ft=coffee")
+buffer_autocmd("*.pp",             "set", "ft=ruby")
+buffer_autocmd("*.conf",           "set", "ft=dosini")
+buffer_autocmd("*.tsx",            "set", "ft=typescript.tsx")
+buffer_autocmd("*.cls",            "set", "ft=apex syntax=java")
+buffer_autocmd("*.trigger",        "set", "ft=apex syntax=java")
 buffer_autocmd("*.nomad.template", "set", "ft=hcl")
 
 -- hold_autocmd("*", "silent call CocActionAsync('highlight')")
@@ -653,3 +694,73 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		})
 	end,
 })
+
+-- https://www.reddit.com/r/neovim/comments/usltce/how_to_disable_completion_for_command_line_window/
+-- autocmd CmdWinEnter * lua require('cmp').setup({enabled = false})
+-- autocmd CmdWinLeave * lua require('cmp').setup({enabled = true})
+vim.api.nvim_create_autocmd({"CmdWinEnter"}, {
+	pattern = {"background"},
+	callback = function()
+		require('cmp').setup({enabled = false})
+	end
+})
+
+vim.api.nvim_create_autocmd({"CmdWinLeave"}, {
+	pattern = {"background"},
+	callback = function()
+		require('cmp').setup({enabled = true})
+	end
+})
+
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+	pattern = { "*" },
+	callback = function()
+		vim.cmd[[
+		if match(getline(1),"/proc/parent/exe") >= 0 | set filetype=sh | endif
+		if match(getline(1),"/bin/sh") >= 0 | set filetype=sh | endif
+			]]
+	end
+})
+
+-- enabled = function()
+--  local buftype = vim.bo.buftype
+-- 
+--  if buftype == 'prompt' or buftype == 'nofile' then
+--      return false
+--  end
+-- 
+--  return true
+-- end
+--
+-- https://stackoverflow.com/questions/40362460/show-cursor-in-command-line-mode
+vim.cmd([[
+" https://github.com/be5invis/Iosevka
+" https://stackoverflow.com/questions/62200208/vim-change-cursor-in-command-line
+" vim cursor escape codes for the terminal emulator
+" INSERT (&t_SI)  - vertical bar (I-beam)
+" REPLACE (&t_SR) - underscore
+" VISUAL (&t_EI)  - block
+let &t_SI = "\<Esc>[5 q"
+let &t_SR = "\<Esc>[3 q"
+let &t_EI = "\<Esc>[1 q"
+
+" set cursor to vertical bar when entering cmd line and
+" revert cursor back to block when leaving cmd line
+autocmd CmdlineEnter * execute 'silent !echo -ne "' . &t_SI . '"'
+autocmd CmdlineLeave * execute 'silent !echo -ne "' . &t_EI . '"'
+" autocmd CmdlineEnter * call echoraw(&t_SI)
+" autocmd CmdlineLeave * call echoraw(&t_EI)
+autocmd VimEnter,WinEnter * match Cursor /\%#./
+function! HighlightCursor( isOn, key )
+	if a:isOn
+		match Cursor /\%#./
+		redraw
+	else
+		match
+	endif
+	return a:key
+endfunction
+nnoremap <expr> : HighlightCursor(1, ':')
+cnoremap <expr> <CR> HighlightCursor(0, "\<lt>CR>")
+]])
+

@@ -72,10 +72,14 @@ return {
 				diagnostics = {
 					enable = false,
 					icons = {
-						hint = "",
-						info = "",
-						warning = "",
-						error = "",
+						-- hint    = "",
+						hint       = "~",
+						-- info    = "",
+						info       = "?",
+						-- warning = "",
+						warning    = "!",
+						-- error   = "",
+						error      = "x",
 					}
 				},
 				update_focused_file = {
@@ -96,8 +100,8 @@ return {
 					-- custom = {}
 				},
 				git = {
-					enable = true,
-					ignore = true,
+					enable  = true,
+					ignore  = true,
 					timeout = 500,
 				},
 				-- [NvimTree] unknown option: view.mappings
@@ -186,7 +190,7 @@ return {
 
 	{
 		"NvChad/nvim-colorizer.lua",
-		event = { "BufReadPost", "BufNewFile" },
+		event  = { "BufReadPost", "BufNewFile" },
 		config = true,
 	},
 
@@ -196,79 +200,79 @@ return {
 		-- git remote set-url origin --push "git@github.com:trailblazing/boot.git"
 		"trailblazing/boot",
 		event = { "VimEnter" },
-		lazy = false,
+		lazy  = false,
 	},
 
 	{
 		-- git remote set-url origin --push "git@github.com:trailblazing/keys.git"
 		"trailblazing/keys",
 		event = { "VimEnter" },
-		lazy = false,
+		lazy  = false,
 	},
 
 	{
 		-- git remote set-url origin --push "git@github.com:trailblazing/session_auto.git"
 		"trailblazing/session_auto",
 		event = { "VimEnter", "VimLeavePre" },
-		lazy = false,
+		lazy  = false,
 	},
 
 	{
 		-- git remote set-url origin --push "git@github.com:trailblazing/vim-buffergator.git"
 		"trailblazing/vim-buffergator",
 		event = { "VimEnter" },
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"preservim/tagbar",
 		event = { "VimEnter" },
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		'lambdalisue/nerdfont.vim',
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
-	 'justinmk/vim-dirvish',
-	 event = "VeryLazy",
-	 lazy = true,
+		'justinmk/vim-dirvish',
+		event = "VeryLazy",
+		lazy  = true,
 	},
 
 	{
 		"chrisbra/vim-sh-indent",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"nvim-lua/plenary.nvim",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 	-- Telescope (Fuzzy Finder)
 	-- Added these plugins to install Telescope
 	-- {
-	-- 	'nvim-telescope/telescope.nvim',
-	-- 	event = "VeryLazy",
-	-- 	lazy = true,
-	-- 	-- lazy = false,
-	-- 	dependencies = {
-	-- 		{'nvim-lua/plenary.nvim'},
-	-- 		{'BurntSushi/ripgrep'},
-	-- 		{'sharkdp/fd'},
-	-- 		{'nvim-telescope/telescope-fzf-native.nvim'},
-	-- 	},
-	-- 	after = {
-	-- 		'nvim-lspconfig',
-	-- 		'nvim-treesitter',
-	-- 	},
-	-- 	cmd = 'Telescope',
-	-- 	module = "telescope",
-	-- 	-- config = function() require("telescope").setup() end,
+	--  'nvim-telescope/telescope.nvim',
+	--  event = "VeryLazy",
+	--  lazy = true,
+	--  -- lazy = false,
+	--  dependencies = {
+	--      {'nvim-lua/plenary.nvim'},
+	--      {'BurntSushi/ripgrep'},
+	--      {'sharkdp/fd'},
+	--      {'nvim-telescope/telescope-fzf-native.nvim'},
+	--  },
+	--  after = {
+	--      'nvim-lspconfig',
+	--      'nvim-treesitter',
+	--  },
+	--  cmd = 'Telescope',
+	--  module = "telescope",
+	--  -- config = function() require("telescope").setup() end,
 	-- },
 
 	{
@@ -309,13 +313,13 @@ return {
 			vim.g.vimwiki_ext2syntax = {['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown'}
 		end,
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"godlygeek/tabular",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 	--
 	--  vimwiki and vim-markdown <Enter> issue #514
@@ -325,66 +329,68 @@ return {
 		-- b:Markdown_GetUrlForPosition -> s:Markdown_GetUrlForPosition
 		"preservim/vim-markdown",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"MDeiml/tree-sitter-markdown",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 	--
 	-- Rainbow Highlighting
 	{
 		"HiPhish/rainbow-delimiters.nvim",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"Thyrum/vim-stabs",
 		event = "VeryLazy",
-		lazy = true,
+		lazy  = true,
 	},
 
 	{
 		"mbbill/undotree",
-		event = "VeryLazy",
-		lazy = true,
+		-- event = "VeryLazy",
+		-- lazy  = true,
+		lazy  = false,
 	},
 
 	{
 		"folke/neodev.nvim",
-		opts = {},
-		event = "VeryLazy",
-		lazy = true,
+		opts   = {},
+		event  = "VeryLazy",
+		lazy   = true,
 	},
 
 	-- Copy from nvim to tmux [TextYankPost]
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- [TextYankPost], needs "lazy = false,"
+	-- Void session_auto saved old session -- restart a brand new session
 	{
 		"roxma/vim-tmux-clipboard",
 		dependencies = {
 			{'tmux-plugins/vim-tmux-focus-events'},
 		},
-		opts = {},
+		opts     = {},
 		-- event = "VeryLazy",
-		lazy = false,
-		config = function() end,
+		lazy     = false,
+		config   = function() end,
 	},
 
-    -- proper syntax highlighting
-    -- commentstring - so that plugins like vim-commentary work as intended
-    -- K - jumps to the *exact* place in man tmux where the word under cursor is explained (a helluva time saver). This should work correctly on practically anything in .tmux.conf.
-    -- :make - invokes tmux source .tmux.conf and places all the errors (if any) in quicklist
-    -- g! - executes lines as tmux commands. Works on visual selection or as a motion. g!! executes just the current line.
+	-- proper syntax highlighting
+	-- commentstring - so that plugins like vim-commentary work as intended
+	-- K - jumps to the *exact* place in man tmux where the word under cursor is explained (a helluva time saver). This should work correctly on practically anything in .tmux.conf.
+	-- :make - invokes tmux source .tmux.conf and places all the errors (if any) in quicklist
+	-- g! - executes lines as tmux commands. Works on visual selection or as a motion. g!! executes just the current line.
 	{
 		"tmux-plugins/vim-tmux",
-		opts = {},
+		opts     = {},
 		-- event = "VeryLazy",
-		lazy = true,
-		config = true,
+		lazy     = true,
+		config   = true,
 	},
 
 	-- Copy from nvim to tmux ? [TextYankPost]
@@ -393,13 +399,33 @@ return {
 	-- "show-buffer -s" error
 	{
 		"aserowy/tmux.nvim",
-		cond = false,
-		opts = {},
-		event = "VeryLazy",
-		lazy = true,
+		cond   = false,
+		opts   = {},
+		event  = "VeryLazy",
+		lazy   = true,
 		config = function() return require("tmux").setup() end,
 	},
 
+	{
+		"vigoux/notifier.nvim",
+		cond   = false,
+		event  = "VeryLazy",
+		lazy   = true,
+		config = function()
+			require'notifier'.setup {
+				-- You configuration here
+			}
+		end
+	},
+
+	{
+		"j-hui/fidget.nvim",
+		-- event  = "VeryLazy",
+		-- lazy   = true,
+		opts = {
+			-- options
+		},
+	},
 
 
 }

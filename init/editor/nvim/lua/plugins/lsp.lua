@@ -92,18 +92,10 @@ return {
 			-- https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
 			lsp.omnifunc.setup({
 				tabcomplete      = true,
-				use_fallback     = true,
+				-- trigger          = '<C-Space>',
 				update_on_delete = true,
-			})
-			lsp.omnifunc.setup({
-				trigger          = '<C-Space>',
-				use_fallback     = true,
-				update_on_delete = true,
-			})
-			lsp.omnifunc.setup({
 				autocomplete     = true,
 				use_fallback     = true,
-				update_on_delete = true,
 			})
 
 			-- lsp.setup()
@@ -456,16 +448,16 @@ return {
 			)
 
 			-- Doesn't work
-			local client = vim.lsp.get_active_clients({ name = 'marksman' })[1]
-			if client then
-				local ns = vim.lsp.diagnostic.get_namespace(client.id)
-				vim.diagnostic.disable(nil, ns)
-			end
+			-- local client = vim.lsp.get_active_clients({ name = 'marksman' })[1]
+			-- if client then
+			-- 	local ns = vim.lsp.diagnostic.get_namespace(client.id)
+			-- 	vim.diagnostic.disable(nil, ns)
+			-- end
 
 			-- Semantic Highlighting in Neovim
 			-- https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
 			-- Doesn't work
-			vim.api.nvim_set_hl(0, '@lsp.type.function.marksman', {})
+			-- vim.api.nvim_set_hl(0, '@lsp.type.function.marksman', {})
 
 			-- local function show_unconst_caps(args)
 			--  local client = vim.lsp.get_client_by_id(args.data.client_id)

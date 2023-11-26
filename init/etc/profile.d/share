@@ -42,6 +42,7 @@
 # printf '%s\n' "$@"
 
 alias /='eval'
+# bash does not recognize //
 alias //='lineno="$LINENO"'
 
 case "$(type env_reset)" in *"function"*|*"alias"*) ;;
@@ -57,8 +58,6 @@ case "$(type env_reset)" in *"function"*|*"alias"*) ;;
 	alias env_reset='_env_reset'
 esac
 
-# bash does not recognize //
-alias //='lineno="$LINENO"'
 
 [ ! -z "${SHARE_PREFIX:+x}" ] || [ ! -d "/mnt/init" ] || {
 	SHARE_PREFIX="/mnt" && export SHARE_PREFIX
@@ -130,7 +129,7 @@ link_correct() {
 	[ -d "$XDG_CACHE_HOME" ] ||
 		. "$XDG_INIT"
 
-	dir_cache() {
+	files_cache() {
 		local ahchor="$1"
 		[ -n "${XDG_CACHE_HOME:+x}" ]  &&
 		[ -d "$XDG_CACHE_HOME" ] || {
@@ -148,71 +147,177 @@ link_correct() {
 		local ahchor_backup_location="$XDG_CACHE_HOME$real_ahchor"
 		local ahchor_backup_dir="${ahchor_backup_location%/*}"
 		[ -d "$ahchor_backup_dir" ] || doas \mkdir -p "$ahchor_backup_dir"
-		prompt "$real_ahchor" "was removed to $ahchor_backup_location"
-		doas \mv -f "$real_ahchor" "$ahchor_backup_location"
-		# doas \mv -f "$real_ahchor" "$real_ahchor-$(date +%Y-%m-%d-%H-%M)"
+		prompt "$real_ahchor" "is going to be removed to $ahchor_backup_location"
+		case "$real_ahchor" in *"/usr"*|*"/sbin"*|*"/bin"*|*/etc*|*"/lib"*|*"/var/db"*|*"kiss"*)
+			prompt '$real_ahchor' "'$real_ahchor' is the file/folder you realy want to remove?"
+			return 1
+		esac
+
+		[ -f "$real_ahchor" ] &&
+			prompt '$real_ahchor' "'$real_ahchor' as a file is going to be removed"
+		[ -d "$real_ahchor" ] &&
+			prompt '$real_ahchor' "'$real_ahchor' as a dir is going to be removed"
+
+		doas \mv -f "$real_ahchor" "$ahchor_backup_location" || {
+			// prompt '$real_ahchor' "'$real_ahchor' can not be moved"
+			# doas \mv -f "$real_ahchor" "$real_ahchor-$(date +%Y-%m-%d-%H-%M)"
+			return 1
+		}
+	}
+
+	link_exists_and_is_correct() {
+		local target="$1"
+		local anchor="$2"
+		local result=1
+		[ ! -e "$anchor" ] ||
+		! {
+			[ -h "$anchor" ] || [ -L "$anchor" ]
+		} ||
+			[ "$(readlink -fn "$anchor")" != "$(readlink -fn "$target")" ] ||
+			result=0
+		return $result
+	}
+
+	wrong_anchor_clear() {
+		local target="$1"
+		local wrong_anchor="$2"
+		{
+			[ -h "$wrong_anchor" ] || [ -L "$wrong_anchor" ]
+		} && {
+			[ "$(readlink -fn "$wrong_anchor")" = "$(readlink -fn "$target")" ] || {
+				# Remove the link
+				prompt '$wrong_anchor' "'$wrong_anchor' as a link is going to be removed"
+				doas \rm -f "$wrong_anchor"
+			}
+		} || {
+			# Move file or folder to cache dir
+			// files_cache "$wrong_anchor" || {
+				prompt '$wrong_anchor' "'$wrong_anchor' removing failed and no further actions"
+				return 1
+			}
+		}
 	}
 
 	# "$anchor" already exists
 	# "$anchor" does not have a '/' at the end
-	{ [ -h "$anchor" ] || [ -L "$anchor" ]; } && {
-		[ "$(readlink -fn "$anchor")" = "$target" ] &&
+	! { [ -h "$anchor" ] || [ -L "$anchor" ]; } || {
+
+		[ "$(readlink -fn "$anchor")" = "$(readlink -fn "$target")" ] &&
 		return 0 || {
 			doas \rm -f "$anchor"
 			doas \ln -sf -- "$target" "$anchor"
 			return 0
 		}
+
 	}
 	# "$anchor" does not exist yet
 	# "$anchor" might have a '/' at the end
 	# [ "${anchor:$((${#anchor}-1)):1}" = '/' ] && {
 	# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" = '/' ] && {
 	[ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] && {
-		[ "${anchor##*/}" != "$target_name" ] ||
-		[ ! -d "$anchor" ] || {
-			# doas \rm -rf "$anchor"
-			// dir_cache "$ahchor"
-		}
-	} || {
-		local anchor_standard="${anchor%/}"
-		# [ "${anchor_standard##*/}" = "${target##*/}" ] && {
-		[ "${anchor_standard##*/}" != "$target_name" ] && {
-			# Creating a linkage under "$anchor"
-			local subdir_anchor="$anchor_standard/$target_name"
-			[ ! -e "$subdir_anchor" ] || {
-				{
-					[ -h "$subdir_anchor" ] || [ -L "$subdir_anchor" ]
-				} && {
-					[ "$(readlink -fn "$subdir_anchor")" = "$target" ] &&
-					return 0 ||
-					# doas \rm -f "$subdir_anchor"
-					// dir_cache "$subdir_anchor"
-				} || {
-					# doas \rm -f "$subdir_anchor"
-					// dir_cache "$subdir_anchor"
-					# doas \mv -f "$subdir_anchor" "$subdir_anchor-$(date +%Y-%m-%d-%H-%M)"
-				}
+		[ "${anchor##*/}" != "$target_name" ] && {
+			[ -d "$anchor" ]  anchor="$anchor/" || {
+				prompt '$anchor' "'$anchor' as a file is going to be removed"
+				doas \rm -f "$anchor"
 			}
 		} || {
+
+			# Might be "$anchor" == "/usr/bin/kiss", "$target_name" == "kiss"
+			[ -f "$anchor" ] && {
+				# doas \rm -f "$anchor"
+				// files_cache "$ahchor" || {
+					prompt '$ahchor' "'$ahchor' removing failed and no further actions"
+					return 1
+				}
+			} || {
+				# doas \rm -rf "$anchor"
+				prompt '$anchor' "'$anchor' is a recursive named dir"
+				// files_cache "$ahchor" || {
+					prompt '$ahchor' "'$ahchor' removing failed and no further actions"
+					return 1
+				}
+			}
+
+		}
+	} || {
+		# Might be "$anchor" == "/usr/bin/", "$target_name" == "kiss"
+		local anchor_standard="${anchor%/}"
+		# "$anchor_standard" == "/usr/bin"
+		# [ "${anchor_standard##*/}" = "${target##*/}" ] && {
+		[ "${anchor_standard##*/}" != "$target_name" ] && {
+			# Trying to create a linkage under "$anchor"
+			local subdir_anchor="$anchor_standard/$target_name"
+
+			link_exists_and_is_correct "$target" "$subdir_anchor" && return 0 ||
+				wrong_anchor_clear "$target" "$subdir_anchor"
+			# "$subdir_anchor" == "/usr/bin/kiss"
+			# [ ! -e "$subdir_anchor" ] || {
+				# {
+				#   [ -h "$subdir_anchor" ] || [ -L "$subdir_anchor" ]
+				# } && {
+				#   [ "$(readlink -fn "$subdir_anchor")" = "$(readlink -fn "$target")" ] &&
+				#   return 0 || {
+				#       # Remove the link
+				#       prompt '$subdir_anchor' "'$subdir_anchor' as a link is going to be removed"
+				#       doas \rm -f "$subdir_anchor"
+				#       # // files_cache "$subdir_anchor"
+				#   }
+				# } || {
+				#   [ -f "$subdir_anchor" ] && {
+				#       prompt '$subdir_anchor' "'$subdir_anchor' as a file is going to be removed"
+				#       doas \rm -f "$subdir_anchor"
+				#   } || {
+				#       prompt '$subdir_anchor' "'$subdir_anchor' as a dir is going to be removed"
+				#       // files_cache "$subdir_anchor" || {
+				#           prompt '$subdir_anchor' "'$subdir_anchor' removing failed and no further actions"
+				#           return 1
+				#       }
+				#   }
+				# }
+			# }
+		} || {
+			# Might be "$anchor" == "/usr/bin/kiss/", "$target_name" == "kiss"
 			# Recursive linkage
-			# doas \rm -rf "$anchor_standard"
-			// dir_cache "$anchor_standard"
-			# doas \mv -f "$anchor_standard" "$anchor_standard-$(date +%Y-%m-%d-%H-%M)"
-			# "$anchor" is the real anchor
+			# "$anchor" already is the real anchor
 			anchor="$anchor_standard"
+
+			link_exists_and_is_correct "$target" "$anchor" && return 0 ||
+				wrong_anchor_clear "$target" "$anchor"
+			# [ ! -e "$anchor" ] || {
+				# {
+				#   [ -h "$anchor" ] || [ -L "$anchor" ]
+				# } && {
+				#   [ "$(readlink -fn "$anchor")" = "$(readlink -fn "$target")" ] &&
+				#   return 0 || {
+				#       # Remove the link
+				#       prompt '$anchor' "'$anchor' as a link is going to be removed"
+				#       doas \rm -f "$anchor"
+				#   }
+				# } || {
+				#   [ -f "$anchor" ] && {
+				#       prompt '$anchor' "'$anchor' as a file is going to be removed"
+				#       doas \rm -f "$anchor"
+				#   } || {
+				#       prompt '$anchor' "'$anchor' as a dir is going to be removed"
+				#       // files_cache "$anchor" || {
+				#           prompt '$ahchor' "'$ahchor' removing failed and no further actions"
+				#           return 1
+				#       }
+				#   }
+				# }
+			# }
 		}
 	}
 
 	local anchor_dir="${anchor%/*}"
 	[ -d "$anchor_dir" ] || doas \mkdir -p "$anchor_dir"
 
-	doas \ln -sf -- "$target" "$anchor" || {
-		printf '%s %s\n' '$target' "$target"
-		printf '%s %s\n' '$anchor' "$anchor"
-	}
-	#
 	# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
 	# doas \ln -sTf -- "$target" "$anchor"
+	doas \ln -sf -- "$target" "$anchor" || {
+		prompt '$target' "$target"
+		prompt '$anchor' "'$anchor' as a link has not been created successfully"
+	}
 }
 
 init_file_overwrite() {
@@ -296,7 +401,11 @@ init_file_overwrite() {
 [ ! -L "$HOME/.xdg-runtime-dir" ] &&
 	printf '%s %s\n' "$HOME/.xdg-runtime-dir" "creating failed"
 
-env_reset MNG_ROOT "/working/os/kiss"
+env_reset MNG_ROOT      "/working/os/kiss"
+env_reset REPO_ROOT     "/var/db/kiss"
+env_reset REPO_ROOT_DEV "/opt/${REPO_ROOT#*/}"
+env_reset DES_ROOT      "/working/kiss"
+env_reset DOTCONFIG     "/mnt/init"
 
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
 env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
@@ -323,7 +432,7 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	# // link_correct "${SHARE_PREFIX}/init/etc/profile"                    "/etc/"
 
 	// init_file_overwrite "/etc/profile.d/kiss-env.sh" "${SHARE_PREFIX}/init/etc/profile.d/kiss-env"
-	#
+
 	# // link_correct "${SHARE_PREFIX}/init/etc/profile.d/nouveau"      "/etc/profile.d/nouveau.sh"
 	// init_file_overwrite "/etc/profile.d/nouveau.sh" "${SHARE_PREFIX}/init/etc/profile.d/nouveau"
 
@@ -333,9 +442,14 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	// init_file_overwrite "/usr/bin/s" "${SHARE_PREFIX}/init/bin/s"
 
 	# [ ! -z "${IS_KISS+x}" ] || {
-	// link_correct "/opt/var/db/kiss"    "/var/db/"
-	// link_correct "/opt/var/db/hooks"   "/var/db/"
-	// link_correct "/opt/var/db/choices" "/var/db/"
+
+	{ [ -h "$REPO_ROOT" ] || [ -L "$REPO_ROOT" ]; } && \rm -f "$REPO_ROOT"
+	[ -d "$REPO_ROOT" ] || \mkdir -p "$REPO_ROOT"
+
+	// link_correct "/opt/var/db/kiss/system"  "$REPO_ROOT/"
+	// link_correct "/opt/var/db/kiss/choices" "$REPO_ROOT/"
+	// link_correct "/opt/var/db/kiss/hooks"   "$REPO_ROOT/"
+
 	# }
 
 	// link_correct "${SHARE_PREFIX}/init/etc/grub.d/10_linux"          "/etc/grub.d/"

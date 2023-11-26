@@ -22,7 +22,8 @@ env_reset LOGNAME "$(/usr/bin/whoami)"
 KISS_PATH=''
 
 # : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
-env_reset REPO_ROOT "/var/db/kiss"
+: "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
+: "${REPO_ROOT_DEV:="/opt/${REPO_ROOT#*/}"}" && export REPO_ROOT_DEV
 
 [ -z "${KISS_DEBUG+x}" ] || {
 	# Later ones have higher priority
@@ -141,7 +142,39 @@ env_reset REPO_ROOT "/var/db/kiss"
 
 
 # : "${REPO_MAIN="$REPO_ROOT/lm"}" && export REPO_MAIN
-env_reset REPO_MAIN "$REPO_ROOT/lm"
+env_reset REPO_MAIN "$REPO_ROOT/system"
+
+newline="
+"
+
+[ -d "${REPO_MAIN#*/}" ] ||
+{
+	[ -L "${REPO_MAIN#*/}" ] ||
+	[ -h "${REPO_MAIN#*/}" ]
+} || {
+	# Link to local development repo root
+	# Actually it is a recommended way to avoid maintaining a seperate repo
+	[ -e "$REPO_ROOT_DEV/system" ] || {
+		printf '%s %s\n' '$REPO_ROOT_DEV/system' "'$REPO_ROOT_DEV/system' does not exist${newline}\
+		and you should better create it manually"
+		exit 1
+	}
+	[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_DEV")" ] || {
+		printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_DEV'"
+		printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
+		exit 1
+	}
+	[ ! -L "$REPO_ROOT/system" ] &&
+	\ln -sf "$REPO_ROOT_DEV/system" "$REPO_ROOT/" ||
+	[ "$(readlink -fn "$REPO_ROOT/system")" = "$(readlink -fn "$REPO_ROOT_DEV/system")" ] || {
+		\rm -f "$REPO_ROOT/system" || {
+			printf '%s %s\n' '$REPO_ROOT/system' "'$REPO_ROOT/system' modification failed"
+			exit 1
+		}
+
+		\ln -sf "$REPO_ROOT_DEV/system" "$REPO_ROOT/"
+	}
+}
 
 if [ -z "${KISS_PATH:+x}" ]; then
 	KISS_PATH=$REPO_MAIN/extra
@@ -191,11 +224,18 @@ env_reset CHOST "${KISS_XHOST_TRIPLE}"
 env_reset CTARGET "${KISS_XHOST_TRIPLE}"
 # : "${CBUILD:="${KISS_XBUILD_TRIPLE}"}" && export CBUILD
 env_reset CBUILD "${KISS_XBUILD_TRIPLE}"
+
+# If you insist to update local system
+# KISS_ROOT= && export KISS_ROOT
+# Or if unset, kiss package manager will set it to '/'
+# [ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
 #
-# By default it is the local root mount point (/)
-# KISS_ROOT=
-# export KISS_ROOT
-[ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
+# By default use a target address (/opt/kiss or /mnt/kiss)
+# /mnt/kiss might be a mount point of /dev/nvme0n1p3 ... something
+# /opt/kiss normally has larger size (20 GB is recommended) on plain local filesystem
+# Thiese two values are put to prevent from ruining local systemm by accident
+export KISS_ROOT="/opt/kiss" BOOTSTRAP=
+[ -d "$KISS_ROOT" ] || \mkdir -p "$KISS_ROOT"
 
 # : "${KISS_REMOTE_REPO="$KISS_PATH"}" && export KISS_REMOTE_REPO
 env_reset KISS_REMOTE_REPO "$KISS_PATH"
@@ -219,7 +259,7 @@ env_reset MAKEFLAGS "-j $(($(nproc) + 1))"
 # export KISS_TMPDIR="/tmp/$(/usr/bin/whoami)/kiss"
 # [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
 # : "${DES_ROOT:="/working/kiss"}" && export DES_ROOT
-env_reset DES_ROOT "/working/kiss"
+: ${DES_ROOT:="/working/kiss"} && export DES_ROOT
 
 [ -d "$DES_ROOT" ] || \mkdir -p "$DES_ROOT"
 # git config --global --add safe.directory "$DES_ROOT"

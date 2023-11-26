@@ -25,17 +25,17 @@ env_reset USER "$(whoami)"
 # https://tldp.org/LDP/abs/html/parameter-substitution.html
 # "grep -q" "$? -eq 0" could be a good solution?
 prepend() {
+	[ ! -z "${1:+x}" ] || return
 	local key="${1}"
 	# CONTAINER_VALUE="$(eval echo "\$${1}")"
 	local value="${2}"
-	[ ! -d "${value}" ] || {
-		# echo "prepend \$key   = $key"
-		# echo "prepend \$CONTAINER_VALUE = $(eval echo "\$${key}")"
-		case ":$(eval echo "\$${key}"):" in
-			*":${value}:"*) :;;
-			*) eval "export $key=${value}\${$key:+\":\$$key\"}" ;;
-		esac
-	}
+	[ -d "${value}" ] || return
+	# echo "prepend \$key   = $key"
+	# echo "prepend \$CONTAINER_VALUE = $(eval echo "\$${key}")"
+	case ":$(eval echo "\$${key}"):" in
+		*":${value}:"*) :;;
+		*) eval "export $key=${value}\${$key:+\":\$$key\"}" ;;
+	esac
 }
 # prepend PATH "/build/os"
 
@@ -56,7 +56,7 @@ prepend() {
 
 prepend_path() {
 	if [ -n "$2" ]; then
-		case ":$(eval "echo \$$1"):" in
+		case ":$(eval "echo \${${1}-}"):" in
 			*":$2:"*) :;;
 			*) eval "export $1=$2\${$1:+\":\$$1\"}" ;;
 		esac
@@ -70,7 +70,7 @@ prepend_path() {
 
 append_path() {
 	if [ -n "$2" ]; then
-		case ":$(eval "echo \$$1"):" in
+		case ":$(eval "echo \${${1}-}"):" in
 			*":$2:"*) :;;
 			*) eval "export $1=\${$1:+\"\$$1:\"}$2" ;;
 		esac
@@ -87,32 +87,32 @@ append_path() {
 # PATH, MANPATH
 # Add to the end of a target path
 _path_append() {
-	[ ! -z "${1:+x}" ] || return
-	local extend=":$(eval "echo \$$1"):"
+	[ ! -z "${1:+x}" ] &&
+	[ -d "$2" ] || return
+	local extend=":$(eval "echo \${${1}-}"):"
 	# echo "\$2 = $2"
 	# echo "test=${extend##*:$2:*}"
 	# [ -d "$2" ] || {
-	[ -d "$2" ] || return
-		# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
-		# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-		[ -z "${extend:+x}" ] && eval "export $1=$2" ||
-		[ -z "${extend##*:$2:*}" ] || eval "export $1=\$$1:$2"
+	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
+	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+	[ "$extend" = "::" ] && eval "export $1=$2" ||
+	[ -z "${extend##*:$2:*}" ] || eval "export $1=\$$1:$2"
 	# }
 }
 alias path_append='_path_append'
 
 # Add to the front of a target path
 _path_prepend() {
-	[ ! -z "${1:+x}" ] || return
-	local extend=":$(eval "echo \$$1"):"
+	[ ! -z "${1:+x}" ] &&
+	[ -d "$2" ] || return
+	local extend=":$(eval "echo \${${1}-}"):"
 	# echo "\$2 = $2"
 	# echo "test=${extend##*:$2:*}"
 	# [ ! -d "$2" ] || {
-	[ -d "$2" ] || return
-		# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
-		# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-		[ -z "${extend:+x}" ] && eval "export $1=$2" ||
-		[ -z "${extend##*:$2:*}" ] || eval "export $1=$2:\$$1"
+	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
+	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+	[ "$extend" = "::" ] && eval "export $1=$2" ||
+	[ -z "${extend##*:$2:*}" ] || eval "export $1=$2:\$$1"
 	# }
 }
 alias path_prepend='_path_prepend'
