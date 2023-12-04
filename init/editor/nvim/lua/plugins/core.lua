@@ -18,7 +18,8 @@ end
 return {
 	{
 		"trailblazing/vim-repeat",
-		event = "VeryLazy"
+		-- event = "VeryLazy",
+		lazy   = false,
 	},
 
 	{
@@ -236,14 +237,17 @@ return {
 		lazy  = true,
 	},
 
+	-- The default shortcut "-" is very bad
 	{
 		'justinmk/vim-dirvish',
+		cond   = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},
 
 	{
 		"chrisbra/vim-sh-indent",
+		cond   = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},
@@ -253,6 +257,7 @@ return {
 		event = "VeryLazy",
 		lazy  = true,
 	},
+
 	-- Telescope (Fuzzy Finder)
 	-- Added these plugins to install Telescope
 	-- {
@@ -345,8 +350,11 @@ return {
 		lazy  = true,
 	},
 
+	-- Always report error
+	-- RetabIndent
 	{
 		"Thyrum/vim-stabs",
+		-- cond  = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},

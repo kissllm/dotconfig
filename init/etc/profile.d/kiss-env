@@ -21,9 +21,10 @@ env_reset LOGNAME "$(/usr/bin/whoami)"
 
 KISS_PATH=''
 
-# : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
+env_reset SHARE_PREFIX_DEV "/opt"
+
 : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
-: "${REPO_ROOT_DEV:="/opt/${REPO_ROOT#*/}"}" && export REPO_ROOT_DEV
+: "${REPO_ROOT_DEV:="$SHARE_PREFIX_DEV/${REPO_ROOT#*/}"}" && export REPO_ROOT_DEV
 
 [ -z "${KISS_DEBUG+x}" ] || {
 	# Later ones have higher priority
@@ -142,39 +143,45 @@ KISS_PATH=''
 
 
 # : "${REPO_MAIN="$REPO_ROOT/lm"}" && export REPO_MAIN
-env_reset REPO_MAIN "$REPO_ROOT/system"
+# Whatever folder name you'd like to use
+env_reset REPO_MAIN "$REPO_ROOT/rolling"
+# This is the real REPO_MAIN
+# Link to a local development repo root
+# Actually it is a recommended way to avoid maintaining a seperate repo
+repo_main_source="$REPO_ROOT_DEV/lm"
 
 newline="
 "
+repo_main() {
 
-[ -d "${REPO_MAIN#*/}" ] ||
-{
-	[ -L "${REPO_MAIN#*/}" ] ||
-	[ -h "${REPO_MAIN#*/}" ]
-} || {
-	# Link to local development repo root
-	# Actually it is a recommended way to avoid maintaining a seperate repo
-	[ -e "$REPO_ROOT_DEV/system" ] || {
-		printf '%s %s\n' '$REPO_ROOT_DEV/system' "'$REPO_ROOT_DEV/system' does not exist${newline}\
-		and you should better create it manually"
-		exit 1
-	}
-	[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_DEV")" ] || {
-		printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_DEV'"
-		printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
-		exit 1
-	}
-	[ ! -L "$REPO_ROOT/system" ] &&
-	\ln -sf "$REPO_ROOT_DEV/system" "$REPO_ROOT/" ||
-	[ "$(readlink -fn "$REPO_ROOT/system")" = "$(readlink -fn "$REPO_ROOT_DEV/system")" ] || {
-		\rm -f "$REPO_ROOT/system" || {
-			printf '%s %s\n' '$REPO_ROOT/system' "'$REPO_ROOT/system' modification failed"
+	# local kiss_root="${1:?"Fake root can not be empty"}"
+	# Empty means the local host
+	local kiss_root="${1-}"
+	local repo_main_target="$kiss_root/${REPO_MAIN#*/}"
+
+	[ -d "$repo_main_target" ] || {
+		[ -L "$repo_main_target" ] ||
+		[ -h "$repo_main_target" ]
+	} || {
+		[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_DEV")" ] || {
+			printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_DEV'"
+			printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
 			exit 1
 		}
+		[ ! -L "$repo_main_target" ] &&
+		\ln -sf "$repo_main_source" "$repo_main_target" ||
+		[ "$(readlink -fn "$repo_main_target")" = "$(readlink -fn "$repo_main_source")" ] || {
+			\rm -f "$repo_main_target" || {
+				printf '%s %s\n' '$REPO_ROOT/rolling' "'$REPO_ROOT/rolling' modification failed"
+				exit 1
+			}
 
-		\ln -sf "$REPO_ROOT_DEV/system" "$REPO_ROOT/"
+			\ln -sf "$repo_main_source" "$repo_main_target"
+		}
 	}
 }
+
+repo_main
 
 if [ -z "${KISS_PATH:+x}" ]; then
 	KISS_PATH=$REPO_MAIN/extra
@@ -237,6 +244,8 @@ env_reset CBUILD "${KISS_XBUILD_TRIPLE}"
 export KISS_ROOT="/opt/kiss" BOOTSTRAP=
 [ -d "$KISS_ROOT" ] || \mkdir -p "$KISS_ROOT"
 
+repo_main "$KISS_ROOT"
+
 # : "${KISS_REMOTE_REPO="$KISS_PATH"}" && export KISS_REMOTE_REPO
 env_reset KISS_REMOTE_REPO "$KISS_PATH"
 # https://github.com/glasnostlinux/glasnost/releases
@@ -258,11 +267,11 @@ env_reset MAKEFLAGS "-j $(($(nproc) + 1))"
 # export KISS_PROMPT=0
 # export KISS_TMPDIR="/tmp/$(/usr/bin/whoami)/kiss"
 # [ -d "$KISS_TMPDIR" ] || \mkdir -p "$KISS_TMPDIR"
-# : "${DES_ROOT:="/working/kiss"}" && export DES_ROOT
-: ${DES_ROOT:="/working/kiss"} && export DES_ROOT
+# : "${DEST_ROOT:="/working/kiss"}" && export DEST_ROOT
+: ${DEST_ROOT:="/working/kiss"} && export DEST_ROOT
 
-[ -d "$DES_ROOT" ] || \mkdir -p "$DES_ROOT"
-# git config --global --add safe.directory "$DES_ROOT"
+[ -d "$DEST_ROOT" ] || \mkdir -p "$DEST_ROOT"
+# git config --global --add safe.directory "$DEST_ROOT"
 # : "${REPO_BASE:="$REPO_MAIN/base"}" && export REPO_BASE
 env_reset REPO_BASE "$REPO_MAIN/base"
 

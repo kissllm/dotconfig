@@ -15,7 +15,7 @@ hl(0, 'Search',    { fg = '#ffffff', bg = 'Brown' })
 -- " hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=Teal ctermfg=6
 -- hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=6
 -- hl(0, 'Identifier',    { fg = '#56b6c2', bg = 'Brown' })
-hl(0, 'Identifier',    { fg = '#56b6c2', bg = 'NONE' })
+hl(0, 'Identifier',    { fg = 'Teal', bg = 'NONE' })
 
 
 vim.cmd([[
@@ -143,6 +143,7 @@ hi CtrlSpaceSearch          ctermfg=220  ctermbg=NONE cterm=bold guibg=#56b6c2
 hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 
 ]])
+
 -- TSCurrentScope use CursorLine
 -- hl(0, 'CursorLine',    { cterm=underline, guibg=#282736, })
 hl(0, 'CursorLine', { bg = 'NONE' })
@@ -152,9 +153,16 @@ hl(0, 'CursorLine', { bg = 'NONE' })
 hl(0, 'Whitespace', { fg = 'NONE', })
 
 -- hl(0, 'Comment',    { fg = 'DarkGray', bg = 'NONE', reverse = true })
-hl(0, 'Comment',    { fg = 'DarkGray', bg = 'Black', reverse = true })
+-- hl(0, 'Comment',    { fg = 'DarkGray', bg = 'Black', reverse = true })
+-- hl(0, 'Comment',    { fg = 'Black', bg='DarkGrey' })
+hl(0, 'Comment',    { bg = 'Blue', fg='DarkGrey' })
+-- hl(0, 'Comment',    { fg = 'White', bg='#c0c0c0' })
 -- hl(0, '@comment',   { fg = 'DarkGray', bg = 'NONE', reverse = true })
-hl(0, '@comment',   { fg = 'DarkGray', bg = 'Black', reverse = true })
+-- hl(0, '@comment',   { fg = 'DarkGray', bg = 'Black', reverse = true })
+-- hl(0, '@comment',   { fg = 'Black', bg='DarkGrey' })
+hl(0, '@comment',   { bg = 'Blue', fg='DarkGrey' })
+-- hl(0, '@comment',   { fg = 'White', bg='#c0c0c0' })
+
 --
 -- Control the highlight guides
 -- CursorColumn   xxx guibg=#313640
@@ -185,15 +193,15 @@ hl(0, '@variable.builtin', { fg = '#cbbf66', bg = 'NONE' })
 -- " hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " hi! @string        guifg=Magenta guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " hi! @string        guifg=Orange guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
--- hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- " hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 hl(0, '@string', { fg = '#cbbf66', bg = 'NONE' })
-hl(0, 'String', { fg = '#cbbf66', bg = 'NONE' })
+hl(0, 'String', { fg = '#8787af', bg = 'NONE' })
 
 -- " hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " @function      xxx guifg=#61afef
--- hi! @function.call guifg=#56b6c2 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
-hl(0, '@function', { fg = '#56b6c2', bg = 'NONE' })
-hl(0, '@function.call', { fg = '#56b6c2', bg = 'NONE' })
+-- " hi! @function.call guifg=#56b6c2 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
+hl(0, '@function', { fg = 'Teal', bg = 'NONE' })
+hl(0, '@function.call', { fg = 'Teal', bg = 'NONE' })
 
 -- hi! Function    ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
 hl(0, 'Function', { fg = '#56b6c2', bg = 'NONE' })
@@ -201,10 +209,24 @@ hl(0, 'Function', { fg = '#56b6c2', bg = 'NONE' })
 -- shIf
 -- shDoubleQuote links to String
 -- shDerefSimple links to PreProc
-hl(0, 'PreProc', { fg = 'Yellow', bg = 'NONE' })
+hl(0, 'PreProc', { fg = 'Cyan', bg = 'NONE' })
 -- hl(0, 'shDerefSimple', { bg = '#eeaa77', fg = 'NONE' })
-hl(0, 'shDerefSimple', { fg = 'yellow', bg = 'NONE' })
-hl(0, 'shDerefVar', { fg = 'Blue', bg = 'NONE' })
+-- hl(0, 'shDerefSimple', { fg = 'Magenta', bg = 'NONE' })
+-- hl(0, 'shDerefSimple', { bg = '#808000', fg = 'NONE' })
+-- hl(0, 'shDerefSimple', { fg = '#ffd7af', bg = '#ffff00' })
+-- hl(0, 'shDerefSimple',   { fg = 'Teal', bg = 'NONE', bold = true })
+hl(0, 'shDerefSimple',   { fg = '#008080', bg = 'NONE' })
+hl(0, 'shDerefSimpleNE', { fg = 'Cyan', bg = 'NONE' })
+hl(0, 'shColon', { bg = '#ffd7af', fg = 'NONE', link='shDerefSimple' })
+
+hl(0, 'shDerefVar',    { fg = 'Teal', bg = 'NONE' })
+hl(0, 'shFor',         { fg = 'Teal', bg = 'NONE' })
+-- The spaces between expressions
+-- indent_blankline ?
+hl(0, 'shDo',          { fg = '#808000', bg = 'NONE' })
+hl(0, 'shExpr',        { fg = '#808000', bg = 'NONE' })
+hl(0, 'shFunctionOne', { fg = '#808000', bg = 'NONE' })
+hl(0, 'Statement',     { fg = '#808000', bg = 'NONE' })
 -- htmlItalic
 -- htmlItalic     xxx cterm=italic gui=italic
 -- wiki uses it
@@ -212,7 +234,7 @@ hl(0, 'htmlItalic', { fg = 'Blue', bg = 'NONE' })
 
 -- :highlight! Cursor gui=reverse guifg=NONE guibg=NONE
 -- hl(0, 'Cursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 0, nocombine = true })
-hl(0, 'Cursor', { bg = 'Brown', fg = 'NONE', reverse = true, blend = 10, nocombine = true })
+hl(0, 'Cursor', { fg = 'White', bg = '#c0c0c0', blend = 10, nocombine = true })
 
 -- hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 -- hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE

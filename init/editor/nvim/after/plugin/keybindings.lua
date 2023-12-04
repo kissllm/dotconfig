@@ -1,22 +1,45 @@
 local U = require('utils')
 
 -- local function map(mode, lhs, rhs, opts)
--- 	local options = { }
--- 	if opts then
--- 		options = vim.tbl_extend("force", options, opts)
--- 	end
--- 	-- local original_definition =
--- 	-- vim.api.nvim_exec("call maparg('" .. lhs .. "', '" ..  mode .. "', " .. "v:false" .. ")", "false")
--- 	-- if original_definition then
--- 	--  vim.cmd(mode .. "unmap " .. lhs)
--- 	-- end
--- 	vim.keymap.set(mode, lhs, rhs, options)
+--  local options = { }
+--  if opts then
+--      options = vim.tbl_extend("force", options, opts)
+--  end
+--  -- local original_definition =
+--  -- vim.api.nvim_exec("call maparg('" .. lhs .. "', '" ..  mode .. "', " .. "v:false" .. ")", "false")
+--  -- if original_definition then
+--  --  vim.cmd(mode .. "unmap " .. lhs)
+--  -- end
+--  vim.keymap.set(mode, lhs, rhs, options)
 -- end
+
+
+-- Register a global internal keymap that wraps `rhs` to be repeatable.
+-- @param mode string table keymap mode, see vim.keymap.set()
+-- @param lhs string lhs of the internal keymap to be created, should be in the form `<Plug>(...)`
+-- @param rhs string function rhs of the keymap, see vim.keymap.set()
+-- @return string The name of a registered internal `<Plug>(name)` keymap. Make sure you use { remap = true }.
+local make_repeatable_keymap = function (mode, lhs, rhs)
+	vim.validate {
+		mode = { mode, { 'string', 'table' } },
+		rhs  = { rhs,  { 'string', 'function' },
+		lhs  = { name = 'string' } }
+	}
+	if not vim.startswith(lhs, "<Plug>") then
+		error("`lhs` should start with `<Plug>`, given: " .. lhs)
+	end
+	vim.keymap.set(mode, lhs, function()
+		rhs()
+		vim.fn['repeat#set'](vim.api.nvim_replace_termcodes(lhs, true, true, true))
+	end)
+	return lhs
+end
+
 
 local map = U.map
 
 -- local function map(...)
--- 	return U.map(...)
+--  return U.map(...)
 -- end
 --
 -- Check definitions
@@ -31,6 +54,7 @@ local map = U.map
 
 -- Use jj to exit insert mode
 map("i", "jj", "<Esc>")
+map("n", "-", "g_")
 
 -- use leader-nt to toggle the NvimTree plugin's visibility in normal mode
 map("n", "<leader>nt",   ":NvimTreeToggle<CR>")
@@ -62,19 +86,38 @@ if key != ""
 ]])
 map("n", "u",            "<PageUp>",               { unique = true})
 vim.cmd([[
-let key = maparg('<c-u>', 'n', v:false)
-if key != ""
-	unmap <c-u>
+	let key = maparg('<c-u>', 'n', v:false)
+	if key != ""
+		unmap <c-u>
 	endif
 ]])
+
 -- vim.cmd("unmap <c-u>")
--- map("n", "<c-u>",        "<Plug>(RepeatUndo)",     { unique = true })
-map("n", "<c-u>",        "<Undo>",                 { unique = true })
+-- map("n", "<c-u>",        "<Plug>(RepeatUndo)",     { unique = true, noremap = true })
+-- map("n", "<C-U>",        "<Plug>(RepeatUndo)",     { unique = true })
+-- map("n", "<C-U>",
+-- function()
+--  vim.call('repeat#set', '<C-U>')
+-- end, { }
+-- )
+
+-- vim.keymap.set("n", "<C-U>", function()
+--  vim.cmd("undo")
+--  vim.call('repeat#set', '<C-U>', vim.v.count)
+-- end, { buffer = 0 })
+
+-- vim.keymap.set('n', '<C-U>', make_repeatable_keymap('n', '<Plug>(RepeatUndo)', function()
+--     -- the actual body (rhs) goes here: some complex logic that you want to repeat
+--  vim.cmd("undo")
+-- end, { remap = true }))
+
+-- map("n", "<c-u>",        "<Undo>",                 { unique = true, noremap = true })
+map("n", "<c-u>",        "<Undo>",                 { unique = true, noremap = true })
 -- map("n", "<c-k>",        ":wincmd k<cr>")
 -- map("n", "<c-j>",        ":wincmd j<cr>")
 -- map("n", "<c-h>",        ":wincmd h<cr>")
 -- map("n", "<c-l>",        ":wincmd l<cr>")
---
+
 map("n", "<Left>",       ":exe 'vertical resize ' . (winwidth(0) + 10)<cr>")
 map("n", "<Right>",      ":exe 'vertical resize ' . (winwidth(0) - 10)<cr>")
 map("n", "<Up>",         ":exe 'resize ' . (winheight(0) + 5)<cr>")
@@ -102,10 +145,10 @@ map("n", "<C-[>",        ":nohlsearch | diffupdate<cr>",        { silent = true 
 --
 map("n", "<F2>",         ":TagbarToggle<cr>")
 map("n", "t",            ":NvimTreeToggle<cr>")
--- map("n",      "<F3>", ":ls<cr>:b<space>")
--- map("n", "<F3>",      ":BuffergatorToggle<cr>")
+-- map("n", "<F3>",         ":ls<cr>:b<space>")
+-- map("n", "<F3>",         ":BuffergatorToggle<cr>")
 -- Won't work correctly
--- map("n", "<Esc>",         "if exists(\"b:is_gt_buffer\") <bar> :BuffergatorClose<CR> <bar> endif")
+-- map("n", "<Esc>",        "if exists(\"b:is_gt_buffer\") <bar> :BuffergatorClose<CR> <bar> endif")
 map("n", "<leader>l",    ":BuffergatorToggle<cr>")
 map("n", "<Leader>d",    ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q",    ":Bdelete<CR>",                        { silent = true })
@@ -121,6 +164,20 @@ map("x", "p", "pgvy")
 map("v", "y", "ygv<Esc>")
 map("n", "xx", "dd")
 map("n", "X", "D")
+
+map("t", "<Esc>", "<C-\\><C-n>")
+map("t", "<A-h>", "<C-\\><C-N><C-w>h")
+map("t", "<A-j>", "<C-\\><C-N><C-w>j")
+map("t", "<A-k>", "<C-\\><C-N><C-w>k")
+map("t", "<A-l>", "<C-\\><C-N><C-w>l")
+
+-- https://vim.fandom.com/wiki/Recover_from_accidental_Ctrl-U
+-- inoremap <c-u> <c-g>u<c-u>
+-- inoremap <c-w> <c-g>u<c-w>
+map("i", "<c-u>", "<c-g>u<c-u>", { noremap = true })
+map("i", "<c-w>", "<c-g>u<c-w>", { noremap = true })
+
+
 
 
 

@@ -144,6 +144,25 @@ set.more            = true
 setlocal.cino       = "e-2"
 set.smartcase       = true
 set.smartindent     = true
+set.autoindent      = true
+vim.cmd([[
+function! GetIndent()
+   let lnum = prevnonblank(v:lnum - 1)
+   let ind = indent(lnum)
+   return ind
+endfunction
+set indentexpr=GetIndent()
+]])
+function get_indent()
+	vim.cmd([[
+	let lnum = prevnonblank(v:lnum - 1)
+	let g:ind = indent(lnum)
+	" return ind
+	]])
+	return vim.g.ind
+end
+
+-- set.indentexpr      = GetIndent()
 set.incsearch       = true
 if vim.fn.exists('$TMUX') then
 	-- set.t_ut = ''
@@ -210,6 +229,14 @@ vim.cmd([[let &t_Ce = "\e[4:0m"]])
 vim.api.nvim_set_var('vimwiki_folding', 'custom')
 set.foldenable      = false
 
+vim.g.indent_blankline_char    = "│"
+vim.g.show_first_indent_level  = 0
+vim.g.indentLine_enabled       = 1
+vim.g.indent_blankline_enabled = 1
+vim.opt.termguicolors          = true
+vim.opt.list                   = true
+-- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
+vim.wo.colorcolumn = "99999"
 
 
 
@@ -217,6 +244,19 @@ set.foldenable      = false
 
 
 
+set.fillchars = {
+    vert       = "│", -- alternatives │
+	-- vert    = "▕", -- alternatives │
+	fold       = " ",
+	-- eob     = " ", -- suppress ~ at EndOfBuffer
+    eob        = " ", -- suppress ~ at EndOfBuffer
+    diff       = "░", -- alternatives = ⣿ ░ ─
+	-- diff    = "╱", -- alternatives = ⣿ ░ ─
+	msgsep     = "‾",
+	foldopen   = "▾",
+	foldsep    = "│",
+	foldclose  = "▸",
+}
 
 set.listchars = {
 	-- nbsp     = '⦸',
@@ -237,6 +277,7 @@ set.listchars = {
 	space       = ' '
 	--eol       = '↴'
 }
+
 
 function filetype_autocmd(filetype, cmd, params)
 	autocmd("FileType", { pattern = filetype, command = cmd .. ' ' .. params })
@@ -267,11 +308,23 @@ autocmd("BufEnter", {
 })
 
 vim.api.nvim_create_user_command(
+	"RL",
+	function()
+		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/configs.lua")
+		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
+		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/keybindings.lua")
+		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+	end,
+	{ nargs = '?', bang = true, silent }
+)
+
+-- "Thyrum/vim-stabs",
+vim.api.nvim_create_user_command(
 	"RT",
 	function()
-		-- set.expandtab = true
-		-- vim.cmd("retab")
-		-- set.expandtab = false
+		set.expandtab = true
+		vim.cmd("retab")
+		set.expandtab = false
 		vim.cmd("RetabIndent")
 		-- vim.cmd("write " .. vim.fn.expand('%'))
 		vim.cmd("W")
@@ -348,7 +401,7 @@ vim.api.nvim_create_autocmd({"RecordingLeave"}, {
 })
 
 -- https://stackoverflow.com/questions/5017009/confusion-about-vim-folding-how-to-disable
--- " Tweak the event and filetypes matched to your liking. 
+-- " Tweak the event and filetypes matched to your liking.
 -- " Note, perl automatically sets foldmethod in the syntax file
 -- autocmd Syntax c,cpp,vim,xml,html,xhtml setlocal foldmethod=syntax
 -- autocmd Syntax c,cpp,vim,xml,html,xhtml,perl normal zR
@@ -724,11 +777,11 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
 
 -- enabled = function()
 --  local buftype = vim.bo.buftype
--- 
+--
 --  if buftype == 'prompt' or buftype == 'nofile' then
 --      return false
 --  end
--- 
+--
 --  return true
 -- end
 --

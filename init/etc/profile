@@ -81,15 +81,22 @@ env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
 # fi
 
 # Try to tell I'm runing in a chroot. Equal means not in a chroot
-# Not equal means in a chroot, then ignore the tmux application, etc.
+# Not equal (contains) means in a chroot, then ignore the tmux application, etc.
 is_chrooted() {
 	local being_in_chroot=0
+	local root_pid="$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)"
+	local pid_list="$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)"
+	local is_pid_contained=1
+
+	case " $pid_list " in
+		*" $root_pid "*) is_pid_contained=0
+	esac
+
 	[ ! -f "/proc/1/mountinfo" ] ||
 	[ ! -f "/proc/$$/mountinfo" ] ||
-	[ \
-	"$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)" -ne \
-	"$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)" ] ||
+	[ "$is_pid_contained" -ne "0" ] ||
 	being_in_chroot=1
+
 	return $being_in_chroot
 }
 

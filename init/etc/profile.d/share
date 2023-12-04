@@ -401,10 +401,10 @@ init_file_overwrite() {
 [ ! -L "$HOME/.xdg-runtime-dir" ] &&
 	printf '%s %s\n' "$HOME/.xdg-runtime-dir" "creating failed"
 
-env_reset MNG_ROOT      "/working/os/kiss"
+env_reset MNGR_ROOT     "/working/os/kiss"
 env_reset REPO_ROOT     "/var/db/kiss"
 env_reset REPO_ROOT_DEV "/opt/${REPO_ROOT#*/}"
-env_reset DES_ROOT      "/working/kiss"
+env_reset DEST_ROOT     "/working/kiss"
 env_reset DOTCONFIG     "/mnt/init"
 
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
@@ -446,7 +446,6 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	{ [ -h "$REPO_ROOT" ] || [ -L "$REPO_ROOT" ]; } && \rm -f "$REPO_ROOT"
 	[ -d "$REPO_ROOT" ] || \mkdir -p "$REPO_ROOT"
 
-	// link_correct "/opt/var/db/kiss/system"  "$REPO_ROOT/"
 	// link_correct "/opt/var/db/kiss/choices" "$REPO_ROOT/"
 	// link_correct "/opt/var/db/kiss/hooks"   "$REPO_ROOT/"
 
@@ -457,11 +456,11 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlmvm.conf"   "/etc/modprobe.d/"
 	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlwifi.conf"  "/etc/modprobe.d/"
 
-	for item in $(\ls -1 "$MNG_ROOT/usr/bin" | grep kiss); do
-		// link_correct "$MNG_ROOT/usr/bin/$item" "/usr/bin/"
+	for item in $(\ls -1 "$MNGR_ROOT/usr/bin" | grep kiss); do
+		// link_correct "$MNGR_ROOT/usr/bin/$item" "/usr/bin/"
 	done
-	for item in $(\ls -1 "$MNG_ROOT/usr/include" | grep kiss); do
-		// link_correct "$MNG_ROOT/usr/include/$item" "/usr/include/"
+	for item in $(\ls -1 "$MNGR_ROOT/usr/include" | grep kiss); do
+		// link_correct "$MNGR_ROOT/usr/include/$item" "/usr/include/"
 	done
 esac
 

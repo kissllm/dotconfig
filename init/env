@@ -9,6 +9,8 @@ newline="
 alias /='eval'
 alias //='lineno="$LINENO"'
 
+env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
+
 # env_reset() {
 #   local env_key_name="${1:?"Must give a key"}"
 #   local env_value="${2:?"Must give a value"}"
@@ -308,7 +310,7 @@ path_prepend PATH "."
 env_reset KISS_TMPDIR "/tmp/$USER/kiss"
 # [ "$CACHE_ROOT" = "/tmp" ] || CACHE_ROOT="/tmp" && export CACHE_ROOT
 # env_reset CACHE_ROOT "/dev/shm"
-env_reset PKG_MNG_ROOT "/working/os/kiss"
+env_reset MNGR_ROOT "/working/os/kiss"
 # : "${DEBUG_AT_BACKGROUND=}"
 # [ -d "$KISS_TMPDIR" ] || mkdir -p "$KISS_TMPDIR"
 # log_dir="$KISS_TMPDIR/logs"
@@ -358,10 +360,10 @@ export KISS_AS_LIBRARY=
 #   printf %s\\n "kiss is not loaded"'
 
 # alias kiss='
-# path_prepend PATH $PKG_MNG_ROOT/usr/bin;
-# command -v $PKG_MNG_ROOT/usr/bin/kiss > /dev/null 2>&1 &&
+# path_prepend PATH $MNGR_ROOT/usr/bin;
+# command -v $MNGR_ROOT/usr/bin/kiss > /dev/null 2>&1 &&
 #   unalias kiss &&
-#   alias kiss='$PKG_MNG_ROOT/usr/bin/kiss' &&
+#   alias kiss='$MNGR_ROOT/usr/bin/kiss' &&
 #   kiss "$@" ||
 #   printf %s\\n "kiss is not loaded"'
 

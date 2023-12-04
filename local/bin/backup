@@ -14,10 +14,10 @@ else
 fi
 
 if [ "$(/usr/bin/whoami)" = "root" ]; then
-	copy_way="rsync -aqzpogDX --delete-after"
+	copy_way="rsync -aqzX --delete-after"
 	# copy_way="/usr/bin/cp -rf"
 else
-	copy_way="doas rsync -aqzpogDX --delete-after"
+	copy_way="doas rsync -aqzX --delete-after"
 	# copy_way="doas /usr/bin/cp -rf"
 fi
 
@@ -56,9 +56,9 @@ done
 
 # Don't delete system database
 if [ "$(/usr/bin/whoami)" = "root" ]; then
-	copy_way="rsync -aqzpogDX"
+	copy_way="rsync -aqzX"
 else
-	copy_way="doas rsync -aqzpogDX"
+	copy_way="doas rsync -aqzX"
 fi
 
 copy_folder() {
