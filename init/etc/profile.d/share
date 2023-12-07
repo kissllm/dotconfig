@@ -118,6 +118,7 @@ link_correct() {
 	[ ! -z "${target:+x}" ] || return 1
 	local target_name="${target##*/}"
 	[ ! -z "${target_name:+x}" ] || return 1
+
 	local anchor="$2"
 
 	[ -n "${anchor:+x}" ] || {
@@ -125,42 +126,46 @@ link_correct() {
 		exit 1
 	}
 
-	[ -n "${XDG_CACHE_HOME:+x}" ]  &&
+	[ -n "${XDG_CACHE_HOME:+x}" ] &&
 	[ -d "$XDG_CACHE_HOME" ] ||
 		. "$XDG_INIT"
 
-	files_cache() {
-		local ahchor="$1"
-		[ -n "${XDG_CACHE_HOME:+x}" ]  &&
+	file_folder_cache() {
+		local target="$1"
+		local ancher="$2"
+		prompt '$target : $ancher' "$target : $ancher"
+		[ -n "${XDG_CACHE_HOME:+x}" ] &&
 		[ -d "$XDG_CACHE_HOME" ] || {
 			prompt '$lineno' "$lineno"
-			prompt '$ahchor' "$ahchor"
+			prompt '$ancher' "$ancher"
 			prompt '$XDG_CACHE_HOME' "$XDG_CACHE_HOME"
 			exit 1
 		}
-		local real_ahchor="$(readlink -f "$anchor")"
-		[ -n "${real_ahchor:+x}" ] || {
+		local real_ancher="$(readlink -f "$anchor")"
+		[ -n "${real_ancher:+x}" ] || {
 			prompt '$lineno' "$lineno"
-			prompt '$real_ahchor' "$real_ahchor"
+			prompt '$real_ancher' "$real_ancher"
 			exit 1
 		}
-		local ahchor_backup_location="$XDG_CACHE_HOME$real_ahchor"
-		local ahchor_backup_dir="${ahchor_backup_location%/*}"
-		[ -d "$ahchor_backup_dir" ] || doas \mkdir -p "$ahchor_backup_dir"
-		prompt "$real_ahchor" "is going to be removed to $ahchor_backup_location"
-		case "$real_ahchor" in *"/usr"*|*"/sbin"*|*"/bin"*|*/etc*|*"/lib"*|*"/var/db"*|*"kiss"*)
-			prompt '$real_ahchor' "'$real_ahchor' is the file/folder you realy want to remove?"
+		local ancher_backup_location="$XDG_CACHE_HOME$real_ancher"
+		local ancher_backup_dir="${ancher_backup_location%/*}"
+		[ -d "$ancher_backup_dir" ] || doas \mkdir -p "$ancher_backup_dir"
+
+		prompt '$real_ancher' "'$real_ancher' is going to be removed to $ancher_backup_location"
+
+		case "$real_ancher" in *"/usr"*|*"/sbin"*|*"/bin"*|*/etc*|*"/lib"*|*"/var/db"*|*"kiss"*)
+			prompt '$real_ancher' "'$real_ancher' is the file/folder you realy want to remove?"
 			return 1
 		esac
 
-		[ -f "$real_ahchor" ] &&
-			prompt '$real_ahchor' "'$real_ahchor' as a file is going to be removed"
-		[ -d "$real_ahchor" ] &&
-			prompt '$real_ahchor' "'$real_ahchor' as a dir is going to be removed"
+		[ -f "$real_ancher" ] &&
+			prompt '$real_ancher' "'$real_ancher' as a file is going to be removed"
+		[ -d "$real_ancher" ] &&
+			prompt '$real_ancher' "'$real_ancher' as a dir is going to be removed"
 
-		doas \mv -f "$real_ahchor" "$ahchor_backup_location" || {
-			// prompt '$real_ahchor' "'$real_ahchor' can not be moved"
-			# doas \mv -f "$real_ahchor" "$real_ahchor-$(date +%Y-%m-%d-%H-%M)"
+		doas \mv -f "$real_ancher" "$ancher_backup_location" || {
+			// prompt '$real_ancher' "'$real_ancher' can not be moved"
+			# doas \mv -f "$real_ancher" "$real_ancher-$(date +%Y-%m-%d-%H-%M)"
 			return 1
 		}
 	}
@@ -189,9 +194,10 @@ link_correct() {
 				prompt '$wrong_anchor' "'$wrong_anchor' as a link is going to be removed"
 				doas \rm -f "$wrong_anchor"
 			}
+			:
 		} || {
 			# Move file or folder to cache dir
-			// files_cache "$wrong_anchor" || {
+			// file_folder_cache "$target" "$wrong_anchor" || {
 				prompt '$wrong_anchor' "'$wrong_anchor' removing failed and no further actions"
 				return 1
 			}
@@ -210,107 +216,80 @@ link_correct() {
 		}
 
 	}
+
+	local anchor_dir=
 	# "$anchor" does not exist yet
-	# "$anchor" might have a '/' at the end
-	# [ "${anchor:$((${#anchor}-1)):1}" = '/' ] && {
-	# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" = '/' ] && {
 	[ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] && {
 		[ "${anchor##*/}" != "$target_name" ] && {
-			[ -d "$anchor" ]  anchor="$anchor/" || {
-				prompt '$anchor' "'$anchor' as a file is going to be removed"
+			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin
+			[ -d "$anchor" ] && {
+				anchor_dir="$anchor"
+			} || {
+				# $anchor is a file, so it can not be transfered to a link
+				prompt '$anchor' "'$anchor' as a wrong named file (which supposed to be $target) is going to be removed"
 				doas \rm -f "$anchor"
+				anchor_dir="${anchor%/*}"
 			}
+			:
 		} || {
+			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/kiss
 
 			# Might be "$anchor" == "/usr/bin/kiss", "$target_name" == "kiss"
 			[ -f "$anchor" ] && {
 				# doas \rm -f "$anchor"
-				// files_cache "$ahchor" || {
-					prompt '$ahchor' "'$ahchor' removing failed and no further actions"
-					return 1
-				}
+				prompt '$anchor' "'$anchor' is a same named file"
 			} || {
 				# doas \rm -rf "$anchor"
-				prompt '$anchor' "'$anchor' is a recursive named dir"
-				// files_cache "$ahchor" || {
-					prompt '$ahchor' "'$ahchor' removing failed and no further actions"
-					return 1
-				}
+				prompt '$anchor' "'$anchor' is a recursive same named dir"
 			}
+			wrong_anchor_clear "$target" "$ancher" || return 1
 
+			anchor_dir="${anchor%/*}"
 		}
+		:
 	} || {
+
+		# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/
+
+		# "$anchor" might have a '/' at the end
+		# [ "${anchor:$((${#anchor}-1)):1}" = '/' ] && {
+		# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" = '/' ] && {
 		# Might be "$anchor" == "/usr/bin/", "$target_name" == "kiss"
 		local anchor_standard="${anchor%/}"
 		# "$anchor_standard" == "/usr/bin"
 		# [ "${anchor_standard##*/}" = "${target##*/}" ] && {
 		[ "${anchor_standard##*/}" != "$target_name" ] && {
 			# Trying to create a linkage under "$anchor"
+			# "$subdir_anchor" == "/usr/bin/kiss"
 			local subdir_anchor="$anchor_standard/$target_name"
 
-			link_exists_and_is_correct "$target" "$subdir_anchor" && return 0 ||
-				wrong_anchor_clear "$target" "$subdir_anchor"
-			# "$subdir_anchor" == "/usr/bin/kiss"
-			# [ ! -e "$subdir_anchor" ] || {
-				# {
-				#   [ -h "$subdir_anchor" ] || [ -L "$subdir_anchor" ]
-				# } && {
-				#   [ "$(readlink -fn "$subdir_anchor")" = "$(readlink -fn "$target")" ] &&
-				#   return 0 || {
-				#       # Remove the link
-				#       prompt '$subdir_anchor' "'$subdir_anchor' as a link is going to be removed"
-				#       doas \rm -f "$subdir_anchor"
-				#       # // files_cache "$subdir_anchor"
-				#   }
-				# } || {
-				#   [ -f "$subdir_anchor" ] && {
-				#       prompt '$subdir_anchor' "'$subdir_anchor' as a file is going to be removed"
-				#       doas \rm -f "$subdir_anchor"
-				#   } || {
-				#       prompt '$subdir_anchor' "'$subdir_anchor' as a dir is going to be removed"
-				#       // files_cache "$subdir_anchor" || {
-				#           prompt '$subdir_anchor' "'$subdir_anchor' removing failed and no further actions"
-				#           return 1
-				#       }
-				#   }
-				# }
-			# }
+			# "$anchor" does not exist yet
+			[ ! -e "$subdir_anchor" ] || {
+				link_exists_and_is_correct "$target" "$subdir_anchor" && return 0 ||
+				wrong_anchor_clear "$target" "$subdir_anchor" || return 1
+			}
+			anchor_dir="$anchor_standard"
+			:
 		} || {
+
+			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/kiss/
+
+			# Duplicated name exists already
 			# Might be "$anchor" == "/usr/bin/kiss/", "$target_name" == "kiss"
 			# Recursive linkage
 			# "$anchor" already is the real anchor
-			anchor="$anchor_standard"
 
-			link_exists_and_is_correct "$target" "$anchor" && return 0 ||
-				wrong_anchor_clear "$target" "$anchor"
-			# [ ! -e "$anchor" ] || {
-				# {
-				#   [ -h "$anchor" ] || [ -L "$anchor" ]
-				# } && {
-				#   [ "$(readlink -fn "$anchor")" = "$(readlink -fn "$target")" ] &&
-				#   return 0 || {
-				#       # Remove the link
-				#       prompt '$anchor' "'$anchor' as a link is going to be removed"
-				#       doas \rm -f "$anchor"
-				#   }
-				# } || {
-				#   [ -f "$anchor" ] && {
-				#       prompt '$anchor' "'$anchor' as a file is going to be removed"
-				#       doas \rm -f "$anchor"
-				#   } || {
-				#       prompt '$anchor' "'$anchor' as a dir is going to be removed"
-				#       // files_cache "$anchor" || {
-				#           prompt '$ahchor' "'$ahchor' removing failed and no further actions"
-				#           return 1
-				#       }
-				#   }
-				# }
-			# }
+			[ ! -e "$anchor" ] || {
+				link_exists_and_is_correct "$target" "$anchor" && return 0 ||
+				wrong_anchor_clear "$target" "$anchor" || return 1
+			}
+			anchor_dir="${anchor_standard%/*}"
 		}
 	}
 
-	local anchor_dir="${anchor%/*}"
 	[ -d "$anchor_dir" ] || doas \mkdir -p "$anchor_dir"
+	# Redefine anchor from $anchor_dir
+	anchor="$anchor_dir/$target_name"
 
 	# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
 	# doas \ln -sTf -- "$target" "$anchor"

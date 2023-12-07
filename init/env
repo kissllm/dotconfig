@@ -341,8 +341,9 @@ export KISS_AS_LIBRARY=
 
 # kiss() { ENV=/usr/bin/kiss $SHELL -l; }
 [ -z "${KISS_AS_LIBRARY+x}" ] || {
-	[ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
-		!= "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] &&
+	# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
+	#   != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] &&
+	is_chrooted &&
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-; } ||
 	alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" ' ||
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-l; }
@@ -375,7 +376,8 @@ export KISS_AS_LIBRARY=
 # Or,
 # set -x
 # kiss
-#
+# kiss-debug
+# kiss-strace
 # }
 
 # Colors.

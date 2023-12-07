@@ -275,7 +275,7 @@ set.listchars = {
 	-- trail    = '•',
 	trail       = '·',
 	space       = ' '
-	--eol       = '↴'
+	-- eol      = '↴'
 }
 
 

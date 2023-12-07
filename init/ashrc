@@ -550,14 +550,14 @@ _tmux() {
 
 	# TERM == tmux version
 	# TERM="tmux-256color" \
+		# TINIT_HOME_DIR="$TINIT_HOME_DIR" \
+		# TMUX_DIR="$TMUX_DIR" \
+		# TMUX_TMPDIR="${TMUX_TMPDIR}" \
 	exec env \
 		VISUAL="vi" \
 		TERM="linux" \
 		COLORTERM="truecolor" \
-		TMUX_TMPDIR="${TMUX_TMPDIR}" \
-		TINIT_HOME_DIR="$TINIT_HOME_DIR" \
 		TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
-		TMUX_DIR="$TMUX_DIR" \
 		TMUX="$TMUX" \
 		TERM_PROGRAM="$TERM_PROGRAM" \
 		WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
