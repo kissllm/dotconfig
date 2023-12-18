@@ -17,8 +17,8 @@
 #   setup   REST help:usage -- "Usage: example.sh [options]... [arguments]..." ''
 #   msg -- 'Options:'
 #   flag    FLAG      -f --flag                  -- "takes no arguments"
-#   param   SHARE_PREFIX -s --share_root            -- "share shell scripts root"
-#   param   HOME  -h --home                  -- "should be applied user home"
+#   param   SHARE_PREFIX -s --share_root         -- "share shell scripts root"
+#   param   HOME  -h --home                      -- "should be applied user home"
 #   option  OPTION    -o --option on:"default"   -- "takes one optional argument"
 #   disp    :usage    -h --help
 #   disp    VERSION   --version
@@ -131,6 +131,9 @@ link_correct() {
 		return 0
 	}
 	local anchor="$2"
+	local anchor_name="${anchor##*/}"
+	[ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] ||
+		anchor_name="$target_name"
 
 	[ -n "${anchor:+x}" ] || {
 		printf '%s %s\n' "Empty anchor input for $target ad line" "$lineno"
@@ -323,7 +326,7 @@ link_correct() {
 
 	[ -d "$anchor_dir" ] || doas \mkdir -p "$anchor_dir"
 	# Redefine anchor from $anchor_dir
-	anchor="$anchor_dir/$target_name"
+	anchor="$anchor_dir/$anchor_name"
 
 	# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
 	# doas \ln -sTf -- "$target" "$anchor"
@@ -460,7 +463,8 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	{ [ -h "$REPO_ROOT" ] || [ -L "$REPO_ROOT" ]; } && \rm -f "$REPO_ROOT"
 	[ -d "$REPO_ROOT" ] || \mkdir -p "$REPO_ROOT"
 
-	// link_correct "/opt/var/db/kiss/choices" "$REPO_ROOT/"
+	# // link_correct "/opt/var/db/kiss/choices" "$REPO_ROOT/"
+	[ ! -e "/opt/var/db/kiss/hooks" ] ||
 	// link_correct "/opt/var/db/kiss/hooks"   "$REPO_ROOT/"
 
 	# }
@@ -469,10 +473,11 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwldvm.conf"   "/etc/modprobe.d/"
 	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlmvm.conf"   "/etc/modprobe.d/"
 	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlwifi.conf"  "/etc/modprobe.d/"
-
+	[ ! -e  "$MNGR_ROOT/usr/bin" ] ||
 	for item in $(\ls -1 "$MNGR_ROOT/usr/bin" | grep kiss); do
 		// link_correct "$MNGR_ROOT/usr/bin/$item" "/usr/bin/"
 	done
+	[ ! -e  "$MNGR_ROOT/usr/include" ] ||
 	for item in $(\ls -1 "$MNGR_ROOT/usr/include" | grep kiss); do
 		// link_correct "$MNGR_ROOT/usr/include/$item" "/usr/include/"
 	done
@@ -499,9 +504,13 @@ folder_tmux="${HOME}/.tmux"
 folder_vim="${HOME}/.vim"
 [ -L "$folder_vim" ] && \rm -f "$folder_vim"
 [ -d "$folder_vim" ] || \mkdir -p "$folder_vim"
+
+[ ! -e  "${SHARE_PREFIX}/init/editor/vim/after" ] ||
 // link_correct "${SHARE_PREFIX}/init/editor/vim/after"  "${HOME}/.vim/"
+[ ! -e  "${SHARE_PREFIX}/init/editor/vim/indent" ] ||
 // link_correct "${SHARE_PREFIX}/init/editor/vim/indent" "${HOME}/.vim/"
 // link_correct "${SHARE_PREFIX}/init/editor/nvim"       "${XDG_CONFIG_HOME}/"
+[ ! -e  "${SHARE_PREFIX}/wiki" ] ||
 // link_correct "${SHARE_PREFIX}/wiki"                   "${HOME}/.wiki"
 #
 # Folder maintenance

@@ -1,14 +1,15 @@
-#!/bin/sh
+#! /bin/sh
 
-[ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
-	!= "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
+# 	!= "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+is_chrooted || {
 
-	doas modprobe cfg80211
+	doas modprobe cfg80211 || :
 	# modprobe iwlmvm
 
 	wifi_mod="$(lsmod | grep "iwlmvm" | awk '{print $1}')"
 	[ -n "$wifi_mod" ] || {
-		doas modprobe iwlmvm
-		doas modprobe iwlwifi
+		doas modprobe iwlmvm || :
+		doas modprobe iwlwifi || :
 	}
 }

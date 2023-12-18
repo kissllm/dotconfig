@@ -158,7 +158,10 @@ repo_main() {
 	# Empty means the local host
 	local kiss_root="${1-}"
 	local repo_main_target="$kiss_root/${REPO_MAIN#*/}"
+	[ -d "$kiss_root/${REPO_ROOT#*/}" ] ||  \mkdir -p "$kiss_root/${REPO_ROOT#*/}"
 
+	[ ! -e "$repo_main_source" ] &&
+		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' does not exist" ||
 	[ -d "$repo_main_target" ] || {
 		[ -L "$repo_main_target" ] ||
 		[ -h "$repo_main_target" ]
@@ -166,14 +169,16 @@ repo_main() {
 		[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_DEV")" ] || {
 			printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_DEV'"
 			printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
-			exit 1
+			# exit 1
+			return 0
 		}
 		[ ! -L "$repo_main_target" ] &&
 		\ln -sf "$repo_main_source" "$repo_main_target" ||
 		[ "$(readlink -fn "$repo_main_target")" = "$(readlink -fn "$repo_main_source")" ] || {
 			\rm -f "$repo_main_target" || {
 				printf '%s %s\n' '$REPO_ROOT/rolling' "'$REPO_ROOT/rolling' modification failed"
-				exit 1
+				# exit 1
+				return 0
 			}
 
 			\ln -sf "$repo_main_source" "$repo_main_target"

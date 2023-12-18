@@ -1,9 +1,10 @@
-#!/bin/sh
+#! /bin/sh
 
-[ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
-    != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
+#     != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+is_chrooted || {
 
     nouveau_mod="$(lsmod | grep "nouveau" | awk '{print $1}')"
 
-    [ -n "$nouveau_mod" ] || doas modprobe nouveau
+    [ -n "$nouveau_mod" ] || doas modprobe nouveau || :
 }

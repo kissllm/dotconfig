@@ -5,7 +5,7 @@
 is_chrooted || {
 	eth_mod="$(lsmod | grep "alx" | awk '{print $1}')"
 	[ -n "$wifi_mod" ] || {
-		doas modprobe alx
-		doas modprobe mdio
+		doas modprobe alx || :
+		doas modprobe mdio || :
 	}
 }
