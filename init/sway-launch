@@ -1,4 +1,4 @@
-# !/bin/sh
+#! /bin/sh
 set -a
 
 printf '%s %s\n' '$tty_num' "$tty_num [enter sway-launch]"

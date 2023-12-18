@@ -1,4 +1,4 @@
-# !/bin/sh -e
+#! /bin/sh -e
 # doas load-kiss
 . /mnt/lib/mount_smart
 

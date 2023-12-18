@@ -769,6 +769,7 @@ else
 
 fi
 
+dmesg -n 1
 
 parent_is_tmux() {
 	local result=1
@@ -808,7 +809,9 @@ is_chrooted ||
 #       } &&
 #           [ $tty_num = "1" ]
 #       } ||
+
 _tmux
+
 # {
 #   command rm -f "$HOME/tmux*.log"
 #   [ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
@@ -866,3 +869,10 @@ _tmux
 # [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
 #
 # set ts=4 sw=4 tw=0 noet :
+#
+#
+#
+#
+#
+#
+#

@@ -192,6 +192,10 @@ if U.is_linux() then
 elseif U.is_mac() then
 	map("n", "gx", "<Cmd>call jobstart(['open', expand('<cfile>')])<CR>")
 end
+
+-- map('n', "w", "<Cmd>call boot#write_generic()<cr>")
+-- vim.keymap.set('ca', 'w', ":getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
+
 map("n", "<leader>qt",  ":Tclose!<CR>", { silent = true })
 
 map("n", "ea",          "<Plug>(EasyAlign)")
@@ -228,7 +232,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	end,
 })
 
-
+-- nvim-cmp
+vim.keymap.set("n", "<leader>ua", "<cmd>lua vim.g.cmptoggle = not vim.g.cmptoggle<CR>", { desc = "toggle nvim-cmp" })
 
 -- local builtin = require('telescope.builtin')
 -- map("n", "<C-p>", builtin.find_files)

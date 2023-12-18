@@ -551,9 +551,10 @@ export FONTCONFIG_PATH=/etc/fonts
 # ~/.vim/ftplugin/man.vim
 
 # neovim is not stable and light-weight
-! command -v /usr/bin/nvim > /dev/null 2>&1 || {
-	  # export MANPAGER='/usr/bin/nvim --clean +Man!'
-	  export MANPAGER='/usr/bin/nvim +Man!'
+# ! command -v /usr/bin/nvim > /dev/null 2>&1 || {
+! command -v /usr/bin/vim > /dev/null 2>&1 || {
+	# export MANPAGER='/usr/bin/nvim --clean +Man!'
+	# export MANPAGER='/usr/bin/vim +Man!'
 #
 #     # Unterminated quoted string
 #     # export MANPAGER="/bin/sh -c \"unset MANPAGER; col -b | vim -c 'set ft=man ts=4 nomod nolist nonu' -\""
@@ -574,20 +575,20 @@ export FONTCONFIG_PATH=/etc/fonts
 # "
 # '
 	# Works
-	# man() {
-	#     unset MANPAGER
-	#     col -b -x | \
-	#     nvim --clean \
-	#         -c 'filetype plugin on' \
-	#         -c 'set ft=man ts=4 nomod nolist nonu' \
-	#         -c 'nnoremap q :q<cr>' \
-	#         -c 'nnoremap <space> <c-d>' \
-	#         -c 'nnoremap , <c-d>' \
-	#         -c 'nnoremap u <c-u>' \
-	#         -c 'nnoremap <c-u> u' \
-	#         -c 'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>' \
-	#         -c "Man $*"
-	# }
+	man() {
+		unset MANPAGER
+		col -b -x | \
+		vim --clean \
+			-c 'filetype plugin on' \
+			-c 'set ft=man ts=4 nomod nolist nonu' \
+			-c 'nnoremap q :q<cr>' \
+			-c 'nnoremap <space> <c-d>' \
+			-c 'nnoremap , <c-d>' \
+			-c 'nnoremap u <c-u>' \
+			-c 'nnoremap <c-u> u' \
+			-c 'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>' \
+			-c "Man $*"
+	}
 }
 
 export MANWIDTH=999
@@ -651,3 +652,11 @@ export WAYLAND_CONFIG_HOME
 }
 
 # set ts=4 sw=4 tw=0 noet :
+
+
+
+
+
+
+
+

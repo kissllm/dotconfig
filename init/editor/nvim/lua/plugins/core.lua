@@ -166,8 +166,10 @@ return {
 		event = "VeryLazy"
 	},
 
+	-- Tons of errors puped up
 	{
 		"wellle/targets.vim",
+		cond  = false,
 		event = { "BufReadPost", "BufNewFile" }
 	},
 
@@ -346,6 +348,7 @@ return {
 	-- Rainbow Highlighting
 	{
 		"HiPhish/rainbow-delimiters.nvim",
+		cond  = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},

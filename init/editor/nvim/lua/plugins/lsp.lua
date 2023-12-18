@@ -92,7 +92,7 @@ return {
 			-- https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
 			lsp.omnifunc.setup({
 				tabcomplete      = true,
-				-- trigger          = '<C-Space>',
+				trigger          = '<C-Space>',
 				update_on_delete = true,
 				autocomplete     = true,
 				use_fallback     = true,
@@ -197,6 +197,15 @@ return {
 
 			-- require("plugins.lspconfig.cmp").setup({
 			cmp.setup({
+				completion = {
+					autocomplete = false,
+				},
+				mapping = {
+					['<C-Space>'] = cmp.mapping.complete()
+				},
+				enabled = function()
+					return vim.g.cmptoggle
+				end,
 				cmp_action = cmp_action,
 				snippet = {
 					-- REQUIRED - you must specify a snippet engine
@@ -333,22 +342,22 @@ return {
 			-- See :help lsp-zero-guide:integrate-with-mason-nvim
 
 			-- lsp.ensure_installed({
-			-- 	"tsserver",
-			-- 	"lua_ls",
-			-- 	"pyright",
-			-- 	"bashls",
-			-- 	"gopls",
-			-- 	"docker_compose_language_service",
-			-- 	"dockerls",
-			-- 	"eslint",
-			-- 	"html",
-			-- 	-- Needs dotnet, and musl libc build failed
-			-- 	-- "marksman",
-			-- 	"ruff_lsp",
-			-- 	"rust_analyzer",
-			-- 	"svelte",
-			-- 	"yamlls",
-			-- 	"jsonls",
+			--  "tsserver",
+			--  "lua_ls",
+			--  "pyright",
+			--  "bashls",
+			--  "gopls",
+			--  "docker_compose_language_service",
+			--  "dockerls",
+			--  "eslint",
+			--  "html",
+			--  -- Needs dotnet, and musl libc build failed
+			--  -- "marksman",
+			--  "ruff_lsp",
+			--  "rust_analyzer",
+			--  "svelte",
+			--  "yamlls",
+			--  "jsonls",
 			-- })
 			local inlay = require("lspconfig.inlay").setup()
 			lsp.on_attach(function(client, bufnr)
@@ -450,8 +459,8 @@ return {
 			-- Doesn't work
 			-- local client = vim.lsp.get_active_clients({ name = 'marksman' })[1]
 			-- if client then
-			-- 	local ns = vim.lsp.diagnostic.get_namespace(client.id)
-			-- 	vim.diagnostic.disable(nil, ns)
+			--  local ns = vim.lsp.diagnostic.get_namespace(client.id)
+			--  vim.diagnostic.disable(nil, ns)
 			-- end
 
 			-- Semantic Highlighting in Neovim
@@ -602,3 +611,10 @@ return {
 		end,
 	},
 }
+
+
+
+
+
+
+

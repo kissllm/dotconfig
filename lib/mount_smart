@@ -1,4 +1,4 @@
-# !/bin/sh --
+#! /bin/sh --
 
 # mount_smart target source
 [ -z "${IS_KISS+x}" ] &&

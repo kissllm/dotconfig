@@ -11,7 +11,7 @@ local fn       = vim.fn
 
 
 set.syntax     = 'false'
-
+set.autoread   = true
 cmd[[
 set omnifunc=v:lua.vim.lsp.omnifunc
 ]]
@@ -135,7 +135,9 @@ set.splitright      = true
 set.ttimeout        = true
 set.ttimeoutlen     = 1
 set.ttyfast         = true
-set.virtualedit     = "block"
+-- weird behavior: automatically moving cursor one character left/backward when shfit+a
+--- set.virtualedit     = "block"
+set.virtualedit     = "onemore"
 set.wildmenu        = true
 set.wildmode        = "full"
 set.paste           = false
@@ -238,6 +240,8 @@ vim.opt.list                   = true
 -- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
 vim.wo.colorcolumn = "99999"
 
+-- initialize global var to false -> nvim-cmp turned off per default
+vim.g.cmptoggle = false
 
 
 
@@ -245,12 +249,12 @@ vim.wo.colorcolumn = "99999"
 
 
 set.fillchars = {
-    vert       = "│", -- alternatives │
+	vert       = "│", -- alternatives │
 	-- vert    = "▕", -- alternatives │
 	fold       = " ",
 	-- eob     = " ", -- suppress ~ at EndOfBuffer
-    eob        = " ", -- suppress ~ at EndOfBuffer
-    diff       = "░", -- alternatives = ⣿ ░ ─
+	eob        = " ", -- suppress ~ at EndOfBuffer
+	diff       = "░", -- alternatives = ⣿ ░ ─
 	-- diff    = "╱", -- alternatives = ⣿ ░ ─
 	msgsep     = "‾",
 	foldopen   = "▾",
@@ -322,13 +326,21 @@ vim.api.nvim_create_user_command(
 vim.api.nvim_create_user_command(
 	"RT",
 	function()
-		set.expandtab = true
-		vim.cmd("retab")
-		set.expandtab = false
+		-- set.expandtab = true
+		-- vim.cmd("retab")
+		-- set.expandtab = false
 		vim.cmd("RetabIndent")
 		-- vim.cmd("write " .. vim.fn.expand('%'))
 		vim.cmd("W")
 		vim.cmd("redraw!")
+	end,
+	{ nargs = '?', bang = true, silent }
+)
+
+vim.api.nvim_create_user_command(
+	"W",
+	function()
+		vim.cmd("call boot#write_generic()<cr>")
 	end,
 	{ nargs = '?', bang = true, silent }
 )
@@ -751,26 +763,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- https://www.reddit.com/r/neovim/comments/usltce/how_to_disable_completion_for_command_line_window/
 -- autocmd CmdWinEnter * lua require('cmp').setup({enabled = false})
 -- autocmd CmdWinLeave * lua require('cmp').setup({enabled = true})
-vim.api.nvim_create_autocmd({"CmdWinEnter"}, {
-	pattern = {"background"},
-	callback = function()
-		require('cmp').setup({enabled = false})
-	end
-})
+-- Uncomment these following two autocmd will end in cursor always moving left one character when typing
+-- vim.api.nvim_create_autocmd({"CmdWinEnter"}, {
+--  pattern = {"background"},
+--  callback = function()
+--      require('cmp').setup({enabled = false})
+--  end
+-- })
+--
+-- vim.api.nvim_create_autocmd({"CmdWinLeave"}, {
+--  pattern = {"background"},
+--  callback = function()
+--      require('cmp').setup({enabled = true})
+--  end
+-- })
 
-vim.api.nvim_create_autocmd({"CmdWinLeave"}, {
-	pattern = {"background"},
-	callback = function()
-		require('cmp').setup({enabled = true})
-	end
-})
-
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+-- vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufReadPost", "BufEnter", "WinEnter", "OptionSet" }, {
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost", "CursorHold", "CursorHoldI" }, {
 	pattern = { "*" },
 	callback = function()
 		vim.cmd[[
-		if match(getline(1),"/proc/parent/exe") >= 0 | set filetype=sh | endif
-		if match(getline(1),"/bin/sh") >= 0 | set filetype=sh | endif
+		if match(getline(1),"/proc/parent/exe") >= 0 | setlocal filetype=sh | endif
+		if match(getline(1),"/bin/sh") >= 0 | setlocal filetype=sh | endif
+		if match(getline(1),"sh") >= 0 | setlocal filetype=sh | endif
 			]]
 	end
 })
@@ -815,5 +830,62 @@ function! HighlightCursor( isOn, key )
 endfunction
 nnoremap <expr> : HighlightCursor(1, ':')
 cnoremap <expr> <CR> HighlightCursor(0, "\<lt>CR>")
+
+
+" "auto update content when changed elsewhere $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+
+autocmd FileChangedShellPost *
+  \ echohl WarningMsg | echo "Buffer changed!" | echohl None
+
+
+" Triger `autoread` when files changes on disk
+" https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
+" https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
+autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
+    \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
+
+" Notification after file change
+" https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
+autocmd FileChangedShellPost *
+  \ echohl WarningMsg | echo "File changed on disk. Buffer reloaded." | echohl None
+
+" autocmd! VimEnter * AutoRead
+
+set autoread   " doesn't work
+
+augroup auto_read
+	au!
+	" Update a buffer's contents on focus if it changed outside of Vim.
+	" https://vi.stackexchange.com/questions/14315/how-can-i-tell-if-im-in-the-command-window
+	" :checktime
+	au FocusGained,BufEnter *
+		\ if mode() == 'n' && getcmdwintype() == '' | checktime | endif
+
+	au FocusGained,BufEnter * :silent! !
+augroup END
+
+" "auto update content when changed elsewhere $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+
+command! -nargs=0 W call boot#write_generic()
+:cnoreabbrev <expr> w getcmdtype() == ":" && getcmdline() == 'w' ? 'W' : 'w'
+
 ]])
+
+
+vim.api.nvim_create_autocmd('FileType', {
+	pattern = 'sh',
+	callback = function()
+		vim.lsp.start({
+			name = 'bash-language-server',
+			-- cmd = { 'bash-language-server', 'start' },
+			cmd = { 'bash-language-server', 'stop' },
+		})
+	end,
+})
+
+
+
+
+
+
 

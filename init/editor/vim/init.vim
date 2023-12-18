@@ -592,6 +592,7 @@ let g:vim_packages_use['liuchengxu/vim-clap']                             = { 't
 " $SHARE_PREFIX/init/editor/nvim/init.vim
 let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'opt', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'opt' }
+let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 'type' : 'opt' }
 
 " let g:vim_packages_use['tmux-plugins/vim-tmux-focus-events']              = { 'type' : 'opt' }  " obsoleted
 
@@ -765,7 +766,6 @@ let g:vim_packages_use['skywind3000/vim-quickui']                         = { 't
 let g:vim_packages_use['itchyny/vim-gitbranch']                           = { 'type' : 'start' }
 let g:vim_packages_use['mbbill/undotree']                                 = { 'type' : 'start',
 	\ 'do' : 'find $(pwd) -type f -exec chmod g+r {} + -o -type d -exec chmod go+rx {} + && chgrp -R users $(pwd)' }
-let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ShowTrailingWhitespace']             = { 'type' : 'start' }
 let g:vim_packages_use['inkarkat/vim-ingo-library']                       = { 'type' : 'start' }
 " let g:vim_packages_use['spindensity/vim-goldendict']                 = { 'type' : 'start' }
@@ -1716,7 +1716,7 @@ if exists("g:indentLine_loaded")
 	" let g:indentLine_bgcolor_gui   = 'NONE'
 	let g:indentLine_bgcolor_gui     = '#FF5F00'
 
-	set conceallevel                 = 1
+	set conceallevel                 =1
 	let g:indentLine_conceallevel    = 1
 	" let g:indentLine_conceallevel  = 2
 	" https://vi.stackexchange.com/questions/7258/how-do-i-prevent-vim-from-hiding-symbols-in-markdown-and-json
@@ -2664,9 +2664,11 @@ highlight ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
 
 " https://stackoverflow.com/questions/60590376/what-is-the-difference-between-cterm-color-and-gui-color
 " https://jonasjacek.github.io/colors/
-hi Cursor guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi Cursor2 guifg=red guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi Comment guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi Cursor  guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi Cursor2 guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+" hi Comment guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+" hi! Comment guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hi! Comment guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 
 hi WinSeparator guifg=#222222 guibg=NONE cterm=NONE ctermbg=NONE ctermfg=DarkRed gui=NONE term=NONE
 
@@ -2762,8 +2764,13 @@ hi clear Visual
 " silent! execute ':hi Visual ctermbg=Blue ctermfg=NONE guifg=NONE guibg=Blue
 "     \ term=inverse cterm=inverse gui=inverse'
 
-silent! execute ':hi Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=NONE
-	\ term=inverse cterm=inverse gui=inverse'
+silent! execute ':hi Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=#22aa77
+	\ term=NONE cterm=NONE gui=NONE'
+	" \ term=inverse cterm=inverse gui=inverse'
+
+" hi Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=#22aa77
+" 	\ term=NONE cterm=NONE gui=NONE
+" 	" \ term=inverse cterm=inverse gui=inverse
 
 " silent! execute ':hi Visual ctermbg=4 ctermfg=NONE guifg=NONE guibg=Blue
 "     \ term=bold cterm=bold gui=bold'
@@ -2811,8 +2818,6 @@ let g:cterm_bg_insert  = '4'
 let g:nontext_fg_cterm = 'NONE'
 let g:nontext_fg_gui   = 'NONE'
 
-hi Visual ctermbg=NONE ctermfg=NONE guifg=NONE guibg=NONE term=inverse cterm=inverse gui=inverse
-
 " That command should set the color of non text characters to be the same as the background color.
 " hi NonText guifg=bg
 " highlight NonText ctermfg=7 guifg=gray
@@ -2854,10 +2859,6 @@ hi PmenuSel          cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#61afef
 
 " hi @constant         cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=#56b6c2 guibg=NONE
 
-hi Cursor guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi Cursor2 guifg=red guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-" hi Comment guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hi Comment guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 highlight FileStyleIgnorePattern guibg=NONE ctermbg=0
 hi NewLineWin ctermfg=248 guifg=#999999
 match NewLineWin /\r\n/
@@ -3976,7 +3977,9 @@ set splitright
 set ttimeout
 set ttimeoutlen=1
 set ttyfast
-set virtualedit=block
+" weird behavior: automatically moving cursor one character left/backward when shfit+a in neovim
+" set virtualedit=block
+set virtualedit=onemore
 set whichwrap=b,s,<,>
 set whichwrap+=<,>,h,l,[,]
 set wildmenu
@@ -6106,7 +6109,7 @@ silent! execute 'set backupdir=' . s:backupdir . '//,.'
 
 " " $XDG_DATA_HOME/nvim == stdpath('data')
 " " Because stdpath('data') was shared between root and ordinary users
-" if has('nvim')
+" iF has('nvim')
 "     let s:undodir = expand(stdpath('cache') . '/undo')
 " else
 "     let s:undodir = expand($HOME . '/.cache/vim/undo')
@@ -6116,6 +6119,8 @@ silent! execute 'set backupdir=' . s:backupdir . '//,.'
 " endif
 " silent! execute 'set undodir=' . s:undodir . '//'
 " set undofile
+
+" Meta <F8> show git version
 
 " https://github.com/mbbill/undotree
 nnoremap <F8> :UndotreeToggle<CR>

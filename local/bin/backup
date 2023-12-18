@@ -1,4 +1,4 @@
-# !/bin/sh -efE
+#! /bin/sh -efE
 
 BACKUP_ROOT="/home/kiss/lm/chroot-x86_64"
 

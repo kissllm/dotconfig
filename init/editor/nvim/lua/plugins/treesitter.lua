@@ -13,6 +13,7 @@ return {
 	-- Lazy does not know it
 	-- run = ":TSUpdate",
 	event = { "BufReadPost", "BufNewFile" },
+	-- cond = false,
 	opts = {
 
 		-- one of "all", "maintained" (parsers with maintainers), or a list of languages
@@ -35,7 +36,7 @@ return {
 		-- List of parsers to ignore installing (for "all")
 		-- ignore_install = { "javascript" },
 		-- ignore_install = { "css" }, -- List of parsers to ignore installing
-		ignore_install = { "" }, -- List of parsers to ignore installing
+		ignore_install = { "marksman" }, -- List of parsers to ignore installing
 
 
 		-- highlight = {
