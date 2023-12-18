@@ -1,0 +1,11 @@
+#! /bin/sh
+
+# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
+# 	!= "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] || {
+is_chrooted || {
+	eth_mod="$(lsmod | grep "alx" | awk '{print $1}')"
+	[ -n "$wifi_mod" ] || {
+		doas modprobe alx
+		doas modprobe mdio
+	}
+}

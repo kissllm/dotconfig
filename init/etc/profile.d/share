@@ -111,14 +111,25 @@ env_reset XDG_INIT "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir"
 
 link_correct() {
 	local target="$1"
-	[ -h "$target" ] || [ -L "$target" ] || [ -f "$target" ] || [ -d "$target" ] || return 1
+	[ -h "$target" ] || [ -L "$target" ] || [ -f "$target" ] || [ -d "$target" ] || {
+		# return 1
+		prompt '$target' "'$target' does not exist"
+		return 0
+	}
 	# [ "${target:$((${#target}-1)):1}" = '/' ] && target="${target%/}"
 	[ "$(expr substr "$target" "$(expr length "$target")" 1)" != '/' ] ||
 		target="${target%/}"
-	[ ! -z "${target:+x}" ] || return 1
+	[ ! -z "${target:+x}" ] || {
+		prompt '$target' "'$target' is root mount point"
+		# return 1
+		return 0
+	}
 	local target_name="${target##*/}"
-	[ ! -z "${target_name:+x}" ] || return 1
-
+	[ ! -z "${target_name:+x}" ] || {
+		prompt '$target_name' "'$target_name' does not exist"
+		# return 1
+		return 0
+	}
 	local anchor="$2"
 
 	[ -n "${anchor:+x}" ] || {
@@ -153,8 +164,9 @@ link_correct() {
 		prompt '$real_ancher' "'$real_ancher' is going to be removed to $ancher_backup_location"
 
 		case "$real_ancher" in *"/usr"*|*"/sbin"*|*"/bin"*|*/etc*|*"/lib"*|*"/var/db"*|*"kiss"*)
-			prompt '$real_ancher' "'$real_ancher' is the file/folder you realy want to remove?"
-			return 1
+			prompt '$real_ancher' "'$real_ancher' is the file/folder, you realy want to remove? If so, remove it manually"
+			# return 1
+			return 0
 		esac
 
 		[ -f "$real_ancher" ] &&
@@ -165,7 +177,8 @@ link_correct() {
 		doas \mv -f "$real_ancher" "$ancher_backup_location" || {
 			// prompt '$real_ancher' "'$real_ancher' can not be moved"
 			# doas \mv -f "$real_ancher" "$real_ancher-$(date +%Y-%m-%d-%H-%M)"
-			return 1
+			# return 1
+			return 0
 		}
 	}
 
@@ -198,7 +211,8 @@ link_correct() {
 			# Move file or folder to cache dir
 			// file_folder_cache "$target" "$wrong_anchor" || {
 				prompt '$wrong_anchor' "'$wrong_anchor' removing failed and no further actions"
-				return 1
+				# return 1
+				return 0
 			}
 		}
 	}
@@ -239,12 +253,20 @@ link_correct() {
 			[ -f "$anchor" ] && {
 				# doas \rm -f "$anchor"
 				prompt '$anchor' "'$anchor' is a same named file"
-				wrong_anchor_clear "$target" "$ancher" || return 1
+				wrong_anchor_clear "$target" "$ancher" || {
+					prompt 'wrong_anchor_clear' "failed"
+					# return 1
+					return 0
+				}
 			} || {
 				[ ! -d "$anchor" ] || {
 					# doas \rm -rf "$anchor"
 					prompt '$anchor' "'$anchor' is a recursive same named dir"
-					wrong_anchor_clear "$target" "$ancher" || return 1
+					wrong_anchor_clear "$target" "$ancher" || {
+						prompt 'wrong_anchor_clear' "failed"
+						# return 1
+						return 0
+					}
 				}
 			}
 
@@ -270,7 +292,11 @@ link_correct() {
 			# "$anchor" does not exist yet
 			[ ! -e "$subdir_anchor" ] || {
 				link_exists_and_is_correct "$target" "$subdir_anchor" && return 0 ||
-				wrong_anchor_clear "$target" "$subdir_anchor" || return 1
+				wrong_anchor_clear "$target" "$subdir_anchor" || {
+					prompt 'wrong_anchor_clear' "failed"
+					# return 1
+					return 0
+				}
 			}
 			anchor_dir="$anchor_standard"
 			:
@@ -285,7 +311,11 @@ link_correct() {
 
 			[ ! -e "$anchor" ] || {
 				link_exists_and_is_correct "$target" "$anchor" && return 0 ||
-				wrong_anchor_clear "$target" "$anchor" || return 1
+				wrong_anchor_clear "$target" "$anchor" || {
+					prompt 'wrong_anchor_clear' "failed"
+					# return 1
+					return 0
+				}
 			}
 			anchor_dir="${anchor_standard%/*}"
 		}
@@ -321,7 +351,8 @@ init_file_overwrite() {
 		target_folder_name="${target_dir##*/}"
 		[ "$target_folder_name" = "$file_name_source" ] && {
 			printf '%s %s\n' "$target_dir" "has the same name with $source but it is a folder"
-			return 1
+			# return 1
+			return 0
 		} || {
 			[ -s "$target_dir/$file_name_source" ] &&
 			diff "$target_dir/$file_name_source" "$source" > /dev/null 2>&1 ||
