@@ -321,7 +321,7 @@ init_file_overwrite() {
 		} || {
 			[ -s "$target_dir/$file_name_source" ] &&
 			diff "$target_dir/$file_name_source" "$source" > /dev/null 2>&1 ||
-			doas /usr/bin/cp -f "$source" "$target_dir/"
+			doas /bin/cp -f "$source" "$target_dir/"
 			return 0
 		}
 	}
@@ -336,7 +336,7 @@ init_file_overwrite() {
 	[ ! -h "$target" ] || [ ! -L "$target" ] || doas \rm -f "$target"
 	[ -s "$target" ] &&
 	diff "$target" "$source" > /dev/null 2>&1 ||
-		doas /usr/bin/cp -f "$source" "$target"
+		doas /bin/cp -f "$source" "$target"
 		# doas /usr/bin/rsync -aq "$source" "$target"
 	[ -s "$target" ] || {
 		prompt '$lineno' "$lineno"
