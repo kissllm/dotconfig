@@ -1,0 +1,18 @@
+#! /bin/sh
+# How to use:
+# . s
+# Definition sequence
+# doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
+#
+# share folder initialization
+if [ -d "/mnt/init" ]; then
+	SHARE_PREFIX="/mnt" && export SHARE_PREFIX
+elif [ -d "/opt/init" ]; then
+	SHARE_PREFIX="/opt" && export SHARE_PREFIX
+fi
+
+. /mnt/init/etc/profile.d/share
+. /etc/profile
+# . $SHARE_PREFIX/init/etc/profile.d/share
+# . /etc/profile
+. $SHARE_PREFIX/init/profile
