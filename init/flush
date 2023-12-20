@@ -1,0 +1,3 @@
+#! /bin/sh -e
+doas dmesg -n 1
+doas dmesg -D
