@@ -24,13 +24,14 @@ reset_cursor_shape() {
 		[ ! -f "$cursor_blink_key" ] ||
 		[ "$(cat $cursor_blink_key)" -eq "0" ] ||
 		echo 0 | tee $cursor_blink_key
-	} || {
-		[ ! -f "$cursor_blink_key" ] ||
-		[ "$(cat $cursor_blink_key)" -eq "0" ] || {
-			! command -v "/usr/bin/doas" > /dev/null 2>&1 ||
-			echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
-		}
 	}
+	# || {
+	# 	[ ! -f "$cursor_blink_key" ] ||
+	# 	[ "$(cat $cursor_blink_key)" -eq "0" ] || {
+	# 		! command -v "/usr/bin/doas" > /dev/null 2>&1 ||
+	# 		echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
+	# 	}
+	# }
 # reset
 # printf '%s %s\n' '$TERM' "$TERM"
 

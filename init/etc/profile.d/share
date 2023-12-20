@@ -48,8 +48,8 @@ alias //='lineno="$LINENO"'
 case "$(type env_reset)" in *"function"*|*"alias"*) ;;
 	*)
 	_env_reset() {
-		local env_key_name="${1:?"Must give a key"}"
-		local env_value="${2:?"Must give a value"}"
+		local env_key_name="${1:?"env_reset needs a key"}"
+		local env_value="${2:?"env_reset needs a value"}"
 		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
 			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
 			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
@@ -66,16 +66,17 @@ esac
 	SHARE_PREFIX="/opt" && export SHARE_PREFIX
 }
 
-found_share_prefix=1
-for item in $(doas /usr/bin/git config --system -l |
-	awk -F = "{print \$2}" 2> /dev/null); do
-	[ "$item" = "$SHARE_PREFIX" ] || continue
-	break
-	found_share_prefix=0
-done
-
-[ "$found_share_prefix" = "0" ] ||
-	doas /usr/bin/git config --system --add safe.directory "$SHARE_PREFIX"
+# found_share_prefix=1
+# git_executable="$(which git)"
+# for item in $("$git_executable" config --system -l |
+# 	awk -F = "{print \$2}" 2> /dev/null); do
+# 	[ "$item" = "$SHARE_PREFIX" ] || continue
+# 	break
+# 	found_share_prefix=0
+# done
+#
+# [ "$found_share_prefix" = "0" ] ||
+# 	"$git_executable" config --system --add safe.directory "$SHARE_PREFIX"
 
 #
 # Made in /etc/profile
@@ -162,7 +163,7 @@ link_correct() {
 		}
 		local ancher_backup_location="$XDG_CACHE_HOME$real_ancher"
 		local ancher_backup_dir="${ancher_backup_location%/*}"
-		[ -d "$ancher_backup_dir" ] || doas \mkdir -p "$ancher_backup_dir"
+		[ -d "$ancher_backup_dir" ] || \mkdir -p "$ancher_backup_dir"
 
 		prompt '$real_ancher' "'$real_ancher' is going to be removed to $ancher_backup_location"
 
@@ -177,9 +178,9 @@ link_correct() {
 		[ -d "$real_ancher" ] &&
 			prompt '$real_ancher' "'$real_ancher' as a dir is going to be removed"
 
-		doas \mv -f "$real_ancher" "$ancher_backup_location" || {
+		\mv -f "$real_ancher" "$ancher_backup_location" || {
 			// prompt '$real_ancher' "'$real_ancher' can not be moved"
-			# doas \mv -f "$real_ancher" "$real_ancher-$(date +%Y-%m-%d-%H-%M)"
+			# \mv -f "$real_ancher" "$real_ancher-$(date +%Y-%m-%d-%H-%M)"
 			# return 1
 			return 0
 		}
@@ -207,7 +208,7 @@ link_correct() {
 			[ "$(readlink -fn "$wrong_anchor")" = "$(readlink -fn "$target")" ] || {
 				# Remove the link
 				prompt '$wrong_anchor' "'$wrong_anchor' as a link is going to be removed"
-				doas \rm -f "$wrong_anchor"
+				\rm -f "$wrong_anchor"
 			}
 			:
 		} || {
@@ -226,8 +227,8 @@ link_correct() {
 
 		[ "$(readlink -fn "$anchor")" = "$(readlink -fn "$target")" ] &&
 		return 0 || {
-			doas \rm -f "$anchor"
-			doas \ln -sf -- "$target" "$anchor"
+			\rm -f "$anchor"
+			\ln -sf -- "$target" "$anchor"
 			return 0
 		}
 
@@ -244,7 +245,7 @@ link_correct() {
 				[ ! -f "$anchor" ] || {
 					# $anchor is a file, so it can not be transfered to a link
 					prompt '$anchor' "'$anchor' as a wrong named file (which supposed to be $target) is going to be removed"
-					doas \rm -f "$anchor"
+					\rm -f "$anchor"
 				}
 				anchor_dir="${anchor%/*}"
 			}
@@ -254,7 +255,7 @@ link_correct() {
 
 			# Might be "$anchor" == "/usr/bin/kiss", "$target_name" == "kiss"
 			[ -f "$anchor" ] && {
-				# doas \rm -f "$anchor"
+				# \rm -f "$anchor"
 				prompt '$anchor' "'$anchor' is a same named file"
 				wrong_anchor_clear "$target" "$ancher" || {
 					prompt 'wrong_anchor_clear' "failed"
@@ -263,7 +264,7 @@ link_correct() {
 				}
 			} || {
 				[ ! -d "$anchor" ] || {
-					# doas \rm -rf "$anchor"
+					# \rm -rf "$anchor"
 					prompt '$anchor' "'$anchor' is a recursive same named dir"
 					wrong_anchor_clear "$target" "$ancher" || {
 						prompt 'wrong_anchor_clear' "failed"
@@ -324,13 +325,13 @@ link_correct() {
 		}
 	}
 
-	[ -d "$anchor_dir" ] || doas \mkdir -p "$anchor_dir"
+	[ -d "$anchor_dir" ] || \mkdir -p "$anchor_dir"
 	# Redefine anchor from $anchor_dir
 	anchor="$anchor_dir/$anchor_name"
 
 	# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
-	# doas \ln -sTf -- "$target" "$anchor"
-	doas \ln -sf -- "$target" "$anchor" || {
+	# \ln -sTf -- "$target" "$anchor"
+	\ln -sf -- "$target" "$anchor" || {
 		prompt '$target' "$target"
 		prompt '$anchor' "'$anchor' as a link has not been created successfully"
 	}
@@ -359,7 +360,7 @@ init_file_overwrite() {
 		} || {
 			[ -s "$target_dir/$file_name_source" ] &&
 			diff "$target_dir/$file_name_source" "$source" > /dev/null 2>&1 ||
-			doas /bin/cp -f "$source" "$target_dir/"
+			/bin/cp -f "$source" "$target_dir/"
 			return 0
 		}
 	}
@@ -371,11 +372,11 @@ init_file_overwrite() {
 	#
 	# diff "/etc/profile" "${SHARE_PREFIX}/init/etc/profile" 2> /dev/null ||
 	#   \cp -f "${SHARE_PREFIX}/init/etc/profile" "/etc/profile"
-	[ ! -h "$target" ] || [ ! -L "$target" ] || doas \rm -f "$target"
+	[ ! -h "$target" ] || [ ! -L "$target" ] || \rm -f "$target"
 	[ -s "$target" ] &&
 	diff "$target" "$source" > /dev/null 2>&1 ||
-		doas /bin/cp -f "$source" "$target"
-		# doas /usr/bin/rsync -aq "$source" "$target"
+		/bin/cp -f "$source" "$target"
+		# /usr/bin/rsync -aq "$source" "$target"
 	[ -s "$target" ] || {
 		prompt '$lineno' "$lineno"
 		prompt '$target' "$target"

@@ -1,5 +1,18 @@
 #! /bin/sh
 
+case "$(type env_reset)" in *"function"*|*"alias"*) ;;
+	*)
+	_env_reset() {
+		local env_key_name="${1:?"env_reset needs a key"}"
+		local env_value="${2:?"env_reset needs a value"}"
+		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
+			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
+			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
+		}
+	}
+	alias env_reset='_env_reset'
+esac
+
 # : ${UID="$(id -u)"} && export UID
 env_reset UID "$(id -u)"
 [ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "$UID"
@@ -46,14 +59,14 @@ env_reset XDG_RUNTIME_DIR "/run/user/$UID"
 # [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
 # printf '%s %s\n' '$XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
 
-[ -d "${XDG_RUNTIME_DIR}" ] || doas mkdir -p "${XDG_RUNTIME_DIR}"
+[ -d "${XDG_RUNTIME_DIR}" ] || \mkdir -p "${XDG_RUNTIME_DIR}"
 
 [ "$(stat -L -c '%u' "$XDG_RUNTIME_DIR")" = "$UID" ] ||
-	doas chown -R $UID:users "${XDG_RUNTIME_DIR}"
+	chown -R $UID:users "${XDG_RUNTIME_DIR}"
 
 # perm="$(stat -L -c '%A' "$XDG_RUNTIME_DIR")"
 [ "$(stat -L -c '%A' "$XDG_RUNTIME_DIR")" = "drwx------" ] ||
-	doas chmod 0700 "${XDG_RUNTIME_DIR}"
+	chmod 0700 "${XDG_RUNTIME_DIR}"
 
 # [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
 # : ${DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"} &&
