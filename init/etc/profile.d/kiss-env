@@ -161,7 +161,7 @@ repo_main() {
 	[ -d "$kiss_root/${REPO_ROOT#*/}" ] ||  \mkdir -p "$kiss_root/${REPO_ROOT#*/}"
 
 	[ ! -e "$repo_main_source" ] &&
-		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' does not exist" ||
+		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' [for $kiss_root/${REPO_MAIN#*/}] does not exist" ||
 	[ -d "$repo_main_target" ] || {
 		[ -L "$repo_main_target" ] ||
 		[ -h "$repo_main_target" ]

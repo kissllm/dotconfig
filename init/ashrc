@@ -673,12 +673,12 @@ export back_ground_root
 back_ground_user='
 [ -z "${TMUX:+x}" ] && [ -z "${TERM_PROGRAM:+x}" ] &&
 color="\033[1;121m" ||
-color="\033[1;102m"
+color="\033[38;5;14m"
 case "$(type kiss 2> /dev/null || :)" in
 	*"ENV"*)
 		;;
 	*)
-		color="\033[1;042m"
+		color="\033[38;5;9m"
 esac
 printf %s "$color"
 '
