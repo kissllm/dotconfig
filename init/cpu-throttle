@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# https://unix.stackexchange.com/questions/632339/intel-cpu-constantly-throttled-to-lowest-frequency-ubuntu-20-04
+
+# doas rmmod intel_rapl_msr
+# doas rmmod processor_thermal_device
+# doas rmmod processor_thermal_rapl
+# doas rmmod intel_rapl_common
+# doas rmmod intel_powerclamp
+
+doas modprobe intel_powerclamp
+doas modprobe intel_rapl_common
+# doas modprobe processor_thermal_rapl
+# doas modprobe processor_thermal_device
+doas modprobe intel_rapl_msr
