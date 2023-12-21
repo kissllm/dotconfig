@@ -17,8 +17,8 @@ alias //='lineno="$LINENO"'
 [ ! -f "$SHARE_PREFIX/init/functions" ] ||
 . "$SHARE_PREFIX/init/functions"
 
-# : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
-env_reset LOGNAME "$(/usr/bin/whoami)"
+# : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
+env_reset LOGNAME "$(id -nu)"
 
 KISS_PATH=''
 

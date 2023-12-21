@@ -408,7 +408,7 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 [ ! -z "${WAYLAND_DISPLAY+x}" ] ||
 [ "1" != "$tty_num" ] || {
 # sway can boot as root
-# [ "$UID" -eq "0" ] || { # [ "$(/usr/bin/whoami)" = "root" ] || {
+# [ "$UID" -eq "0" ] || { # [ "$(id -nu)" = "root" ] || {
 	# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
 	# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
 	# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user

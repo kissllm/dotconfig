@@ -33,9 +33,9 @@ env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
 #   }
 # }
 
-# user="$(whoami)"
+# user="$(id -nu)"
 # [ "$USER" = "$user" ] || USER="$user" && export USER
-env_reset USER "$(whoami)"
+env_reset USER "$(id -nu)"
 
 path_prepend PATH "$SHARE_PREFIX/init"
 

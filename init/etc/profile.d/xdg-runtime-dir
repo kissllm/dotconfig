@@ -17,7 +17,7 @@ esac
 env_reset UID "$(id -u)"
 [ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "$UID"
 
-# : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
+# : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
 env_reset LOGNAME "$(id -nu)"
 # : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 #	"\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
