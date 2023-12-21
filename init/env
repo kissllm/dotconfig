@@ -23,10 +23,13 @@ _functions="$SHARE_PREFIX/init/functions"
 [ ! -f "$_functions" ] && {
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
-} ||
-	. "$_functions"
+} || {
+	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	[ ! -z "${env_reset_type:+x}" ] ||
+		. "$_functions"
+}
 
-env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
+// env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
 
 # env_reset() {
 #   local env_key_name="${1:?"Must give a key"}"
@@ -39,7 +42,7 @@ env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
 
 # user="$(id -nu)"
 # [ "$USER" = "$user" ] || USER="$user" && export USER
-env_reset USER "$(id -nu)"
+// env_reset USER "$(id -nu)"
 
 path_prepend PATH "$SHARE_PREFIX/init"
 
@@ -230,10 +233,10 @@ path_prepend PATH "."
 # So don't use the log functions until user_output and pipes/listeners are ready
 
 # [ "$KISS_TMPDIR" = "/tmp/$USER/kiss" ] || KISS_TMPDIR="/tmp/$USER/kiss" && export KISS_TMPDIR
-env_reset KISS_TMPDIR "/tmp/$USER/kiss"
+// env_reset KISS_TMPDIR "/tmp/$USER/kiss"
 # [ "$CACHE_ROOT" = "/tmp" ] || CACHE_ROOT="/tmp" && export CACHE_ROOT
-# env_reset CACHE_ROOT "/dev/shm"
-env_reset MNGR_ROOT "/working/os/kiss"
+# // env_reset CACHE_ROOT "/dev/shm"
+// env_reset MNGR_ROOT "/working/os/kiss"
 # : "${DEBUG_AT_BACKGROUND=}"
 # [ -d "$KISS_TMPDIR" ] || mkdir -p "$KISS_TMPDIR"
 # log_dir="$KISS_TMPDIR/logs"
@@ -253,12 +256,12 @@ env_reset MNGR_ROOT "/working/os/kiss"
 # kiss() { (. /usr/bin/kiss "$@"); }
 # kiss() { ENV=/usr/include/kiss-share $SHELL; }
 # : "${ERR_OUTPUT:="$KISS_TMPDIR/logs/err.log"}"      && export ERR_OUTPUT
-env_reset ERR_OUTPUT "$KISS_TMPDIR/logs/err.log"
+// env_reset ERR_OUTPUT "$KISS_TMPDIR/logs/err.log"
 # : "${INIT_OUTPUT:="$KISS_TMPDIR/logs/init.log"}"  && export INIT_OUTPUT
-env_reset INIT_OUTPUT "$KISS_TMPDIR/logs/init.log"
+// env_reset INIT_OUTPUT "$KISS_TMPDIR/logs/init.log"
 # : "${USER_OUTPUT:="$KISS_TMPDIR/logs/build.log"}" && export USER_OUTPUT
-env_reset USER_OUTPUT "$KISS_TMPDIR/logs/build.log"
-env_reset SHELL_OPTIONS $(printf '%s' $-)
+// env_reset USER_OUTPUT "$KISS_TMPDIR/logs/build.log"
+// env_reset SHELL_OPTIONS $(printf '%s' $-)
 export USE_SAY_PIPE=
 export KISS_AS_LIBRARY=
 

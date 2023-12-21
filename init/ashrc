@@ -17,11 +17,14 @@ _functions="$SHARE_PREFIX/init/functions"
 [ ! -f "$_functions" ] && {
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
-} ||
-	. "$_functions"
+} || {
+	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	[ ! -z "${env_reset_type:+x}" ] ||
+		. "$_functions"
+}
 
 # : ${UID="$(id -u)"} && export UID
-env_reset UID "$(id -u)"
+// env_reset UID "$(id -u)"
 
 reset_cursor_shape() {
 
@@ -589,7 +592,7 @@ alias tmux='_tmux'
 
 # https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
 # : "${PWD_LENGTH:=13}" && export PWD_LENGTH
-env_reset PWD_LENGTH 13
+// env_reset PWD_LENGTH 13
 
 # TRIMMED='tmux source-file ${HOME}/.tmux.conf; tmux select-pane -T "#{pane_title}";
 # printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$PWD_LENGTH})|\1...\2|"'

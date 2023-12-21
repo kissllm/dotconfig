@@ -18,15 +18,18 @@ _functions="$SHARE_PREFIX/init/functions"
 [ ! -f "$_functions" ] && {
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
-} ||
-	. "$_functions"
+} || {
+	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	[ ! -z "${env_reset_type:+x}" ] ||
+		. "$_functions"
+}
 
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
-env_reset LOGNAME "$(id -nu)"
+// env_reset LOGNAME "$(id -nu)"
 
 KISS_PATH=''
 
-env_reset SHARE_PREFIX_DEV "/opt"
+// env_reset SHARE_PREFIX_DEV "/opt"
 
 : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
 : "${REPO_ROOT_DEV:="$SHARE_PREFIX_DEV/${REPO_ROOT#*/}"}" && export REPO_ROOT_DEV
@@ -149,7 +152,7 @@ env_reset SHARE_PREFIX_DEV "/opt"
 
 # : "${REPO_MAIN="$REPO_ROOT/lm"}" && export REPO_MAIN
 # Whatever folder name you'd like to use
-env_reset REPO_MAIN "$REPO_ROOT/rolling"
+// env_reset REPO_MAIN "$REPO_ROOT/rolling"
 # This is the real REPO_MAIN
 # Link to a local development repo root
 # Actually it is a recommended way to avoid maintaining a seperate repo
@@ -214,33 +217,33 @@ KISS_PATH=$REPO_MAIN/core:$KISS_PATH
 export KISS_PATH
 
 # : "${ARCH:="x86_64"}" && export ARCH
-env_reset ARCH "x86_64"
+// env_reset ARCH "x86_64"
 # : "${KISS_XHOST_ARCH:="$ARCH"}" && export KISS_XHOST_ARCH
-env_reset KISS_XHOST_ARCH "$ARCH"
+// env_reset KISS_XHOST_ARCH "$ARCH"
 # : "${KISS_XBUILD_ARCH:="$KISS_XHOST_ARCH"}" && export KISS_XBUILD_ARCH
-env_reset KISS_XBUILD_ARCH "$KISS_XHOST_ARCH"
+// env_reset KISS_XBUILD_ARCH "$KISS_XHOST_ARCH"
 # : "${CLIBC:="musl"}" && export CLIBC
-env_reset CLIBC "musl"
+// env_reset CLIBC "musl"
 # : "${KISS_XHOST_ABI:="$CLIBC"}" && export KISS_XHOST_ABI
-env_reset KISS_XHOST_ABI "$CLIBC"
+// env_reset KISS_XHOST_ABI "$CLIBC"
 # : "${KISS_XBUILD_ABI:="$KISS_XHOST_ABI"}" && export KISS_XBUILD_ABI
-env_reset KISS_XBUILD_ABI "$KISS_XHOST_ABI"
+// env_reset KISS_XBUILD_ABI "$KISS_XHOST_ABI"
 # : "${KISS_XHOST_TRIPLE:="$KISS_XHOST_ARCH-linux-$KISS_XHOST_ABI"}" && export KISS_XHOST_TRIPLE
-env_reset KISS_XHOST_TRIPLE "$KISS_XHOST_ARCH-linux-$KISS_XHOST_ABI"
+// env_reset KISS_XHOST_TRIPLE "$KISS_XHOST_ARCH-linux-$KISS_XHOST_ABI"
 # : "${KISS_XBUILD_TRIPLE:="$KISS_XBUILD_ARCH-linux-$KISS_XBUILD_ABI"}" && export KISS_XBUILD_TRIPLE
-env_reset KISS_XBUILD_TRIPLE "$KISS_XBUILD_ARCH-linux-$KISS_XBUILD_ABI"
+// env_reset KISS_XBUILD_TRIPLE "$KISS_XBUILD_ARCH-linux-$KISS_XBUILD_ABI"
 # For aports
 # : "${CARCH:="$ARCH"}" && export CARCH
-env_reset CARCH "$ARCH"
+// env_reset CARCH "$ARCH"
 # : "${CTARGET_ARCH:="$ARCH"}" && export CTARGET_ARCH
-env_reset CTARGET_ARCH "$ARCH"
+// env_reset CTARGET_ARCH "$ARCH"
 # For cports
 # : "${CHOST:="${KISS_XHOST_TRIPLE}"}"	 && export CHOST
-env_reset CHOST "${KISS_XHOST_TRIPLE}"
+// env_reset CHOST "${KISS_XHOST_TRIPLE}"
 # : "${CTARGET:="${KISS_XHOST_TRIPLE}"}" && export CTARGET
-env_reset CTARGET "${KISS_XHOST_TRIPLE}"
+// env_reset CTARGET "${KISS_XHOST_TRIPLE}"
 # : "${CBUILD:="${KISS_XBUILD_TRIPLE}"}" && export CBUILD
-env_reset CBUILD "${KISS_XBUILD_TRIPLE}"
+// env_reset CBUILD "${KISS_XBUILD_TRIPLE}"
 
 # If you insist to update local system
 # KISS_ROOT= && export KISS_ROOT
@@ -257,21 +260,21 @@ export KISS_ROOT="/opt/kiss" BOOTSTRAP=
 repo_main "$KISS_ROOT"
 
 # : "${KISS_REMOTE_REPO="$KISS_PATH"}" && export KISS_REMOTE_REPO
-env_reset KISS_REMOTE_REPO "$KISS_PATH"
+// env_reset KISS_REMOTE_REPO "$KISS_PATH"
 # https://github.com/glasnostlinux/glasnost/releases
 # CFLAGS="-march=x86-64 -mtune=generic -pipe -Os"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -no-pie"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -pipe -fPIC -mtune=native --host=x86_64"
 # CFLAGS="--target=$KISS_XHOST_TRIPLE -Os -fPIC -mcpu=x86-64"
 # : "${CFLAGS:="--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"}" && export CFLAGS
-env_reset CFLAGS "--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
+// env_reset CFLAGS "--target=$KISS_XHOST_TRIPLE -O3 -pipe -fPIC -march=x86-64 -mtune=native"
 # : "${CXXFLAGS="$CFLAGS"}" && export CXXFLAGS
-env_reset CXXFLAGS "$CFLAGS"
+// env_reset CXXFLAGS "$CFLAGS"
 # : "${CPPFLAGS="$CXXFLAGS"}" && export CPPFLAGS
-env_reset CPPFLAGS "$CXXFLAGS"
+// env_reset CPPFLAGS "$CXXFLAGS"
 
 # : "${MAKEFLAGS:="-j $(($(nproc) + 1))"}" && export MAKEFLAGS
-env_reset MAKEFLAGS "-j $(($(nproc) + 1))"
+// env_reset MAKEFLAGS "-j $(($(nproc) + 1))"
 
 [ -z "${KISS_PROMPT+x}" ] || unset KISS_PROMPT
 # export KISS_PROMPT=0
@@ -283,7 +286,7 @@ env_reset MAKEFLAGS "-j $(($(nproc) + 1))"
 [ -d "$DEST_ROOT" ] || \mkdir -p "$DEST_ROOT"
 # git config --global --add safe.directory "$DEST_ROOT"
 # : "${REPO_BASE:="$REPO_MAIN/base"}" && export REPO_BASE
-env_reset REPO_BASE "$REPO_MAIN/base"
+// env_reset REPO_BASE "$REPO_MAIN/base"
 
 
 

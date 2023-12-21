@@ -27,8 +27,11 @@ _functions="$SHARE_PREFIX/init/functions"
 [ ! -f "$_functions" ] && {
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
-} ||
-	. "$_functions"
+} || {
+	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	[ ! -z "${env_reset_type:+x}" ] ||
+		. "$_functions"
+}
 
 # case "$(type env_reset)" in *"function"*|*"alias"*) ;;
 # 	*)
@@ -44,12 +47,12 @@ _functions="$SHARE_PREFIX/init/functions"
 # esac
 
 [ ! -f "/etc/hostname" ] ||
-env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
+// env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
 # : ${os_name:="$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release)"}
-env_reset id "$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release |
+// env_reset id "$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release |
 	tr '[A-Z]' '[a-z]')"
-env_reset os_pretty_name "$(
+// env_reset os_pretty_name "$(
 awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"" |
 	tr '[A-Z]' '[a-z]')"
 # : ${os_pretty_name:="$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release)"}
@@ -60,13 +63,13 @@ case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*)
 	# trap '"${LINENO-}" "${FUNCNAME-}" "${0-}"' ERR || :
 esac
 
-env_reset UID "$(id -u)"
+// env_reset UID "$(id -u)"
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
-env_reset LOGNAME "$(id -nu)"
+// env_reset LOGNAME "$(id -nu)"
 #
 # : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 #   "\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
-env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
+// env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 	"\$1 == v {print \$6}" /etc/passwd)"
 
 # home="$(/usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
@@ -75,7 +78,7 @@ env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 #     echo "Fixed \$HOME = $HOME"
 # }
 
-env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
+// env_reset LAYOUT_INIT "${SHARE_PREFIX}/init/etc/profile.d/share"
 
 [ ! -z "${loaded_share+x}" ] ||
 [ ! -f "$LAYOUT_INIT" ] || {

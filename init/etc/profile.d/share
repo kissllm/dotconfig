@@ -59,10 +59,13 @@ _functions="$SHARE_PREFIX/init/functions"
 [ ! -f "$_functions" ] && {
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
-} ||
-	. "$_functions"
+} || {
+	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	[ ! -z "${env_reset_type:+x}" ] ||
+		. "$_functions"
+}
 
-env_reset UID "$(id -u)"
+// env_reset UID "$(id -u)"
 
 # found_share_prefix=1
 # git_executable="$(which git)"
@@ -106,7 +109,7 @@ prompt() {
 	printf '%s %s\n' "$1" "$2"
 }
 
-env_reset XDG_INIT "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir"
+// env_reset XDG_INIT "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir"
 
 link_correct() {
 	local target="$1"
@@ -422,18 +425,18 @@ init_file_overwrite() {
 [ -L "$HOME/.xdg-runtime-dir" ] ||
 	printf '%s %s\n' "$HOME/.xdg-runtime-dir" "creating failed"
 
-env_reset MNGR_ROOT     "/working/os/kiss"
-env_reset REPO_ROOT     "/var/db/kiss"
-env_reset REPO_ROOT_DEV "/opt/${REPO_ROOT#*/}"
-env_reset DEST_ROOT     "/working/kiss"
-env_reset DOTCONFIG     "/mnt/init"
+// env_reset MNGR_ROOT     "/working/os/kiss"
+// env_reset REPO_ROOT     "/var/db/kiss"
+// env_reset REPO_ROOT_DEV "/opt/${REPO_ROOT#*/}"
+// env_reset DEST_ROOT     "/working/kiss"
+// env_reset DOTCONFIG     "/mnt/init"
 
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
-env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
+// env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
 # : ${os_name:="$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release)"}
 # : ${os_pretty_name:="$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release)"}
-# env_reset os_pretty_name "$(awk -F = "\$1 == \"PRETTY_NAME\" {print \$2}" < /etc/os-release | tr -d "\"")"
-env_reset os_pretty_name "$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"")"
+# // env_reset os_pretty_name "$(awk -F = "\$1 == \"PRETTY_NAME\" {print \$2}" < /etc/os-release | tr -d "\"")"
+// env_reset os_pretty_name "$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"")"
 
 case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*)
 	IS_KISS= && export IS_KISS
@@ -489,7 +492,7 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 esac
 
 # : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} &&
-env_reset WAYLAND_CONFIG_HOME "${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+// env_reset WAYLAND_CONFIG_HOME "${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
 export WAYLAND_CONFIG_HOME
 // link_correct "${SHARE_PREFIX}/init/wayland/env" "${WAYLAND_CONFIG_HOME}/"
 
