@@ -4,7 +4,7 @@ case "$(type env_reset)" in *"function"*|*"alias"*) ;;
 	*)
 	_env_reset() {
 		local env_key_name="${1:?"env_reset needs a key"}"
-		local env_value="${2:?"env_reset needs a value"}"
+		local env_value="${2:?"env_reset '$1' needs a value"}"
 		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
 			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
 			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
@@ -18,7 +18,7 @@ env_reset UID "$(id -u)"
 [ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "$UID"
 
 # : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
-env_reset LOGNAME "$(/usr/bin/whoami)"
+env_reset LOGNAME "$(id -nu)"
 # : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 #	"\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
 env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \

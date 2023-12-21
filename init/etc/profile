@@ -53,8 +53,7 @@ esac
 
 env_reset UID "$(id -u)"
 # : "${LOGNAME:="$(/usr/bin/whoami)"}" && export LOGNAME
-env_reset LOGNAME "$(/usr/bin/whoami)"
-# [ -n "${LOGNAME+x}" ] || export LOGNAME="$(/usr/bin/whoami)"
+env_reset LOGNAME "$(id -nu)"
 #
 # : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" \
 #   "\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
