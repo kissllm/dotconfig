@@ -9,6 +9,19 @@ newline="
 alias /='eval'
 alias //='lineno="$LINENO"'
 
+# share folder initialization
+[ ! -z "${SHARE_PREFIX:+x}" ] || {
+	[ -d "/mnt/init" ] &&
+	{ SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
+		[ -d "/opt/init" ] &&
+		{ SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
+		printf '%s %s\n' '$SHARE_PREFIX' "not found"
+	}
+}
+
+[ ! -f "$SHARE_PREFIX/init/functions" ] ||
+. "$SHARE_PREFIX/init/functions"
+
 env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
 
 # env_reset() {
@@ -23,101 +36,7 @@ env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
 # user="$(whoami)"
 # [ "$USER" = "$user" ] || USER="$user" && export USER
 env_reset USER "$(whoami)"
-# https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
-# https://tldp.org/LDP/abs/html/parameter-substitution.html
-# "grep -q" "$? -eq 0" could be a good solution?
-prepend() {
-	[ ! -z "${1:+x}" ] || return
-	local key="${1}"
-	# CONTAINER_VALUE="$(eval echo "\$${1}")"
-	local value="${2}"
-	[ -d "${value}" ] || return
-	# echo "prepend \$key   = $key"
-	# echo "prepend \$CONTAINER_VALUE = $(eval echo "\$${key}")"
-	case ":$(eval echo "\$${key}"):" in
-		*":${value}:"*) :;;
-		*) eval "export $key=${value}\${$key:+\":\$$key\"}" ;;
-	esac
-}
-# prepend PATH "/build/os"
 
-# https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
-# # prepend to PATH
-# _path_prepend "$XDG_DATA_HOME/phpenv/bin"
-#
-# # prepend to MANPATH
-# _path_prepend MANPATH "$XDG_DATA_HOME/shell-installer/man"
-#
-# # prepend to PERL5LIB
-# _path_prepend PERL5LIB "$PERL_LOCAL_LIB_ROOT/lib/perl5"
-#
-# Features
-#
-#     POSIX compliant
-#     Doesn't use Bash's declare -n
-
-prepend_path() {
-	if [ -n "$2" ]; then
-		case ":$(eval "echo \${${1}-}"):" in
-			*":$2:"*) :;;
-			*) eval "export $1=$2\${$1:+\":\$$1\"}" ;;
-		esac
-	else
-		case ":$PATH:" in
-			*":$1:"*) :;;
-			*) export PATH="$1${PATH:+":$PATH"}" ;;
-		esac
-	fi
-}
-
-append_path() {
-	if [ -n "$2" ]; then
-		case ":$(eval "echo \${${1}-}"):" in
-			*":$2:"*) :;;
-			*) eval "export $1=\${$1:+\"\$$1:\"}$2" ;;
-		esac
-	else
-		case ":$PATH:" in
-			*":$1:"*) :;;
-			*) export PATH="${PATH:+"$PATH:"}$1" ;;
-		esac
-	fi
-}
-
-# https://unix.stackexchange.com/questions/4965/keep-duplicates-out-of-path-on-source
-# Define path_append and path_prepend to add directory to target path, e.g.
-# PATH, MANPATH
-# Add to the end of a target path
-_path_append() {
-	[ ! -z "${1:+x}" ] &&
-	[ -d "$2" ] || return
-	local extend=":$(eval "echo \${${1}-}"):"
-	# echo "\$2 = $2"
-	# echo "test=${extend##*:$2:*}"
-	# [ -d "$2" ] || {
-	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
-	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-	[ "$extend" = "::" ] && eval "export $1=$2" ||
-	[ -z "${extend##*:$2:*}" ] || eval "export $1=\$$1:$2"
-	# }
-}
-alias path_append='_path_append'
-
-# Add to the front of a target path
-_path_prepend() {
-	[ ! -z "${1:+x}" ] &&
-	[ -d "$2" ] || return
-	local extend=":$(eval "echo \${${1}-}"):"
-	# echo "\$2 = $2"
-	# echo "test=${extend##*:$2:*}"
-	# [ ! -d "$2" ] || {
-	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
-	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
-	[ "$extend" = "::" ] && eval "export $1=$2" ||
-	[ -z "${extend##*:$2:*}" ] || eval "export $1=$2:\$$1"
-	# }
-}
-alias path_prepend='_path_prepend'
 path_prepend PATH "$SHARE_PREFIX/init"
 
 # echo "\$TERM = $TERM"
@@ -484,8 +403,8 @@ export QT_SCALE_FACTOR=1
 # GDK_SCALE allows only Integer values, GDK_DPI_SCALE=x allows decimal values such as . GDK_DPI_SCALE=0.66
 # export GDK_SCALE=0
 export GDK_SCALE=2.0
-# export GDK_DPI_SCALE=2.0
-export GDK_DPI_SCALE=0.75
+export GDK_DPI_SCALE=2.0
+# export GDK_DPI_SCALE=0.75
 
 
 # https://forum.obarun.org/viewtopic.php?id=855
@@ -550,46 +469,62 @@ export FONTCONFIG_PATH=/etc/fonts
 # https://muru.dev/2015/08/28/vim-for-man.html
 # ~/.vim/ftplugin/man.vim
 
-# neovim is not stable and light-weight
-# ! command -v /usr/bin/nvim > /dev/null 2>&1 || {
-! command -v /usr/bin/vim > /dev/null 2>&1 || {
-	# export MANPAGER='/usr/bin/nvim --clean +Man!'
-	# export MANPAGER='/usr/bin/vim +Man!'
-#
-#     # Unterminated quoted string
-#     # export MANPAGER="/bin/sh -c \"unset MANPAGER; col -b | vim -c 'set ft=man ts=4 nomod nolist nonu' -\""
-
-# man: SYSERR: exec: : No such file or directory
-#     export MANPAGER=$'
-#     /bin/sh -c "
-#     unset MANPAGER; col -b -x |
-# nvim -R
-# -c \'set ft=man ts=4 nomod nolist nonu\'
-# -c \'nnoremap q :q<cr>\'
-# -c \'nnoremap <space> <c-d>\'
-# -c \'nnoremap , <c-d>\'
-# -c \'nnoremap u <c-u>\'
-# -c \'nnoremap <c-u> u\'
-# -c \'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>\'
-# -c \'+Man! $*\'
-# "
-# '
-	# Works
-	man() {
-		unset MANPAGER
-		col -b -x | \
-		vim --clean \
-			-c 'filetype plugin on' \
-			-c 'set ft=man ts=4 nomod nolist nonu' \
-			-c 'nnoremap q :q<cr>' \
-			-c 'nnoremap <space> <c-d>' \
-			-c 'nnoremap , <c-d>' \
-			-c 'nnoremap u <c-u>' \
-			-c 'nnoremap <c-u> u' \
-			-c 'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>' \
-			-c "Man $*"
-	}
+_busybox="$(which busybox)"
+[ -z "${_busybox:+x}" ] || { alias _vi='busybox vi'; alias vi='_vi'; }
+[ ! -z "${vi:+x}" ] || {
+	_nvi="$(which nvi)"
+	[ -z "${_nvi:+x}" ] || alias vi='_nvi'
 }
+
+_vim="$(which vim)"
+_nvim="$(which nvim)"
+
+[ ! -z "${manpager:+x}" ] ||
+! command -v "$vi"  > /dev/null 2>&1 || MANPAGER="vi"
+[ ! -z "${manpager:+x}" ] ||
+! command -v "$_vim"  > /dev/null 2>&1 || MANPAGER="vim"
+# neovim is not stable and light-weight
+[ ! -z "${manpager:+x}" ] ||
+! command -v "$_nvim" > /dev/null 2>&1 || MANPAGER="nvim"
+case "$MANPAGER" in
+	vim|nvim)
+		# export MANPAGER='/usr/bin/nvim --clean +Man!'
+		# export MANPAGER='/usr/bin/vim +Man!'
+		#
+		#     # Unterminated quoted string
+		#     # export MANPAGER="/bin/sh -c \"unset MANPAGER; col -b | vim -c 'set ft=man ts=4 nomod nolist nonu' -\""
+
+		# man: SYSERR: exec: : No such file or directory
+		#     export MANPAGER=$'
+		#     /bin/sh -c "
+		#     unset MANPAGER; col -b -x |
+		# nvim -R
+		# -c \'set ft=man ts=4 nomod nolist nonu\'
+		# -c \'nnoremap q :q<cr>\'
+		# -c \'nnoremap <space> <c-d>\'
+		# -c \'nnoremap , <c-d>\'
+		# -c \'nnoremap u <c-u>\'
+		# -c \'nnoremap <c-u> u\'
+		# -c \'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>\'
+		# -c \'+Man! $*\'
+		# "
+		# '
+		# Works
+		man() {
+			unset MANPAGER
+			col -b -x | \
+				"$manpager" --clean \
+				-c 'filetype plugin on' \
+				-c 'set ft=man ts=4 nomod nolist nonu' \
+				-c 'nnoremap q :q<cr>' \
+				-c 'nnoremap <space> <c-d>' \
+				-c 'nnoremap , <c-d>' \
+				-c 'nnoremap u <c-u>' \
+				-c 'nnoremap <c-u> u' \
+				-c 'nnoremap K :Man <c-r>=expand(\\\"<cword>\\\")<cr><cr>' \
+				-c "Man $*"
+			}
+		esac
 
 export MANWIDTH=999
 

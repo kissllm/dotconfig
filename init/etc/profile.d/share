@@ -45,26 +45,20 @@ alias /='eval'
 # bash does not recognize //
 alias //='lineno="$LINENO"'
 
-case "$(type env_reset)" in *"function"*|*"alias"*) ;;
-	*)
-	_env_reset() {
-		local env_key_name="${1:?"env_reset needs a key"}"
-		local env_value="${2:?"env_reset needs a value"}"
-		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
-			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
-			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
-		}
+# share folder initialization
+[ ! -z "${SHARE_PREFIX:+x}" ] || {
+	[ -d "/mnt/init" ] &&
+	{ SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
+		[ -d "/opt/init" ] &&
+		{ SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
+		printf '%s %s\n' '$SHARE_PREFIX' "not found"
 	}
-	alias env_reset='_env_reset'
-esac
-
-
-[ ! -z "${SHARE_PREFIX:+x}" ] || [ ! -d "/mnt/init" ] || {
-	SHARE_PREFIX="/mnt" && export SHARE_PREFIX
 }
-[ ! -z "${SHARE_PREFIX:+x}" ] || [ ! -d "/opt/init" ] || {
-	SHARE_PREFIX="/opt" && export SHARE_PREFIX
-}
+
+[ ! -f "$SHARE_PREFIX/init/functions" ] ||
+. "$SHARE_PREFIX/init/functions"
+
+env_reset UID "$(id -u)"
 
 # found_share_prefix=1
 # git_executable="$(which git)"
@@ -118,7 +112,8 @@ link_correct() {
 		return 0
 	}
 	# [ "${target:$((${#target}-1)):1}" = '/' ] && target="${target%/}"
-	[ "$(expr substr "$target" "$(expr length "$target")" 1)" != '/' ] ||
+	# [ "$(expr substr "$target" "$(expr length "$target")" 1)" != '/' ] ||
+	[ "$(awk -- "BEGIN { print substr (ARGV[1], "${#target}", 1) }" "$target")" != '/' ] ||
 		target="${target%/}"
 	[ ! -z "${target:+x}" ] || {
 		prompt '$target' "'$target' is root mount point"
@@ -133,7 +128,8 @@ link_correct() {
 	}
 	local anchor="$2"
 	local anchor_name="${anchor##*/}"
-	[ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] ||
+	# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] ||
+	[ "$(awk -- "BEGIN { print substr (ARGV[1], "${#anchor}", 1) }" "$anchor")" != '/' ] ||
 		anchor_name="$target_name"
 
 	[ -n "${anchor:+x}" ] || {
@@ -236,7 +232,8 @@ link_correct() {
 
 	local anchor_dir=
 	# "$anchor" does not exist yet
-	[ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] && {
+	# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] && {
+	[ "$(awk -- "BEGIN { print substr (ARGV[1], "${#anchor}", 1) }" "$anchor")" != '/' ] && {
 		[ "${anchor##*/}" != "$target_name" ] && {
 			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin
 			[ -d "$anchor" ] && {
@@ -365,7 +362,8 @@ init_file_overwrite() {
 		}
 	}
 
-	[ "$(expr substr "$target" "$(expr length "$target")" 1)" != '/' ] ||
+	# [ "$(expr substr "$target" "$(expr length "$target")" 1)" != '/' ] ||
+	[ "$(awk -- "BEGIN { print substr (ARGV[1], "${#target}", 1) }" "$target")" != '/' ] ||
 	target="${target%/}"
 
 	# local file_name_target="${target##*/}"
@@ -389,6 +387,7 @@ init_file_overwrite() {
 	return 0
 }
 
+[ "$UID" != "0" ] ||
 # // link_correct "${SHARE_PREFIX}/init/etc/profile.d/share" "/etc/profile.d/share.sh"
 # // init_file_overwrite "/etc/profile.d/share.sh" "${SHARE_PREFIX}/init/etc/profile.d/share"
 // init_file_overwrite "/etc/profile.d/xdg-runtime-dir.sh" \
@@ -442,6 +441,7 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*)
 	# // init_file_overwrite "/etc/" "${SHARE_PREFIX}/init/etc/inittab"
 esac
 
+[ "$UID" != "0" ] ||
 case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alpine"*|*"Alpine"*)
 	# [ "$(cat /etc/hostname 2> /dev/null)" != "kiss" ] || {
 	# diff "/etc/profile" "${SHARE_PREFIX}/init/etc/profile" 2> /dev/null ||

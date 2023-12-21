@@ -228,7 +228,10 @@ vim.cmd([[let &t_Cs = "\e[4:3m"]])
 vim.cmd([[let &t_Ce = "\e[4:0m"]])
 -- https://stackoverflow.com/questions/5017009/confusion-about-vim-folding-how-to-disable
 -- https://www.reddit.com/r/neovim/comments/xtnc54/how_do_i_disable_all_folding_in_all_documents/
-vim.api.nvim_set_var('vimwiki_folding', 'custom')
+-- vim.api.nvim_set_var('vimwiki_folding', 'custom')
+-- https://github.com/vimwiki/vimwiki/issues/1197
+vim.api.nvim_set_var('vimwiki_folding', 'expr:quick')
+
 set.foldenable      = false
 
 vim.g.indent_blankline_char    = "│"

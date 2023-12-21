@@ -209,6 +209,7 @@ return {
 	{
 		-- git remote set-url origin --push "git@github.com:trailblazing/keys.git"
 		"trailblazing/keys",
+		-- cond  = false,
 		event = { "VimEnter" },
 		lazy  = false,
 	},
