@@ -61,11 +61,13 @@ env_reset XDG_RUNTIME_DIR "/run/user/$UID"
 
 [ -d "${XDG_RUNTIME_DIR}" ] || \mkdir -p "${XDG_RUNTIME_DIR}"
 
-[ "$(stat -L -c '%u' "$XDG_RUNTIME_DIR")" = "$UID" ] ||
+# [ "$(stat -L -c '%u' "$XDG_RUNTIME_DIR")" = "$UID" ] ||
+[ "$(\ls -dl "$XDG_RUNTIME_DIR" | awk '{print $3}')" = "$UID" ] ||
 	chown -R $UID:users "${XDG_RUNTIME_DIR}"
 
 # perm="$(stat -L -c '%A' "$XDG_RUNTIME_DIR")"
-[ "$(stat -L -c '%A' "$XDG_RUNTIME_DIR")" = "drwx------" ] ||
+# [ "$(stat -L -c '%A' "$XDG_RUNTIME_DIR")" = "drwx------" ] ||
+[ "$(\ls -dl "$XDG_RUNTIME_DIR" | awk '{print $1}')" = "drwx------" ] ||
 	chmod 0700 "${XDG_RUNTIME_DIR}"
 
 # [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
