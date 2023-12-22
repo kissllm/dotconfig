@@ -149,7 +149,11 @@ map("n", "t",            ":NvimTreeToggle<cr>")
 -- map("n", "<F3>",         ":BuffergatorToggle<cr>")
 -- Won't work correctly
 -- map("n", "<Esc>",        "if exists(\"b:is_gt_buffer\") <bar> :BuffergatorClose<CR> <bar> endif")
-map("n", "<leader>l",    ":BuffergatorToggle<cr>")
+--
+-- map("n", "<leader>l",    ":BuffergatorToggle<cr>")
+-- :nnoremap <Leader>pp :lua require'telescope.builtin'.buffers{}
+map("n", "<leader>l",    ":lua require'telescope.builtin'.buffers{}<cr>")
+
 map("n", "<Leader>d",    ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q",    ":Bdelete<CR>",                        { silent = true })
 

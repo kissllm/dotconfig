@@ -1,5 +1,11 @@
 #! /bin/sh
 
+alias /='eval'
+# bash does not recognize //
+alias //='lineno="$LINENO"'
+
+SCRIPT_NAME="xdg-runtime-dir" && export SCRIPT_NAME
+
 # share folder initialization
 [ ! -z "${SHARE_PREFIX:+x}" ] || {
 	[ -d "/mnt/init" ] &&
@@ -57,15 +63,15 @@ printf '%s %s\n' '$HOME' "$HOME"
 
 # : ${XDG_DATA_HOME:="$HOME/.local/share"} && export XDG_DATA_HOME
 // env_reset XDG_DATA_HOME "$HOME/.local/share"
-[ -d "${XDG_DATA_HOME}" ]	|| \mkdir -p "${XDG_DATA_HOME}"
+[ -d "${XDG_DATA_HOME}" ]	|| doas \mkdir -p "${XDG_DATA_HOME}"
 
 # : ${XDG_CACHE_HOME:="$HOME/.cache"} && export XDG_CACHE_HOME
 // env_reset XDG_CACHE_HOME "$HOME/.cache"
-[ -d "${XDG_CACHE_HOME}" ]	|| \mkdir -p "${XDG_CACHE_HOME}"
+[ -d "${XDG_CACHE_HOME}" ]	|| doas \mkdir -p "${XDG_CACHE_HOME}"
 
 # : ${XDG_CONFIG_HOME:="$HOME/.config"} && export XDG_CONFIG_HOME
 // env_reset XDG_CONFIG_HOME "$HOME/.config"
-[ -d "${XDG_CONFIG_HOME}" ] || \mkdir -p "${XDG_CONFIG_HOME}"
+[ -d "${XDG_CONFIG_HOME}" ] || doas \mkdir -p "${XDG_CONFIG_HOME}"
 
 # expect_xdg_runtime_dir="/run/user/$UID"
 # [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
@@ -79,7 +85,7 @@ printf '%s %s\n' '$HOME' "$HOME"
 # [ "${XDG_RUNTIME_DIR}" = "$expect_xdg_runtime_dir" ] ||
 # printf '%s %s\n' '$XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
 
-[ -d "${XDG_RUNTIME_DIR}" ] || \mkdir -p "${XDG_RUNTIME_DIR}"
+[ -d "${XDG_RUNTIME_DIR}" ] || doas \mkdir -p "${XDG_RUNTIME_DIR}"
 
 group_name="$UID"
 case "$(id $LOGNAME)" in *"users"*)
@@ -87,12 +93,12 @@ case "$(id $LOGNAME)" in *"users"*)
 esac
 # [ "$(stat -L -c '%u' "$XDG_RUNTIME_DIR")" = "$UID" ] ||
 [ "$(\ls -dl "$XDG_RUNTIME_DIR" | awk '{print $3}')" = "$UID" ] ||
-	chown -R $UID:$group_name "${XDG_RUNTIME_DIR}"
+	doas chown -R $UID:$group_name "${XDG_RUNTIME_DIR}"
 
 # perm="$(stat -L -c '%A' "$XDG_RUNTIME_DIR")"
 # [ "$(stat -L -c '%A' "$XDG_RUNTIME_DIR")" = "drwx------" ] ||
 [ "$(\ls -dl "$XDG_RUNTIME_DIR" | awk '{print $1}')" = "drwx------" ] ||
-	chmod 0700 "${XDG_RUNTIME_DIR}"
+	doas chmod 0700 "${XDG_RUNTIME_DIR}"
 
 # [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
 # : ${DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"} &&

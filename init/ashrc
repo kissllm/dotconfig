@@ -3,6 +3,12 @@
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
 
+alias /='eval'
+# bash does not recognize //
+alias //='lineno="$LINENO"'
+
+SCRIPT_NAME="ashrc" && export SCRIPT_NAME
+
 # share folder initialization
 [ ! -z "${SHARE_PREFIX:+x}" ] || {
 	[ -d "/mnt/init" ] &&

@@ -193,6 +193,8 @@ return {
 							["<PageDown>"] = actions.results_scrolling_down,
 
 							-- ["?"]          = actions.which_key,
+							-- https://www.reddit.com/r/neovim/comments/qspemc/close_buffers_with_telescope/
+							['<c-d>']      = actions.delete_buffer,
 						},
 					}
 				},
@@ -215,6 +217,25 @@ return {
 						-- AND operator for live_grep like how fzf handles spaces with wildcards in rg
 						return { prompt = prompt:gsub("%s", ".*") }
 					end,
+				},
+				-- nnoremap gb :buffers<CR>:buffer<Space>
+				buffers = {
+					show_all_buffers = true,
+					-- theme = "dropdown",
+					-- previewer = false,
+					previewer        = true,
+					sort_mru         = true,
+					sort_lastused    = true,
+					mappings = {
+						n = {
+							["d"] = "delete_buffer",
+						-- :lua vim.api.nvim_buf_delete(term_bufnr, { force = true })).
+						},
+						i = {
+							-- ["<c-d>"] = "delete_buffer",
+							["<c-d>"] = actions.delete_buffer + actions.move_to_top,
+						},
+					},
 				},
 			},
 			extensions = {

@@ -13,6 +13,8 @@ umask 022
 alias /='eval'
 alias //='lineno="$LINENO"'
 
+SCRIPT_NAME="profile" && export SCRIPT_NAME
+
 # share folder initialization
 [ ! -z "${SHARE_PREFIX:+x}" ] || {
 	[ -d "/mnt/init" ] &&

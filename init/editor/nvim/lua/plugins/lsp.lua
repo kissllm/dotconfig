@@ -108,15 +108,18 @@ return {
 
 	{
 		'williamboman/mason.nvim',
-		cmd = "Mason",
+		cmd   = "Mason",
 		event = "BufReadPre",
-		lazy = true,
+		lazy  = true,
 		dependencies = {
+			"jayp0521/mason-null-ls.nvim",
 			"williamboman/mason-lspconfig.nvim",
-			lazy = true
+			lazy = true,
 		},
 		config = function()
 			require("mason").setup({
+			-- https://github.com/williamboman/nvim-lsp-installer/discussions/509
+				PATH = "prepend", -- "skip" seems to cause the spawning error
 				log_level = vim.log.levels.DEBUG,
 				ui = {
 					icons = {
@@ -168,10 +171,17 @@ return {
 			})
 
 			for _, server_name in ipairs(get_servers()) do
-				lspconfig[server_name].setup({
-					lsp = lsp,
-					capabilities = capabilities,
-				})
+			--  https://www.reddit.com/r/neovim/comments/109gdka/how_can_i_disable_pylsp/
+				if
+					server_name ~= "marksman"
+					-- and
+					-- server_name ~= "bash-language-server"
+					then
+					lspconfig[server_name].setup({
+						lsp = lsp,
+						capabilities = capabilities,
+					})
+				end
 			end
 		end,
 	},

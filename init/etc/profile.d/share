@@ -45,6 +45,8 @@ alias /='eval'
 # bash does not recognize //
 alias //='lineno="$LINENO"'
 
+SCRIPT_NAME="share" && export SCRIPT_NAME
+
 # share folder initialization
 [ ! -z "${SHARE_PREFIX:+x}" ] || {
 	[ -d "/mnt/init" ] &&
@@ -98,18 +100,18 @@ _functions="$SHARE_PREFIX/init/functions"
 }
 
 [ -n "${SHELL##*"zsh"*}" ] || {
-	ln -sf ${SHARE_PREFIX}/init/shell/zsh          ${HOME}/.zinit
-	ln -sf ${SHARE_PREFIX}/init/shell/zsh/zshrc    ${HOME}/.zshrc
-	ln -sf ${SHARE_PREFIX}/init/shell/zsh/zshenv   ${HOME}/.zshenv
-	ln -sf ${SHARE_PREFIX}/init/shell/zsh/zlogin   ${HOME}/.zlogin
-	ln -sf ${SHARE_PREFIX}/init/shell/zsh/zprofile ${HOME}/.zprofile
+	ln -sf $SHARE_PREFIX/init/shell/zsh          $HOME/.zinit
+	ln -sf $SHARE_PREFIX/init/shell/zsh/zshrc    $HOME/.zshrc
+	ln -sf $SHARE_PREFIX/init/shell/zsh/zshenv   $HOME/.zshenv
+	ln -sf $SHARE_PREFIX/init/shell/zsh/zlogin   $HOME/.zlogin
+	ln -sf $SHARE_PREFIX/init/shell/zsh/zprofile $HOME/.zprofile
 }
 
 prompt() {
 	printf '%s %s\n' "$1" "$2"
 }
 
-// env_reset XDG_INIT "${SHARE_PREFIX}/init/etc/profile.d/xdg-runtime-dir"
+// env_reset XDG_INIT "$SHARE_PREFIX/init/etc/profile.d/xdg-runtime-dir"
 
 link_correct() {
 	local target="$1"
@@ -375,8 +377,8 @@ init_file_overwrite() {
 
 	# local file_name_target="${target##*/}"
 	#
-	# diff "/etc/profile" "${SHARE_PREFIX}/init/etc/profile" 2> /dev/null ||
-	#   \cp -f "${SHARE_PREFIX}/init/etc/profile" "/etc/profile"
+	# diff "/etc/profile" "$SHARE_PREFIX/init/etc/profile" 2> /dev/null ||
+	#   \cp -f "$SHARE_PREFIX/init/etc/profile" "/etc/profile"
 	[ ! -h "$target" ] || [ ! -L "$target" ] || \rm -f "$target"
 	[ -s "$target" ] &&
 	diff "$target" "$source" > /dev/null 2>&1 ||
@@ -395,8 +397,8 @@ init_file_overwrite() {
 }
 
 [ "$UID" != "0" ] ||
-# // link_correct "${SHARE_PREFIX}/init/etc/profile.d/share" "/etc/profile.d/share.sh"
-# // init_file_overwrite "/etc/profile.d/share.sh" "${SHARE_PREFIX}/init/etc/profile.d/share"
+# // link_correct "$SHARE_PREFIX/init/etc/profile.d/share" "/etc/profile.d/share.sh"
+# // init_file_overwrite "/etc/profile.d/share.sh" "$SHARE_PREFIX/init/etc/profile.d/share"
 // init_file_overwrite "/etc/profile.d/xdg-runtime-dir.sh" \
 	"$XDG_INIT"
 {
@@ -431,56 +433,60 @@ init_file_overwrite() {
 // env_reset DEST_ROOT     "/working/kiss"
 // env_reset DOTCONFIG     "/mnt/init"
 
+[ ! -f "/etc/hostname" ] ||
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
 // env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
+
 # : ${os_name:="$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release)"}
 # : ${os_pretty_name:="$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release)"}
 # // env_reset os_pretty_name "$(awk -F = "\$1 == \"PRETTY_NAME\" {print \$2}" < /etc/os-release | tr -d "\"")"
-// env_reset os_pretty_name "$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"")"
+// env_reset id "$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release |
+	tr '[A-Z]' '[a-z]')"
+// env_reset os_pretty_name "$(
+awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"" |
+	tr '[A-Z]' '[a-z]')"
 
-case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*)
+case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*)
 	IS_KISS= && export IS_KISS
-	# // link_correct "${SHARE_PREFIX}/init/etc/profile.d/kiss-env" "/etc/profile.d/kiss-env.sh"
-	# Moved to next case clause
-	# // init_file_overwrite "/etc/profile.d/kiss-env.sh" "${SHARE_PREFIX}/init/etc/profile.d/kiss-env"
 
-	# // link_correct "${SHARE_PREFIX}/init/etc/inittab"              "/etc/"
-	# // init_file_overwrite "/etc/" "${SHARE_PREFIX}/init/etc/inittab"
+	# // link_correct "$SHARE_PREFIX/init/etc/inittab" "/etc/"
+	# // init_file_overwrite "/etc/" "$SHARE_PREFIX/init/etc/inittab"
 esac
 
 [ "$UID" != "0" ] ||
-case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alpine"*|*"Alpine"*)
+case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*|*"void"*|*"alpine"*)
 	# [ "$(cat /etc/hostname 2> /dev/null)" != "kiss" ] || {
-	# diff "/etc/profile" "${SHARE_PREFIX}/init/etc/profile" 2> /dev/null ||
-	#   \cp -f "${SHARE_PREFIX}/init/etc/profile" "/etc/profile"
-	// init_file_overwrite "/etc/profile" "${SHARE_PREFIX}/init/etc/profile"
-	# // link_correct "${SHARE_PREFIX}/init/etc/profile"                    "/etc/"
+	# diff "/etc/profile" "$SHARE_PREFIX/init/etc/profile" 2> /dev/null ||
+	#   \cp -f "$SHARE_PREFIX/init/etc/profile" "/etc/profile"
+	// init_file_overwrite "/etc/profile" "$SHARE_PREFIX/init/etc/profile"
+	# // link_correct "$SHARE_PREFIX/init/etc/profile"                    "/etc/"
 
-	// init_file_overwrite "/etc/profile.d/kiss-env.sh" "${SHARE_PREFIX}/init/etc/profile.d/kiss-env"
+	// init_file_overwrite "/etc/profile.d/kiss-env.sh" "$SHARE_PREFIX/init/etc/profile.d/kiss-env"
 
-	# // link_correct "${SHARE_PREFIX}/init/etc/profile.d/nouveau"      "/etc/profile.d/nouveau.sh"
-	// init_file_overwrite "/etc/profile.d/nouveau.sh" "${SHARE_PREFIX}/init/etc/profile.d/nouveau"
+	# // link_correct "$SHARE_PREFIX/init/etc/profile.d/nouveau"      "/etc/profile.d/nouveau.sh"
+	// init_file_overwrite "/etc/profile.d/nouveau.sh" "$SHARE_PREFIX/init/etc/profile.d/nouveau"
 
-	# // link_correct "${SHARE_PREFIX}/init/etc/profile.d/iwl"          "/etc/profile.d/iwl.sh"
-	// init_file_overwrite "/etc/profile.d/iwl.sh" "${SHARE_PREFIX}/init/etc/profile.d/iwl"
-	// init_file_overwrite "/etc/profile.d/eth.sh" "${SHARE_PREFIX}/init/etc/profile.d/eth"
-	// init_file_overwrite "/usr/bin/s" "${SHARE_PREFIX}/init/bin/s"
+	# // link_correct "$SHARE_PREFIX/init/etc/profile.d/iwl"          "/etc/profile.d/iwl.sh"
+	// init_file_overwrite "/etc/profile.d/iwl.sh" "$SHARE_PREFIX/init/etc/profile.d/iwl"
+	// init_file_overwrite "/etc/profile.d/eth.sh" "$SHARE_PREFIX/init/etc/profile.d/eth"
+	// init_file_overwrite "/usr/bin/s" "$SHARE_PREFIX/init/bin/s"
 
 	# [ ! -z "${IS_KISS+x}" ] || {
 
 	{ [ -h "$REPO_ROOT" ] || [ -L "$REPO_ROOT" ]; } && \rm -f "$REPO_ROOT"
 	[ -d "$REPO_ROOT" ] || \mkdir -p "$REPO_ROOT"
 
-	# // link_correct "/opt/var/db/kiss/choices" "$REPO_ROOT/"
-	[ ! -e "/opt/var/db/kiss/hooks" ] ||
-	// link_correct "/opt/var/db/kiss/hooks"   "$REPO_ROOT/"
+	[ ! -e "$REPO_ROOT_DEV/choices" ] ||
+	// link_correct "$REPO_ROOT_DEV/choices" "$REPO_ROOT/"
+	[ ! -e "$REPO_ROOT_DEV/hooks" ] ||
+	// link_correct "$REPO_ROOT_DEV/hooks"   "$REPO_ROOT/"
 
 	# }
 
-	// link_correct "${SHARE_PREFIX}/init/etc/grub.d/10_linux"          "/etc/grub.d/"
-	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwldvm.conf"   "/etc/modprobe.d/"
-	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlmvm.conf"   "/etc/modprobe.d/"
-	// link_correct "${SHARE_PREFIX}/init/etc/modprobe.d/iwlwifi.conf"  "/etc/modprobe.d/"
+	// link_correct "$SHARE_PREFIX/init/etc/grub.d/10_linux"          "/etc/grub.d/"
+	// link_correct "$SHARE_PREFIX/init/etc/modprobe.d/iwldvm.conf"   "/etc/modprobe.d/"
+	// link_correct "$SHARE_PREFIX/init/etc/modprobe.d/iwlmvm.conf"   "/etc/modprobe.d/"
+	// link_correct "$SHARE_PREFIX/init/etc/modprobe.d/iwlwifi.conf"  "/etc/modprobe.d/"
 	[ ! -e  "$MNGR_ROOT/usr/bin" ] ||
 	for item in $(\ls -1 "$MNGR_ROOT/usr/bin" | grep kiss); do
 		// link_correct "$MNGR_ROOT/usr/bin/$item" "/usr/bin/"
@@ -491,35 +497,57 @@ case "${os_name} ${os_pretty_name}" in *"kiss"*|*"KISS"*|*"void"*|*"Void"*|*"alp
 	done
 esac
 
+insert_or_link() {
+	local source="$1"
+	local target="$2"
+	[ -f "$target" ] && {
+		diff -bwurB "$target" "$source" > /dev/null 2>&1 ||
+		grep -q "$source" "$target" ||
+		printf '\n%s\n%s\n' "[ ! -f \"$source\" ] ||" \
+		". \"$source\"" >> "$target"
+	} ||
+	// link_correct "$source" "$target"
+}
+
 # : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} &&
 // env_reset WAYLAND_CONFIG_HOME "${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
 export WAYLAND_CONFIG_HOME
-// link_correct "${SHARE_PREFIX}/init/wayland/env" "${WAYLAND_CONFIG_HOME}/"
+// link_correct "$SHARE_PREFIX/init/wayland/env" "${WAYLAND_CONFIG_HOME}/"
 
-// link_correct "${SHARE_PREFIX}/init/profile"                  "${HOME}/.profile"
-// link_correct "${SHARE_PREFIX}/init/ashrc"                    "${HOME}/.ashrc"
-// link_correct "${SHARE_PREFIX}/init/terminal/tmux.conf"       "${HOME}/.tmux.conf"
-// link_correct "${SHARE_PREFIX}/init/terminal/foot/foot.ini"   "${XDG_CONFIG_HOME}/foot/"
-// link_correct "${SHARE_PREFIX}/init/wayland/river/init"       "${XDG_CONFIG_HOME}/river/"
-// link_correct "${SHARE_PREFIX}/init/wayland/sway/config"      "${XDG_CONFIG_HOME}/sway/"
-// link_correct "${SHARE_PREFIX}/init/wayland/sway/colorscheme" "${XDG_CONFIG_HOME}/sway/"
-# Keep ${SHARE_PREFIX} as just a configuration location
-folder_tmux="${HOME}/.tmux"
+# [ -f "$HOME/.profile" ] && {
+# 	diff -bwurB "$HOME/.profile" "$SHARE_PREFIX/init/profile" > /dev/null 2>&1 ||
+# 	grep -q '$SHARE_PREFIX/init/profile' ||
+# 	printf '\n%s\n%s\n' '[ ! -f "$SHARE_PREFIX/init/profile" ] ||' \
+# 	'. "$SHARE_PREFIX/init/profile"' >> "$HOME/.profile"
+# } ||
+# // link_correct "$SHARE_PREFIX/init/profile" "$HOME/.profile"
+// insert_or_link "$SHARE_PREFIX/init/profile" "$HOME/.profile"
+
+# // link_correct "$SHARE_PREFIX/init/ashrc" "$HOME/.ashrc"
+// insert_or_link "$SHARE_PREFIX/init/ashrc" "$HOME/.ashrc"
+
+// link_correct "$SHARE_PREFIX/init/terminal/tmux.conf"       "$HOME/.tmux.conf"
+// link_correct "$SHARE_PREFIX/init/terminal/foot/foot.ini"   "$XDG_CONFIG_HOME/foot/"
+// link_correct "$SHARE_PREFIX/init/wayland/river/init"       "$XDG_CONFIG_HOME/river/"
+// link_correct "$SHARE_PREFIX/init/wayland/sway/config"      "$XDG_CONFIG_HOME/sway/"
+// link_correct "$SHARE_PREFIX/init/wayland/sway/colorscheme" "$XDG_CONFIG_HOME/sway/"
+# Keep $SHARE_PREFIX as just a configuration location
+folder_tmux="$HOME/.tmux"
 [ -L "$folder_tmux" ] && \rm -f "$folder_tmux"
 [ -d "$folder_tmux" ] || \mkdir -p "$folder_tmux"
-# // link_correct "${SHARE_PREFIX}/init/terminal/tmux"       "${HOME}/.tmux"
-// link_correct "${SHARE_PREFIX}/init/editor/vim/init.vim" "${HOME}/.vimrc"
-folder_vim="${HOME}/.vim"
+# // link_correct "$SHARE_PREFIX/init/terminal/tmux"       "$HOME/.tmux"
+// link_correct "$SHARE_PREFIX/init/editor/vim/init.vim" "$HOME/.vimrc"
+folder_vim="$HOME/.vim"
 [ -L "$folder_vim" ] && \rm -f "$folder_vim"
 [ -d "$folder_vim" ] || \mkdir -p "$folder_vim"
 
-[ ! -e  "${SHARE_PREFIX}/init/editor/vim/after" ] ||
-// link_correct "${SHARE_PREFIX}/init/editor/vim/after"  "${HOME}/.vim/"
-[ ! -e  "${SHARE_PREFIX}/init/editor/vim/indent" ] ||
-// link_correct "${SHARE_PREFIX}/init/editor/vim/indent" "${HOME}/.vim/"
-// link_correct "${SHARE_PREFIX}/init/editor/nvim"       "${XDG_CONFIG_HOME}/"
-[ ! -e  "${SHARE_PREFIX}/wiki" ] ||
-// link_correct "${SHARE_PREFIX}/wiki"                   "${HOME}/.wiki"
+[ ! -e  "$SHARE_PREFIX/init/editor/vim/after" ] ||
+// link_correct "$SHARE_PREFIX/init/editor/vim/after"  "$HOME/.vim/"
+[ ! -e  "$SHARE_PREFIX/init/editor/vim/indent" ] ||
+// link_correct "$SHARE_PREFIX/init/editor/vim/indent" "$HOME/.vim/"
+// link_correct "$SHARE_PREFIX/init/editor/nvim"       "$XDG_CONFIG_HOME/"
+[ ! -e  "$SHARE_PREFIX/wiki" ] ||
+// link_correct "$SHARE_PREFIX/wiki"                   "$HOME/.wiki"
 #
 # Folder maintenance
 folder_nvim="${XDG_DATA_HOME}/nvim"
@@ -532,21 +560,21 @@ folder_site="${XDG_DATA_HOME}/nvim/site"
 
 # Default editor packages is based on musl libc on current system
 # Since I use lazy.nvim, don't need to maintain this link
-# // link_correct "${SHARE_PREFIX}/init/editor/nvim/site/pack" \
+# // link_correct "$SHARE_PREFIX/init/editor/nvim/site/pack" \
 #   "${XDG_DATA_HOME}/nvim/site/pack"
 #
 # If you have additional musl libc builds of the editor
 # ! expr "$KISS_XHOST_ABI" : "musl" > /dev/null 2>&1 ||
-# // link_correct "${SHARE_PREFIX}/init/editor/nvim/site/pack-musl" \
+# // link_correct "$SHARE_PREFIX/init/editor/nvim/site/pack-musl" \
 #     "${XDG_DATA_HOME}/nvim/site/pack"
 #
 folder_parser="${XDG_DATA_HOME}/nvim/site/parser"
 [ -L "$folder_parser" ] && \rm -f "$folder_parser"
 [ -d "$folder_parser" ] || \mkdir -p "$folder_parser"
 
-# [ ! -L ${XDG_CONFIG_HOME}/coc ] ||
-#     \rm -f ${XDG_CONFIG_HOME}/coc
-# \ln -sf ${SHARE_PREFIX}/init/editor/coc ${XDG_CONFIG_HOME}/coc
+# [ ! -L $XDG_CONFIG_HOME/coc ] ||
+#     \rm -f $XDG_CONFIG_HOME/coc
+# \ln -sf $SHARE_PREFIX/init/editor/coc $XDG_CONFIG_HOME/coc
 
 export loaded_share=
 

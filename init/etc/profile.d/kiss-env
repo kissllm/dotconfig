@@ -4,6 +4,8 @@
 alias /='eval'
 alias //='lineno="$LINENO"'
 
+SCRIPT_NAME="kiss-env" && export SCRIPT_NAME
+
 # share folder initialization
 [ ! -z "${SHARE_PREFIX:+x}" ] || {
 	[ -d "/mnt/init" ] &&
