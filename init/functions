@@ -6,7 +6,7 @@ alias //='lineno="$LINENO"'
 
 SCRIPT_NAME="functions" && export SCRIPT_NAME
 
-case "$(type env_reset)" in *"function"*|*"alias"*) ;;
+case "$(type env_reset > /dev/null 2>&1 && type env_reset)" in *"function"*|*"alias"*) ;;
 	*)
 	_env_reset() {
 		local env_key_name="${1:?"env_reset needs a key"}"
@@ -34,7 +34,7 @@ esac
 # Try to tell I'm runing in a chroot. Equal means not in a chroot
 # Not equal (contains) means in a chroot (being_in_chroot=0), then
 # ignore the tmux application, etc.
-case "$(type is_chrooted)" in *"function"*|*"alias"*) ;;
+case "$(type is_chrooted > /dev/null 2>&1 && type is_chrooted)" in *"function"*|*"alias"*) ;;
 	*)
 		_is_chrooted() {
 			# Is chrooted

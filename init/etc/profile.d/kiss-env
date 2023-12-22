@@ -21,7 +21,7 @@ _functions="$SHARE_PREFIX/init/functions"
 	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
 	exit 0
 } || {
-	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+	env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
 	[ ! -z "${env_reset_type:+x}" ] ||
 		. "$_functions"
 }
