@@ -495,6 +495,10 @@ case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*|*"void"*|*"alpine"*)
 	for item in $(\ls -1 "$MNGR_ROOT/usr/include" | grep kiss); do
 		// link_correct "$MNGR_ROOT/usr/include/$item" "/usr/include/"
 	done
+	;;
+	*)
+	// init_file_overwrite "/etc/profile.d/functions.sh" "$SHARE_PREFIX/init/functions"
+
 esac
 
 insert_or_link() {
