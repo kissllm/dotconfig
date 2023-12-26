@@ -36,31 +36,44 @@ command -v "${SHELL}" > /dev/null 2>&1 &&
 	printf '%s %s\n' '$SHELL' "$SHELL"
 }
 
-alias /='eval'
-# bash does not recognize //
-alias //='lineno="$LINENO"'
+SCRIPT_NAME="profile" && export SCRIPT_NAME
 
-SCRIPT_NAME="share" && export SCRIPT_NAME
-
-# share folder initialization
-[ ! -z "${SHARE_PREFIX:+x}" ] || {
-	[ -d "/mnt/init" ] &&
-	{ SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-		[ -d "/opt/init" ] &&
-		{ SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-		printf '%s %s\n' '$SHARE_PREFIX' "not found"
-	}
-}
-
-_functions="$SHARE_PREFIX/init/functions"
-[ ! -f "$_functions" ] && {
-	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-	exit 0
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+{
+	[ -f "/mnt/init/include/route" ] &&
+	. /mnt/init/include/route
 } || {
-	env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
-	[ ! -z "${env_reset_type:+x}" ] ||
-		. "$_functions"
+	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
+	exit 0
 }
+
+# alias /='eval'
+# # bash does not recognize //
+# alias //='lineno="$LINENO"'
+#
+# SCRIPT_NAME="profile" && export SCRIPT_NAME
+#
+# # share folder initialization
+# [ ! -z "${SHARE_PREFIX:+x}" ] || {
+#   [ -d "/mnt/init" ] &&
+#   { SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
+#       [ -d "/opt/init" ] &&
+#       { SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
+#       printf '%s %s\n' '$SHARE_PREFIX' "not found"
+#   }
+# }
+#
+# _functions="/usr/include/kiss/functions"
+# [ -f "$_functions" ] ||
+# _functions="$SHARE_PREFIX/init/include/functions"
+# [ ! -f "$_functions" ] && {
+#   printf '%s %s\n' '$_functions' "'$_functions' does not exist"
+#   exit 0
+# } || {
+#   env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
+#   [ ! -z "${env_reset_type:+x}" ] ||
+#       . "$_functions"
+# }
 
 
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME

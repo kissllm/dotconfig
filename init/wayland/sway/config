@@ -670,7 +670,8 @@ bar {
 	# status_command while date +'%Y-%m-%d %l:%M:%S %p'; do sleep 1; done
 	# swaybar_command waybar -c ~/.config/waybar/style.css
 	# swaybar_command swaybar -c ~/.config/waybar/style.css
-	# swaybar_command polybar -c ~/.config/polybar/config.ini
+	# To override default waybar, you must define something(a placeholder)
+	swaybar_command polybar -c ~/.config/polybar/config.ini
 	# swaybar_command swaybar
 
 	# status_command i3status-rs ~/.config/i3status-rust/config.toml

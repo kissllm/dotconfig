@@ -10,42 +10,55 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 # Set default umask.
 umask 022
 
-alias /='eval'
-alias //='lineno="$LINENO"'
-
 SCRIPT_NAME="profile" && export SCRIPT_NAME
 
-# share folder initialization
-[ ! -z "${SHARE_PREFIX:+x}" ] || {
-	[ -d "/mnt/init" ] &&
-	{ SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-		[ -d "/opt/init" ] &&
-		{ SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-		printf '%s %s\n' '$SHARE_PREFIX' "not found"
-	}
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+{
+	[ -f "/mnt/init/include/route" ] &&
+	. /mnt/init/include/route
+} || {
+	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
+	exit 0
 }
 
-_functions="$SHARE_PREFIX/init/functions"
-[ ! -f "$_functions" ] && {
-	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-	exit 0
-} || {
-	env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
-	[ ! -z "${env_reset_type:+x}" ] ||
-		. "$_functions"
-}
+# alias /='eval'
+# alias //='lineno="$LINENO"'
+#
+# SCRIPT_NAME="profile" && export SCRIPT_NAME
+#
+# # share folder initialization
+# [ ! -z "${SHARE_PREFIX:+x}" ] || {
+#   [ -d "/mnt/init" ] &&
+#   { SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
+#       [ -d "/opt/init" ] &&
+#       { SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
+#       printf '%s %s\n' '$SHARE_PREFIX' "not found"
+#   }
+# }
+#
+# _functions="/usr/include/kiss/functions"
+# [ -f "$_functions" ] ||
+# _functions="$SHARE_PREFIX/init/include/functions"
+# [ ! -f "$_functions" ] && {
+#   printf '%s %s\n' '$_functions' "'$_functions' does not exist"
+#   exit 0
+# } || {
+#   env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
+#   [ ! -z "${env_reset_type:+x}" ] ||
+#       . "$_functions"
+# }
 
 # case "$(type env_reset)" in *"function"*|*"alias"*) ;;
-# 	*)
-# 	_env_reset() {
-# 		local env_key_name="${1:?"env_reset needs a key"}"
-# 		local env_value="${2:?"env_reset '$1' needs a value"}"
-# 		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
-# 			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
-# 			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
-# 		}
-# 	}
-# 	alias env_reset='_env_reset'
+#   *)
+#   _env_reset() {
+#       local env_key_name="${1:?"env_reset needs a key"}"
+#       local env_value="${2:?"env_reset '$1' needs a value"}"
+#       / "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
+#           # / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
+#           / "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
+#       }
+#   }
+#   alias env_reset='_env_reset'
 # esac
 
 [ ! -f "/etc/hostname" ] ||
@@ -92,31 +105,31 @@ esac
 # Not equal (contains) means in a chroot (being_in_chroot=0), then
 # ignore the tmux application, etc.
 # case "$(type is_chrooted)" in *"function"*|*"alias"*) ;;
-# 	*)
-# 		_is_chrooted() {
-# 			# Is chrooted
-# 			local being_in_chroot=0
-# 			local root_pid=
-# 			[ ! -f "/proc/1/mountinfo" ] ||
-# 			root_pid="$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)"
-# 			local pid_list=
-# 			[ ! -f "/proc/$$/mountinfo" ] ||
-# 			pid_list="$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)"
-# 			# Is chrooted
-# 			local is_pid_contained=1
+#   *)
+#       _is_chrooted() {
+#           # Is chrooted
+#           local being_in_chroot=0
+#           local root_pid=
+#           [ ! -f "/proc/1/mountinfo" ] ||
+#           root_pid="$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)"
+#           local pid_list=
+#           [ ! -f "/proc/$$/mountinfo" ] ||
+#           pid_list="$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)"
+#           # Is chrooted
+#           local is_pid_contained=1
 #
-# 			case " $pid_list " in
-# 				# Not chrooted
-# 				*" $root_pid "*) is_pid_contained=0
-# 			esac
+#           case " $pid_list " in
+#               # Not chrooted
+#               *" $root_pid "*) is_pid_contained=0
+#           esac
 #
-# 			[ "$is_pid_contained" -ne "0" ] ||
-# 			# Not chrooted
-# 				being_in_chroot=1
+#           [ "$is_pid_contained" -ne "0" ] ||
+#           # Not chrooted
+#               being_in_chroot=1
 #
-# 			return $being_in_chroot
-# 		}
-# 		alias is_chrooted='_is_chrooted'
+#           return $being_in_chroot
+#       }
+#       alias is_chrooted='_is_chrooted'
 # esac
 
 # Load profiles from /etc/profile.d

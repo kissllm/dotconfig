@@ -1,8 +1,12 @@
 #!/bin/sh
 # doas root /mnt/alpine /bin/ash
 des="${1:?"Must give a target path"}"
-set -eE
-trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
+
+[ -z "${IS_KISS+x}"] && set -e || {
+	set -eE
+	trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
+}
+
 # shellcheck source=/mnt/lib/mount_smart
 . /mnt/lib/mount_smart
 # des = /mnt/gentoo # or some absolute path
@@ -35,8 +39,8 @@ smart_rbind () {
 		mount --make-rslave $des/proc
 
 # [ $(target_exists "$des/tmp") -eq 0 ] && {
-#	  mount --rbind /tmp $des/tmp
-#	  mount --make-rslave $des/tmp
+#     mount --rbind /tmp $des/tmp
+#     mount --make-rslave $des/tmp
 # }
 
 for I in sys sys/kernel/security sys/dev/block dev dev/pts dev/shm run; do

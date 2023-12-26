@@ -232,8 +232,10 @@ return {
 						-- :lua vim.api.nvim_buf_delete(term_bufnr, { force = true })).
 						},
 						i = {
-							-- ["<c-d>"] = "delete_buffer",
-							["<c-d>"] = actions.delete_buffer + actions.move_to_top,
+							-- ["<c-d>"]  = "delete_buffer",
+							["<c-d>"]     = actions.delete_buffer + actions.move_to_top,
+							["<C-j>"]     = actions.move_selection_next,
+							["<C-k>"]     = actions.move_selection_previous,
 						},
 					},
 				},

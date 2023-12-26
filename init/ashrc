@@ -1,32 +1,17 @@
-#! /bin/sh
+#! /bin/Sh
 # set -x
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
 
-alias /='eval'
-# bash does not recognize //
-alias //='lineno="$LINENO"'
-
 SCRIPT_NAME="ashrc" && export SCRIPT_NAME
 
-# share folder initialization
-[ ! -z "${SHARE_PREFIX:+x}" ] || {
-	[ -d "/mnt/init" ] &&
-	{ SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-		[ -d "/opt/init" ] &&
-		{ SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-		printf '%s %s\n' '$SHARE_PREFIX' "not found"
-	}
-}
-
-_functions="$SHARE_PREFIX/init/functions"
-[ ! -f "$_functions" ] && {
-	printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-	exit 0
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+{
+	[ -f "/mnt/init/include/route" ] &&
+	. /mnt/init/include/route
 } || {
-	env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
-	[ ! -z "${env_reset_type:+x}" ] ||
-		. "$_functions"
+	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
+	exit 0
 }
 
 # : ${UID="$(id -u)"} && export UID
@@ -52,11 +37,11 @@ reset_cursor_shape() {
 		echo 0 | tee $cursor_blink_key
 	}
 	# || {
-	# 	[ ! -f "$cursor_blink_key" ] ||
-	# 	[ "$(cat $cursor_blink_key)" -eq "0" ] || {
-	# 		! command -v "/usr/bin/doas" > /dev/null 2>&1 ||
-	# 		echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
-	# 	}
+	#   [ ! -f "$cursor_blink_key" ] ||
+	#   [ "$(cat $cursor_blink_key)" -eq "0" ] || {
+	#       ! command -v "/usr/bin/doas" > /dev/null 2>&1 ||
+	#       echo 0 | doas -u root -- tee /sys/class/graphics/fbcon/cursor_blink
+	#   }
 	# }
 # reset
 # printf '%s %s\n' '$TERM' "$TERM"
@@ -391,7 +376,7 @@ reset_cursor_shape() {
 reset_cursor_shape
 
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
-#
+
 # tabstop
 tabs -4
 LESS="-x4" && export LESS
@@ -405,6 +390,50 @@ LESS="-x4" && export LESS
 		. ${SHARE_PREFIX}/init/kiss-env
 }
 
+sock_sway=
+launcher="greeter"
+
+sway_socket() {
+	local launcher="${1-}"
+	[ -z "${launcher:+x}" ] ||
+	printf '%s %s\n' '$launcher' "$launcher"
+	# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
+	#   grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
+	# sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
+	#   grep -v swc-launch | sort -rnk3 | awk "{print \$1}" | tr -d " ")"
+	# # local index=0
+	# for sock_id in $sock_id_list; do
+	#    break
+	# done
+	[ -z "${WAYLAND_DISPLAY+x}" ] || {
+		printf '%s %s\n' '$SHLVL' "$SHLVL" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		export WAYLAND_DISPLAY
+		printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
+		printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
+	}
+	sock_id="$(for item in $( \
+	ps -ef | grep "sway -d" | grep -v "grep" | awk "{print \$2}" 2> /dev/null)
+	do
+		[ -z "$(pstree -p "$item" | grep "$item" | grep "sway" 2> /dev/null)" ] &&
+		continue || { printf '%s' "$item"; break; }
+	done)"
+
+	[ -n "${sock_id:+x}" ] || { printf '\n'; return 0; }
+
+	SWAY_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$UID.$sock_id.sock"
+	[ ! -S "$SWAY_SOCK" ] || {
+		export SWAY_SOCK
+		[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
+		printf '%s' "${SWAY_SOCK}" > /tmp/wayland/.socket
+
+		printf '%s %s\n' '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)"
+	}
+	[ -z "${DISPLAY+x}" ] || unset DISPLAY
+	printf '\n%s' "$SWAY_SOCK"
+}
+
 # printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 # printf '%s %s\n' '$DISPLAY' "$DISPLAY"
 
@@ -413,13 +442,20 @@ LESS="-x4" && export LESS
 # tty_nme might not a number on pts
 tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 # export tty_num
-#
+
+[ -z "${IS_KISS+x}" ] || DONT_USE_GREET=
+[ -z "${DONT_USE_GREET=x}" ] && designate_tty=7 ||
+designate_tty=1
+
 # Initialize wayland
 # [ "$XDG_SESSION_TYPE" = "wayland" ] ||
 [ ! -d "${SHARE_PREFIX}/init" ] ||
 # [ ! -z "${DISPLAY+x}" ] ||
-[ ! -z "${WAYLAND_DISPLAY+x}" ] ||
-[ "1" != "$tty_num" ] || {
+{
+	[ ! -z "${WAYLAND_DISPLAY+x}" ] &&
+	[ ! -z "${WAYLAND_ENV+x}" ]
+} ||
+[ "$designate_tty" != "$tty_num" ] || {
 # sway can boot as root
 # [ "$UID" -eq "0" ] || { # [ "$(id -nu)" = "root" ] || {
 	# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
@@ -427,22 +463,25 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 	# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
 	# XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in ${SHARE_PREFIX}/init/env
 	# [ "$UID" -eq "0" ] || {
-	[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
+	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
 	# [ -e "/tmp/wayland/.display" ] || touch "/tmp/wayland/.display"
-	[ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
-	WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
-	export WAYLAND_CONFIG_HOME
+	[ -n "${WAYLAND_CONFIG_HOME:+x}" ] || {
+		WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+		export WAYLAND_CONFIG_HOME
+	}
 	printf '%s %s\n' '$SHLVL' "$SHLVL" |
 		tee -a ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
 	# }
 
 	# sway_socket
-	sock_sway="$([ ! -f "/tmp/wayland/.socket" ] ||
-		cat "/tmp/wayland/.socket" 2> /dev/null)"
-	# {
-	# [ -z "${sock_sway:+x}" ] ||
-	[ ! -S "$sock_sway" ] &&
-		# } &&
+	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] ||
+	#   cat "/tmp/wayland/.socket" 2> /dev/null)"
+	sock_sway="$(delegate -- sway_socket "$launcher")"
+
+	{
+		[ -z "${sock_sway:+x}" ] ||
+		[ ! -S "$sock_sway" ]
+	} &&
 	# ${SHARE_PREFIX}/init/velox-launch
 	# { . ${SHARE_PREFIX}/init/sway-launch; sock_sway=sway_socket "$launcher"; } ||
 	. ${SHARE_PREFIX}/init/sway-launch ||
@@ -461,14 +500,19 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 #     [ "$UID" -ne "0" ]; then
 
 # [ "$UID" -eq "0" ] ||
-[ "1" != "$tty_num" ] || {
+[ "$designate_tty" != "$tty_num" ] || {
+	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
+	[ -n "${WAYLAND_CONFIG_HOME:+x}" ] || {
+		WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+		export WAYLAND_CONFIG_HOME
+	}
 
 	# [ ! -z "${WAYLAND_DISPLAY+x}" ] || {
 	#   WAYLAND_DISPLAY="$(cat /tmp/wayland/.display 2> /dev/null)"
 	#   [ -z "${WAYLAND_DISPLAY+x}" ] || export WAYLAND_DISPLAY
 	# }
 	# {
-	#
+
 	# Writting WAYLAND_DISPLAY to file
 	display_wayland="$([ ! -f "/tmp/wayland/.display" ] ||
 		cat "/tmp/wayland/.display" 2> /dev/null)"
@@ -490,7 +534,8 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 	}
 
 	# Reading SWAY_SOCK from file
-	sock_sway="$([ ! -f "/tmp/wayland/.socket" ] || cat "/tmp/wayland/.socket" 2> /dev/null)"
+	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] || cat "/tmp/wayland/.socket" 2> /dev/null)"
+	sock_sway="$(delegate -- sway_socket "$launcher")"
 	# Try again
 	# {
 	#   # [ -f "/tmp/wayland/.socket" ] &&
@@ -504,6 +549,14 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 	[ "$sock_sway" = "$SWAY_SOCK" ] ||
 		{ SWAY_SOCK="$sock_sway"; export SWAY_SOCK; }
 	# }
+	[ ! -z "${WAYLAND_ENV+x}" ] ||
+		[ ! -f "${WAYLAND_CONFIG_HOME}/env" ] || {
+		printf '%s %s\n' "${WAYLAND_CONFIG_HOME}/env" "sourced"
+			set -a
+			# shellcheck disable=SC1090
+			. "${WAYLAND_CONFIG_HOME}/env"
+			set +a
+		}
 }
 
 # elif [ -n "$(cat /tmp/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then

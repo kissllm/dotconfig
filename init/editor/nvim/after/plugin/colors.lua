@@ -167,7 +167,7 @@ hl(0, '@comment',   { bg = 'Blue', fg='DarkGrey' })
 -- Control the highlight guides
 -- CursorColumn   xxx guibg=#313640
 -- indent_blankline
-hl(0, 'WinSeparator',   { fg = '#444444', bg = 'NONE', })
+hl(0, 'WinSeparator', { fg = '#444444', bg = 'NONE', })
 --
 -- SignColumn     xxx guifg=#dcdfe4
 --                    links to WinSeparator
@@ -175,7 +175,8 @@ hl(0, 'WinSeparator',   { fg = '#444444', bg = 'NONE', })
 -- hl(0, 'CursorColumn',   { bg = '#606090', fg = 'NONE', })
 -- hl(0, 'CursorColumn',   { fg = 'DarkGray', bg = 'NONE', reverse = true })
 -- indent_blankline
-hl(0, 'CursorColumn',   { fg = 'NONE', reverse = true })
+-- hl(0, 'CursorColumn', { fg = 'NONE', reverse = true })
+hl(0, 'CursorColumn', { bg = 'NONE', fg = 'Blue' })
 -- hl(0, 'CursorColumn',   { fg = 'DarkBlue', bg = 'NONE', italic = true })
 -- hl(0, 'CursorColumn',   { fg = 'Gray', bg = 'NONE', italic = true })
 -- vim_lsp_references

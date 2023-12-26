@@ -328,10 +328,12 @@ vim.api.nvim_create_user_command(
 -- "Thyrum/vim-stabs",
 vim.api.nvim_create_user_command(
 	"RT",
-	function()
-		-- set.expandtab = true
-		-- vim.cmd("retab")
-		-- set.expandtab = false
+	function(retab)
+		if retab ~= nil then
+			set.expandtab = true
+			vim.cmd("retab")
+			set.expandtab = false
+		end
 		vim.cmd("RetabIndent")
 		-- vim.cmd("write " .. vim.fn.expand('%'))
 		vim.cmd("W")

@@ -5,6 +5,8 @@ GRUB_TIMEOUT=5
 GRUB_DISTRIBUTOR="KISS"
 GRUB_DISABLE_SUBMENU=y
 GRUB_DISABLE_RECOVERY=true
+#
+# [    0.108755] Unknown kernel command line parameters "BOOT_IMAGE=/vmlinuz-6.5.13_1 ip=dhcp", will be passed to user space.
 
 # GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
 # GRUB_CMDLINE_LINUX_DEFAULT=" ro rd.neednet=1 ip=dhcp loglevel=4 slub_debug=P page_poison=1 vga=0x318 fbcon=font:FONT_TER16x32"
