@@ -525,9 +525,13 @@ case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*|*"void"*|*"alpine"*)
 	}
 esac
 
-[ "$UID" != "0" ] ||
-	// init_file_overwrite "/etc/profile.d/functions.sh" "$MNGR_ROOT/usr/include/functions"
+[ "$UID" != "0" ] || {
+	[ -f "$MNGR_ROOT/usr/include/kiss/functions" ] &&
+	// init_file_overwrite "/etc/profile.d/functions.sh" "$MNGR_ROOT/usr/include/kiss/functions" ||
+	// init_file_overwrite "/etc/profile.d/functions.sh" "$SHARE_PREFIX/init/include/functions"
+}
 
+[ ! -f "$MNGR_ROOT/usr/include/kiss/functions" ] ||
 // init_file_overwrite "$SHARE_PREFIX/init/include/functions" "$MNGR_ROOT/usr/include/kiss/functions"
 
 insert_or_link() {
