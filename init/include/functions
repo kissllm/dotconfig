@@ -1,0 +1,300 @@
+#! /bin/sh
+
+newline="
+"
+alias /='eval'
+# bash does not recognize //
+alias //='lineno="$LINENO"'
+
+SCRIPT_NAME="functions" && export SCRIPT_NAME
+
+case "$(type env_reset > /dev/null 2>&1 && type env_reset)" in *"function"*|*"alias"*) ;;
+	*)
+	_env_reset() {
+		local env_key_name="${1:?"env_reset needs a key"}"
+		local env_value="${2:?"env_reset '$1' needs a value [$lineno : $SCRIPT_NAME]"}"
+		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
+			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
+			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
+		}
+	}
+	alias env_reset='_env_reset'
+esac
+
+# How do I tell I'm runing in a chroot?
+# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
+
+# No root needed. Equal means not in a chroot
+# [ "$(awk '$5=="/" {print $1}' </proc/1/mountinfo)" != "$(awk '$5=="/" {print $1}' </proc/$$/mountinfo)" ]
+# root permission needed
+# if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+#     echo "We are chrooted!"
+# else
+#     echo "Business as usual"
+# fi
+
+# Try to tell I'm runing in a chroot. Equal means not in a chroot
+# Not equal (contains) means in a chroot (being_in_chroot=0), then
+# ignore the tmux application, etc.
+case "$(type is_chrooted > /dev/null 2>&1 && type is_chrooted)" in *"function"*|*"alias"*) ;;
+	*)
+		_is_chrooted() {
+			# Is chrooted
+			local being_in_chroot=0
+			local root_pid=
+			[ ! -f "/proc/1/mountinfo" ] ||
+			root_pid="$(awk '$5 == "/" {print $1}' < /proc/1/mountinfo)"
+			local pid_list=
+			[ ! -f "/proc/$$/mountinfo" ] ||
+			pid_list="$(awk '$5 == "/" {print $1}' < /proc/$$/mountinfo)"
+			# Is chrooted
+			local is_pid_contained=1
+
+			case " $pid_list " in
+				# Not chrooted
+				*" $root_pid "*) is_pid_contained=0
+			esac
+
+			[ "$is_pid_contained" -ne "0" ] ||
+			# Not chrooted
+				being_in_chroot=1
+
+			return $being_in_chroot
+		}
+		alias is_chrooted='_is_chrooted'
+esac
+
+# https://unix.stackexchange.com/questions/32041/checking-if-path-contains-home-mydir-and-adding-it-if-not-all-in-a-script
+# https://tldp.org/LDP/abs/html/parameter-substitution.html
+# "grep -q" "$? -eq 0" could be a good solution?
+prepend() {
+	[ ! -z "${1:+x}" ] || return
+	local key="${1}"
+	# CONTAINER_VALUE="$(eval echo "\$${1}")"
+	local value="${2}"
+	[ -d "${value}" ] || return
+	# echo "prepend \$key   = $key"
+	# echo "prepend \$CONTAINER_VALUE = $(eval echo "\$${key}")"
+	case ":$(eval echo "\$${key}"):" in
+		*":${value}:"*) :;;
+		*) eval "export $key=${value}\${$key:+\":\$$key\"}" ;;
+	esac
+}
+# prepend PATH "/build/os"
+
+# https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
+# # prepend to PATH
+# _path_prepend "$XDG_DATA_HOME/phpenv/bin"
+#
+# # prepend to MANPATH
+# _path_prepend MANPATH "$XDG_DATA_HOME/shell-installer/man"
+#
+# # prepend to PERL5LIB
+# _path_prepend PERL5LIB "$PERL_LOCAL_LIB_ROOT/lib/perl5"
+#
+# Features
+#
+#     POSIX compliant
+#     Doesn't use Bash's declare -n
+
+prepend_path() {
+	if [ -n "$2" ]; then
+		case ":$(eval "echo \${${1}-}"):" in
+			*":$2:"*) :;;
+			*) eval "export $1=$2\${$1:+\":\$$1\"}" ;;
+		esac
+	else
+		case ":$PATH:" in
+			*":$1:"*) :;;
+			*) export PATH="$1${PATH:+":$PATH"}" ;;
+		esac
+	fi
+}
+
+append_path() {
+	if [ -n "$2" ]; then
+		case ":$(eval "echo \${${1}-}"):" in
+			*":$2:"*) :;;
+			*) eval "export $1=\${$1:+\"\$$1:\"}$2" ;;
+		esac
+	else
+		case ":$PATH:" in
+			*":$1:"*) :;;
+			*) export PATH="${PATH:+"$PATH:"}$1" ;;
+		esac
+	fi
+}
+
+# https://unix.stackexchange.com/questions/4965/keep-duplicates-out-of-path-on-source
+# Define path_append and path_prepend to add directory to target path, e.g.
+# PATH, MANPATH
+# Add to the end of a target path
+_path_append() {
+	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return
+	local extend=":$(eval "echo \${${1}-}"):"
+	# echo "\$2 = $2"
+	# echo "test=${extend##*:$2:*}"
+	# [ -d "$2" ] || {
+	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
+	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+	[ "$extend" = "::" ] && eval "export $1=$2" ||
+	[ -z "${extend##*:$2:*}" ] || eval "export $1=\$$1:$2"
+	# }
+}
+alias path_append='_path_append'
+
+# Add to the front of a target path
+_path_prepend() {
+	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return
+	local extend=":$(eval "echo \${${1}-}"):"
+	# echo "\$2 = $2"
+	# echo "test=${extend##*:$2:*}"
+	# [ ! -d "$2" ] || {
+	# eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" \
+	# -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ||
+	[ "$extend" = "::" ] && eval "export $1=$2" ||
+	[ -z "${extend##*:$2:*}" ] || eval "export $1=$2:\$$1"
+	# }
+}
+alias path_prepend='_path_prepend'
+
+type_include() {
+	local key="$1"
+	local value="$2"
+	local include_target="${3-}"
+	local result=1
+
+	local check_type="$(type "$key" > /dev/null 2>&1 && type "$key")" || :
+	[ -z "${check_type:+x}" ] ||
+	[ ! -z "${check_type##*"$value"*}" ] || {
+		result=0
+		// debug '$key' "$check_type"
+		[ -z "${include_target:+x}" ] ||{
+			// cue "$include_target" "included"
+			[ ! -e "$include_target" ] ||
+			. "$include_target"
+		}
+	}
+	return $result
+}
+
+# FS       : field separator
+# : ${FS:="\x03"} && export FS
+: ${FS:="\003"} && export FS
+# RS       : record separator
+# : ${RS:="\x1f"} && export RS
+: ${RS:="\037"} && export RS
+
+# Does not handle EOF
+# Some maintainers might print debug information to stdout in a function's definition,
+# but which function has a "returned" string
+# This delegation makes it sure of only getting the printf content after the last \n,
+# which content comes from a function like
+# function_name() { printf "\n%s$FSs" "$field_00" "$field_01"; }
+# local var="$(delegate function_name "$@")"
+# local var="$(delegate -- function_name "$@")"
+# local var="$(// delegate -- function_name "$@")"
+# Usage on newline_delimitered_list (a vector of vectors)
+# function_name() { printf "\n%s$RS%s" "$vector_00" "$vector_01"; }
+# function_name() { printf "\n%s" "$vector_00$RS$vector_01"; }
+# If function_name prints a "$RS" delimitered list
+# local newline_delimitered_list="$(// delegate "\n" function_name "$@")"
+delegate() {
+	# _level_1 will let you lose error scenario
+	# _level_1
+	# Version 1 / Version 2 / Version 3
+	# local sub=
+	# Version 4
+	local sub="$newline" &&
+	type_include "$1" "function" ||
+	type_include "$1" "alias" || {
+		# Version 1 / Version 2 / Version 3
+		# [ "$1" = "--" ] || sub="{ gsub(/$RS/, \"$1\") }"
+		# Version 4
+		[ "$1" = "--" ] || sub="$1"
+		shift 1
+	}
+
+	local newline_leading= &&
+	# "$@" won't lose any empty arguments
+	newline_leading=$("$@") && {
+		# Version 2
+		# local line="${newline_leading##*${newline}}"
+
+		# local line= ifs="$IFS" IFS="$newline"
+		# for line in $newline_leading; do :; done
+		# local IFS="$ifs"
+
+		# Version 1 / Version 2 / Version 3
+		# Remove the leading newline
+		# [ ! -z "${sub:+x}" ] && {
+
+		# 	# Replaced by above implementation
+		# 	# For version 3
+		# 	# If user forgot to use the [printf '\n%s'] format to a return string
+		# 	# Adding a leading "\n" make EOF happy
+		# 	# [ "$(printf '%c' "$newline_leading" | od -b | awk '{print $2}')" = "012" ] ||
+		# 	# 	newline_leading="$(printf '\n%s' "$newline_leading")"
+
+
+		# 	# "$@" | tail -n 1
+		# 	# "$@" | awk 'END{print}'
+
+		# 	# Version 1 Works
+		# 	# "$@" | awk 'BEGIN { RS = '\n' } END { print }'
+		# 	# printf '%s\n' "$newline_leading" | awk 'BEGIN { RS = '\n' } END { print }'
+		# 	# printf '%s\n' "$(awk "BEGIN { RS = "\n" } $sub END { print; print "\n" }" <<- EOF || :
+		# 	# $newline_leading
+		# 	# EOF
+		# 	# )"
+		# 	#   awk "BEGIN { RS = "\n" } $sub END { print }" <<- EOF || :
+		# 	# $newline_leading
+		# 	# EOF
+
+		# 	# Can only read the current environment's argument list
+		# 	# (IFS="$RS" && { "$@" | local item; for item do echo "\$item = $item" > $TTY; done; })
+		# 	#
+		# 	# (IFS=$RS && { local item; for item in $newline_leading; do echo "\$item = $item" > $TTY; done; })
+		# 	#
+		# 	# Version 2 Works
+		# 	# The following implementation has an extra $newline in each returned string
+		# 	#  (doubled $newline) -- setting RS = "\n"
+		# 	# Does not mean removing the leading $newline of the user returned string
+		# 	/ "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline}${line}${newline}EOF"
+
+
+		# 	# Version 3 Works
+		# 	# / "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline_leading}${newline}EOF"
+
+		# 	#
+		# 	# This is not the awk output
+		# 	# printf '%s\n' "$newline_leading" > "$log_pipe"
+		# 	#
+		# 	# "$@" | awk 'BEGIN { RS = '\n' } END { print }' | awk " $sub { print }"
+		# } || {
+		# 	printf '%s' "$line"
+		# 	return 0
+		# }
+		#
+		# Version 4
+		printf '%s' "${newline_leading##*${sub}}"
+		return 0
+	} || {
+		// war '$#' "$# [delegate]"
+		// war '$@' "$(esceval "$@")"
+		# printf '\n'
+		printf ''
+		# interrupt
+		return 1
+	}
+}
+
+: "${FUNCTIONS=""}" && export FUNCTIONS
+
+# sh:   set ts=4 sw=4 tw=0 noet   :
+# vi:   set filetype=sh syntax=sh :
+# vim:  set filetype=sh syntax=sh :
+# nvim: set filetype=sh syntax=sh :
+
+
+

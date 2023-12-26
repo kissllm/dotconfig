@@ -2,7 +2,8 @@
 
 SCRIPT_NAME="xdg-runtime-dir" && export SCRIPT_NAME
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 {
 	[ -f "/mnt/init/include/route" ] &&
 	. /mnt/init/include/route
@@ -13,7 +14,7 @@ SCRIPT_NAME="xdg-runtime-dir" && export SCRIPT_NAME
 
 # : ${UID="$(id -u)"} && export UID
 // env_reset UID "$(id -u)"
-[ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "$UID"
+[ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "${UID-}"
 
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
 // env_reset LOGNAME "$(id -nu)"
@@ -29,9 +30,9 @@ SCRIPT_NAME="xdg-runtime-dir" && export SCRIPT_NAME
 #     echo "Fixed \$HOME = $HOME"
 # }
 [ -n "${LOGNAME:+x}" ] ||
-printf '%s %s\n' '$LOGNAME' "$LOGNAME"
+printf '%s %s\n' '$LOGNAME' "${LOGNAME-}"
 [ -n "${HOME:+x}" ] ||
-printf '%s %s\n' '$HOME' "$HOME"
+printf '%s %s\n' '$HOME' "${HOME-}"
 
 # : ${XDG_DATA_HOME:="$HOME/.local/share"} && export XDG_DATA_HOME
 // env_reset XDG_DATA_HOME "$HOME/.local/share"

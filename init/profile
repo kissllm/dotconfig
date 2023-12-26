@@ -38,7 +38,8 @@ command -v "${SHELL}" > /dev/null 2>&1 &&
 
 SCRIPT_NAME="profile" && export SCRIPT_NAME
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 {
 	[ -f "/mnt/init/include/route" ] &&
 	. /mnt/init/include/route

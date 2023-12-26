@@ -49,7 +49,8 @@ umask 022
 
 SCRIPT_NAME="share" && export SCRIPT_NAME
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 {
 	[ -f "/mnt/init/include/route" ] &&
 	. /mnt/init/include/route
@@ -370,10 +371,11 @@ init_file_overwrite() {
 
 	[ -d "$source" ] && return 0
 	[ -h "$source" ] || [ -L "$source" ] || [ -f "$source" ] || {
+		prompt '$source' "'$source' does not exist"
 		prompt '$lineno' "$lineno"
 		prompt '$target' "$target"
 		prompt '$source' "$source"
-		exit 1
+		return 1
 	}
 	[ -d "$target" ] && {
 		target_dir="${target%/}"
@@ -408,13 +410,14 @@ init_file_overwrite() {
 		# On FreeBSD it is /usr/local/bin/rsync
 		# $(which rsync) -aq "$source" "$target"
 	[ -s "$target" ] || {
+		prompt '$target' "'$target' size is zero"
 		prompt '$lineno' "$lineno"
 		prompt '$target' "$target"
 		prompt '$source' "$source"
 		prompt '$XDG_CONFIG_HOME' "$XDG_CONFIG_HOME"
 		prompt '$XDG_CACHE_HOME'  "$XDG_CACHE_HOME"
 		prompt '$XDG_DATA_HOME'   "$XDG_DATA_HOME"
-		exit 1
+		return 1
 	}
 	return 0
 }

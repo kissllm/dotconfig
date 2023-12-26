@@ -6,7 +6,8 @@
 
 SCRIPT_NAME="s" && export SCRIPT_NAME
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 {
 	[ -f "/mnt/init/include/route" ] &&
 	. /mnt/init/include/route
@@ -14,28 +15,6 @@ SCRIPT_NAME="s" && export SCRIPT_NAME
 	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
 	exit 0
 }
-
-# # share folder initialization
-# [ ! -z "${SHARE_PREFIX:+x}" ] || {
-#   [ -d "/mnt/init" ] &&
-#   { SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-#       [ -d "/opt/init" ] &&
-#       { SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-#       printf '%s %s\n' '$SHARE_PREFIX' "not found"
-#   }
-# }
-#
-# _functions="/usr/include/kiss/functions"
-# [ -f "$_functions" ] ||
-# _functions="$SHARE_PREFIX/init/include/functions"
-# [ ! -f "$_functions" ] && {
-#   printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-#   exit 0
-# } || {
-#   env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
-#   [ ! -z "${env_reset_type:+x}" ] ||
-#       . "$_functions"
-# }
 
 # . $SHARE_PREFIX/init/etc/profile.d/share
 . /mnt/init/etc/profile.d/share

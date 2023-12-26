@@ -5,7 +5,8 @@
 
 SCRIPT_NAME="ashrc" && export SCRIPT_NAME
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] ||
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
 {
 	[ -f "/mnt/init/include/route" ] &&
 	. /mnt/init/include/route
@@ -582,7 +583,21 @@ export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
 # export TMUX_DIR=$HOME/.tmux
 export TMUX_DIR=${SHARE_PREFIX}/init/terminal
 
-: "${HOSTNAME="$(cat /etc/hostname)"}" && export HOSTNAME
+: "${HOSTNAME="$( \
+[ ! -f "/etc/hostname" ] && {
+	[ ! -f "/etc/os-release" ] || {
+		awk -F = '$1 == "ID" {print $2}' < /etc/os-release | tr '[A-Z]' '[a-z]'
+		return 0
+	}
+	[ "$(which hostname)" = "" ] || {
+		hostname
+		return 0
+	}
+	printf '%s %s\n' 'HOSTNAME' 'could not get defined'
+	exit 0
+} ||
+cat /etc/hostname
+)"}" && export HOSTNAME
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$UID"
