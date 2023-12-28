@@ -432,7 +432,7 @@ sway_socket() {
 		printf '%s %s\n' '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)"
 	}
 	[ -z "${DISPLAY+x}" ] || unset DISPLAY
-	printf '\n%s' "$SWAY_SOCK"
+	printf "$RS%s" "$SWAY_SOCK"
 }
 
 # printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
@@ -477,7 +477,7 @@ designate_tty=1
 	# sway_socket
 	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] ||
 	#   cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(delegate -- sway_socket "$launcher")"
+	sock_sway="$(// delegate -- sway_socket "$launcher")"
 
 	{
 		[ -z "${sock_sway:+x}" ] ||
@@ -536,7 +536,7 @@ designate_tty=1
 
 	# Reading SWAY_SOCK from file
 	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] || cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(delegate -- sway_socket "$launcher")"
+	sock_sway="$(// delegate -- sway_socket "$launcher")"
 	# Try again
 	# {
 	#   # [ -f "/tmp/wayland/.socket" ] &&

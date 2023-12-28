@@ -138,7 +138,7 @@ launcher="greeter"
 		eval "nohup \"$launcher\" -t /dev/tty7 -- /usr/bin/sway -d \
 			> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &"
 			# > ${WAYLAND_CONFIG_HOME}/.autolauncher.log && sway_socket "$launcher" 2>&1 &
-			sock_sway="$(delegate -- sway_socket "$launcher")"
+			sock_sway="$(// delegate -- sway_socket "$launcher")"
 	} || {
 		launcher=$(which dbus-run-session 2> /dev/null || :)
 		printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
@@ -163,7 +163,7 @@ launcher="greeter"
 				tee ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &"
 				# > ${WAYLAND_CONFIG_HOME}/.autolauncher.log && sway_socket "$launcher" 2>&1 &
 			# nohup dbus-run-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
-			sock_sway="$(delegate -- sway_socket "$launcher")"
+			sock_sway="$(// delegate -- sway_socket "$launcher")"
 		}
 	}
 }
@@ -172,4 +172,11 @@ launcher="greeter"
 
 [ -z "${WAYLAND_DISPLAY+x}" ] ||
 [ ! -z "${sock_sway:+x}" ] ||
-	sock_sway="$(delegate -- sway_socket "$launcher")"
+	sock_sway="$(// delegate -- sway_socket "$launcher")"
+
+
+
+
+
+
+
