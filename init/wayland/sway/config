@@ -845,6 +845,12 @@ $bindsym XF86TouchpadToggle exec swaymsg input type:touchpad events toggle enabl
 bindsym $mod+F3  exec --no-startup-id sh -c 'doas brightnessctl --min-val=2 -q set 5%-'
 bindsym $mod+F4  exec --no-startup-id sh -c 'doas brightnessctl -q set +5%'
 bindsym $mod+F10 exec --no-startup-id swaymsg input type:touchpad events toggle enabled disabled
+bindsym $alt_mod+F10 exec --no-startup-id swaymsg input type:touchpad events toggle enabled disabled
+# kcm-touchpad-list-devices kcminit kcminit_startup kcmshell5
+# [Touchpad not working after waking up from suspend in Fedora and Ubuntu](https://www.reddit.com/r/linux4noobs/comments/uco894/touchpad_not_working_after_waking_up_from_suspend/)
+# doas modprobe -r hid-multitouch && doas modprobe hid-multitouch
+# wtype -k XF86TouchpadToggle
+# /mnt/local/bin/touchpad
 
 # bindsym XF86TouchpadToggle input type:touchpad events toggle enabled disabled
 

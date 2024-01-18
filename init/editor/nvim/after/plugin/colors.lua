@@ -93,10 +93,10 @@ hi! @parameter     guifg=#22aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE
 highlight FileStyleIgnorePattern guibg=NONE ctermbg=0
 hi NewLineWin ctermfg=248 guifg=#999999
 match NewLineWin /\r\n/
-hi! ExtraWhitespace ctermbg=red guibg=red
+" hi! ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
 
-hi! ShowTrailingWhitespace ctermbg=Yellow guibg=Yellow
+" hi! ShowTrailingWhitespace ctermbg=Yellow guibg=#22aa77
 " hi SpecialKey   ctermfg=DarkGray guifg=NONE
 " hi! link SpecialKey Comment
 hi! VertSplit    guifg=#222222 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
@@ -105,7 +105,7 @@ hi! WinSeparator guifg=#222222 guibg=NONE ctermfg=DarkRed  ctermbg=NONE cterm=NO
 
 " indent_blankline
 " hi! SignColumn     ctermbg=NONE guibg=NONE
-hi! link SignColumn WinSeparator
+" hi! link SignColumn WinSeparator
 hi! link SpecialKey WinSeparator
 
 silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' .
@@ -139,8 +139,15 @@ hi CocInlayHint             guibg=NONE guifg=#6F7378 ctermbg=NONE ctermfg=DarkGr
 
 hi CtrlSpaceSelected        term=reverse ctermfg=187  ctermbg=23  cterm=bold
 hi CtrlSpaceNormal          term=NONE    ctermfg=244  ctermbg=232 cterm=NONE
-hi CtrlSpaceSearch          ctermfg=220  ctermbg=NONE cterm=bold guibg=#56b6c2
+hi CtrlSpaceSearch          ctermfg=220  ctermbg=NONE cterm=bold  guibg=#56b6c2
 hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
+
+" https://vi.stackexchange.com/questions/6803/poor-syntax-highlighting-in-vimwiki-command-prompt
+set t_Co=256
+let &t_AB="\e[48;5;%dm"
+let &t_AF="\e[38;5;%dm"
+" https://vi.stackexchange.com/questions/38840/vimwiki-overriding-normal-md-highlighting
+let g:vimwiki_ext2syntax = {}
 
 ]])
 
@@ -148,10 +155,9 @@ hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 -- hl(0, 'CursorLine',    { cterm=underline, guibg=#282736, })
 hl(0, 'CursorLine', { bg = 'NONE' })
 -- hl(0, 'CursorLine', { fg = 'NONE' })
+--
 
--- Whitespace     xxx guifg=#615e5e
-hl(0, 'Whitespace', { fg = 'NONE', })
-
+-- indent_blankline::highlight_guides
 -- hl(0, 'Comment',    { fg = 'DarkGray', bg = 'NONE', reverse = true })
 -- hl(0, 'Comment',    { fg = 'DarkGray', bg = 'Black', reverse = true })
 -- hl(0, 'Comment',    { fg = 'Black', bg='DarkGrey' })
@@ -166,8 +172,12 @@ hl(0, '@comment',   { bg = 'Blue', fg='DarkGrey' })
 --
 -- Control the highlight guides
 -- CursorColumn   xxx guibg=#313640
--- indent_blankline
 hl(0, 'WinSeparator', { fg = '#444444', bg = 'NONE', })
+-- indent_blankline::highlight_guides
+-- hl(0, 'SignColumn',   { bg = '#ffd7af', fg = 'NONE', })
+hl(0, 'SignColumn',   { bg = '#008080', fg = 'NONE', })
+-- SpecialComment xxx ctermfg=242 guifg=#ff4444
+hl(0, 'SpecialComment',   { bg = '#008080', fg = 'NONE', })
 --
 -- SignColumn     xxx guifg=#dcdfe4
 --                    links to WinSeparator
@@ -188,7 +198,7 @@ hl(0, 'LspReferenceText', { bg = 'NONE' })
 -- hi @variable.builtin cterm=NONE gui=NONE guifg=#56b6c2 guibg=NONE
 -- @variable      xxx guifg=#dcdfe4
 -- hl(0, '@variable', { fg = 'Orange', bg = 'NONE' })
-hl(0, '@variable', { fg = '#ff4444', bg = 'NONE' })
+hl(0, '@variable',         { fg = '#ff4444', bg = 'NONE' })
 hl(0, '@variable.builtin', { fg = '#cbbf66', bg = 'NONE' })
 
 -- " hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
@@ -196,21 +206,21 @@ hl(0, '@variable.builtin', { fg = '#cbbf66', bg = 'NONE' })
 -- " hi! @string        guifg=Orange guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 hl(0, '@string', { fg = '#cbbf66', bg = 'NONE' })
-hl(0, 'String', { fg = '#8787af', bg = 'NONE' })
+hl(0, 'String',  { fg = '#8787af', bg = 'NONE' })
 
 -- " hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " @function      xxx guifg=#61afef
 -- " hi! @function.call guifg=#56b6c2 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
-hl(0, '@function', { fg = 'Teal', bg = 'NONE' })
+hl(0, '@function',      { fg = 'Teal', bg = 'NONE' })
 hl(0, '@function.call', { fg = 'Teal', bg = 'NONE' })
 
 -- hi! Function    ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
-hl(0, 'Function', { fg = '#56b6c2', bg = 'NONE' })
+hl(0, 'Function',       { fg = '#56b6c2', bg = 'NONE' })
 --
 -- shIf
 -- shDoubleQuote links to String
 -- shDerefSimple links to PreProc
-hl(0, 'PreProc', { fg = 'Cyan', bg = 'NONE' })
+hl(0, 'PreProc',        { fg = 'Cyan', bg = 'NONE' })
 -- hl(0, 'shDerefSimple', { bg = '#eeaa77', fg = 'NONE' })
 -- hl(0, 'shDerefSimple', { fg = 'Magenta', bg = 'NONE' })
 -- hl(0, 'shDerefSimple', { bg = '#808000', fg = 'NONE' })
@@ -235,16 +245,22 @@ hl(0, 'htmlItalic', { fg = 'Blue', bg = 'NONE' })
 
 -- :highlight! Cursor gui=reverse guifg=NONE guibg=NONE
 -- hl(0, 'Cursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 0, nocombine = true })
-hl(0, 'Cursor', { fg = 'White', bg = '#c0c0c0', blend = 10, nocombine = true })
+hl(0, 'Cursor',     { fg = 'White', bg = '#c0c0c0', blend = 10, nocombine = true })
 
 -- hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 -- hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 -- hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
 hl(0, 'TermCursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
-hl(0, 'lCursor', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
-hl(0, 'Cursor2', { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
-
-
+hl(0, 'lCursor',    { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+hl(0, 'Cursor2',    { fg = 'NONE', bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+-- indent_blankline::highlight_empty
+-- Whitespace     xxx guifg=#615e5e
+-- hl(0, 'Whitespace', { fg = 'NONE', })
+hl(0, 'Whitespace',             { bg = 'NONE', fg = '#808000' })
+hl(0, 'ShowTrailingWhitespace', { fg = 'Blue', bg = 'red' })
+hl(0, 'ExtraWhitespace',        { bg = 'red',  fg = 'NONE' })
+hl(0, 'diffLine',               { bg = '#808000',  fg = 'NONE' })
+hl(0, 'diffAdded',              { bg = 'Teal',  fg = 'NONE' })
 
 
 

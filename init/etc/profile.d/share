@@ -264,7 +264,7 @@ link_correct() {
 	# [ "$(expr substr "$anchor" "$(expr length "$anchor")" 1)" != '/' ] && {
 	[ "$(awk -- "BEGIN { print substr (ARGV[1], "${#anchor}", 1) }" "$anchor")" != '/' ] && {
 		[ "${anchor##*/}" != "$target_name" ] && {
-			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin
+			# $REPO_ROOT_IMPL/usr/bin/kiss <- /usr/bin
 			[ -d "$anchor" ] && {
 				anchor_dir="$anchor"
 			} || {
@@ -277,7 +277,7 @@ link_correct() {
 			}
 			:
 		} || {
-			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/kiss
+			# $REPO_ROOT_IMPL/usr/bin/kiss <- /usr/bin/kiss
 
 			# Might be "$anchor" == "/usr/bin/kiss", "$target_name" == "kiss"
 			[ -f "$anchor" ] && {
@@ -305,7 +305,7 @@ link_correct() {
 		:
 	} || {
 
-		# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/
+		# $REPO_ROOT_IMPL/usr/bin/kiss <- /usr/bin/
 
 		# "$anchor" might have a '/' at the end
 		# [ "${anchor:$((${#anchor}-1)):1}" = '/' ] && {
@@ -332,7 +332,7 @@ link_correct() {
 			:
 		} || {
 
-			# $REPO_ROOT_DEV/usr/bin/kiss <- /usr/bin/kiss/
+			# $REPO_ROOT_IMPL/usr/bin/kiss <- /usr/bin/kiss/
 
 			# Duplicated name exists already
 			# Might be "$anchor" == "/usr/bin/kiss/", "$target_name" == "kiss"
@@ -453,11 +453,11 @@ init_file_overwrite() {
 [ -L "$HOME/.xdg-runtime-dir" ] ||
 	printf '%s %s\n' "$HOME/.xdg-runtime-dir" "creating failed"
 
-// env_reset MNGR_ROOT     "/working/os/kiss"
-// env_reset REPO_ROOT     "/var/db/kiss"
-// env_reset REPO_ROOT_DEV "/opt/${REPO_ROOT#*/}"
-// env_reset DEST_ROOT     "/working/kiss"
-// env_reset DOTCONFIG     "/mnt/init"
+// env_reset MNGR_ROOT      "/working/os/kiss"
+// env_reset REPO_ROOT      "/var/db/kiss"
+// env_reset REPO_ROOT_IMPL "/opt/${REPO_ROOT#*/}"
+// env_reset DEST_ROOT      "/working/kiss"
+// env_reset DOTCONFIG      "/mnt/init"
 
 [ ! -f "/etc/hostname" ] ||
 # : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
@@ -503,10 +503,10 @@ case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*|*"void"*|*"alpine"*)
 		{ [ -h "$REPO_ROOT" ] || [ -L "$REPO_ROOT" ]; } && \rm -f "$REPO_ROOT"
 		[ -d "$REPO_ROOT" ] || \mkdir -p "$REPO_ROOT"
 
-		[ ! -e "$REPO_ROOT_DEV/choices" ] ||
-		// link_correct "$REPO_ROOT_DEV/choices" "$REPO_ROOT/"
-		[ ! -e "$REPO_ROOT_DEV/hooks" ] ||
-		// link_correct "$REPO_ROOT_DEV/hooks"   "$REPO_ROOT/"
+		[ ! -e "$REPO_ROOT_IMPL/choices" ] ||
+		// link_correct "$REPO_ROOT_IMPL/choices" "$REPO_ROOT/"
+		[ ! -e "$REPO_ROOT_IMPL/hooks" ] ||
+		// link_correct "$REPO_ROOT_IMPL/hooks"   "$REPO_ROOT/"
 
 		# }
 

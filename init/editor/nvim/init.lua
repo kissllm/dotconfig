@@ -1,10 +1,23 @@
 #! /bin/luajit
-
+-- https://www.reddit.com/r/lua/comments/wi0bau/whats_the_correct_way_to_run_a_lua_file_that_uses/
+function add_rel_path(dir)
+  local spath =
+      debug.getinfo(1,'S').source
+        :sub(2)
+        :gsub("^([^/])","./%1")
+        :gsub("[^/]*$","")
+  dir=dir and (dir.."/") or ""
+  spath = spath..dir
+  package.path = spath.."?.lua;"
+               ..spath.."?/init.lua"
+               ..package.path
+end
+add_rel_path("lua")
 local log_address = vim.fn.stdpath('config') .. "/lua/?.lua"
 -- local log_address = os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/?.lua"
 -- if not string.find(package.path, log_address) then
 -- if not string.match("*;" .. package.path .. ";*", "*;" .. log_address .. ";*") then
---  print("Not found" .. log_address)
+--  print("Manually append: " .. log_address)
 --  package.path = package.path .. ";" .. log_address
 -- end
 local path_list = vim.split(package.path, ";")
@@ -16,7 +29,7 @@ for _, v in ipairs(path_list) do
 	end
 end
 if found == false then
-	print("Not found" .. log_address)
+	print("Manually append: " .. log_address)
 	package.path = package.path .. ";" .. log_address
 end
 
@@ -26,8 +39,10 @@ local log = require("log")
 if log == nil then
 	print("What")
 else
-	-- print("log: \n" .. tostring(serialize(log)))
-	print("log: \n" .. serialize(log))
+	-- print("log to string: \n" .. tostring(serialize(log)))
+	-- print("log: \n" .. serialize(log))
+	print("log")
+	print( vim.inspect(log) )
 end
 
 if log.home == nil then
@@ -146,7 +161,18 @@ local runtime_path  = vim.split(package.path, ";")
 local runtime_cpath = vim.split(package.cpath, ";")
 -- table.insert(runtime_path, "lua/?.lua")
 -- Oneline command: :lua print(serialize(vim.split(package.path, ";")))
-print("runtime_path: \n" .. serialize(runtime_path))
+-- Does not work
+-- print("runtime_path: \n" .. serialize(runtime_path))
+print("runtime_path")
+for key, value in pairs(runtime_path) do
+    print('\t', key, value)
+end
+-- No new line for runtime_path (array like table)
+-- print( vim.inspect(runtime_path) )
+print("runtime_cpath")
+for key, value in pairs(runtime_cpath) do
+    print('\t', key, value)
+end
 
 local lazy_config = require("lazy-config")
 if not lazy_config then

@@ -130,7 +130,7 @@ append_path() {
 # PATH, MANPATH
 # Add to the end of a target path
 _path_append() {
-	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return
+	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return 0
 	local extend=":$(eval "echo \${${1}-}"):"
 	# echo "\$2 = $2"
 	# echo "test=${extend##*:$2:*}"
@@ -145,7 +145,7 @@ alias path_append='_path_append'
 
 # Add to the front of a target path
 _path_prepend() {
-	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return
+	[ ! -z "${1:+x}" ] && [ -d "$2" ] || return 0
 	local extend=":$(eval "echo \${${1}-}"):"
 	# echo "\$2 = $2"
 	# echo "test=${extend##*:$2:*}"
@@ -203,22 +203,27 @@ delegate() {
 	# _level_1 will let you lose error scenario
 	# _level_1
 	# Version 1 / Version 2 / Version 3
-	# local sub=
+	local sub=
 	# Version 4
-	local sub="$newline" &&
+	# local sub="$newline" &&
 	type_include "$1" "function" ||
 	type_include "$1" "alias" || {
 		# Version 1 / Version 2 / Version 3
 		# [ "$1" = "--" ] || sub="{ gsub(/$RS/, \"$1\") }"
+		[ "$1" = "--" ] || sub="{ gsub(/$FS/, \"$1\") }"
 		# Version 4
-		[ "$1" = "--" ] || sub="$1"
+		# [ "$1" = "--" ] || sub="$1"
 		shift 1
 	}
 
-	local newline_leading= &&
+	# Version 3 -- \n as $RS
+	# local newline_leading= &&
+	local line= &&
 	# "$@" won't lose any empty arguments
-	newline_leading=$("$@") && {
-		# Version 2
+	# Version 3 -- \n as $RS
+	# newline_leading=$("$@") && {
+	line=$("$@" | tr -d "$newline") && {
+		# Version 4 -- using $RS as string
 		# local line="${newline_leading##*${newline}}"
 
 		# local line= ifs="$IFS" IFS="$newline"
@@ -229,56 +234,58 @@ delegate() {
 		# Remove the leading newline
 		# [ ! -z "${sub:+x}" ] && {
 
-		# 	# Replaced by above implementation
-		# 	# For version 3
-		# 	# If user forgot to use the [printf '\n%s'] format to a return string
-		# 	# Adding a leading "\n" make EOF happy
-		# 	# [ "$(printf '%c' "$newline_leading" | od -b | awk '{print $2}')" = "012" ] ||
-		# 	# 	newline_leading="$(printf '\n%s' "$newline_leading")"
+			# Replaced by above implementation
+			# For version 3
+			# If user forgot to use the [printf '\n%s'] format to a return string
+			# Adding a leading "\n" make EOF happy
+			# [ "$(printf '%c' "$newline_leading" | od -b | awk '{print $2}')" = "012" ] ||
+			# 	newline_leading="$(printf '\n%s' "$newline_leading")"
 
 
-		# 	# "$@" | tail -n 1
-		# 	# "$@" | awk 'END{print}'
+			# "$@" | tail -n 1
+			# "$@" | awk 'END{print}'
 
-		# 	# Version 1 Works
-		# 	# "$@" | awk 'BEGIN { RS = '\n' } END { print }'
-		# 	# printf '%s\n' "$newline_leading" | awk 'BEGIN { RS = '\n' } END { print }'
-		# 	# printf '%s\n' "$(awk "BEGIN { RS = "\n" } $sub END { print; print "\n" }" <<- EOF || :
-		# 	# $newline_leading
-		# 	# EOF
-		# 	# )"
-		# 	#   awk "BEGIN { RS = "\n" } $sub END { print }" <<- EOF || :
-		# 	# $newline_leading
-		# 	# EOF
+			# Version 1 Works
+			# "$@" | awk 'BEGIN { RS = '\n' } END { print }'
+			# printf '%s\n' "$newline_leading" | awk 'BEGIN { RS = '\n' } END { print }'
+			# printf '%s\n' "$(awk "BEGIN { RS = "\n" } $sub END { print; print "\n" }" <<- EOF || :
+			# $newline_leading
+			# EOF
+			# )"
+			#   awk "BEGIN { RS = "\n" } $sub END { print }" <<- EOF || :
+			# $newline_leading
+			# EOF
 
-		# 	# Can only read the current environment's argument list
-		# 	# (IFS="$RS" && { "$@" | local item; for item do echo "\$item = $item" > $TTY; done; })
-		# 	#
-		# 	# (IFS=$RS && { local item; for item in $newline_leading; do echo "\$item = $item" > $TTY; done; })
-		# 	#
-		# 	# Version 2 Works
-		# 	# The following implementation has an extra $newline in each returned string
-		# 	#  (doubled $newline) -- setting RS = "\n"
-		# 	# Does not mean removing the leading $newline of the user returned string
-		# 	/ "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline}${line}${newline}EOF"
+			# Can only read the current environment's argument list
+			# (IFS="$RS" && { "$@" | local item; for item do echo "\$item = $item" > $TTY; done; })
+			#
+			# (IFS=$RS && { local item; for item in $newline_leading; do echo "\$item = $item" > $TTY; done; })
+			#
+			# Version 2 Works
+			# The following implementation has an extra $newline in each returned string
+			#  (doubled $newline) -- setting RS = "\n"
+			# Does not mean removing the leading $newline of the user returned string
+			# / "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline}${line}${newline}EOF"
+			/ "awk 'BEGIN { RS = \""$RS"\" } $sub END { print }' << EOF || :${newline}${line}${newline}EOF"
 
 
-		# 	# Version 3 Works
-		# 	# / "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline_leading}${newline}EOF"
+			# Version 3 Works
+			# / "awk 'BEGIN { RS = \"\n\" } $sub END { print }' << EOF || :${newline_leading}${newline}EOF"
 
-		# 	#
-		# 	# This is not the awk output
-		# 	# printf '%s\n' "$newline_leading" > "$log_pipe"
-		# 	#
-		# 	# "$@" | awk 'BEGIN { RS = '\n' } END { print }' | awk " $sub { print }"
+			#
+			# This is not the awk output
+			# printf '%s\n' "$newline_leading" > "$log_pipe"
+			#
+			# "$@" | awk 'BEGIN { RS = '\n' } END { print }' | awk " $sub { print }"
 		# } || {
+		# 	# Version 3 -- \n as $RS
 		# 	printf '%s' "$line"
 		# 	return 0
 		# }
 		#
-		# Version 4
-		printf '%s' "${newline_leading##*${sub}}"
-		return 0
+		# Version 4 -- using $RS as string
+		# printf '%s' "${newline_leading##*${sub}}"
+		# return 0
 	} || {
 		// war '$#' "$# [delegate]"
 		// war '$@' "$(esceval "$@")"

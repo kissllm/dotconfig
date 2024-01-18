@@ -585,8 +585,10 @@ export XKB_DEFAULT_OPTIONS=grp:win_space_toggle
 # vim/nvim init
 export VINIT_HOME_DIR="${SHARE_PREFIX}/init/editor"
 
-[ ! -d "${SHARE_PREFIX}/.void-packages" ] ||
-export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
+# [ ! -d "${SHARE_PREFIX}/.void-packages" ] ||
+[ ! -d "${HOME}/.void-packages" ] ||
+# export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
+export XBPS_DISTDIR="${HOME}/.void-packages"
 
 
 # https://github.com/caenrique/nvim-toggle-terminal

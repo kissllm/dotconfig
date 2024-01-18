@@ -2,8 +2,12 @@
 -- Merged from:
 -- https://medium.com/@shaikzahid0713/rainbow-parenthesis-and-indentation-in-neovim-dd379f4e516f
 -- indentline-config.lua
-
-
+--
+-- If idl does not show indents in cmake
+-- [ highlight group not found: Normal #31 ](https://github.com/preservim/vim-indent-guides/issues/31)
+-- :colorscheme default
+-- But it's UTF8 code that does not work in tty correctly
+--
 -- vim.opt.list = true
 return {
 	'lukas-reineke/indent-blankline.nvim',
@@ -36,24 +40,25 @@ return {
 		},
 	},
 
-	main = "ibl",
-	-- opt = true,
-	enabled = true,
-	cond    = true,
+	main       = "ibl",
+	-- opt     = true,
+	cond       = true,
 	-- The following line will kill ibl from loading
-	-- lazy = false,
+	-- lazy    = false,
 
+	lazy       = true,
+	-- enabled = true,
 	-- enabled = false,
 	-- cond    = false,
 	--
-	-- cond = function() return false end,
-	event = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
+	-- cond    = function() return false end,
+	event      = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
 
 	config = function()
 
+		-- 'txt',
 		local exclude_ft = {
 			"help",
-			'txt',
 			'log',
 			"git",
 			"markdown",
@@ -92,28 +97,28 @@ return {
 		-- }
 
 		-- local highlight_delimiter = {
-		local highlight = {
-			"RainbowDelimiterRed",
-			"RainbowDelimiterYellow",
-			"RainbowDelimiterBlue",
-			"RainbowDelimiterOrange",
-			"RainbowDelimiterGreen",
-			"RainbowDelimiterViolet",
-			"RainbowDelimiterCyan",
-		}
+		-- local highlight = {
+		--  "RainbowDelimiterRed",
+		--  "RainbowDelimiterYellow",
+		--  "RainbowDelimiterBlue",
+		--  "RainbowDelimiterOrange",
+		--  "RainbowDelimiterGreen",
+		--  "RainbowDelimiterViolet",
+		--  "RainbowDelimiterCyan",
+		-- }
 
 		local highlight_guides = {
 			"CursorColumn",
 
 			-- "Whitespace",
-			-- "Comment",
-			"SignColumn",
+			"Comment",
+			-- "SignColumn",
 		}
 
 		local highlight_empty = {
-			-- "Whitespace",
+			"Whitespace",
 			-- "Comment",
-			"SignColumn",
+			-- "SignColumn",
 
 			-- "SignColumn",
 			"CursorColumn",
@@ -121,7 +126,8 @@ return {
 
 		local opts = {
 
-			enabled = true,
+			enabled = false,
+			-- enabled = true,
 			-- disable_with_nolist = true,
 			-- show_trailing_blankline_indent = true,
 			-- show_trailing_blankline_indent = false,
@@ -165,7 +171,6 @@ return {
 				-- highlight = highlight,
 
 				-- highlight = highlight_guides,
-
 				highlight = highlight_empty,
 
 				-- highlight = highlight,
@@ -185,7 +190,6 @@ return {
 				-- enabled      = true,
 				enabled      = false,
 				-- reverse      = true,
-				-- highlight = highlight,
 				-- highlight = "IndentBlanklineContextChar",
 				highlight    = "Function",
 				show_start   = false,
@@ -207,7 +211,8 @@ return {
 			-- strict_tabs                 = true,
 			-- context_char                = "│",
 			-- use_treesitter              = true,
-    		-- show_foldtext               = false,
+			-- use_treesitter              = false,
+			-- show_foldtext               = false,
 			-- space_char_blankline        = " ",
 		}
 
@@ -335,22 +340,27 @@ return {
 		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
 		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_tab_indent_level)
 
-		-- api.nvim_create_autocmd("InsertEnter", {
-		--  pattern = "*",
-		--  group = gid,
-		--  command = "IndentBlanklineDisable",
-		-- })
+		api.nvim_create_autocmd("InsertEnter", {
+			pattern = "*",
+			group = gid,
+			command = "IBLDisable",
+		})
 
-		-- api.nvim_create_autocmd("InsertLeave", {
-		--  pattern = "*",
-		--  group = gid,
-		--  callback = function()
-		--      if not vim.tbl_contains(exclude_ft, vim.bo.filetype) then
-		--          vim.cmd([[IndentBlanklineEnable]])
-		--      end
-		--  end,
-		-- })
+		api.nvim_create_autocmd("InsertLeave", {
+			pattern = "*",
+			group = gid,
+			callback = function()
+				if not vim.tbl_contains(exclude_ft, vim.bo.filetype) then
+					vim.cmd([[IBLEnable]])
+				end
+			end,
+		})
+
+
 	end,
+	keys = {
+		{'<Leader>k', '<cmd>IBLToggle<cr>',  desc = 'Indent lines toggle'},
+	},
 }
 
 

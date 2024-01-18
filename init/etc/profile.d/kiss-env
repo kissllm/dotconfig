@@ -48,7 +48,7 @@ KISS_PATH=''
 // env_reset SHARE_PREFIX_DEV "/opt"
 
 : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
-: "${REPO_ROOT_DEV:="$SHARE_PREFIX_DEV/${REPO_ROOT#*/}"}" && export REPO_ROOT_DEV
+: "${REPO_ROOT_IMPL:="$SHARE_PREFIX_DEV/${REPO_ROOT#*/}"}" && export REPO_ROOT_IMPL
 
 [ -z "${KISS_DEBUG+x}" ] || {
 	# Later ones have higher priority
@@ -166,13 +166,13 @@ KISS_PATH=''
 }
 
 
-# : "${REPO_MAIN="$REPO_ROOT/lm"}" && export REPO_MAIN
+# : "${KISS_REPO="$REPO_ROOT/lm"}" && export KISS_REPO
 # Whatever folder name you'd like to use
-// env_reset REPO_MAIN "$REPO_ROOT/rolling"
-# This is the real REPO_MAIN
+// env_reset KISS_REPO "$REPO_ROOT/main"
+# This is the real KISS_REPO
 # Link to a local development repo root
 # Actually it is a recommended way to avoid maintaining a seperate repo
-repo_main_source="$REPO_ROOT_DEV/lm"
+repo_main_source="$REPO_ROOT_IMPL/lm"
 
 newline="
 "
@@ -181,17 +181,17 @@ repo_main() {
 	# local kiss_root="${1:?"Fake root can not be empty"}"
 	# Empty means the local host
 	local kiss_root="${1-}"
-	local repo_main_target="$kiss_root/${REPO_MAIN#*/}"
+	local repo_main_target="$kiss_root/${KISS_REPO#*/}"
 	[ -d "$kiss_root/${REPO_ROOT#*/}" ] ||  \mkdir -p "$kiss_root/${REPO_ROOT#*/}"
 
 	[ ! -e "$repo_main_source" ] &&
-		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' [for $kiss_root/${REPO_MAIN#*/}] does not exist" ||
+		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' [for $kiss_root/${KISS_REPO#*/}] does not exist" ||
 	[ -d "$repo_main_target" ] || {
 		[ -L "$repo_main_target" ] ||
 		[ -h "$repo_main_target" ]
 	} || {
-		[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_DEV")" ] || {
-			printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_DEV'"
+		[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_IMPL")" ] || {
+			printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_IMPL'"
 			printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
 			# exit 1
 			return 0
@@ -200,7 +200,7 @@ repo_main() {
 		\ln -sf "$repo_main_source" "$repo_main_target" ||
 		[ "$(readlink -fn "$repo_main_target")" = "$(readlink -fn "$repo_main_source")" ] || {
 			\rm -f "$repo_main_target" || {
-				printf '%s %s\n' '$REPO_ROOT/rolling' "'$REPO_ROOT/rolling' modification failed"
+				printf '%s %s\n' '$REPO_ROOT/main' "'$REPO_ROOT/main' modification failed"
 				# exit 1
 				return 0
 			}
@@ -213,22 +213,22 @@ repo_main() {
 repo_main
 
 if [ -z "${KISS_PATH:+x}" ]; then
-	KISS_PATH=$REPO_MAIN/extra
+	KISS_PATH=$KISS_REPO/extra
 else
-	KISS_PATH=$REPO_MAIN/extra:$KISS_PATH
+	KISS_PATH=$KISS_REPO/extra:$KISS_PATH
 fi
 
-KISS_PATH=$REPO_MAIN/fonts:$KISS_PATH
-KISS_PATH=$REPO_MAIN/wayland:$KISS_PATH
-KISS_PATH=$REPO_MAIN/system:$KISS_PATH
-KISS_PATH=$REPO_MAIN/core:$KISS_PATH
+KISS_PATH=$KISS_REPO/fonts:$KISS_PATH
+KISS_PATH=$KISS_REPO/wayland:$KISS_PATH
+KISS_PATH=$KISS_REPO/system:$KISS_PATH
+KISS_PATH=$KISS_REPO/core:$KISS_PATH
 
 # Static version will remove dynamic libraries
-# KISS_PATH=$REPO_MAIN/static/bin:$KISS_PATH
-# KISS_PATH=$REPO_MAIN/static/community:$KISS_PATH
-# KISS_PATH=$REPO_MAIN/static/wayland:$KISS_PATH
-# KISS_PATH=$REPO_MAIN/static/extra:$KISS_PATH
-# KISS_PATH=$REPO_MAIN/static/core:$KISS_PATH
+# KISS_PATH=$KISS_REPO/static/bin:$KISS_PATH
+# KISS_PATH=$KISS_REPO/static/community:$KISS_PATH
+# KISS_PATH=$KISS_REPO/static/wayland:$KISS_PATH
+# KISS_PATH=$KISS_REPO/static/extra:$KISS_PATH
+# KISS_PATH=$KISS_REPO/static/core:$KISS_PATH
 
 export KISS_PATH
 
@@ -301,8 +301,8 @@ repo_main "$KISS_ROOT"
 
 [ -d "$DEST_ROOT" ] || \mkdir -p "$DEST_ROOT"
 # git config --global --add safe.directory "$DEST_ROOT"
-# : "${REPO_BASE:="$REPO_MAIN/base"}" && export REPO_BASE
-// env_reset REPO_BASE "$REPO_MAIN/base"
+# : "${REPO_BASE:="$KISS_REPO/base"}" && export REPO_BASE
+// env_reset REPO_BASE "$KISS_REPO/base"
 
 
 

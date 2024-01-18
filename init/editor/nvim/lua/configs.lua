@@ -241,11 +241,12 @@ vim.g.indent_blankline_enabled = 1
 vim.opt.termguicolors          = true
 vim.opt.list                   = true
 -- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
-vim.wo.colorcolumn = "99999"
+vim.wo.colorcolumn             = "99999"
 
 -- initialize global var to false -> nvim-cmp turned off per default
-vim.g.cmptoggle = false
-
+vim.g.cmptoggle                = false
+-- set.wrapscan                   = false
+set.wrapscan                   = true
 
 
 
@@ -259,10 +260,13 @@ set.fillchars = {
 	eob        = " ", -- suppress ~ at EndOfBuffer
 	diff       = "░", -- alternatives = ⣿ ░ ─
 	-- diff    = "╱", -- alternatives = ⣿ ░ ─
-	msgsep     = "‾",
-	foldopen   = "▾",
+	-- msgsep     = "‾",
+	msgsep     = "│",
+	-- foldopen   = "▾",
+	foldopen   = "│",
 	foldsep    = "│",
-	foldclose  = "▸",
+	-- foldclose  = "▸",
+	foldclose  = "│",
 }
 
 set.listchars = {
@@ -484,6 +488,7 @@ buffer_autocmd("*.tsx",            "set", "ft=typescript.tsx")
 buffer_autocmd("*.cls",            "set", "ft=apex syntax=java")
 buffer_autocmd("*.trigger",        "set", "ft=apex syntax=java")
 buffer_autocmd("*.nomad.template", "set", "ft=hcl")
+buffer_autocmd("*.txt",            "set", "ft=cmake")
 
 -- hold_autocmd("*", "silent call CocActionAsync('highlight')")
 
@@ -787,10 +792,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost", "CursorHold", "CursorHoldI" }, {
 	pattern = { "*" },
 	callback = function()
+		-- Using "bash" just because the server is "bashls"
+		-- Set to sh will constantly give "Client xxxx quit with exit code 1 and signal 0"
 		vim.cmd[[
-		if match(getline(1),"/proc/parent/exe") >= 0 | setlocal filetype=sh | endif
-		if match(getline(1),"/bin/sh") >= 0 | setlocal filetype=sh | endif
-		if match(getline(1),"sh") >= 0 | setlocal filetype=sh | endif
+		if match(getline(1),"/proc/parent/exe") >= 0 | setlocal filetype=bash | endif
+		if match(getline(1),"/bin/sh") >= 0 | setlocal filetype=bash | endif
+		" if match(getline(1),"sh") >= 0 | setlocal filetype=bash | endif
 			]]
 	end
 })
@@ -847,7 +854,7 @@ autocmd FileChangedShellPost *
 " https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
 " https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
 autocmd FocusGained,BufEnter,CursorHold,CursorHoldI *
-    \ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
+	\ if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif
 
 " Notification after file change
 " https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread

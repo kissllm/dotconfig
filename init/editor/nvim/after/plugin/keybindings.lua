@@ -140,8 +140,12 @@ map("n", "gb",           ":ls<cr>:b<space>")
 --
 map("n", "<leader>/",    ":nohlsearch | diffupdate<CR>",        { silent = true })
 -- They are the same
-map("n", "<C-[>",        ":nohlsearch | diffupdate<cr>",        { silent = true })
+-- map("n", "<C-[>",        ":nohlsearch | diffupdate<cr>",        { silent = true })
 -- map("n", "<esc>",        ":nohlsearch | diffupdate<cr>",     { silent = true })
+-- Paired with tmux.conf bind-key -n \{
+map("i", "[ ", "{")
+-- Paired with tmux.conf bind-key -n \}
+map("i", "] ", "}")
 --
 map("n", "<F2>",         ":TagbarToggle<cr>")
 map("n", "t",            ":NvimTreeToggle<cr>")

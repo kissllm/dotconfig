@@ -2,7 +2,13 @@
 -- lua =require('vim.lsp.log').get_filename()
 -- $HOME/.local/state/nvim/lsp.log
 -- https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
+-- https://github.com/kabouzeid/nvim-lspinstall/wiki
 local function on_attach(client, bufnr)
+	local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+	local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+	buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
 	local opts = {buffer = bufnr}
 
 	vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
@@ -21,6 +27,23 @@ local function on_attach(client, bufnr)
 	vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
 	vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
 
+	-- Set some keybinds conditional on server capabilities
+	if client.resolved_capabilities.document_formatting then
+		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+	elseif client.resolved_capabilities.document_range_formatting then
+		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+	end
+
+	-- Set autocommands conditional on server_capabilities
+	if client.resolved_capabilities.document_highlight then
+		vim.api.nvim_exec([[
+		augroup lsp_document_highlight
+		autocmd! * <buffer>
+		autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+		autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+		augroup END
+		]], false)
+	end
 end
 
 local servers = { "jsonls", "lua_ls", "glint", "pyright", "ruff_lsp", 'rust_analyzer', "tsserver", "cssls" }
@@ -200,6 +223,8 @@ return {
 			local lsp = lspzero["lsp"]
 			local cmp_action = lspzero["cmp_action"]
 			local cmp = require('cmp')
+			-- https://github.com/Ashwani1330/Vim-Nvim/blob/4fa54b3dedb18317a34ecc42f9089f582c30cabb/after/plugin/lsp.lua
+			local cmp_select = { behavior = cmp.SelectBehavior.Select }
 			-- local lspkind = require("lspkind")
 			print("cmp: \n" .. serialize(cmp))
 			-- https://neovim.discourse.group/t/how-to-avoid-pressing-enter-twice-to-create-a-new-line/2649
@@ -237,7 +262,10 @@ return {
 					['<C-e>']     = cmp.mapping.abort(),
 					-- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 					-- ['<CR>']   = cmp.mapping.confirm({ select = true }),
-					['<CR>']      = cmp.mapping.confirm { select = false },
+					-- ['<CR>']      = cmp.mapping.confirm { select = false },
+					['<C-y>']     = cmp.mapping.confirm({ select = true }),
+					['<C-p>']     = cmp.mapping.select_prev_item( cmp_select ),
+					['<C-n>']     = cmp.mapping.select_next_item( cmp_select ),
 				}),
 				sources = cmp.config.sources({
 					{ name = 'nvim_lsp' },
@@ -504,8 +532,9 @@ return {
 				end
 			})
 			--
-			-- require('lspconfig').marksman.setup {
-			lspconfig.marksman.setup {
+			-- :lua require('lspconfig').marksman.setup{}
+			-- require('lspconfig').marksman.setup {}
+			lspconfig.marksman.setup({
 				on_attach = function(client, buffer)
 					vim.api.nvim_create_autocmd("LspTokenUpdate", {
 						buffer = buffer,
@@ -522,17 +551,30 @@ return {
 
 					-- other on_attach logic
 				end
-			}
+			})
 
 			if lspconfig.lua_ls ~= nil then
-				lspconfig.lua_ls.setup ({
+				lspconfig.lua_ls.setup({
 					-- settings = {
 					lspzero = lspzero,
 					lsp = lsp,
 					lua = {
+						runtime = {
+							-- LuaJIT in the case of Neovim
+							version = 'LuaJIT',
+							path = vim.split(package.path, ';'),
+						},
 						diagnostics = {
 							globals = { 'vim' }
-						}
+						},
+						workspace = {
+							-- Make the server aware of Neovim runtime files
+							library = {
+								[vim.fn.expand('$VIMRUNTIME/lua')] = true,
+								[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+							},
+						},
+
 					},
 					single_file_support = false,
 					on_attach = on_attach
@@ -546,8 +588,59 @@ return {
 				-- Intentional trigger an error
 				local lua_ls = require("lspconfig.lua_ls")
 			end
+			-- config that activates keymaps and enables snippet support
+			local function make_config()
+				local capabilities = vim.lsp.protocol.make_client_capabilities()
+				capabilities.textDocument.completion.completionItem.snippetSupport = true
+				return {
+					-- enable snippet support
+					capabilities = capabilities,
+					-- map buffer local keybindings when the language server attaches
+					on_attach = on_attach,
+				}
+			end
+
+			-- lsp-install
+			local function setup_servers()
+				-- require'lspinstall'.setup()
+				lsp.setup()
+
+				-- get all installed servers
+				-- local servers = require'lspinstall'.installed_servers()
+				-- local servers = lsp.servers()
+				-- ... and add manually installed servers
+				table.insert(servers, "clangd")
+				table.insert(servers, "sourcekit")
+
+				for _, server in pairs(servers) do
+					local config = make_config()
+
+					-- language specific config
+					if server == "lua" then
+						config.settings = lua_settings
+					end
+					if server == "sourcekit" then
+						config.filetypes = {"swift", "objective-c", "objective-cpp"}; -- we don't want c and cpp!
+					end
+					if server == "clangd" then
+						config.filetypes = {"c", "cpp"}; -- we don't want objective-c and objective-cpp!
+					end
+
+					require'lspconfig'[server].setup(config)
+				end
+			end
+
+			setup_servers()
+
+			-- Automatically reload after `:LspInstall <server>` so we don't have to restart neovim
+			-- require'lspinstall'.post_install_hook = function ()
+			lsp.post_install_hook = function ()
+				setup_servers() -- reload installed servers
+				vim.cmd("bufdo e") -- this triggers the FileType autocmd that starts the server
+			end
+
 			-- https://neovim.discourse.group/t/how-do-you-configure-an-lsp-to-disable-another-lsp/2547
-			lspconfig.glint.setup {
+			lspconfig.glint.setup({
 				on_attach = function()
 					for i, server in ipairs(vim.lsp.buf_get_clients()) do
 						print(server.name)
@@ -556,7 +649,7 @@ return {
 						end
 					end
 				end,
-			}
+			})
 			lspconfig.tsserver.setup({
 				single_file_support = false,
 				on_attach = function(client, bufnr)

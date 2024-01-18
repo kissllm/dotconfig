@@ -83,11 +83,11 @@ function serialize(tbl, indent)
 	if tbl == nil then return toprint end
 	local len = #tostring(#tbl)
 	if len == 0 then return toprint end
+	print("object type: " .. type(tbl))
 	toprint = string.rep(" ", indent) .. "{\r\n"
 	indent = indent + 2
 	-- for index, data in ipairs(tbl) do
 	-- print(index)
-	print(type(tbl))
 	-- for k, v in ipairs(data) do
 	for k, v in ipairs(tbl) do
 		toprint = toprint .. string.rep(" ", indent)
@@ -152,7 +152,7 @@ local home  = os.getenv("HOME")
 log.home    = home
 log.address = home .. "/.vim.log"
 
-print("log: \n" .. serialize(log))
+-- print("log: \n" .. serialize(log))
 
 -- print("log.address: " .. log.address)
 -- print("log file: " .. home .. "/.vim.log" .. "\n")

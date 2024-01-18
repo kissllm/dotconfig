@@ -93,7 +93,8 @@ return {
 		require("telescope").load_extension("noice")
 		require("telescope").load_extension("notify")
 		require("noice").setup({
-			-- module = "noice",
+			-- Trying to resolve nui.nvim invalid window id errors
+			module = "noice",
 			-- you can enable a preset for easier configuration
 			presets = {
 				-- you can enable a preset by setting it to true, or a table that will override the preset config
