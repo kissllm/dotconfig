@@ -375,7 +375,7 @@ reset_cursor_shape() {
 	export cursor_code
 }
 
-[ -z "${TERM##*tmux*}" ] ||
+# [ -z "${TERM##*tmux*}" ] ||
 reset_cursor_shape
 
 [ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
@@ -644,7 +644,7 @@ _tmux() {
 		# TMUX_TMPDIR="${TMUX_TMPDIR}" \
 	exec env \
 		VISUAL="vi" \
-		TERM="tmux-256color" \
+		TERM="linux" \
 		COLORTERM="truecolor" \
 		TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
 		TMUX="$TMUX" \

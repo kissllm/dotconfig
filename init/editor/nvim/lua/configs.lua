@@ -8,6 +8,7 @@ local set      = vim.opt -- global options
 local setlocal = vim.opt_local -- local options
 local cmd      = vim.api.nvim_command -- execute Vim commands
 local fn       = vim.fn
+local hl       = vim.api.nvim_set_hl
 
 
 set.syntax     = 'false'
@@ -42,10 +43,42 @@ set.timeoutlen   = 300
 vim.g.mapleader      = ' '
 vim.g.maplocalleader = ' '
 vim.g.NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
-set.termguicolors   = true
+
+
 set.bg              = 'dark'
 set.background      = 'dark'
 vim.o.background    = 'dark'
+
+-- indent_blankline needs this
+set.termguicolors   = true
+-- indent_blankline needs this
+set.list            = true
+
+-- indent_blankline
+-- https://github.com/lukas-reineke/indent-blankline.nvim/commit/6c4ca1bb3e8c91da1acef812dc7017790282f818
+vim.g.indent_blankline_use_treesitter        = 1
+vim.g.indent_blankline_show_current_context  = 0
+vim.g.indent_blankline_context_highlight     = 0
+vim.g.indent_blankline_char                  = "│"
+vim.g.show_first_indent_level                = 0
+vim.g.indentLine_enabled                     = 1
+vim.g.indent_blankline_enabled               = 1
+-- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
+vim.wo.colorcolumn                           = "99999"
+
+
+-- vim.cmd [[hi! RainbowRed    guifg=#E06C75 guibg=NONE gui=nocombine ctermfg=Brown  ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowYellow guifg=#E5C07B guibg=NONE gui=nocombine ctermfg=Yellow ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowGreen  guifg=#98C379 guibg=NONE gui=nocombine ctermfg=Green  ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowCyan   guifg=#56B6C2 guibg=NONE gui=nocombine ctermfg=Cyan   ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowBlue   guifg=#61AFEF guibg=NONE gui=nocombine ctermfg=Blue   ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowViolet guifg=#C678DD guibg=NONE gui=nocombine ctermfg=Red    ctermbg=NONE cterm=nocombine term=NONE ]]
+-- vim.cmd [[hi! RainbowOrange guifg=#D19A66 guibg=NONE gui=nocombine ctermfg=White  ctermbg=NONE cterm=nocombine term=NONE ]]
+-- indent_blankline highlight groups
+-- hl(0, 'indent_odd',          { fg = '#606090', bg = 'NONE', nocombine = true })
+hl(0, 'indent_odd',             { fg = 'NONE', bg = 'NONE', nocombine = true })
+-- hl(0, 'indent_even',         { fg = 'NONE', bg = '#909060', nocombine = true })
+hl(0, 'indent_even',            { fg = 'NONE', bg = 'Blue', nocombine = true })
 -- vim.api.nvim_set_options("background", "dark")
 -- if vim.g.colors_name ~= "onehalf-lush" then
 --     vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy")
@@ -54,7 +87,7 @@ vim.o.background    = 'dark'
 --   -
 --     -- cmd("colorscheme onehalf-lush")
 -- end
-set.list            = true
+
 set.tabstop         = 4
 set.shiftwidth      = 4
 vim.g.vim_indent_cont = vim.opt.shiftwidth:get()
@@ -92,10 +125,13 @@ set.wrapmargin      = 0
 set.backspace       = "indent,eol,start"
 set.eadirection     = "ver"
 set.equalalways     = false
--- set.cursorline      = true
-set.cursorline      = false
--- set.cursorcolumn    = true
-set.cursorcolumn    = false
+
+set.cursorline      = true
+-- set.cursorline      = false
+
+set.cursorcolumn    = true
+-- set.cursorcolumn    = false
+--
 -- set.cmdheight       = 1
 set.cmdheight       = 0
 set.ruler           = false
@@ -174,9 +210,12 @@ set.backup          = false
 set.writebackup     = false
 set.tags            = "./tags,tags;" .. vim.env.HOME
 set.switchbuf       = 'uselast'
+-- https://vi.stackexchange.com/questions/39972/prevent-neovim-lsp-from-opening-a-scratch-preview-buffer
 -- set.completeopt  = { "menuone", "noselect" }
-set.completeopt     = 'menu,menuone'
-set.completeopt     = set.completeopt + 'noinsert,noselect'
+set.completeopt     = 'menu'
+set.completeopt     = set.completeopt + 'menuone'
+set.completeopt     = set.completeopt + 'noinsert'
+set.completeopt     = set.completeopt + 'noselect'
 set.completeopt     = set.completeopt - 'preview'
 set.belloff         = set.belloff + 'ctrlg'
 set.redrawtime      = 1000
@@ -234,14 +273,8 @@ vim.api.nvim_set_var('vimwiki_folding', 'expr:quick')
 
 set.foldenable      = false
 
-vim.g.indent_blankline_char    = "│"
-vim.g.show_first_indent_level  = 0
-vim.g.indentLine_enabled       = 1
-vim.g.indent_blankline_enabled = 1
-vim.opt.termguicolors          = true
-vim.opt.list                   = true
--- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
-vim.wo.colorcolumn             = "99999"
+
+
 
 -- initialize global var to false -> nvim-cmp turned off per default
 vim.g.cmptoggle                = false
@@ -324,7 +357,11 @@ vim.api.nvim_create_user_command(
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/configs.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/keybindings.lua")
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+		-- vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+		vim.opt.background = 'dark'
+		set.background = 'dark'
+		-- vim.api.nvim_win_set_options("background", "dark")
+		-- vim.api.nvim_command("colorscheme onehalf-lush-dark")
 	end,
 	{ nargs = '?', bang = true, silent }
 )
@@ -346,13 +383,13 @@ vim.api.nvim_create_user_command(
 	{ nargs = '?', bang = true, silent }
 )
 
-vim.api.nvim_create_user_command(
-	"W",
-	function()
-		vim.cmd("call boot#write_generic()<cr>")
-	end,
-	{ nargs = '?', bang = true, silent }
-)
+-- vim.api.nvim_create_user_command(
+-- 	"W",
+-- 	function()
+-- 		vim.cmd('call boot#write_generic()')
+-- 	end,
+-- 	{ nargs = '?', bang = true, silent }
+-- )
 
 -- Heavy operation
 -- local group = augroup("retab_on_save", { clear = true })
@@ -620,6 +657,7 @@ vim.g.vimwiki_filetypes = { "markdown" }
 --
 -- https://stackoverflow.com/questions/65549814/setting-vimwiki-list-in-a-lua-init-file
 vim.g.vimwiki_ext2syntax = {['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown'}
+vim.g.vimwiki_global_ext = 0
 
 vim.cmd([[
 let g:restore_each_buffer_view = 1
@@ -633,6 +671,7 @@ let g:vim_markdown_no_extensions_in_markdown = 1
 let g:vimwiki_markdown_link_ext = 1
 
 " https://www.reddit.com/r/vim/comments/9riu4c/using_vimwiki_with_markdown/
+" https://github.com/vimwiki/vimwiki/issues/345
 let g:vimwiki_global_ext = 0
 
 let wiki = {}
@@ -647,6 +686,9 @@ let wiki_personal.ext = '.md'
 
 let g:vimwiki_list = [wiki, wiki_personal]
 let g:vimwiki_ext2syntax = {'.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
+" Disable <Enter> create link behavior
+" https://github.com/vimwiki/vimwiki/issues/1088
+" let g:vimwiki_key_mappings = { 'all_maps': 0, }
 
 " let boot_load_path = stdpath("data") . '/*/pack/*/start/boot/autoload/boot.vim'
 let boot_load_path = stdpath("data") . '/lazy/boot/autoload/boot.vim'
@@ -684,8 +726,8 @@ let g:tagbar_expand                        = 1
 let g:qf_bufname_or_text = 1
 
 " Only works on vim
-:command! -nargs=0 -bang Quit :noautocmd qa!
-:cnoreabbrev <expr> q getcmdtype() == ":" && getcmdline() == 'q' ? 'Quit' : 'q'
+" :command! -nargs=0 -bang Quit :noautocmd qa!
+" :cnoreabbrev <expr> q getcmdtype() == ":" && getcmdline() == 'q' ? 'Quit' : 'q'
 
 augroup Mkd
 	au BufRead,BufWinEnter,BufNewFile *.{md,mdx,mdown,mkd,mkdn,markdown,mdwn} setlocal syntax=markdown
@@ -696,6 +738,26 @@ augroup END
 " command! -nargs=? -bang BW :silent! bprevious <bar> bdelete<bang> #
 " nnoremap <silent> <Leader>d :<C-U>bprevious <bar> bdelete #<cr>
 " nnoremap <silent> <Leader>q :Bdelete<CR>
+
+" https://www.reddit.com/r/neovim/comments/oxddk9/how_do_i_get_the_value_from_a_highlight_group/
+" call SynGroup()
+function! SynGroup()
+	let l:s = synID(line('.'), col('.'), 1)
+	echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+endfunction
+
+" https://vim.fandom.com/wiki/Identify_the_syntax_highlighting_group_used_at_the_cursor
+
+nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
+\ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
+\ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+
+com! CheckHighlightUnderCursor echo {l,c,n ->
+        \   'hi<'    . synIDattr(synID(l, c, 1), n)             . '> '
+        \  .'trans<' . synIDattr(synID(l, c, 0), n)             . '> '
+        \  .'lo<'    . synIDattr(synIDtrans(synID(l, c, 1)), n) . '> '
+        \ }(line("."), col("."), "name")
+
 
 ]])
 
@@ -789,7 +851,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- })
 
 -- vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufReadPost", "BufEnter", "WinEnter", "OptionSet" }, {
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost", "CursorHold", "CursorHoldI" }, {
+-- vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost", "CursorHold", "CursorHoldI" }, {
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
 	pattern = { "*" },
 	callback = function()
 		-- Using "bash" just because the server is "bashls"
@@ -878,8 +941,8 @@ augroup END
 
 " "auto update content when changed elsewhere $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 
-command! -nargs=0 W call boot#write_generic()
-:cnoreabbrev <expr> w getcmdtype() == ":" && getcmdline() == 'w' ? 'W' : 'w'
+" command! -nargs=0 W call boot#write_generic()
+:cnoreabbrev <expr> w! getcmdtype() == ":" && getcmdline() == 'w!' ? 'W' : 'w'
 
 ]])
 

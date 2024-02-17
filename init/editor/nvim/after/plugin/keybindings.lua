@@ -118,16 +118,24 @@ map("n", "<c-u>",        "<Undo>",                 { unique = true, noremap = tr
 -- map("n", "<c-h>",        ":wincmd h<cr>")
 -- map("n", "<c-l>",        ":wincmd l<cr>")
 
-map("n", "<Left>",       ":exe 'vertical resize ' . (winwidth(0) + 10)<cr>")
-map("n", "<Right>",      ":exe 'vertical resize ' . (winwidth(0) - 10)<cr>")
-map("n", "<Up>",         ":exe 'resize ' . (winheight(0) + 5)<cr>")
-map("n", "<Down>",       ":exe 'resize ' . (winheight(0) - 5)<cr>")
+-- These is occupied by tty switches
+-- map("n", "<A-Left>",     ":exe 'vertical resize ' . (winwidth(0) + 10)<cr>")
+-- map("n", "<A-Right>",    ":exe 'vertical resize ' . (winwidth(0) - 10)<cr>")
+-- map("n", "<A-Up>",       ":exe 'resize ' . (winheight(0) + 5)<cr>")
+-- map("n", "<A-Down>",     ":exe 'resize ' . (winheight(0) - 5)<cr>")
+
+map("n", "<A-h>",        ":exe 'vertical resize ' . (winwidth(0) - 10)<cr>")
+map("n", "<A-l>",        ":exe 'vertical resize ' . (winwidth(0) + 10)<cr>")
+map("n", "<A-j>",        ":exe 'resize ' . (winheight(0) - 5)<cr>")
+map("n", "<A-k>",        ":exe 'resize ' . (winheight(0) + 5)<cr>")
 
 map("n", "<leader>[",    "m`O<Esc>``")
 map("n", '[ ',           "m`O<Esc>``")
+map("n", '{',            "m`O<Esc>``")
 map("n", "<S-CR>",       "m`O<Esc>``")
 map("n", "<leader>]",    "m`o<Esc>``")
 map("n", '] ',           "m`o<Esc>``")
+map("n", '}',            "m`o<Esc>``")
 map("n", "<C-CR>",       "m`o<Esc>``")
 map("n", "<leader><CR>", "m`o<Esc>``")
 
@@ -157,6 +165,7 @@ map("n", "t",            ":NvimTreeToggle<cr>")
 -- map("n", "<leader>l",    ":BuffergatorToggle<cr>")
 -- :nnoremap <Leader>pp :lua require'telescope.builtin'.buffers{}
 map("n", "<leader>l",    ":lua require'telescope.builtin'.buffers{}<cr>")
+map("n", "<leader>j",    ":lua require'telescope.builtin'.grep_string()<CR>")
 
 map("n", "<Leader>d",    ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q",    ":Bdelete<CR>",                        { silent = true })
@@ -202,7 +211,8 @@ elseif U.is_mac() then
 end
 
 -- map('n', "w", "<Cmd>call boot#write_generic()<cr>")
--- vim.keymap.set('ca', 'w', ":getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
+-- vim.keymap.set("ca", 'w', ":getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
+vim.cmd("ca w getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
 
 map("n", "<leader>qt",  ":Tclose!<CR>", { silent = true })
 
@@ -212,6 +222,9 @@ map("x", "ea",          "<Plug>(EasyAlign)")
 map("v", "<Enter>",     "<Plug>(EasyAlign)", { noremap = true })
 -- Start interactive EasyAlign for a motion/text object (e.g. gaip)
 map("n", "ga",          "<Plug>(EasyAlign)", { noremap = true })
+
+-- https://superuser.com/questions/41378/how-to-search-for-selected-text-in-vim
+vim.cmd([[vnoremap // :<c-u>let temp_variable=@"<CR>gvy:<c-u>let @/='\V<C-R>=escape(@",'/\')<CR>'<CR>:let @"=temp_variable<CR>:<c-u>set hlsearch<CR>]])
 
 vim.api.nvim_create_autocmd('LspAttach', {
 	group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),

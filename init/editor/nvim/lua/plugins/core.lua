@@ -329,6 +329,21 @@ return {
 		event = "VeryLazy",
 		lazy  = true,
 	},
+
+	-- TSInstall markdown
+	-- TSInstall markdown_inline
+	-- Fixed <Enter> generate markdown link issue ( when without this plugin? ) -- No
+	-- session_auto sent the feedkeys of <Enter>
+	{
+		"tadmccorkle/markdown.nvim",
+		event = "VeryLazy",
+		lazy  = true,
+		ft = "markdown", -- or 'event = "VeryLazy"'
+		opts = {
+			-- configuration here or empty for defaults
+		},
+	},
+
 	--
 	--  vimwiki and vim-markdown <Enter> issue #514
 	-- https://github.com/vimwiki/vimwiki/issues/514
@@ -336,12 +351,14 @@ return {
 		-- $HOME/.local/share/nvim/lazy/vim-markdown/ftplugin/mkd.vim
 		-- b:Markdown_GetUrlForPosition -> s:Markdown_GetUrlForPosition
 		"preservim/vim-markdown",
+		cond  = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},
 
 	{
 		"MDeiml/tree-sitter-markdown",
+		cond  = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},
@@ -461,37 +478,72 @@ return {
 	},
 
 	-- {
-	-- 	"toppair/peek.nvim",
-	-- 	event = { "VeryLazy" },
-	-- 	build = "deno task --quiet build:fast",
-	-- 	config = function()
-	-- 		require("peek").setup({
-	-- 			auto_load = true,         -- whether to automatically load preview when
-	-- 			-- entering another markdown buffer
-	-- 			close_on_bdelete = true,  -- close preview window on buffer delete
+	--  "toppair/peek.nvim",
+	--  event = { "VeryLazy" },
+	--  build = "deno task --quiet build:fast",
+	--  config = function()
+	--      require("peek").setup({
+	--          auto_load = true,         -- whether to automatically load preview when
+	--          -- entering another markdown buffer
+	--          close_on_bdelete = true,  -- close preview window on buffer delete
 
-	-- 			syntax = true,            -- enable syntax highlighting, affects performance
+	--          syntax = true,            -- enable syntax highlighting, affects performance
 
-	-- 			theme = 'dark',           -- 'dark' or 'light'
+	--          theme = 'dark',           -- 'dark' or 'light'
 
-	-- 			update_on_change = true,
+	--          update_on_change = true,
 
-	-- 			app = 'webview',          -- 'webview', 'browser', string or a table of strings
-	-- 			-- explained below
+	--          app = 'webview',          -- 'webview', 'browser', string or a table of strings
+	--          -- explained below
 
-	-- 			filetype = { 'markdown' },-- list of filetypes to recognize as markdown
+	--          filetype = { 'markdown' },-- list of filetypes to recognize as markdown
 
-	-- 			-- relevant if update_on_change is true
-	-- 			throttle_at = 200000,     -- start throttling when file exceeds this
-	-- 			-- amount of bytes in size
-	-- 			throttle_time = 'auto',   -- minimum amount of time in milliseconds
-	-- 			-- that has to pass before starting new render
-	-- 		})
-	-- 		-- refer to `configuration to change defaults`
-	-- 		vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
-	-- 		vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
-	-- 	end,
+	--          -- relevant if update_on_change is true
+	--          throttle_at = 200000,     -- start throttling when file exceeds this
+	--          -- amount of bytes in size
+	--          throttle_time = 'auto',   -- minimum amount of time in milliseconds
+	--          -- that has to pass before starting new render
+	--      })
+	--      -- refer to `configuration to change defaults`
+	--      vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
+	--      vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
+	--  end,
 	-- },
 
+
+	-- Make posix shell extremely slow
+	{
+		"RRethy/vim-illuminate",
+		cond   = false,
+		event  = "VeryLazy",
+		lazy   = true,
+	},
+
+	{
+		"olimorris/onedarkpro.nvim",
+		priority = 1000, -- Ensure it loads first
+	},
+
+	{
+		"nvim-treesitter/playground",
+		cond   = false,
+		event  = "VeryLazy",
+		lazy   = true,
+	},
+
+	{
+		"nacro90/numb.nvim",
+		event  = "VeryLazy",
+		lazy   = true,
+		config = function()
+			require("numb").setup {
+				show_numbers = true, -- Enable 'number' for the window while peeking
+				show_cursorline = true, -- Enable 'cursorline' for the window while peeking
+				hide_relativenumbers = true, -- Enable turning off 'relativenumber' for the window while peeking
+				number_only = false, -- Peek only when the command is only a number instead of when it starts with a number
+				centered_peeking = true, -- Peeked line will be centered relative to window
+			}
+		end
+	},
 
 }

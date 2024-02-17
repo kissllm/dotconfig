@@ -28,14 +28,18 @@ local function on_attach(client, bufnr)
 	vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
 
 	-- Set some keybinds conditional on server capabilities
-	if client.resolved_capabilities.document_formatting then
+	-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+	-- if client.resolved_capabilities.document_formatting then
+	if client.server_capabilities.documentFormattingProvider then
 		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-	elseif client.resolved_capabilities.document_range_formatting then
+	-- elseif client.resolved_capabilities.document_range_formatting then
+	elseif client.server_capabilities.documentRangeFormattingProvider then
 		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
 	end
 
 	-- Set autocommands conditional on server_capabilities
-	if client.resolved_capabilities.document_highlight then
+	-- if client.resolved_capabilities.document_highlight then
+	if client.server_capabilities.documentHighlightProvider then
 		vim.api.nvim_exec([[
 		augroup lsp_document_highlight
 		autocmd! * <buffer>
@@ -146,9 +150,12 @@ return {
 				log_level = vim.log.levels.DEBUG,
 				ui = {
 					icons = {
-						package_installed = "✓",
-						package_pending = "➜",
-						package_uninstalled = "✗"
+						-- package_installed = "✓",
+						package_installed = "v",
+						-- package_pending = "➜",
+						package_pending = "->",
+						-- package_uninstalled = "✗"
+						package_uninstalled = "x"
 					}
 				}
 			})
@@ -422,10 +429,14 @@ return {
 				)
 			end)
 			lsp.set_sign_icons({
-				error = "",
-				warn  = "",
-				hint  = "",
-				info  = "",
+				-- error = "",
+				error = "o",
+				-- warn  = "",
+				warn  = "^",
+				-- hint  = "",
+				hint  = "!",
+				-- info  = "",
+				info  = "?",
 			})
 			--
 			-- (Optional) Configure lua language server for neovim

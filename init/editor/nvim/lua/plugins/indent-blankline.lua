@@ -43,6 +43,7 @@ return {
 	main       = "ibl",
 	-- opt     = true,
 	cond       = true,
+	-- cond       = false,
 	-- The following line will kill ibl from loading
 	-- lazy    = false,
 
@@ -52,7 +53,8 @@ return {
 	-- cond    = false,
 	--
 	-- cond    = function() return false end,
-	event      = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
+	-- Leads "RL" (reloading configurations) failure
+	-- event      = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
 
 	config = function()
 
@@ -74,16 +76,6 @@ return {
 			"Trouble",
 		}
 
-		-- vim.g.indentLine_enabled = 1
-		-- vim.opt.termguicolors = true
-
-		-- vim.cmd [[hi! RainbowRed    guifg=#E06C75 guibg=NONE gui=nocombine ctermfg=Brown  ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowYellow guifg=#E5C07B guibg=NONE gui=nocombine ctermfg=Yellow ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowGreen  guifg=#98C379 guibg=NONE gui=nocombine ctermfg=Green  ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowCyan   guifg=#56B6C2 guibg=NONE gui=nocombine ctermfg=Cyan   ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowBlue   guifg=#61AFEF guibg=NONE gui=nocombine ctermfg=Blue   ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowViolet guifg=#C678DD guibg=NONE gui=nocombine ctermfg=Red    ctermbg=NONE cterm=nocombine term=NONE ]]
-		-- vim.cmd [[hi! RainbowOrange guifg=#D19A66 guibg=NONE gui=nocombine ctermfg=White  ctermbg=NONE cterm=nocombine term=NONE ]]
 		--
 		-- This is out of date
 		-- local highlight = {
@@ -108,20 +100,27 @@ return {
 		-- }
 
 		local highlight_guides = {
-			"CursorColumn",
-
+			-- "Normal",
+			-- "CursorColumn",
+			-- "CursorLine",
+			"indent_even",
 			-- "Whitespace",
-			"Comment",
+			-- "Comment",
 			-- "SignColumn",
+			-- "Statement",
+			"indent_odd",
 		}
 
 		local highlight_empty = {
-			"Whitespace",
+			-- "Statement",
+			-- "Whitespace",
 			-- "Comment",
 			-- "SignColumn",
-
+			"indent_odd",
 			-- "SignColumn",
-			"CursorColumn",
+			-- "CursorColumn",
+			"indent_odd",
+			-- "indent_even",
 		}
 
 		local opts = {
@@ -146,7 +145,8 @@ return {
 				highlight = highlight_guides,
 				-- highlight = highlight_empty,
 
-				remove_blankline_trail = false,
+				-- remove_blankline_trail = false,
+				remove_blankline_trail = true,
 			},
 			indent = {
 				-- https://www.compart.com/en/unicode/U+2502

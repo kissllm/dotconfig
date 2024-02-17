@@ -12,7 +12,7 @@ case "$(type env_reset > /dev/null 2>&1 && type env_reset)" in *"function"*|*"al
 	*)
 	_env_reset() {
 		local env_key_name="${1:?"env_reset needs a key"}"
-		local env_value="${2:?"env_reset '$1' needs a value [$lineno : $SCRIPT_NAME]"}"
+		local env_value="${2:?"env_reset '$1' needs a value [$lineno : functions]"}"
 		/ "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
 			# / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
 			/ "$env_key_name=\"$env_value\"" && / "export \"$env_key_name\""
@@ -178,12 +178,17 @@ type_include() {
 	return $result
 }
 
-# FS       : field separator
+# https://en.wikipedia.org/wiki/C0_and_C1_control_codes#Field_separators
+# FS       : field separator of awk
+# ETX      : end of text in ASCII
 # : ${FS:="\x03"} && export FS
 : ${FS:="\003"} && export FS
-# RS       : record separator
+# RS       : record separator of awk
+# RS       : record separator in ASCII
+: ${RS:="\036"} && export RS
+# US       : unit separator in ASCII
 # : ${RS:="\x1f"} && export RS
-: ${RS:="\037"} && export RS
+# : ${RS:="\037"} && export RS
 
 # Does not handle EOF
 # Some maintainers might print debug information to stdout in a function's definition,
@@ -287,7 +292,7 @@ delegate() {
 		# printf '%s' "${newline_leading##*${sub}}"
 		# return 0
 	} || {
-		// war '$#' "$# [delegate]"
+		// war '$#' "$# [delegate] [functions]"
 		// war '$@' "$(esceval "$@")"
 		# printf '\n'
 		printf ''

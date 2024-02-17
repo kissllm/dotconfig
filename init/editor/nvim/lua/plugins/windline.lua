@@ -16,7 +16,8 @@ return {
 		require('wlfloatline').setup({
 			interval = 300,
 			ui = {
-				active_char = '▁',
+				-- active_char = '▁',
+				active_char = '/',
 				active_color = 'blue',
 				active_hl = nil,
 			},

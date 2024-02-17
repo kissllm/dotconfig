@@ -2218,7 +2218,8 @@ else
 endif
 
 " set guicursor+=a:Cursor/lCursor
-set guicursor="disable"
+" set guicursor="disable"
+set guicursor=n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20
 
 augroup unfold
 	au!

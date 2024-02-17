@@ -176,6 +176,8 @@ return {
 				enabled    = true, -- enables the Noice popupmenu UI
 				---@type 'nui'|'cmp'
 				backend    = "nui", -- backend to use to show regular cmdline completions
+				-- Won't auto complement -- might because I disabled it in cmdline
+				-- backend    = "cmp", -- backend to use to show regular cmdline completions
 				---@type NoicePopupmenuItemKind|false
 				-- Icons for completion item kinds (see defaults at noice.config.icons.kinds)
 				kind_icons = {}, -- set to `false` to disable icons
@@ -357,20 +359,20 @@ return {
 					zindex    = 50,
 					border = nil,
 					-- border = {
-					-- 	enabled = false,
-					-- 	padding = {
-					-- 		top    = 0,
-					-- 		bottom = 0,
-					-- 		left   = 0,
-					-- 		right  = 0,
-					-- 	},
-					-- 	style = "rounded",
-					-- 	-- text = {
-					-- 	-- 	top          = " command output ",
-					-- 	-- 	top_align    = "center",
-					-- 	-- 	bottom       = "",
-					-- 	-- 	bottom_align = "left",
-					-- 	-- },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 					buf_options = {
 						modifiable    = true,
@@ -405,20 +407,20 @@ return {
 					zindex    = 50,
 					border = nil,
 					-- border = {
-					-- 	enabled = false,
-					-- 	padding = {
-					-- 		top    = 0,
-					-- 		bottom = 0,
-					-- 		left   = 0,
-					-- 		right  = 0,
-					-- 	},
-					-- 	style = "rounded",
-					-- 	-- text = {
-					-- 	-- 	top          = " command output ",
-					-- 	-- 	top_align    = "center",
-					-- 	-- 	bottom       = "",
-					-- 	-- 	bottom_align = "left",
-					-- 	-- },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 
 					buf_options = nil,
@@ -478,20 +480,20 @@ return {
 					zindex    = 50,
 					border = nil,
 					-- border = {
-					-- 	enabled = false,
-					-- 	padding = {
-					-- 		top    = 0,
-					-- 		bottom = 0,
-					-- 		left   = 0,
-					-- 		right  = 0,
-					-- 	},
-					-- 	style = "rounded",
-					-- 	-- text = {
-					-- 	-- 	top          = " command output ",
-					-- 	-- 	top_align    = "center",
-					-- 	-- 	bottom       = "",
-					-- 	-- 	bottom_align = "left",
-					-- 	-- },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 					buf_options = {
 						modifiable    = true,
@@ -528,18 +530,18 @@ return {
 						winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
 						-- foldenable = false,
 						-- winhighlight = {
-						-- 	Normal      = "NoiceCmdlinePopup",
-						-- 	FloatTitle  = "NoiceCmdlinePopupTitle",
-						-- 	FloatBorder = "NoiceCmdlinePopupBorder",
-						-- 	IncSearch   = "",
-						-- 	CurSearch   = "",
-						-- 	Search      = "",
-						-- 	-- Cursor      = "NoiceHiddenCursor",
-						-- 	-- lazy/noice.nvim/lua/noice/config/highlights.lua
-						-- 	-- vim.api.nvim_set_hl(0, "NoiceHiddenCursor", { blend = 100, nocombine = true })
-						-- 	-- System cursor,please -- otherwise won't show
-						-- 	Cursor      = "Cursor",
-						-- 	-- Cursor      = "",
+						--  Normal      = "NoiceCmdlinePopup",
+						--  FloatTitle  = "NoiceCmdlinePopupTitle",
+						--  FloatBorder = "NoiceCmdlinePopupBorder",
+						--  IncSearch   = "",
+						--  CurSearch   = "",
+						--  Search      = "",
+						--  -- Cursor      = "NoiceHiddenCursor",
+						--  -- lazy/noice.nvim/lua/noice/config/highlights.lua
+						--  -- vim.api.nvim_set_hl(0, "NoiceHiddenCursor", { blend = 100, nocombine = true })
+						--  -- System cursor,please -- otherwise won't show
+						--  Cursor      = "Cursor",
+						--  -- Cursor      = "",
 						-- },
 					},
 				},
@@ -612,20 +614,20 @@ return {
 					zindex    = 200,
 					border = nil,
 					-- border = {
-					-- 	enabled = false,
-					-- 	padding = {
-					-- 		top    = 0,
-					-- 		bottom = 0,
-					-- 		left   = 0,
-					-- 		right  = 0,
-					-- 	},
-					-- 	style = "rounded",
-					-- 	-- text = {
-					-- 	--  top          = " command output ",
-					-- 	--  top_align    = "center",
-					-- 	--  bottom       = "",
-					-- 	--  bottom_align = "left",
-					-- 	-- },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 					buf_options = {
 						modifiable    = true,
@@ -677,21 +679,21 @@ return {
 					zindex    = 50,
 					border = nil,
 					-- border = {
-					-- 	enabled = false,
-					-- 	padding = {
-					-- 		top    = 0,
-					-- 		bottom = 0,
-					-- 		left   = 0,
-					-- 		right  = 0,
-					-- 	},
-					-- 	style = "rounded",
-					-- 	-- style = "single",
-					-- 	-- text = {
-					-- 	--  top          = " command output ",
-					-- 	--  top_align    = "center",
-					-- 	--  bottom       = "",
-					-- 	--  bottom_align = "left",
-					-- 	-- },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- style = "single",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 					buf_options = {
 						modifiable    = true,
@@ -732,18 +734,18 @@ return {
 						-- winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
 						-- foldenable = false,
 						-- winhighlight = {
-						-- 	Normal      = "NoiceCmdlinePopup",
-						-- 	FloatTitle  = "NoiceCmdlinePopupTitle",
-						-- 	FloatBorder = "NoiceCmdlinePopupBorder",
-						-- 	IncSearch   = "",
-						-- 	CurSearch   = "",
-						-- 	Search      = "",
-						-- 	-- Cursor      = "NoiceHiddenCursor",
-						-- 	-- lazy/noice.nvim/lua/noice/config/highlights.lua
-						-- 	-- vim.api.nvim_set_hl(0, "NoiceHiddenCursor", { blend = 100, nocombine = true })
-						-- 	-- System cursor,please -- otherwise won't show
-						-- 	Cursor      = "Cursor",
-						-- 	-- Cursor      = "",
+						--  Normal      = "NoiceCmdlinePopup",
+						--  FloatTitle  = "NoiceCmdlinePopupTitle",
+						--  FloatBorder = "NoiceCmdlinePopupBorder",
+						--  IncSearch   = "",
+						--  CurSearch   = "",
+						--  Search      = "",
+						--  -- Cursor      = "NoiceHiddenCursor",
+						--  -- lazy/noice.nvim/lua/noice/config/highlights.lua
+						--  -- vim.api.nvim_set_hl(0, "NoiceHiddenCursor", { blend = 100, nocombine = true })
+						--  -- System cursor,please -- otherwise won't show
+						--  Cursor      = "Cursor",
+						--  -- Cursor      = "",
 						-- },
 					},
 				},
