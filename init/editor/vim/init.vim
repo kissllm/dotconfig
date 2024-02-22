@@ -3551,18 +3551,26 @@ if 1 == g:navi_protect
 
 	if has('nvim')
 		nnoremap <S-CR> M`O<Esc>``
-		nnoremap <leader>[ M`O<Esc>``
 		nnoremap <C-CR> M`o<Esc>``
-		nnoremap <leader>] M`o<Esc>``
 	else
 		" Could be enabled by 'tpope/vim-unimpaired'
 		" Use [-space for shift-enter
 		" And ]-space for ctrl-enter
-		nnoremap <leader>[ M`O<Esc>``
-		nnoremap <leader>] M`o<Esc>``
 		" nnoremap [<Space> M`O<Esc>``
 		" nnoremap ]<Space> M`o<Esc>``
 	endif
+	nnoremap <leader>[ M`O<Esc>``
+	nnoremap <leader>] M`o<Esc>``
+	nnoremap { M`O<Esc>``
+	nnoremap } M`o<Esc>``
+
+" Paired with tmux.conf bind-key -n \{
+" inoremap [<Space> {
+" Paired with tmux.conf bind-key -n \}
+" inoremap ]<Space> }
+
+" inoremap "<leader>[" {
+" inoremap "<leader>]" }
 
 	" nnoremap <S-CR> <NOP>
 	" nnoremap <C-CR> <NOP>
@@ -3598,13 +3606,6 @@ if 1 == g:navi_protect
 	" inoremap <C-CR> ThisIsCenter
 	" inoremap <S-CR> ThisIsSenter
 
-" Paired with tmux.conf bind-key -n \{
-inoremap [<Space> {
-" Paired with tmux.conf bind-key -n \}
-inoremap ]<Space> }
-
-" inoremap "<leader>[" {
-" inoremap "<leader>]" }
 
 
 

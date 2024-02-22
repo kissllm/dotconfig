@@ -38,7 +38,8 @@ set.ignorecase   = true
 -- Default is 0 -- no limitation
 -- set.pumheight     = 10 -- maybe too big ?
 set.pumheight    = 0 -- maybe too big ?
-set.timeoutlen   = 300
+-- set.timeoutlen   = 300
+set.timeoutlen   = 700
 -- vim.g.mapleader      = "<Space>"
 vim.g.mapleader      = ' '
 vim.g.maplocalleader = ' '
@@ -77,8 +78,10 @@ vim.wo.colorcolumn                           = "99999"
 -- indent_blankline highlight groups
 -- hl(0, 'indent_odd',          { fg = '#606090', bg = 'NONE', nocombine = true })
 hl(0, 'indent_odd',             { fg = 'NONE', bg = 'NONE', nocombine = true })
--- hl(0, 'indent_even',         { fg = 'NONE', bg = '#909060', nocombine = true })
 hl(0, 'indent_even',            { fg = 'NONE', bg = 'Blue', nocombine = true })
+hl(0, 'IblIndent',              { fg = 'NONE', bg = 'NONE', nocombine = true })
+hl(0, 'IblScope',               { fg = 'NONE', bg = 'Blue', nocombine = true })
+hl(0, 'IblWhitespace',          { fg = 'NONE', bg = 'Blue', nocombine = true })
 -- vim.api.nvim_set_options("background", "dark")
 -- if vim.g.colors_name ~= "onehalf-lush" then
 --     vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy")
@@ -357,7 +360,7 @@ vim.api.nvim_create_user_command(
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/configs.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/keybindings.lua")
-		-- vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
 		vim.opt.background = 'dark'
 		set.background = 'dark'
 		-- vim.api.nvim_win_set_options("background", "dark")

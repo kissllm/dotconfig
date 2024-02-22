@@ -468,6 +468,7 @@ return {
 		end,
 		event  = "VeryLazy",
 		lazy   = true,
+		cond   = false,
 	},
 
 	{
@@ -545,5 +546,16 @@ return {
 			}
 		end
 	},
+
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+		priority = 1000,
+		event  = "VeryLazy",
+		lazy   = true,
+	},
+
+
+
 
 }

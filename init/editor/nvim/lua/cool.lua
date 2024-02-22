@@ -420,19 +420,19 @@ end
 
 -- changes braghtness of rgb_color by percentage
 local function brightness_modifier(rgb_color, parcentage)
-	local color = rgb_str2num(rgb_color)
-	color.red = clamp(color.red + (color.red * parcentage / 100), 0, 255)
-	color.green = clamp(color.green + (color.green * parcentage / 100), 0, 255)
-	color.blue = clamp(color.blue + (color.blue * parcentage / 100), 0, 255)
+	local color  = rgb_str2num(rgb_color)
+	color.red    = clamp(color.red + (color.red * parcentage / 100), 0, 255)
+	color.green  = clamp(color.green + (color.green * parcentage / 100), 0, 255)
+	color.blue   = clamp(color.blue + (color.blue * parcentage / 100), 0, 255)
 	return rgb_num2str(color)
 end
 
 -- changes contrast of rgb_color by amount
 local function contrast_modifier(rgb_color, amount)
-	local color = rgb_str2num(rgb_color)
-	color.red = clamp(color.red + amount, 0, 255)
-	color.green = clamp(color.green + amount, 0, 255)
-	color.blue = clamp(color.blue + amount, 0, 255)
+	local color  = rgb_str2num(rgb_color)
+	color.red    = clamp(color.red + amount, 0, 255)
+	color.green  = clamp(color.green + amount, 0, 255)
+	color.blue   = clamp(color.blue + amount, 0, 255)
 	return rgb_num2str(color)
 end
 
@@ -822,38 +822,38 @@ windline.setup({
 		colors.FilenameFg = colors.orange
 		-- colors.FilenameBg = colors.black
 		-- colors.FilenameBg = colors.black_light
-		colors.FilenameBg = colors.transparent
+		colors.FilenameBg   = colors.transparent
 
-		colors.arrowwhite = colors.black_light
+		colors.arrowwhite   = colors.black_light
 
-		colors.arrowleft1 = colors.white
-		colors.arrowleft2 = colors.white
-		colors.arrowleft3 = colors.white
-		colors.arrowleft4 = colors.white
-		colors.arrowleft5 = colors.white
+		colors.arrowleft1   = colors.white
+		colors.arrowleft2   = colors.white
+		colors.arrowleft3   = colors.white
+		colors.arrowleft4   = colors.white
+		colors.arrowleft5   = colors.white
 
-		colors.arrowright1 = colors.white
-		colors.arrowright2 = colors.white
-		colors.arrowright3 = colors.white
-		colors.arrowright4 = colors.white
-		colors.arrowright5 = colors.white
+		colors.arrowright1  = colors.white
+		colors.arrowright2  = colors.white
+		colors.arrowright3  = colors.white
+		colors.arrowright4  = colors.white
+		colors.arrowright5  = colors.white
 
-		colors.wavewhite = colors.white
+		colors.wavewhite    = colors.white
 
-		colors.waveleft1 = colors.white
-		colors.waveleft2 = colors.white
-		colors.waveleft3 = colors.white
-		colors.waveleft4 = colors.white
-		colors.waveleft5 = colors.white
+		colors.waveleft1    = colors.white
+		colors.waveleft2    = colors.white
+		colors.waveleft3    = colors.white
+		colors.waveleft4    = colors.white
+		colors.waveleft5    = colors.white
 
-		colors.waveright1 = colors.white
-		colors.waveright2 = colors.white
-		colors.waveright3 = colors.white
-		colors.waveright4 = colors.white
-		colors.waveright5 = colors.white
+		colors.waveright1   = colors.white
+		colors.waveright2   = colors.white
+		colors.waveright3   = colors.white
+		colors.waveright4   = colors.white
+		colors.waveright5   = colors.white
 
-		colors.StatusFg = colors.ActiveFg
-		colors.StatusBg = colors.ActiveBg
+		colors.StatusFg     = colors.ActiveFg
+		colors.StatusBg     = colors.ActiveBg
 
 		-- dynamically get color from colorscheme hightlight group
 		local searchFg, searchBg = require("windline.themes").get_hl_color("Search")
@@ -979,11 +979,11 @@ windline.add_component({
 
 animation.animation({
 		data = {
-			{ "red_light", effects.rainbow() },
+			{ "red_light",   effects.rainbow() },
 			{ "green_light", effects.rainbow() },
-			{ "cyan_light", effects.blackwhite() },
-			{ "FilenameBg", effects.rainbow() },
-			{ "FilenameBg", effects.blackwhite() },
+			{ "cyan_light",  effects.blackwhite() },
+			{ "FilenameBg",  effects.rainbow() },
+			{ "FilenameBg",  effects.blackwhite() },
 		},
 		timeout = 10,
 		delay = 200,

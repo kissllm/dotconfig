@@ -48,6 +48,7 @@ return {
 	-- lazy    = false,
 
 	lazy       = true,
+	-- lazy       = false,
 	-- enabled = true,
 	-- enabled = false,
 	-- cond    = false,
@@ -57,6 +58,8 @@ return {
 	-- event      = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
 
 	config = function()
+
+		local hl = vim.api.nvim_set_hl
 
 		-- 'txt',
 		local exclude_ft = {
@@ -123,6 +126,55 @@ return {
 			-- "indent_even",
 		}
 
+		local highlight_rainbow = {
+			"RainbowRed",
+			"RainbowYellow",
+			"RainbowBlue",
+			"RainbowOrange",
+			"RainbowGreen",
+			"RainbowViolet",
+			"RainbowCyan",
+		}
+
+		local hooks = require("ibl.hooks")
+		-- local hooks = require "ibl.hooks"
+
+		-- create the highlight groups in the highlight setup hook, so they are reset
+		-- every time the colorscheme changes
+		hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+			hl(0, 'indent_odd',             { fg = 'NONE', bg = 'NONE', nocombine = true })
+			hl(0, 'indent_even',            { fg = 'NONE', bg = 'Blue', nocombine = true })
+			-- https://github.com/lukas-reineke/indent-blankline.nvim/blob/master/doc/indent_blankline.txt
+			hl(0, 'IblIndent',              { fg = 'NONE', bg = 'NONE', nocombine = true })
+			hl(0, 'IblScope',               { fg = 'NONE', bg = 'Blue', nocombine = true })
+			hl(0, 'IblWhitespace',          { fg = 'NONE', bg = 'Blue', nocombine = true })
+			hl(0, "RainbowRed",             { fg = "#E06C75" })
+			hl(0, "RainbowYellow",          { fg = "#E5C07B" })
+			hl(0, "RainbowBlue",            { fg = "#61AFEF" })
+			hl(0, "RainbowOrange",          { fg = "#D19A66" })
+			hl(0, "RainbowGreen",           { fg = "#98C379" })
+			hl(0, "RainbowViolet",          { fg = "#C678DD" })
+			hl(0, "RainbowCyan",            { fg = "#56B6C2" })
+		end)
+
+		hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
+
+		-- ~/.local/share/nvim/lazy/rainbow-delimiters.nvim/plugin/rainbow-delimiters.lua
+		-- hooks.register(hooks.type.SCOPE_HIGHLIGHT, function()
+		--  hl(0, 'RainbowDelimiterRed'   , {default = true, fg = '#cc241d', ctermfg= 'Red'    })
+		--  hl(0, 'RainbowDelimiterOrange', {default = true, fg = '#d65d0e', ctermfg= 'White'  })
+		--  hl(0, 'RainbowDelimiterYellow', {default = true, fg = '#d79921', ctermfg= 'Yellow' })
+		--  hl(0, 'RainbowDelimiterGreen' , {default = true, fg = '#689d6a', ctermfg= 'Green'  })
+		--  hl(0, 'RainbowDelimiterCyan'  , {default = true, fg = '#a89984', ctermfg= 'Cyan'   })
+		--  hl(0, 'RainbowDelimiterBlue'  , {default = true, fg = '#458588', ctermfg= 'Blue'   })
+		--  hl(0, 'RainbowDelimiterViolet', {default = true, fg = '#b16286', ctermfg= 'Magenta'})
+		-- end)
+		--
+		--
+		-- show_first_indent_level        = false,
+		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
+		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_tab_indent_level)
+
 		local opts = {
 
 			enabled = false,
@@ -184,6 +236,8 @@ return {
 					-- },
 				tab_char = "│", -- "U+2502"
 			},
+			-- highlight settings for scope
+			-- https://github.com/ArjunSahlot/.dotfiles/blob/main/.config/nvim/lua/arjun/lazy/indent-align.lua
 			-- TSCurrentScope sets this?
 			scope = {
 				-- injected_languages = true,
@@ -191,7 +245,9 @@ return {
 				enabled      = false,
 				-- reverse      = true,
 				-- highlight = "IndentBlanklineContextChar",
-				highlight    = "Function",
+				-- highlight    = "Function",
+				-- highlight    = highlight_rainbow,
+				highlight    = rainbow_delimiters,
 				show_start   = false,
 				show_end     = false,
 				include = {
@@ -293,7 +349,7 @@ return {
 		-- local indent_blankline = require('indent_blankline')
 		-- Version 3
 		local api    = vim.api
-		local set_hl = api.nvim_set_hl
+		local hl = api.nvim_set_hl
 		local ibl    = require('ibl')
 		ibl.setup(opts)
 
@@ -304,58 +360,43 @@ return {
 		-- vim.wo.colorcolumn = "99999"
 		-- vim.opt.list = true
 		local gid = api.nvim_create_augroup("indent_blankline", { clear = true })
+		-- local indent_blankline_augroup = vim.api.nvim_create_augroup("indent_blankline_augroup", {clear = true})
 
 		-- HACK: work-around for https://github.com/lukas-reineke/indent-blankline.nvim/issues/59
 		-- vim.wo.colorcolumn = "99999"
 		-- vim.g.rainbow_delimiters = { highlight = highlight }
 
-		local hooks = require "ibl.hooks"
-		-- create the highlight groups in the highlight setup hook, so they are reset
-		-- every time the colorscheme changes
-		hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-			-- set_hl(0, "RainbowRed",    { fg = "#E06C75" })
-			-- set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
-			-- set_hl(0, "RainbowBlue",   { fg = "#61AFEF" })
-			-- set_hl(0, "RainbowOrange", { fg = "#D19A66" })
-			-- set_hl(0, "RainbowGreen",  { fg = "#98C379" })
-			-- set_hl(0, "RainbowViolet", { fg = "#C678DD" })
-			-- set_hl(0, "RainbowCyan",   { fg = "#56B6C2" })
-		end)
-
-		hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
-
-		-- ~/.local/share/nvim/lazy/rainbow-delimiters.nvim/plugin/rainbow-delimiters.lua
-		-- hooks.register(hooks.type.SCOPE_HIGHLIGHT, function()
-		--  set_hl(0, 'RainbowDelimiterRed'   , {default = true, fg = '#cc241d', ctermfg= 'Red'    })
-		--  set_hl(0, 'RainbowDelimiterOrange', {default = true, fg = '#d65d0e', ctermfg= 'White'  })
-		--  set_hl(0, 'RainbowDelimiterYellow', {default = true, fg = '#d79921', ctermfg= 'Yellow' })
-		--  set_hl(0, 'RainbowDelimiterGreen' , {default = true, fg = '#689d6a', ctermfg= 'Green'  })
-		--  set_hl(0, 'RainbowDelimiterCyan'  , {default = true, fg = '#a89984', ctermfg= 'Cyan'   })
-		--  set_hl(0, 'RainbowDelimiterBlue'  , {default = true, fg = '#458588', ctermfg= 'Blue'   })
-		--  set_hl(0, 'RainbowDelimiterViolet', {default = true, fg = '#b16286', ctermfg= 'Magenta'})
-		-- end)
-		--
-		--
-		-- show_first_indent_level        = false,
-		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
-		hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_tab_indent_level)
-
 		api.nvim_create_autocmd("InsertEnter", {
-			pattern = "*",
-			group = gid,
-			command = "IBLDisable",
+			pattern  = "*",
+			group    = gid,
+			command  = "IBLDisable",
 		})
 
 		api.nvim_create_autocmd("InsertLeave", {
-			pattern = "*",
-			group = gid,
-			callback = function()
+			pattern   = "*",
+			group     = gid,
+			callback  = function()
 				if not vim.tbl_contains(exclude_ft, vim.bo.filetype) then
 					vim.cmd([[IBLEnable]])
 				end
 			end,
 		})
 
+		vim.api.nvim_create_autocmd("ModeChanged", {
+			-- group = indent_blankline_augroup,
+			group    = gid,
+			pattern  = "[vV\x16]*:*",
+			command  = "IBLEnable",
+			desc     = "Enable indent-blankline when exiting visual mode"
+		})
+
+		vim.api.nvim_create_autocmd("ModeChanged", {
+			-- group = indent_blankline_augroup,
+			group    = gid,
+			pattern  = "*:[vV\x16]*",
+			command  = "IBLDisable",
+			desc     = "Disable indent-blankline when exiting visual mode"
+		})
 
 	end,
 	keys = {

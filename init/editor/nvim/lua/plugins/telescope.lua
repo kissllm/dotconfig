@@ -8,7 +8,7 @@
 -- Telescope (Fuzzy Finder)
 -- Added these plugins to install Telescope
 
-local U = require('utils')
+-- local U = require('utils')
 
 return {
 	'nvim-telescope/telescope.nvim',
@@ -16,10 +16,11 @@ return {
 	lazy = true,
 	-- lazy = false,
 	dependencies = {
-		{'nvim-lua/plenary.nvim'},
-		{'BurntSushi/ripgrep'},
-		{'sharkdp/fd'},
-		{'nvim-telescope/telescope-fzf-native.nvim',
+		{ 'nvim-lua/plenary.nvim' },
+		{ 'BurntSushi/ripgrep' },
+		{ 'sharkdp/fd' },
+		{
+			'nvim-telescope/telescope-fzf-native.nvim',
 			build = "make",
 			-- https://zyree.hashnode.dev/neovim-as-an-ide
 			cond = function()
@@ -27,45 +28,69 @@ return {
 			end,
 			-- https://www.barbarianmeetscoding.com/notes/neovim-lazyvim/#custom-telescope-configs
 			-- config = function()
-			-- 	require("telescope").load_extension("fzf")
+			--  require("telescope").load_extension("fzf")
 			-- end,
 		},
-		{"nvim-telescope/telescope-live-grep-args.nvim"},
-		{"debugloop/telescope-undo.nvim"},
-		{'nvim-telescope/telescope-media-files.nvim'},
+		{ "nvim-telescope/telescope-live-grep-args.nvim" },
+		{ "debugloop/telescope-undo.nvim" },
+		{ 'nvim-telescope/telescope-media-files.nvim' },
 		-- Converted from "after" keyword
-		{'neovim/nvim-lspconfig'},
-		{"nvim-treesitter/nvim-treesitter"},
+		{ 'neovim/nvim-lspconfig' },
+		{ "nvim-treesitter/nvim-treesitter" },
 	},
 	-- Lazy does not know it
 	-- after = {
-	-- 	'nvim-lspconfig',
-	-- 	'nvim-treesitter',
+	--  'nvim-lspconfig',
+	--  'nvim-treesitter',
 	-- },
 	cmd = 'Telescope',
 	module = "telescope",
 	config = function()
+		local U = require('utils')
+		-- https://github.com/nvim-telescope/telescope.nvim/blob/master/plugin/telescope.lua
+		local colors = require("catppuccin.palettes").get_palette()
+		-- local colors = require("onehalf-lush").get_palette()
+		local TelescopeColor = {
+			TelescopeMatching      = { fg = colors.flamingo },
+			TelescopeSelection     = { fg = colors.text, bg = colors.surface0, bold = true },
+
+			TelescopePromptPrefix  = { bg = colors.surface0 },
+			TelescopePromptNormal  = { bg = colors.surface0 },
+			TelescopeResultsNormal = { bg = colors.mantle },
+			TelescopePreviewNormal = { bg = colors.mantle },
+			TelescopePromptBorder  = { bg = colors.surface0, fg = colors.surface0 },
+			TelescopeResultsBorder = { bg = colors.mantle, fg = colors.mantle },
+			TelescopePreviewBorder = { bg = colors.mantle, fg = colors.mantle },
+			TelescopePromptTitle   = { bg = colors.pink, fg = colors.mantle },
+			TelescopeResultsTitle  = { fg = colors.mantle },
+			TelescopePreviewTitle  = { bg = colors.green, fg = colors.mantle },
+		}
+
+		for hl, col in pairs(TelescopeColor) do
+			vim.api.nvim_set_hl(0, hl, col)
+		end
+
 		-- Put this pcall outside return will end up with include this file per se
 		local status_ok, telescope = pcall(require, "telescope")
 		if not status_ok then
 			return
 		end
 		--
-		local actions    = require("telescope.actions")
+		local actions      = require("telescope.actions")
 		-- https://www.harrisoncramer.me/building-a-powerful-neovim-configuration/
 		-- https://github.com/harrisoncramer/nvim/blob/main/lua/plugins/telescope/init.lua
-		local finders    = require("telescope.finders")
-		local conf       = require("telescope.config").values
-		local previewers = require("telescope.previewers")
-		local pickers    = require("telescope.pickers")
-		local builtin    = require("telescope.builtin")
+		local finders      = require("telescope.finders")
+		local conf         = require("telescope.config").values
+		local previewers   = require("telescope.previewers")
+		local pickers      = require("telescope.pickers")
+		local builtin      = require("telescope.builtin")
 		-- https://github.com/nvim-telescope/telescope-live-grep-args.nvim
 		local actions_undo = require("telescope-undo.actions")
 		local lga_actions  = require("telescope-live-grep-args.actions")
 		-- $HOME/.local/share/nvim/lazy
-		local cwd = require("lazy.core.config").options.root
+		local cwd          = require("lazy.core.config").options.root
 		-- require("telescope").setup()
-		telescope.setup{
+		telescope.setup {
 
 			-- https://www.lazyvim.org/configuration/examples
 			-- https://www.reddit.com/r/neovim/comments/11m3575/howwhere_to_set_plugin_keymaps_with_lazynvim/
@@ -117,8 +142,8 @@ return {
 					-- Default configuration for telescope goes here:
 					-- config_key = value,
 					-- https://lee-phillips.org/nvimTelescopeConfig/
-					scroll_strategy      = "limit";
-					file_ignore_patterns = { ".git/[^h]" };
+					scroll_strategy      = "limit",
+					file_ignore_patterns = { ".git/[^h]" },
 					-- file_ignore_patterns = { '^node_modules/', },
 					-- prompt_prefix        = " ",
 					prompt_prefix        = "< ",
@@ -126,12 +151,48 @@ return {
 					selection_caret      = "-> ",
 					path_display         = { "smart" },
 					-- https://www.lazyvim.org/configuration/examples
-					layout_strategy      = "horizontal",
-					layout_config        = { prompt_position = "top" },
-					sorting_strategy     = "ascending",
+					layout_strategy      = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config        = {
+						-- vertical = { width = 0.7 },
+						horizontal      = { height = 0.999 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						-- height              = 0.999,
+						height          = { padding = 0 },
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
+					sorting_strategy     = 'ascending',
 					winblend             = 0,
 
-					mappings = {
+					mappings             = {
 						i = {
 							["<C-n>"]      = actions.cycle_history_next,
 							["<C-p>"]      = actions.cycle_history_prev,
@@ -187,9 +248,9 @@ return {
 							["G"]          = actions.move_to_bottom,
 
 							-- ["<C-u>"]      = actions.preview_scrolling_up,
-							["u"]      = actions.preview_scrolling_up,
+							["u"]          = actions.preview_scrolling_up,
 							-- ["<C-d>"]      = actions.preview_scrolling_down,
-							["m"]      = actions.preview_scrolling_down,
+							["m"]          = actions.preview_scrolling_down,
 
 							["<PageUp>"]   = actions.results_scrolling_up,
 							["<PageDown>"] = actions.results_scrolling_down,
@@ -211,7 +272,83 @@ return {
 				-- builtin picker
 				-- https://lee-phillips.org/nvimTelescopeConfig/
 				find_files = {
-					hidden = true;
+					hidden          = true,
+					layout_strategy = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config   = {
+						-- vertical = { width = 0.3 },
+						horizontal      = { height = 0.999 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
+				},
+				grep_string = {
+					layout_strategy = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config   = {
+						-- vertical = { width = 0.3 },
+						horizontal      = { height = 0.999 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
 				},
 				-- https://www.reddit.com/r/neovim/comments/udx0fi/telescopebuiltinlive_grep_and_operator/
 				live_grep = {
@@ -219,6 +356,43 @@ return {
 						-- AND operator for live_grep like how fzf handles spaces with wildcards in rg
 						return { prompt = prompt:gsub("%s", ".*") }
 					end,
+					layout_strategy    = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config      = {
+						-- vertical = { width = 0.3 },
+						horizontal      = { height = 0.999 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
 				},
 				-- nnoremap gb :buffers<CR>:buffer<Space>
 				buffers = {
@@ -228,20 +402,110 @@ return {
 					previewer        = true,
 					sort_mru         = true,
 					sort_lastused    = true,
-					mappings = {
+					mappings         = {
 						n = {
 							["d"] = "delete_buffer",
-						-- :lua vim.api.nvim_buf_delete(term_bufnr, { force = true })).
+							-- :lua vim.api.nvim_buf_delete(term_bufnr, { force = true })).
 						},
 						i = {
 							-- ["<c-d>"]  = "delete_buffer",
-							["<c-d>"]     = actions.delete_buffer + actions.move_to_top,
-							["<C-j>"]     = actions.move_selection_next,
-							["<C-k>"]     = actions.move_selection_previous,
+							["<c-d>"] = actions.delete_buffer + actions.move_to_top,
+							["<C-j>"] = actions.move_selection_next,
+							["<C-k>"] = actions.move_selection_previous,
 						},
+					},
+					layout_strategy  = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config    = {
+						vertical        = { width = 0.3 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
+				},
+				help_tags = {
+					layout_strategy  = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config    = {
+						vertical        = { width = 0.3 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
 					},
 				},
 			},
+			center = {
+				width = function(_, max_columns)
+					-- local percentage = 0.95
+					local percentage = 1
+					local max = 900
+					-- return math.min(math.floor(percentage * max_columns), max)
+					return math.max(math.floor(percentage * max_columns), max)
+				end,
+				height = function(_, _, max_lines)
+					-- local percentage = 0.95
+					local percentage = 1
+					local min = 900
+					return math.max(math.floor(percentage * max_lines), min)
+				end,
+			},
+
 			extensions = {
 				-- Your extension configuration goes here:
 				-- extension_name = {
@@ -287,14 +551,16 @@ return {
 		U.map("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
 
 		-- [telescope.builtin.lsp_*]: no client attached
-		-- U.map("n", "gd", function() builtin.lsp_definitions({ cwd = cwd }) end,      { noremap = true, silent = true })
-		-- U.map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, { noremap = true, silent = true })
-		-- U.map("n", "gr", function() builtin.lsp_references({ cwd = cwd }) end,       { noremap = true, silent = true })
+		-- U.map("n", "gd", function() builtin.lsp_definitions     ({ cwd = cwd }) end, { noremap = true, silent = true })
+		-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', opts)
+		-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', { noremap = true, silent = true })
+		U.map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, { noremap = true, silent = true })
+		U.map("n", "gr", function() builtin.lsp_references      ({ cwd = cwd }) end, { noremap = true, silent = true })
 
-		-- U.map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end,   { noremap = true, silent = true })
-		-- U.map("n", "<leader>fg", function() builtin.live_grep({ cwd = cwd }) end,    { noremap = true, silent = true })
-		-- U.map("n", "<leader>fb", function() builtin.buffers({ cwd = cwd }) end,      { noremap = true, silent = true })
-		-- U.map("n", "<leader>fh", function() builtin.help_tags({ cwd = cwd }) end,    { noremap = true, silent = true })
+		U.map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end, { noremap = true, silent = true })
+		U.map("n", "<leader>fg", function() builtin.live_grep ({ cwd = cwd }) end, { noremap = true, silent = true })
+		U.map("n", "<leader>fb", function() builtin.buffers   ({ cwd = cwd }) end, { noremap = true, silent = true })
+		U.map("n", "<leader>fh", function() builtin.help_tags ({ cwd = cwd }) end, { noremap = true, silent = true })
 
 		-- https://git.osdec.gov.my/hardynobat/my-dot-config/-/blob/master/init.lua.lazy
 		-- vim.api.nvim_set_keymap('n', '<leader><space>', [[<cmd>lua require('telescope.builtin').buffers()<CR>]], { noremap = true, silent = true })

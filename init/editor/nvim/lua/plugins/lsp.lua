@@ -78,6 +78,7 @@ return {
 		},
 		lazy = true,
 		config = function()
+			local servers = { "jsonls", "lua_ls", "glint", "pyright", "ruff_lsp", 'rust_analyzer', "tsserver", "cssls" }
 			-- No such file
 			-- require("lsp-zero.settings").preset({})
 			-- https://github.com/VonHeikemen/lsp-zero.nvim
@@ -103,18 +104,21 @@ return {
 				return
 			end
 
-			lsp.on_attach(function(client, bufnr)
+			lsp.on_attach(
+			function(client, bufnr)
 				-- see :help lsp-zero-keybindings
 				-- to learn the available actions
-				lsp.default_keymaps({buffer = bufnr})
+				lsp.default_keymaps({ buffer = bufnr })
 
-				local opts = {buffer = bufnr}
+				local opts = { buffer = bufnr }
 
-				vim.keymap.set('n', 'gd', '<cmd>Telescope lsp_definitions<cr>', opts)
+				-- vim.keymap.set('n', 'gd', '<cmd>Telescope lsp_definitions<cr>', opts)
+				vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', opts)
 				vim.keymap.set('n', 'gi', '<cmd>Telescope lsp_implementations<cr>', opts)
 				vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', opts)
 
-			end)
+			end
+			)
 			--
 			-- https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
 			lsp.omnifunc.setup({
@@ -251,9 +255,11 @@ return {
 				cmp_action = cmp_action,
 				snippet = {
 					-- REQUIRED - you must specify a snippet engine
+					-- [lsp-zero will setup for you](https://github.com/VonHeikemen/lsp-zero.nvim/blob/v2.x/doc/md/autocomplete.md#add-an-external-collection-of-snippets)
 					expand = function(args)
-						vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-						-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+						-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+						-- LuaSnips supports LSP snippets
+						require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
 						-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
 						-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
 					end,
@@ -275,15 +281,16 @@ return {
 					['<C-n>']     = cmp.mapping.select_next_item( cmp_select ),
 				}),
 				sources = cmp.config.sources({
-					{ name = 'nvim_lsp' },
-					{ name = 'vsnip' }, -- For vsnip users.
-					-- { name = 'luasnip' }, -- For luasnip users.
-					-- { name = 'ultisnips' }, -- For ultisnips users.
-					-- { name = 'snippy' }, -- For snippy users.
-					},
-					{
-					{ name = 'buffer' },
-				})
+				{ name = 'nvim_lsp' },
+				-- { name = 'vsnip' }, -- For vsnip users.
+				{ name = 'luasnip' }, -- For luasnip users.
+				-- { name = 'ultisnips' }, -- For ultisnips users.
+				-- { name = 'snippy' }, -- For snippy users.
+				},
+				{
+				{ name = 'buffer' },
+				}
+				)
 			})
 			-- Set configuration for specific filetype.
 			cmp.setup.filetype('gitcommit', {
@@ -350,6 +357,53 @@ return {
 			{ "b0o/schemastore.nvim" },
 		},
 		config = function(_, _)
+			local function on_attach(client, bufnr)
+				local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+				local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+				buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+				local opts = {buffer = bufnr}
+
+				vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
+				vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+				vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
+				vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
+				vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+				vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+				vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
+				vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
+				vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
+
+				vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+
+				vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+				vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
+				vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
+
+				-- Set some keybinds conditional on server capabilities
+				-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+				-- if client.resolved_capabilities.document_formatting then
+				if client.server_capabilities.documentFormattingProvider then
+					buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+					-- elseif client.resolved_capabilities.document_range_formatting then
+				elseif client.server_capabilities.documentRangeFormattingProvider then
+					buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+				end
+
+				-- Set autocommands conditional on server_capabilities
+				-- if client.resolved_capabilities.document_highlight then
+				if client.server_capabilities.documentHighlightProvider then
+					vim.api.nvim_exec([[
+					augroup lsp_document_highlight
+					autocmd! * <buffer>
+					autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+					autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+					augroup END
+					]], false)
+				end
+			end
+			local servers = { "jsonls", "lua_ls", "glint", "pyright", "ruff_lsp", 'rust_analyzer', "tsserver", "cssls" }
 			-- Comment this out for debugging
 			vim.lsp.set_log_level("off")
 			local lspzero = require("lspconfig.lsp-zero").setup()
@@ -405,7 +459,8 @@ return {
 			--  "jsonls",
 			-- })
 			local inlay = require("lspconfig.inlay").setup()
-			lsp.on_attach(function(client, bufnr)
+			lsp.on_attach(
+			function(client, bufnr)
 				lsp.default_keymaps({
 					buffer = bufnr,
 					preserve_mappings = false,
@@ -427,7 +482,8 @@ return {
 					vim.lsp.handlers['signature_help'],
 					{ border = 'single', close_events = { "CursorMoved", "BufHidden", "InsertCharPre" } }
 				)
-			end)
+			end
+			)
 			lsp.set_sign_icons({
 				-- error = "",
 				error = "o",
