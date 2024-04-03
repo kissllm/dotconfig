@@ -1,3 +1,7 @@
+--
+--
+-- [lsp_definitions doesn't work for builtins and deps in Deno LSP #2768](https://github.com/nvim-telescope/telescope.nvim/issues/2768)
+-- https://nvimluau.dev/nvim-telescope-telescope-nvim
 -- https://github.com/nvim-telescope/telescope.nvim/blob/master/doc/telescope.txt
 -- https://vimawesome.com/plugin/telescope-nvim-care-of-itself
 -- https://medium.com/@shaikzahid0713/telescope-333594836896
@@ -9,16 +13,23 @@
 -- Added these plugins to install Telescope
 
 -- local U = require('utils')
-
+-- :Telescope treesitter
+-- :checkhealth telescope
 return {
 	'nvim-telescope/telescope.nvim',
+	-- branch = '0.1.x',
+	-- branch = '0.1.x',
+	tag = '0.1.6',
+	-- branch = 'master',
 	event = "VeryLazy",
 	lazy = true,
 	-- lazy = false,
+	cond = true,
+	-- cond = false,
 	dependencies = {
 		{ 'nvim-lua/plenary.nvim' },
 		{ 'BurntSushi/ripgrep' },
-		{ 'sharkdp/fd' },
+		-- { 'sharkdp/fd' },
 		{
 			'nvim-telescope/telescope-fzf-native.nvim',
 			build = "make",
@@ -37,33 +48,171 @@ return {
 		-- Converted from "after" keyword
 		{ 'neovim/nvim-lspconfig' },
 		{ "nvim-treesitter/nvim-treesitter" },
+		-- For lsp_capabilities
+		-- { 'hrsh7th/nvim-cmp' },
+		-- { "hrsh7th/cmp-nvim-lsp" },
+		-- { "hrsh7th/cmp-nvim-lsp-signature-help" },
+		{ "gbrlsnchs/telescope-lsp-handlers.nvim" },
+		--{ "Slotos/telescope-lsp-handlers.nvim" },
 	},
 	-- Lazy does not know it
-	-- after = {
-	--  'nvim-lspconfig',
-	--  'nvim-treesitter',
-	-- },
-	cmd = 'Telescope',
+	after = {
+		'nvim-lspconfig',
+		'nvim-treesitter',
+	},
+	-- https://github.com/wbthomason/packer.nvim/issues/781
+	-- Remove cmd = "Telescope"
+	-- cmd = 'Telescope',
 	module = "telescope",
 	config = function()
+		-- This shows lsp.lua never work?
+		-- local lspzero = require('lspconfig.lsp-zero').setup()
+		-- This is a nil value
+		-- local lspconfig = lspzero["lsp"]
+		local lspconfig = require('lspconfig')
+
+		-- local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+		-- lspconfig.clangd.setup {}
+		-- local lua_ls = require("lspconfig.lua_ls")
+		-- lua_ls.setup {
+		-- 	-- settings = {
+		-- 	-- lspzero = lspzero,
+		-- 	lsp = lsp,
+		-- 	capabilities = lsp_capabilities,
+		-- 	lua = {
+		-- 		format = {
+		-- 			enable = true,
+		-- 			defaultConfig = {
+		-- 				indent_style = "space",
+		-- 				indent_size = "2",
+		-- 				align_continuous_assign_statement = false,
+		-- 				align_continuous_rect_table_field = false,
+		-- 				align_array_table = false
+		-- 			},
+		-- 		},
+		-- 		-- https://github.com/folke/neodev.nvim
+		-- 		completion = {
+		-- 			callSnippet = "Replace"
+		-- 		},
+		-- 		runtime = {
+		-- 			-- LuaJIT in the case of Neovim
+		-- 			version = 'LuaJIT',
+		-- 			path = vim.split(package.path, ';'),
+		-- 		},
+		-- 		diagnostics = {
+		-- 			globals = { 'vim' }
+		-- 		},
+		-- 		workspace = {
+		-- 			-- Make the server aware of Neovim runtime files
+		-- 			library = {
+		-- 				[vim.fn.expand('$VIMRUNTIME/lua')] = true,
+		-- 			[vim.fn.stdpath("config") .. "/lua"] = true,
+		-- 				[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+		-- 			},
+		-- 		},
+
+		-- 	},
+		-- 	single_file_support = false,
+		-- 	on_attach = on_attach
+		-- 	-- on_attach = function(client, bufnr)
+		-- 	--      --  print('hello world')
+		-- 	--      -- end,
+		-- 	-- },
+		-- }
+
+		lspconfig.on_attach = function(client, bufnr)
+			-- see :help lsp-zero-keybindings
+			-- to learn the available actions
+			lspconfig.default_keymaps({ buffer = bufnr })
+
+			local opts = { buffer = bufnr }
+
+			-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', opts)
+			vim.keymap.set('n', 'gd', '<cmd>Telescope lsp_definitions<cr>', opts)
+			vim.keymap.set('n', 'gi', '<cmd>Telescope lsp_implementations<cr>', opts)
+			vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', opts)
+			vim.keymap.set('n', 'gC', '<cmd>Telescope lsp_document_symbols<cr>', opts)
+
+			local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+			local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+			buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+			local opts = { buffer = bufnr }
+			vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
+			-- vim.keymap.set('n',  '<leader>d',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+			vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+			vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
+			vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
+			vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+			-- vim.keymap.set('n',  '<leader>r',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+			vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+			vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
+			vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
+			vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
+
+			vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+
+			vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+			vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
+			vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
+
+			-- Set some keybinds conditional on server capabilities
+			-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+			-- if client.resolved_capabilities.document_formatting then
+			if client.server_capabilities.documentFormattingProvider then
+				buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+				-- elseif client.resolved_capabilities.document_range_formatting then
+			elseif client.server_capabilities.documentRangeFormattingProvider then
+				buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+			end
+
+			-- Set autocommands conditional on server_capabilities
+			-- if client.resolved_capabilities.document_highlight then
+			if client.server_capabilities.documentHighlightProvider then
+				vim.api.nvim_exec([[
+augroup lsp_document_highlight
+	autocmd! * <buffer>
+	autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+	autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+augroup END
+				]], false)
+			end
+
+			local caps = client.server_capabilities
+			if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+				local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
+				vim.api.nvim_create_autocmd("TextChanged", {
+					group = augroup,
+					buffer = bufnr,
+					callback = function()
+						vim.lsp.buf.semantic_tokens_full()
+					end,
+				})
+				-- fire it first time on load as well
+				-- vim.lsp.buf.semantic_tokens_full()
+			end
+		end
+
 		local U = require('utils')
+		local map = U.map
 		-- https://github.com/nvim-telescope/telescope.nvim/blob/master/plugin/telescope.lua
 		local colors = require("catppuccin.palettes").get_palette()
 		-- local colors = require("onehalf-lush").get_palette()
 		local TelescopeColor = {
 			TelescopeMatching      = { fg = colors.flamingo },
-			TelescopeSelection     = { fg = colors.text, bg = colors.surface0, bold = true },
+			TelescopeSelection     = { bg = colors.surface0, fg = colors.text, bold = true },
 
 			TelescopePromptPrefix  = { bg = colors.surface0 },
 			TelescopePromptNormal  = { bg = colors.surface0 },
 			TelescopeResultsNormal = { bg = colors.mantle },
 			TelescopePreviewNormal = { bg = colors.mantle },
-			TelescopePromptBorder  = { bg = colors.surface0, fg = colors.surface0 },
-			TelescopeResultsBorder = { bg = colors.mantle, fg = colors.mantle },
-			TelescopePreviewBorder = { bg = colors.mantle, fg = colors.mantle },
-			TelescopePromptTitle   = { bg = colors.pink, fg = colors.mantle },
 			TelescopeResultsTitle  = { fg = colors.mantle },
-			TelescopePreviewTitle  = { bg = colors.green, fg = colors.mantle },
+			TelescopePromptBorder  = { bg = colors.surface0, fg = colors.surface0 },
+			TelescopeResultsBorder = { bg = colors.mantle,   fg = colors.mantle },
+			TelescopePreviewBorder = { bg = colors.mantle,   fg = colors.mantle },
+			TelescopePromptTitle   = { bg = colors.pink,     fg = colors.mantle },
+			TelescopePreviewTitle  = { bg = colors.green,    fg = colors.mantle },
 		}
 
 		for hl, col in pairs(TelescopeColor) do
@@ -73,6 +222,7 @@ return {
 		-- Put this pcall outside return will end up with include this file per se
 		local status_ok, telescope = pcall(require, "telescope")
 		if not status_ok then
+			print("telescope pcall failed")
 			return
 		end
 		--
@@ -89,56 +239,59 @@ return {
 		local lga_actions  = require("telescope-live-grep-args.actions")
 		-- $HOME/.local/share/nvim/lazy
 		local cwd          = require("lazy.core.config").options.root
+		telescope.load_extension("lsp_handlers")
+		telescope.load_extension("live_grep_args")
+		telescope.load_extension("undo")
 		-- require("telescope").setup()
 		telescope.setup {
 
 			-- https://www.lazyvim.org/configuration/examples
 			-- https://www.reddit.com/r/neovim/comments/11m3575/howwhere_to_set_plugin_keymaps_with_lazynvim/
-			keys = {
-				-- add a keymap to browse plugin files
-				-- stylua: ignore
-				{
-					-- "<leader>ff",
-					"<leader>fp",
-					function() builtin.find_files({ cwd = cwd }) end,
-					desc = "Find Plugin File",
-				},
-				{
-					"<leader>fg",
-					function() builtin.live_grep({ cwd = cwd }) end,
-					desc = "Find String in Files",
-				},
-				{
-					"<leader>fb",
-					function() builtin.buffers({ cwd = cwd }) end,
-					desc = "Find String in Buffers",
-				},
-				{
-					"<leader>fh",
-					function() builtin.help_tags({ cwd = cwd }) end,
-					desc = "Find Help Tags",
-				},
-				-- https://www.reddit.com/r/neovim/comments/zko4tf/difficulty_loading_telescopenvim_lazy_or_eager/
-				{
-					"gd",
-					function() builtin.lsp_definitions({ cwd = cwd }) end,
-					desc = "Find lsp definitions",
-				},
-				{
-					"gy",
-					function() builtin.lsp_type_definitions({ cwd = cwd }) end,
-					desc = "Find lsp type definitions",
-				},
-				{
-					"gr",
-					function() builtin.lsp_references({ cwd = cwd }) end,
-					desc = "Find lsp references",
-				},
-			},
-			-- telescope.setup{
-			--
+			-- keys = {
+			-- 	-- add a keymap to browse plugin files
+			-- 	-- stylua: ignore
+			-- 	{
+			-- 		-- "<leader>ff",
+			-- 		"<leader>fp",
+			-- 		function() builtin.find_files({ cwd = cwd }) end,
+			-- 		desc = "Find Plugin File",
+			-- 	},
+			-- 	{
+			-- 		"<leader>fg",
+			-- 		function() builtin.live_grep({ cwd = cwd }) end,
+			-- 		desc = "Find String in Files",
+			-- 	},
+			-- 	{
+			-- 		"<leader>fb",
+			-- 		function() builtin.buffers({ cwd = cwd }) end,
+			-- 		desc = "Find String in Buffers",
+			-- 	},
+			-- 	{
+			-- 		"<leader>fh",
+			-- 		function() builtin.help_tags({ cwd = cwd }) end,
+			-- 		desc = "Find Help Tags",
+			-- 	},
+			-- 	-- https://www.reddit.com/r/neovim/comments/zko4tf/difficulty_loading_telescopenvim_lazy_or_eager/
+			-- 	{
+			-- 		"gd",
+			-- 		function() builtin.lsp_definitions({ cwd = cwd }) end,
+			-- 		desc = "Find lsp definitions",
+			-- 	},
+			-- 	{
+			-- 		"gy",
+			-- 		function() builtin.lsp_type_definitions({ cwd = cwd }) end,
+			-- 		desc = "Find lsp type definitions",
+			-- 	},
+			-- 	{
+			-- 		"gr",
+			-- 		function() builtin.lsp_references({ cwd = cwd }) end,
+			-- 		desc = "Find lsp references",
+			-- 	},
+			-- },
+
 			opts = {
 				defaults = {
+					selection_strategy   = "closest",
 					-- Default configuration for telescope goes here:
 					-- config_key = value,
 					-- https://lee-phillips.org/nvimTelescopeConfig/
@@ -155,18 +308,20 @@ return {
 					-- layout_strategy      = 'vertical',
 					layout_config        = {
 						-- vertical = { width = 0.7 },
-						horizontal      = { height = 0.999 },
-						prompt_position = 'top',
+						horizontal       = { height = 0.999 },
+						prompt_position  = 'top',
 						-- prompt_position     = 'left',
 						-- prompt_position     = 'bottom',
 						-- preview_cutoff   = 10,
-						preview_cutoff  = 0,
+						preview_cutoff   = 0,
 						-- height              = 0.999,
-						height          = { padding = 0 },
-						width           = { padding = 0 },
+
+						-- height           = { padding = 0 },
+						-- width            = { padding = 0 },
+
 						-- height              = 1,
 						-- width               = 1,
-						preview_width   = 0.67,
+						preview_width    = 0.67,
 						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
 						-- width = function(_, cols, _)
 						--  if cols > 200 then
@@ -175,7 +330,7 @@ return {
 						--      return math.floor(cols * 0.87)
 						--  end
 						-- end,
-						width           = function(_, max_columns)
+						width            = function(_, max_columns)
 							-- local percentage = 0.95
 							local percentage = 1
 							local max = 900
@@ -188,9 +343,25 @@ return {
 							local min = 900
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
+						center = {
+							width = function(_, max_columns)
+								-- local percentage = 0.95
+								local percentage = 1
+								local max = 900
+								-- return math.min(math.floor(percentage * max_columns), max)
+								return math.max(math.floor(percentage * max_columns), max)
+							end,
+							height = function(_, _, max_lines)
+								-- local percentage = 0.95
+								local percentage = 1
+								local min = 900
+								return math.max(math.floor(percentage * max_lines), min)
+							end,
+						},
 					},
 					sorting_strategy     = 'ascending',
 					winblend             = 0,
+
 
 					mappings             = {
 						i = {
@@ -259,9 +430,10 @@ return {
 							-- https://www.reddit.com/r/neovim/comments/qspemc/close_buffers_with_telescope/
 							['<c-d>']      = actions.delete_buffer,
 						},
-					}
+					},
 				},
 			},
+
 			pickers = {
 				-- Default configuration for builtin pickers goes here:
 				-- picker_name = {
@@ -490,21 +662,6 @@ return {
 					},
 				},
 			},
-			center = {
-				width = function(_, max_columns)
-					-- local percentage = 0.95
-					local percentage = 1
-					local max = 900
-					-- return math.min(math.floor(percentage * max_columns), max)
-					return math.max(math.floor(percentage * max_columns), max)
-				end,
-				height = function(_, _, max_lines)
-					-- local percentage = 0.95
-					local percentage = 1
-					local min = 900
-					return math.max(math.floor(percentage * max_lines), min)
-				end,
-			},
 
 			extensions = {
 				-- Your extension configuration goes here:
@@ -540,38 +697,177 @@ return {
 						},
 					},
 				},
-			}
+
+				-- https://github.com/gbrlsnchs/telescope-lsp-handlers.nvim
+				lsp_handlers = {
+					disable = {},
+					location = {
+						telescope = {},
+						no_results_message = 'No references found',
+					},
+					symbol = {
+						telescope = {},
+						no_results_message = 'No symbols found',
+					},
+					call_hierarchy = {
+						telescope = {},
+						no_results_message = 'No calls found',
+					},
+					code_action = {
+						telescope = {},
+						no_results_message = 'No code actions available',
+						prefix = '',
+					},
+				},
+
+			},
 		}
 		-- require("telescope").load_extension("live_grep_args")
 		-- telescope.load_extension("fzf")
-		telescope.load_extension("live_grep_args")
-		telescope.load_extension("undo")
 		local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 		-- vim.keymap.set("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
-		U.map("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
+		map("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
 
-		-- [telescope.builtin.lsp_*]: no client attached
-		-- U.map("n", "gd", function() builtin.lsp_definitions     ({ cwd = cwd }) end, { noremap = true, silent = true })
-		-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', opts)
-		-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', { noremap = true, silent = true })
-		U.map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, { noremap = true, silent = true })
-		U.map("n", "gr", function() builtin.lsp_references      ({ cwd = cwd }) end, { noremap = true, silent = true })
+		-- USE_TELESCOPE_GOTO=1
 
-		U.map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end, { noremap = true, silent = true })
-		U.map("n", "<leader>fg", function() builtin.live_grep ({ cwd = cwd }) end, { noremap = true, silent = true })
-		U.map("n", "<leader>fb", function() builtin.buffers   ({ cwd = cwd }) end, { noremap = true, silent = true })
-		U.map("n", "<leader>fh", function() builtin.help_tags ({ cwd = cwd }) end, { noremap = true, silent = true })
+		if USE_TELESCOPE_GOTO ~= nil then
 
-		-- https://git.osdec.gov.my/hardynobat/my-dot-config/-/blob/master/init.lua.lazy
-		-- vim.api.nvim_set_keymap('n', '<leader><space>', [[<cmd>lua require('telescope.builtin').buffers()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>ff', [[<cmd>lua require('telescope.builtin').find_files()<CR>]], { noremap = true, silent = true})
-		-- vim.api.nvim_set_keymap('n', '<leader>fb', [[<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>fh', [[<cmd>lua require('telescope.builtin').help_tags()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>ft', [[<cmd>lua require('telescope.builtin').tags()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>fd', [[<cmd>lua require('telescope.builtin').grep_string()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>fp', [[<cmd>lua require('telescope.builtin').live_grep()<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>fo', [[<cmd>lua require('telescope.builtin').tags{ only_current_buffer = true }<CR>]], { noremap = true, silent = true })
-		-- vim.api.nvim_set_keymap('n', '<leader>?', [[<cmd>lua require('telescope.builtin').oldfiles()<CR>]], { noremap = true, silent = true })
+			-- [telescope.builtin.lsp_*]: no client attached
+			map("n", "gd", function() builtin.lsp_definitions     ({ cwd = cwd }) end, { noremap = true, silent = true })
+			-- map("n", "gd", [[<cmd>lua require('telescope.builtin').lsp_definitions({ cwd = require("lazy.core.config").options.root })<cr>]], { noremap = true, silent = true })
+			-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', [[<cmd>Telescope lsp_definitions<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>Telescope lsp_definitions<CR>', { noremap = true, silent = true })
+
+			map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, { noremap = true, silent = true })
+
+			-- map("n", "gy", function() require("telescope.builtin").lsp_type_definitions({ cwd = require("lazy.core.config").options.root }) end, { noremap = true, silent = true })
+
+			map("n", "gr", function() builtin.lsp_references      ({ cwd = cwd }) end, { noremap = true, silent = true })
+
+			-- map("n", "gr", function() require("telescope.builtin").lsp_references({ cwd = require("lazy.core.config").options.root }) end, { noremap = true, silent = true })
+			-- map("n", "gr", function() require("telescope-bibtex.actions").bibtex ({ cwd = require("lazy.core.config").options.root }) , { noremap = true, silent = true })
+
+			-- map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end, { noremap = true, silent = true })
+			-- map("n", "<leader>fg", function() builtin.live_grep ({ cwd = cwd }) end, { noremap = true, silent = true })
+			-- map("n", "<leader>fb", function() builtin.buffers   ({ cwd = cwd }) end, { noremap = true, silent = true })
+			-- map("n", "<leader>fh", function() builtin.help_tags ({ cwd = cwd }) end, { noremap = true, silent = true })
+
+			-- https://git.osdec.gov.my/hardynobat/my-dot-config/-/blob/master/init.lua.lazy
+			-- vim.api.nvim_set_keymap('n', '<leader><space>', [[<cmd>lua require('telescope.builtin').buffers()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>ff', [[<cmd>lua require('telescope.builtin').find_files()<CR>]], { noremap = true, silent = true})
+			-- vim.api.nvim_set_keymap('n', '<leader>fb', [[<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>fh', [[<cmd>lua require('telescope.builtin').help_tags()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>ft', [[<cmd>lua require('telescope.builtin').tags()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>fd', [[<cmd>lua require('telescope.builtin').grep_string()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>fp', [[<cmd>lua require('telescope.builtin').live_grep()<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>fo', [[<cmd>lua require('telescope.builtin').tags{ only_current_buffer = true }<CR>]], { noremap = true, silent = true })
+			-- vim.api.nvim_set_keymap('n', '<leader>?', [[<cmd>lua require('telescope.builtin').oldfiles()<CR>]], { noremap = true, silent = true })
+		else
+			map('n',  'gd', function() vim.lsp.buf.definition     ({ cwd = cwd }) end, { noremap = true, silent = true })
+			map('n',  'gD', function() vim.lsp.buf.declaration    ({ cwd = cwd }) end, { noremap = true, silent = true })
+			map('n',  'gr', function() vim.lsp.buf.references     ({ cwd = cwd }) end, { noremap = true, silent = true })
+			-- map('n',  'gr', '<cmd>lua vim.lsp.buf.references()<cr>', { noremap = true, silent = true })
+
+		end
+
+		vim.api.nvim_create_autocmd('LspAttach', {
+			desc = 'LSP actions',
+			group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
+			pattern = "*",
+			callback = function(args)
+				local opts = { buffer = args.buf }
+				local U = require('utils')
+				local map = U.map
+				map("n", "<leader>a", vim.lsp.buf.code_action, opts)
+
+				if USE_TELESCOPE_GOTO ~= nil then
+					local builtin = require("telescope.builtin")
+					local cwd = require("lazy.core.config").options.root
+					-- Defined in telescope.lua
+					map("n", "gd", function() builtin.lsp_definitions     ({ cwd = cwd }) end, opts)
+					map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, opts)
+					map("n", "gr", function() builtin.lsp_references      ({ cwd = cwd }) end, opts)
+
+					map("n", "<leader>ff", function() builtin.find_files  ({ cwd = cwd }) end, opts)
+					map("n", "<leader>fg", function() builtin.live_grep   ({ cwd = cwd }) end, opts)
+					map("n", "<leader>fb", function() builtin.buffers     ({ cwd = cwd }) end, opts)
+					map("n", "<leader>fh", function() builtin.help_tags   ({ cwd = cwd }) end, opts)
+				end
+				map({ "n", "x" }, "<leader>f", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
+				map({ "n", "x" }, "gq", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
+				map("n", "K", vim.lsp.buf.hover, opts)
+				map("i", "<C-k>", vim.lsp.buf.signature_help, opts)
+				map("n", "<leader>r", vim.lsp.buf.rename, opts)
+
+				local bufnr = args.buf
+				-- local bufnr = vim.fn.winbufnr(0)
+				-- local client = args.client
+				-- local client = vim.lsp.buf_get_clients()
+				local client = vim.lsp.get_client_by_id(args.data.client_id)
+				local function buf_set_keymap(...) vim.keymap.set(...) end
+				local function buf_set_option(name, value) vim.api.nvim_set_option_value(name, value, { buf = args.buf }) end
+
+				buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+				local opts = { buffer = bufnr }
+				vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
+				-- vim.keymap.set('n',  '<leader>d',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+				vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+				vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
+				vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
+				vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+				-- vim.keymap.set('n',  '<leader>r',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+				vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+				vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
+				vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
+				vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
+
+				vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+
+				vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+				vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
+				vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
+
+				-- Set some keybinds conditional on server capabilities
+				-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+				-- if client.resolved_capabilities.document_formatting then
+				if client.server_capabilities.documentFormattingProvider then
+					buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+					-- elseif client.resolved_capabilities.document_range_formatting then
+				elseif client.server_capabilities.documentRangeFormattingProvider then
+					buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+				end
+
+				-- Set autocommands conditional on server_capabilities
+				-- if client.resolved_capabilities.document_highlight then
+				if client.server_capabilities.documentHighlightProvider then
+					vim.api.nvim_exec([[
+augroup lsp_document_highlight
+	autocmd! * <buffer>
+	autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+	autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+augroup END
+					]], false)
+				end
+
+				local caps = client.server_capabilities
+				if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+					local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
+					vim.api.nvim_create_autocmd("TextChanged", {
+						group = augroup,
+						buffer = bufnr,
+						callback = function()
+							-- vim.lsp.buf.semantic_tokens_full()
+							vim.lsp.semantic_tokens.force_refresh()
+						end,
+					})
+					-- fire it first time on load as well
+					-- vim.lsp.buf.semantic_tokens_full()
+					vim.lsp.semantic_tokens.force_refresh()
+				end
+
+			end,
+		})
 
 
 		-- return telescope

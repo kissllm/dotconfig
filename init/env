@@ -26,6 +26,11 @@ SCRIPT_NAME="env" && export SCRIPT_NAME
 #   }
 # }
 
+# compiler_version="$($cc --version | grep version | awk -F " " '{print $NF}')"
+compiler_version="$(llvm-config --version | tr -d '[:alpha:]')"
+export C_INCLUDE_PATH="/usr/lib/clang/$compiler_version/include:/usr/include"
+export CPLUS_INCLUDE_PATH="/usr/include/c++/v1/:/usr/lib/clang/$compiler_version/include:/usr/include"
+
 # user="$(id -nu)"
 # [ "$USER" = "$user" ] || USER="$user" && export USER
 // env_reset USER "$(id -nu)"
@@ -35,6 +40,7 @@ path_prepend PATH "$SHARE_PREFIX/init"
 # echo "\$TERM = $TERM"
 #
 set_font() {
+	local font_size="$1"
 # Set font when running in console. For hidpi screen
 # If you want to change font in tmux, just detach it and attach again
 	# { [ "$TERM" = "linux" ] || [ -z "${TERM##*"vt"*}" ]; } || return 0
@@ -43,30 +49,30 @@ set_font() {
 		*"tty"*)
 			# This case doesn't mean it is realy a tty, jist can run setfont on it
 			# Bright(and fat face)  Normal
-			# ter-v24b.psf.gz       ter-v24n.psf.gz
+			# ter-v${font_size}b.psf.gz       ter-v${font_size}n.psf.gz
 			font=
 			# terminus-font
-			if [ -f "/mnt/setfont/ter-v24n.psf.gz" ]; then
-				font="/mnt/setfont/ter-v24n.psf.gz"
-			elif [ -f "/mnt/setfont/consolefonts/ter-v24n.psf.gz" ]; then
-				font="/mnt/setfont/consolefonts/ter-v24n.psf.gz"
+			if [ -f "/mnt/setfont/ter-v${font_size}n.psf.gz" ]; then
+				font="/mnt/setfont/ter-v${font_size}n.psf.gz"
+			elif [ -f "/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz" ]; then
+				font="/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz"
 			else
-				consolefonts="$(find /mnt/setfont -type d -name \
+				fonts_dir="$(find /mnt/setfont -type d -name \
 					"consolefonts" 2> /dev/null)"
-				[ -n "${consolefonts:+x}" ] ||
+				[ -n "${fonts_dir:+x}" ] ||
 				# Might be permission denied
-				consolefonts="$(find /usr/share -type d -name \
+				fonts_dir="$(find /usr/share -type d -name \
 					"consolefonts" 2> /dev/null)"
-				# consolefonts="/usr/share/consolefonts"
-				# consolefonts="/usr/share/kdb/consolefonts"
+				# fonts_dir="/usr/share/consolefonts"
+				# fonts_dir="/usr/share/kdb/consolefonts"
 
-				[ -n "${consolefonts:+x}" ] || return 0
-				if  [ -f "$consolefonts/ter-v24n.psf.gz" ]; then
-					font="$consolefonts/ter-v24n.psf.gz"
-					# font="${consolefonts}/ter-v28b.psf.gz"
+				[ -n "${fonts_dir:+x}" ] || return 0
+				if  [ -f "$fonts_dir/ter-v${font_size}n.psf.gz" ]; then
+					font="$fonts_dir/ter-v${font_size}n.psf.gz"
+					# font="${fonts_dir}/ter-v28b.psf.gz"
 					# Use default font
-				elif [ -f "$consolefonts/LatGrkCyr-12x22.psfu.gz" ]; then
-					font="$consolefonts/LatGrkCyr-12x22.psfu.gz"
+				elif [ -f "$fonts_dir/LatGrkCyr-12x22.psfu.gz" ]; then
+					font="$fonts_dir/LatGrkCyr-12x22.psfu.gz"
 				fi
 			fi
 			[ -z "${font:+x}" ] || {
@@ -81,7 +87,7 @@ set_font() {
 }
 
 { [ "$TERM" != "linux" ] && [ -n "${TERM##*"vt"*}" ]; } ||
-[ -n "${TMUX+x}" ] || set_font
+[ -n "${TMUX+x}" ] || set_font 22
 
 [ ! -d "/usr/share/easy-rsa" ] ||
 path_prepend PATH "/usr/share/easy-rsa"
@@ -132,7 +138,7 @@ export LC_NUMERIC="en_US.UTF-8"
 export LC_TIME="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-export LESS="-RX"
+export LESS="${LESS-} -RX"
 
 [ -d "${TMP}" ] || mkdir "${TMP}"
 
@@ -220,10 +226,17 @@ path_prepend PATH "."
 # So don't use the log functions until user_output and pipes/listeners are ready
 
 # [ "$KISS_TMPDIR" = "/tmp/$USER/kiss" ] || KISS_TMPDIR="/tmp/$USER/kiss" && export KISS_TMPDIR
-// env_reset KISS_TMPDIR "/tmp/$USER/kiss"
+: ${KISS_TMPDIR:="/tmp/$USER/kiss"} && export KISS_TMPDIR
+# : "${ERR_OUTPUT:="$KISS_TMPDIR/logs/err.log"}"      && export ERR_OUTPUT
+// env_reset ERR_OUTPUT   "$KISS_TMPDIR/logs/err.log"
+# : "${INIT_OUTPUT:="$KISS_TMPDIR/logs/init.log"}"  && export INIT_OUTPUT
+// env_reset INIT_OUTPUT  "$KISS_TMPDIR/logs/init.log"
+# : "${USER_OUTPUT:="$KISS_TMPDIR/logs/build.log"}" && export USER_OUTPUT
+// env_reset USER_OUTPUT  "$KISS_TMPDIR/logs/build.log"
 # [ "$CACHE_ROOT" = "/tmp" ] || CACHE_ROOT="/tmp" && export CACHE_ROOT
 # // env_reset CACHE_ROOT "/dev/shm"
-// env_reset MNGR_ROOT "/working/os/kiss"
+[ ! -z "${MNGR_ROOT:+x}" ] ||
+// env_reset MNGR_ROOT    "$SHARE_PREFIX/os/kiss"
 # : "${DEBUG_AT_BACKGROUND=}"
 # [ -d "$KISS_TMPDIR" ] || mkdir -p "$KISS_TMPDIR"
 # log_dir="$KISS_TMPDIR/logs"
@@ -242,12 +255,6 @@ path_prepend PATH "."
 # # alias kiss='. /usr/bin/kiss'
 # kiss() { (. /usr/bin/kiss "$@"); }
 # kiss() { ENV=/usr/include/kiss-share $SHELL; }
-# : "${ERR_OUTPUT:="$KISS_TMPDIR/logs/err.log"}"      && export ERR_OUTPUT
-// env_reset ERR_OUTPUT "$KISS_TMPDIR/logs/err.log"
-# : "${INIT_OUTPUT:="$KISS_TMPDIR/logs/init.log"}"  && export INIT_OUTPUT
-// env_reset INIT_OUTPUT "$KISS_TMPDIR/logs/init.log"
-# : "${USER_OUTPUT:="$KISS_TMPDIR/logs/build.log"}" && export USER_OUTPUT
-// env_reset USER_OUTPUT "$KISS_TMPDIR/logs/build.log"
 // env_reset SHELL_OPTIONS $(printf '%s' $-)
 export USE_SAY_PIPE=
 export KISS_AS_LIBRARY=
@@ -256,13 +263,19 @@ export KISS_AS_LIBRARY=
 [ -z "${KISS_AS_LIBRARY+x}" ] || {
 	# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
 	#   != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] &&
-	is_chrooted &&
+
+	# is_chrooted &&
+	#
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-; } ||
-	alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" ' ||
+
+	# alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" ' ||
+	alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" '
+
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-l; }
 
 	# alias kiss=' SHELL_OPTIONS=$- ENV=/usr/bin/kiss $SHELL -$-l "$@" '
-	alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-li "$@" '
+
+	# alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-li "$@" '
 }
 #
 # alias kiss='copy "$CACHE_ROOT";
@@ -618,6 +631,47 @@ export WAYLAND_CONFIG_HOME
 	set -a
 	. "${SHARE_PREFIX}/init/etc/chrome_dev.conf"
 	set +a
+}
+
+sway_socket() {
+	local launcher="${1-}"
+	[ -z "${launcher:+x}" ] ||
+	printf '%s %s\n' '$launcher' "$launcher [$LINENO : ashrc]"
+	# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
+	#   grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
+	# sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
+	#   grep -v swc-launch | sort -rnk3 | awk "{print \$1}" | tr -d " ")"
+	# # local index=0
+	# for sock_id in $sock_id_list; do
+	#    break
+	# done
+	[ -z "${WAYLAND_DISPLAY+x}" ] || {
+		printf '%s %s\n' '$SHLVL' "$SHLVL" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		export WAYLAND_DISPLAY
+		printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
+		printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
+	}
+	sock_id="$(for item in $( \
+	ps -ef | grep "sway -d" | grep -v "grep" | awk "{print \$2}" 2> /dev/null)
+	do
+		[ -z "$(pstree -p "$item" | grep "$item" | grep "sway" 2> /dev/null)" ] &&
+		continue || { printf '%s' "$item"; break; }
+	done)"
+
+	[ -n "${sock_id:+x}" ] || { printf '\n'; return 0; }
+
+	SWAY_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$UID.$sock_id.sock"
+	[ ! -S "$SWAY_SOCK" ] || {
+		export SWAY_SOCK
+		[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
+		printf '%s' "${SWAY_SOCK}" > /tmp/wayland/.socket
+
+		printf '%s %s\n' '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)"
+	}
+	[ -z "${DISPLAY+x}" ] || unset DISPLAY
+	printf "$RS%s" "$SWAY_SOCK"
 }
 
 # set ts=4 sw=4 tw=0 noet :

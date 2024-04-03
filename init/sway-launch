@@ -113,12 +113,12 @@ insure_groups() {
 	}
 }
 
-[ ! -z "${sock_sway+x}" ] ||
-sock_sway=
-[ ! -z "${launcher+x}" ] ||
-launcher="greeter"
+# [ ! -z "${sock_sway+x}" ] ||
+# sock_sway=
 
-[ -z "${DONT_USE_GREET=x}" ] && {
+[ -z "${DONT_USE_GREET+x}" ] && {
+	[ ! -z "${launcher+x}" ] ||
+	launcher="greeter"
 	insure_groups "dbus"
 	insure_groups "_seatd"
 	# [ ! -z "${IS_KISS+x}" ] ||
@@ -130,10 +130,10 @@ launcher="greeter"
 
 	# swc-launch is used in preference to dbus
 	launcher=$(which swc-launch 2> /dev/null || :)
-	printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
+	printf '%s %s\n' '$launcher' "$launcher [$LINENO : sway-launch]"
 	{ [ ! -z "${launcher:+x}" ] ||
 	command -v "$launcher" > /dev/null 2>&1; } && {
-		printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
+		# printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
 		# exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
 		eval "nohup \"$launcher\" -t /dev/tty7 -- /usr/bin/sway -d \
 			> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &"
@@ -141,7 +141,7 @@ launcher="greeter"
 			sock_sway="$(// delegate -- sway_socket "$launcher")"
 	} || {
 		launcher=$(which dbus-run-session 2> /dev/null || :)
-		printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
+		printf '%s %s\n' '$launcher' "$launcher [$LINENO : sway-launch]"
 		[ -z "${launcher:+x}" ] ||
 		command -v  "$launcher" > /dev/null 2>&1 && {
 			# https://github.com/microsoft/WSL/issues/7915

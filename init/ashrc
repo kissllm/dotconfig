@@ -393,50 +393,20 @@ LESS="-x4" && export LESS
 		. ${SHARE_PREFIX}/init/kiss-env
 }
 
+
+[ -z "${IS_KISS+x}" ] || export DONT_USE_GREET=
+
+designate_tty=7
+
+# [ ! -z "${DONT_USE_GREET+x}" ] && designate_tty=7 || {
+[ ! -z "${DONT_USE_GREET+x}" ] ||
+	launcher="greeter" # designate_tty=1
+
 sock_sway=
-launcher="greeter"
 
-sway_socket() {
-	local launcher="${1-}"
-	[ -z "${launcher:+x}" ] ||
-	printf '%s %s\n' '$launcher' "$launcher"
-	# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
-	#   grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
-	# sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
-	#   grep -v swc-launch | sort -rnk3 | awk "{print \$1}" | tr -d " ")"
-	# # local index=0
-	# for sock_id in $sock_id_list; do
-	#    break
-	# done
-	[ -z "${WAYLAND_DISPLAY+x}" ] || {
-		printf '%s %s\n' '$SHLVL' "$SHLVL" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-		printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-		export WAYLAND_DISPLAY
-		printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
-		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
-		printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
-	}
-	sock_id="$(for item in $( \
-	ps -ef | grep "sway -d" | grep -v "grep" | awk "{print \$2}" 2> /dev/null)
-	do
-		[ -z "$(pstree -p "$item" | grep "$item" | grep "sway" 2> /dev/null)" ] &&
-		continue || { printf '%s' "$item"; break; }
-	done)"
-
-	[ -n "${sock_id:+x}" ] || { printf '\n'; return 0; }
-
-	SWAY_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$UID.$sock_id.sock"
-	[ ! -S "$SWAY_SOCK" ] || {
-		export SWAY_SOCK
-		[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
-		printf '%s' "${SWAY_SOCK}" > /tmp/wayland/.socket
-
-		printf '%s %s\n' '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)"
-	}
-	[ -z "${DISPLAY+x}" ] || unset DISPLAY
-	printf "$RS%s" "$SWAY_SOCK"
-}
-
+# sway_socket() was put into ${SHARE_PREFIX}/init/env
+# Otherwise you will get "sway_socket: not found" in sway-launch
+#
 # printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 # printf '%s %s\n' '$DISPLAY' "$DISPLAY"
 
@@ -445,10 +415,6 @@ sway_socket() {
 # tty_nme might not a number on pts
 tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 # export tty_num
-
-[ -z "${IS_KISS+x}" ] || DONT_USE_GREET=
-[ -z "${DONT_USE_GREET=x}" ] && designate_tty=7 ||
-designate_tty=1
 
 # Initialize wayland
 # [ "$XDG_SESSION_TYPE" = "wayland" ] ||

@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash?page=1&tab=votes#tab-top
@@ -14,12 +14,12 @@ usage()
 		[--verbose] [--dry-run]
 
 	optional arguments:
-		-h, --help							show this help message and exit
-		-v, --verbose						increase the verbosity of the bash script
-		-g, --group_rename GROUP_RENAME		pass in a group name ("users", "audio", etc.)
+		-h, --help                          show this help message and exit
+		-v, --verbose                       increase the verbosity of the bash script
+		-g, --group_rename GROUP_RENAME     pass in a group name ("users", "audio", etc.)
 		-s, --others_include OTHERS_INCLUDE pass in a OTHERS_INCLUDE number (1 or 0)
-		-T, --time TIME_STR					pass in a time string
-		--dry-run							do a dry run, dont change any files
+		-T, --time TIME_STR                 pass in a time string
+		--dry-run                           do a dry run, dont change any files
 
 HEREDOC
 }
@@ -32,8 +32,8 @@ OTHERS_INCLUDE=1
 time_str=
 GROUP_RENAME=
 
-# use getopt and store the output into $OPTS
-# note the use of -o for the short options, --long for the long name options
+# Use getopt and store the output into $OPTS
+# Note the use of -o for the short options, --long for the long name options
 # and a : for any option that takes a parameter
 OPTS=$(getopt -o "h:s:S:B:c:C:l:m:M:p:t:T:g:d:v" --long "help\
 ,group_rename:\
@@ -61,12 +61,12 @@ done
 if [ $verbose > 0 ]; then
 
 	# print out all the parameters we read in
-	cat <<EOM
-	GROUP_RENAME		= $GROUP_RENAME
-	OTHERS_INCLUDE		= $OTHERS_INCLUDE
-	time				= $time_str
-	verbose				= $verbose
-	dryrun				= $dryrun
+	cat << EOM
+	GROUP_RENAME        = $GROUP_RENAME
+	OTHERS_INCLUDE      = $OTHERS_INCLUDE
+	time                = $time_str
+	verbose             = $verbose
+	dryrun              = $dryrun
 EOM
 fi
 
@@ -80,9 +80,9 @@ permition () {
 	# do
 
 	# command doas find $packages_path -type d -name ".git" -prune -o -type d -name ".github" -prune \
-	#	  -o -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
-	#	  -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + \
-	#	  && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
+	#     -o -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+	#     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + \
+	#     && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
 
 	if [ -d "${packages_path}" ] && [ -n "${GROUP_RENAME}"]; then
 		# command doas \chown -R --quiet root:users "$packages_path"
@@ -97,26 +97,26 @@ permition () {
 	# command doas find "$packages_path" -type d -exec doas \chmod -f g+s,go+rx '{}' 2>&1 + &
 	doas find "$packages_path" -type d -exec doas \chmod -f go+rx '{}' 2>&1 + &
 	# command doas find "$packages_path" \
-	#	  -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
-	#	  -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + &
+	#     -type f -name '*' -print -exec doas \chmod --quiet g+r {} >/dev/null 2>&1 + \
+	#     -o -type d -print -exec doas \chmod --quiet go+rx {} >/dev/null 2>&1 + &
 
 	# # && command doas \chgrp -R --quiet users $packages_path >/dev/null 2>&1 &
 	# # Extremely slow
 	# command doas find "$packages_path" -type f -name '*' -exec sh -c ' [ \
-	#	  "$(expr substr $(stat -L -c %A "$1") 4 1)" = "x" ] \
-	#	  && command doas \chmod --quiet g+rx "$1" || command doas \chmod --quiet g+r "$1" ' sh '{}' >/dev/null 2>&1 \; \
-	#	  -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+	#     "$(expr substr $(stat -L -c %A "$1") 4 1)" = "x" ] \
+	#     && command doas \chmod --quiet g+rx "$1" || command doas \chmod --quiet g+r "$1" ' sh '{}' >/dev/null 2>&1 \; \
+	#     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
 
 	# command doas find "$packages_path" -type f -name '*' -exec sh -c 'perm="$(stat -L -c '%A' "$1")"; \
-	#	  needs_read=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r"; group_run=; \
-	#	  [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x"; \
-	#	  [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$1";' \
-	#	  sh '{}' >/dev/null 2>&1 \; \
-	#	  -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+	#     needs_read=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r"; group_run=; \
+	#     [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x"; \
+	#     [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$1";' \
+	#     sh '{}' >/dev/null 2>&1 \; \
+	#     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
 
 	# # Doesn't work
 	# command doas find "$packages_path" -type f -name '*' -exec group_permission_fix '{}' 2>&1 \; \
-	#	  -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
+	#     -o -type d -print -exec doas \chmod --quiet go+rx '{}' >/dev/null 2>&1 \; &
 
 	file_list=$(doas find "$packages_path" -type f -name "*")
 	for file in $file_list; do
@@ -177,7 +177,7 @@ permition () {
 		}
 		# [ "x" = "$user_run" ]  && [ "x" != "$group_run" ] && { needs_operation_group=1; group_run="x"; }
 		# [ "s" = "$user_run" ]  && [ "s" != "$group_run" ] && { needs_operation_group=1; group_run="s"; }
-		# [ "x" != "$user_run" ] && [ "s" != "$user_run" ]	&& [ "x" = "$group_run" ] && { needs_operation_group=1; group_run=; }
+		# [ "x" != "$user_run" ] && [ "s" != "$user_run" ]  && [ "x" = "$group_run" ] && { needs_operation_group=1; group_run=; }
 
 		[ "$OTHERS_INCLUDE" -ne "0" ] && {
 			others_run="$(expr substr $perm 10 1)"
@@ -236,69 +236,69 @@ permition () {
 
 	# # Wroks
 	# command doas find "$packages_path" -type f -name '*' -exec doas sh -c ' \
-	#	  for file ; \
-	#	  do \
-	#		  if [ -f "$file" ] ; then \
-	#			  perm="$(stat -L -c '%A' "$file")" ; \
-	#			  needs_operation=0 ; \
-	#			  needs_read= ; \
-	#			  user_read="$(expr substr $perm 2 1)" ; \
-	#			  group_read="$(expr substr $perm 5 1)" ; \
-	#			  others_read="$(expr substr $perm 8 1)" ; \
-	#			  [ "r" = "$user_read" ] && [ "r" != "$group_read" ] && { needs_read="r" ; needs_operation=1 ; } ; \
-	#			  [ "r" = "$user_read" ] && [ "r" != "$others_read" ] && { needs_read="r" ; needs_operation=1 ; } ; \
-	#			  group_run= ; \
-	#			  user_run="$(expr substr $perm 4 1)" ; \
-	#			  group_run="$(expr substr $perm 7 1)" ; \
-	#			  others_run="$(expr substr $perm 10 1)" ; \
-	#			  [ "x" = "$user_run" ]  && [ "x" != "$group_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
-	#			  [ "x" = "$user_run" ]  && [ "x" != "$others_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
-	#			  [ "s" = "$user_run" ]  && [ "x" != "$group_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
-	#			  [ "s" = "$user_run" ]  && [ "x" != "$others_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
-	#			  [ "x" != "$user_run" ] && [ "s" != "$user_run" ]	&& [ "x" = "$group_run" ] && needs_operation=1 ; \
-	#			  [ "r" = "$user_read" ] && [ "" != "$needs_operation" ] && needs_read="r" ; \
-	#			  [ "x" = "$user_run" ]  && [ "" != "$needs_operation" ] && group_run="x" ; \
-	#			  [ "s" = "$user_run" ]  && [ "" != "$needs_operation" ] && group_run="x" ; \
-	#			  perm_group=$needs_read$group_run ; \
-	#			  [ "" != "$perm_group" ] && printf "should no be empty: %s\n" "$perm_group" >> $HOME/.vim.log 2>&1 ; \
-	#			  [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o=$perm_group "$file" 2>&1	\
-	#			  echo "Processing" "$file" & \
-	#		  else \
-	#			  ${IFS# echo "Error" "$file" >/dev/stderr} ; \
-	#			  ${IFS# command doas rm -f "$file" 2>&1} &  \
-	#		  fi \
-	#		  done' _ "{}" 2>&1 + &
+	#     for file ; \
+	#     do \
+	#         if [ -f "$file" ] ; then \
+	#             perm="$(stat -L -c '%A' "$file")" ; \
+	#             needs_operation=0 ; \
+	#             needs_read= ; \
+	#             user_read="$(expr substr $perm 2 1)" ; \
+	#             group_read="$(expr substr $perm 5 1)" ; \
+	#             others_read="$(expr substr $perm 8 1)" ; \
+	#             [ "r" = "$user_read" ] && [ "r" != "$group_read" ] && { needs_read="r" ; needs_operation=1 ; } ; \
+	#             [ "r" = "$user_read" ] && [ "r" != "$others_read" ] && { needs_read="r" ; needs_operation=1 ; } ; \
+	#             group_run= ; \
+	#             user_run="$(expr substr $perm 4 1)" ; \
+	#             group_run="$(expr substr $perm 7 1)" ; \
+	#             others_run="$(expr substr $perm 10 1)" ; \
+	#             [ "x" = "$user_run" ]  && [ "x" != "$group_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
+	#             [ "x" = "$user_run" ]  && [ "x" != "$others_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
+	#             [ "s" = "$user_run" ]  && [ "x" != "$group_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
+	#             [ "s" = "$user_run" ]  && [ "x" != "$others_run" ] && { group_run="x" ; needs_operation=1 ; } ; \
+	#             [ "x" != "$user_run" ] && [ "s" != "$user_run" ]  && [ "x" = "$group_run" ] && needs_operation=1 ; \
+	#             [ "r" = "$user_read" ] && [ "" != "$needs_operation" ] && needs_read="r" ; \
+	#             [ "x" = "$user_run" ]  && [ "" != "$needs_operation" ] && group_run="x" ; \
+	#             [ "s" = "$user_run" ]  && [ "" != "$needs_operation" ] && group_run="x" ; \
+	#             perm_group=$needs_read$group_run ; \
+	#             [ "" != "$perm_group" ] && printf "should no be empty: %s\n" "$perm_group" >> $HOME/.vim.log 2>&1 ; \
+	#             [ "" != "$needs_operation" ] && command doas chmod g=$perm_group,o=$perm_group "$file" 2>&1   \
+	#             echo "Processing" "$file" & \
+	#         else \
+	#             ${IFS# echo "Error" "$file" >/dev/stderr} ; \
+	#             ${IFS# command doas rm -f "$file" 2>&1} &  \
+	#         fi \
+	#         done' _ "{}" 2>&1 + &
 
 	# # Won't work
 	# # a=()
 	# while IFS='' read -r -u"$FD" -d $'\0' file; do
-	#	  # note that $IFS is having the default value here
-	#	  # a+=("$file") # or however you want to process each file
-	#	  perm="$(stat -L -c '%A' "$file")";
-	#	  needs_read=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r";
-	#	  group_run=; [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x";
-	#	  [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$file";
+	#     # note that $IFS is having the default value here
+	#     # a+=("$file") # or however you want to process each file
+	#     perm="$(stat -L -c '%A' "$file")";
+	#     needs_read=; [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r";
+	#     group_run=; [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x";
+	#     [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$file";
 	# done {FD}< <(command doas find "$packages_path" -type f -print0)
-	# exec {FD}<&-	 # close the file descriptor
+	# exec {FD}<&-   # close the file descriptor
 
 	# # # Extremely slow
 	# # https://www.reddit.com/r/linux/comments/2xgpcf/handy_bash_feature_process_substitution/
 	# while read line; do
-	#	  # echo ${line}
-	#	  # short=${line##*/}
-	#	  # ln -s ${line} $HOME/bin/${short%.sh}
-	#	  perm=$(echo "obase=2; ibase=8; $(stat -L -c '%a' "$line")" | bc)
-	#	  # perm="$(stat -L -c '%A' "$line")"
-	#	  needs_read=
-	#	  # [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r"
-	#	  # group_readable=$((((2#$perm&2#000100000))>>5))
-	#	  [ 0 = $((((2#$perm & 2#000100000))>>5)) ] && needs_read="r"
-	#	  group_run=
-	#	  # user_executable=$((((2#$perm & 2#001000000))>>6))
-	#	  # group_executable=$((((2#$perm & 2#000001000))>>3))
-	#	  # [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x"
-	#	  [ 1 = $((((2#$perm & 2#001000000))>>6)) ] && [ 0 = $((((2#$perm & 2#000001000))>>3)) ] && group_run="x"
-	#	  [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$line" 2>&1 &;
+	#     # echo ${line}
+	#     # short=${line##*/}
+	#     # $cmd_link -- ${line} $HOME/bin/${short%.sh}
+	#     perm=$(echo "obase=2; ibase=8; $(stat -L -c '%a' "$line")" | bc)
+	#     # perm="$(stat -L -c '%A' "$line")"
+	#     needs_read=
+	#     # [ "r" != "$(expr substr $perm 5 1)" ] && needs_read="r"
+	#     # group_readable=$((((2#$perm&2#000100000))>>5))
+	#     [ 0 = $((((2#$perm & 2#000100000))>>5)) ] && needs_read="r"
+	#     group_run=
+	#     # user_executable=$((((2#$perm & 2#001000000))>>6))
+	#     # group_executable=$((((2#$perm & 2#000001000))>>3))
+	#     # [ "$(expr substr $perm 4 1)" = "x" ] && [ "$(expr substr $perm 7 1)" != "x" ] && group_run="x"
+	#     [ 1 = $((((2#$perm & 2#001000000))>>6)) ] && [ 0 = $((((2#$perm & 2#000001000))>>3)) ] && group_run="x"
+	#     [ "r" = "$needs_read" ] || [ "x" = "$group_run" ] && command doas chmod g+$needs_read$group_run "$line" 2>&1 &;
 	# done < <(command doas find "$packages_path" -type f)
 	# # done < <(find "$packages_path" -type f -name \*.sh)
 
@@ -330,13 +330,13 @@ if [ -d "${1}" ]; then
 	permition "${1}" &
 else
 	echo "${1}, No such file or directory [$0]"
-#	  if [ $SHELL = "zsh" ]; then
-#		  working_path="${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
-#	  else
-#		  working_path='"${SHARE_PREFIX}/.git" "${VINIT_HOME_DIR}" "${TINIT_HOME_DIR}"'
+#     if [ $SHELL = "zsh" ]; then
+#         working_path="${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+#     else
+#         working_path='"${SHARE_PREFIX}/.git" "${VINIT_HOME_DIR}" "${TINIT_HOME_DIR}"'
 #
-#		  permition "${SHARE_PREFIX}/.git"
-#		  permition "${VINIT_HOME_DIR}"
-#		  permition "${TINIT_HOME_DIR}"
-#	  fi
+#         permition "${SHARE_PREFIX}/.git"
+#         permition "${VINIT_HOME_DIR}"
+#         permition "${TINIT_HOME_DIR}"
+#     fi
 fi

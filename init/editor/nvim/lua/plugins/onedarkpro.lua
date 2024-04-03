@@ -2,8 +2,8 @@ return {
 	"olimorris/onedarkpro.nvim",
 	lazy = false,
 	priority = 1000, -- Ensure it loads first
-	cond = true,
-	-- cond = false,
+	-- cond = true,
+	cond = false,
 	config = function()
 		require("onedarkpro").setup({
 			colors      = {}, -- Override default colors or create your own

@@ -10,29 +10,41 @@ local hl = vim.api.nvim_set_hl
 -- " hi! Search      ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45 cterm=inverse term=inverse gui=inverse
 -- " hi! Search      ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45
 -- " hi! IncSearch   ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45 cterm=inverse term=inverse gui=inverse
+-- Must could be reverse and still visible
+-- "Visual" and "Search" are a pair unless nocombine == true
 -- hl(0, 'Search',              { fg = 'NONE',     bg = '#56b6c2', reverse = true })
 -- hl(0, 'Search',              { fg = 'Black',    bg = '#56b6c2' })
--- hl(0, 'Search',              { fg = '#ffffff',  bg = 'Brown' })
-hl(0, 'Search',                 { fg = '#ffffff',  bg = '#ff4444' })
-hl(0, 'IncSearch',              { bg = 'NONE',     fg='NONE', reverse = true })
+-- hl(0, 'Search',              { fg = '#ffffff',  bg = '#ff00ff' })
+-- hl(0, 'Search',              { fg = 'White',    bg = 'Brown' })
+hl(0, 'Search',                 { bg = '#ff4444',  fg='White',    nocombine = true, bold = true })
+-- hl(0, 'IncSearch',           { bg = 'NONE',     fg='NONE', reverse = true })
+-- hl(0, 'IncSearch',           { bg = 'NONE',     fg='NONE' })
+-- hl(0, 'IncSearch',           { bg = '#ffffff',  fg='NONE',     nocombine = true, bold = true })
+hl(0, 'IncSearch',              { bg = '#ff00ff',  fg='White',    nocombine = true, bold = true })
 -- shVariable links to Identifier
 -- " hi! Identifier  ctermbg=NONE guibg=#56b6c2 guifg=Teal ctermfg=6
 -- hi! Identifier    ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=6
 -- hl(0, 'Identifier',          { fg = '#56b6c2',  bg = 'Brown' })
-hl(0, 'Identifier',             { fg = 'Teal',     bg = 'NONE' })
+-- hl(0, 'Identifier',          { fg = 'Teal',     bg = '#ff00ff', nocombine = true, bold = true })
+-- hl(0, 'Identifier',          { fg = 'Teal',     bg = 'White',   nocombine = true, bold = true })
+hl(0, 'Identifier',             { fg = 'Teal',     bg = 'NONE',    nocombine = true, bold = true })
 
 -- " hi! Normal      ctermbg=0 guibg=NONE
 hl(0, 'Normal',                 { bg = 'NONE' })
 -- When cursor is on a word, other similar word highlight by "Visual"
+-- "Visual" and "Search" are a pair unless nocombine == true
 -- " hi Visual       ctermbg=NONE ctermfg=NONE guifg=Teal guibg=NONE term=inverse cterm=inverse gui=inverse
 -- hi! Visual        ctermbg=NONE ctermfg=NONE guifg=NONE guibg=#22aa77 term=NONE cterm=NONE gui=NONE
 -- hl(0, 'Visual',              { bg = '#22aa77',  fg='Teal' })
--- hl(0, 'Visual',              { bg = 'Black',    fg='Teal', reverse = true })
+-- hl(0, 'Visual',              { bg = 'Black',    fg='Teal',     reverse = true })
 -- hl(0, 'Visual',              { bg = 'NONE',     fg='#ff00ff' })
--- hl(0, 'Visual',              { bg = 'White',    fg='#56b6c2', reverse = true })
--- hl(0, 'Visual',              { fg = 'White',    bg='Cyan', nocombine = true })
-hl(0, 'Visual',                 { fg = 'Black',    bg='Cyan', nocombine = true })
-hl(0, 'StatusLine',             { fg = 'White',    bg='Blue', nocombine = true })
+-- hl(0, 'Visual',              { bg = 'White',    fg='#56b6c2',  reverse = true })
+-- hl(0, 'Visual',              { fg = 'White',    bg='Cyan',     nocombine = true })
+-- hl(0, 'Visual',              { fg = 'Black',    bg='Cyan',     nocombine = true })
+-- hl(0, 'Visual',              { fg = 'Black',    bg='NONE',     nocombine = true, reverse = true })
+-- hl(0, 'Visual',              { bg = 'NONE',     fg='NONE',     nocombine = true, bold = true, reverse = true })
+hl(0, 'Visual',                 { fg = 'Teal',     bg = 'White',  nocombine = true, bold = true })
+hl(0, 'StatusLine',             { fg = 'White',    bg='Blue',     nocombine = true })
 -- hl(0, 'StatusLine',          { fg = '#ff4444',  bg = 'NONE' })
 
 vim.cmd([[
@@ -156,31 +168,32 @@ hl(0, 'Comment',                { bg = 'Blue',     fg='DarkGrey' })
 hl(0, '@comment',               { bg = 'Blue',     fg='DarkGrey' })
 -- hl(0, '@comment',            { fg = 'Black',    bg='DarkGrey' })
 -- hl(0, '@comment',            { fg = 'White',    bg='#c0c0c0' })
--- hi! SpecialComment   guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
--- SpecialComment xxx ctermfg=242 guifg=#ff4444
+-- hi! SpecialComment    guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- SpecialComment xxx    ctermfg=242 guifg=#ff4444
 hl(0, 'SpecialComment',         { bg = '#008080',  fg = 'NONE', })
 
 hl(0, 'WhiteSpace',             { bg = 'Blue',     fg='DarkGrey' })
 
 --
 -- Control the highlight guides
--- CursorColumn   xxx guibg=#313640
--- hi! WinSeparator     guifg=#222222 guibg=NONE ctermfg=DarkRed  ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- CursorColumn   xxx    guibg=#313640
+-- hi! WinSeparator      guifg=#222222 guibg=NONE ctermfg=DarkRed  ctermbg=NONE cterm=NONE gui=NONE term=NONE
 hl(0, 'WinSeparator',           { fg = '#444444',  bg = 'NONE', })
--- " hi SpecialKey      ctermfg=DarkGray guifg=NONE
+-- " hi SpecialKey       ctermfg=DarkGray guifg=NONE
 -- " hi! link SpecialKey Comment
 -- " hi! link SpecialKey VertSplit
 -- hi! link SpecialKey WinSeparator
 hl(0, 'SpecialKey',             { fg = '#444444',  bg = 'NONE', })
 -- indent_blankline::highlight_guides
 -- " indent_blankline
--- " hi! SignColumn     ctermbg=NONE guibg=NONE
+-- " hi! SignColumn      ctermbg=NONE guibg=NONE
 -- " hi! link SignColumn WinSeparator
--- " hi! SignColumn     ctermbg=NONE guibg=NONE
+-- " hi! SignColumn      ctermbg=NONE guibg=NONE
 -- hl(0, 'SignColumn',          { bg = '#ffd7af',  fg = 'NONE', })
-hl(0, 'SignColumn',             { bg = '#008080',  fg = 'NONE', })
+-- hl(0, 'SignColumn',          { bg = '#008080',  fg = 'NONE', })
+hl(0, 'SignColumn',             { fg = '#008080',  bg = 'NONE', })
 --
--- SignColumn     xxx guifg=#dcdfe4
+-- SignColumn     xxx    guifg=#dcdfe4
 --                    links to WinSeparator
 
 -- hl(0, 'LineNr',              { bg = 'Black',    fg = '#606090' })
@@ -191,7 +204,7 @@ hl(0, 'LineNr',                 { bg = 'NONE',     fg = '#444444' })
 -- hl(0, 'CursorLineNr',        { bg = 'Black',    fg = '#606090', bold = true })
 -- hl(0, 'CursorLineNr',        { bg = 'NONE',     fg = '#606090', bold = true })
 hl(0, 'CursorLineNr',           { fg = 'White',    bg = 'Teal', bold = true })
--- hi! CursorLineNr ctermbg=NONE ctermfg=15 guibg=#444444 guifg=#ffffff
+-- hi! CursorLineNr      ctermbg=NONE ctermfg=15 guibg=#444444 guifg=#ffffff
 --  \ cterm=inverse term=inverse gui=inverse
 
 -- hl(0, 'CursorLine',          { cterm=underline, guibg=#282736, })
@@ -209,13 +222,14 @@ if vim.o.background == 'dark' then
 	-- hl(0, 'CursorLine',      { bg = 'NONE',     fg = 'NONE',    blend = 10, bold = true, nocombine = true })
 else
 	-- hl(0, 'CursorLine',      { bg = 'NONE',     fg = 'NONE',    bold = true, reverse = true })
-	hl(0, 'CursorLine',         { bg = 'White',    fg = 'NONE',    bold = true, nocombine = true })
+	-- hl(0, 'CursorLine',      { bg = 'White',    fg = 'NONE',    bold = true, nocombine = true })
+	hl(0, 'CursorLine',         { bg = 'Black',    fg = 'NONE',    bold = true, nocombine = true })
 	-- hl(0, 'CursorLine',      { bg = 'NONE',     fg = 'NONE',    blend = 10, nocombine = true, reverse = true })
 end
 -- hl(0, 'CursorLine',          { fg = 'NONE' })
 --
 -- TSCurrentScope default links to CursorLine, which is really annoying
-hl(0, 'TSCurrentScope',         { bg = 'NONE',     fg = 'NONE', nocombine = true })
+hl(0, 'TSCurrentScope',         { bg = 'NONE',     fg = 'NONE',    nocombine = true })
 
 --
 -- https://www.reddit.com/r/vim/comments/ocp8xv/cursorline_and_cursorcolumn_highlight_behavior/
@@ -229,20 +243,20 @@ hl(0, 'TSCurrentScope',         { bg = 'NONE',     fg = 'NONE', nocombine = true
 -- hl(0, 'CursorColumn',        { fg = 'NONE',     bg = 'Blue' })
 -- hl(0, 'CursorColumn',        { fg = 'NONE',     bg = '#606090', blend = 10, nocombine = true })
 -- hl(0, 'CursorColumn',        { fg = 'NONE',     bg = '#606090', blend = 10, nocombine = true })
--- hl(0, 'CursorColumn',        { fg = 'NONE',     bg = 'Orange', nocombine = true })
-hl(0, 'CursorColumn',           { fg = 'NONE',     bg = 'Blue', nocombine = true })
--- hl(0, 'CursorColumn',        { fg = 'DarkBlue', bg = 'NONE', italic = true })
--- hl(0, 'CursorColumn',        { fg = 'Gray',     bg = 'NONE', italic = true })
+-- hl(0, 'CursorColumn',        { fg = 'NONE',     bg = 'Orange',  nocombine = true })
+hl(0, 'CursorColumn',           { fg = 'NONE',     bg = 'Blue',    nocombine = true })
+-- hl(0, 'CursorColumn',        { fg = 'DarkBlue', bg = 'NONE',    italic = true })
+-- hl(0, 'CursorColumn',        { fg = 'Gray',     bg = 'NONE',    italic = true })
 --
 -- Copied to indent-blankline.lua
 -- indent_blankline
--- hl(0, 'indent_odd',          { fg = '#606090',  bg = 'NONE', nocombine = true })
-hl(0, 'indent_odd',             { fg = 'NONE',     bg = 'NONE', nocombine = true })
+-- hl(0, 'indent_odd',          { fg = '#606090',  bg = 'NONE',    nocombine = true })
+hl(0, 'indent_odd',             { fg = 'NONE',     bg = 'NONE',    nocombine = true })
 -- hl(0, 'indent_even',         { fg = 'NONE',     bg = '#909060', nocombine = true })
-hl(0, 'indent_even',            { fg = 'NONE',     bg = 'Blue', nocombine = true })
-hl(0, 'IblIndent',              { fg = 'NONE',     bg = 'NONE', nocombine = true })
-hl(0, 'IblScope',               { fg = 'NONE',     bg = 'Blue', nocombine = true })
-hl(0, 'IblWhitespace',          { fg = 'NONE',     bg = 'Blue', nocombine = true })
+hl(0, 'indent_even',            { fg = 'NONE',     bg = 'Blue',    nocombine = true })
+hl(0, 'IblIndent',              { fg = 'NONE',     bg = 'NONE',    nocombine = true })
+hl(0, 'IblScope',               { fg = 'NONE',     bg = 'Blue',    nocombine = true })
+hl(0, 'IblWhitespace',          { fg = 'NONE',     bg = 'Blue',    nocombine = true })
 
 -- vim_lsp_references
 
@@ -251,7 +265,7 @@ hl(0, 'LspReferenceText',       { bg = 'NONE' })
 
 -- " hi! @string        guifg=#99aa77 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " hi! @string        guifg=Magenta guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
--- " hi! @string        guifg=Orange guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
+-- " hi! @string        guifg=Orange  guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " hi! @string        guifg=#cbbf66 guibg=NONE ctermfg=45   ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- hl(0, '@string',             { fg = '#cbbf66',  bg = 'NONE' })
 hl(0, '@string',                { fg = 'Cyan',     bg = 'NONE' })
@@ -261,9 +275,12 @@ hl(0, 'String',                 { fg = 'Magenta',  bg = 'NONE' })
 -- " hi! @function.call guifg=#00aa99 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- " @function      xxx guifg=#61afef
 -- " hi! @function.call guifg=#56b6c2 guibg=NONE ctermfg=NONE ctermbg=NONE cterm=NONE gui=NONE term=NONE
-hl(0, '@function',              { fg = 'Teal',     bg = 'NONE' })
+-- hl(0, '@function',           { fg = 'White',    bg = 'Magenta', bold = true })
+hl(0, '@function',              { fg = 'Magenta',  bg = 'NONE', bold = true })
 hl(0, '@function.call',         { fg = 'Teal',     bg = 'NONE' })
-hl(0, '@function.builtin',      { fg = 'Teal',     bg = 'NONE' })
+-- hl(0, '@function.builtin',   { fg = 'Teal',     bg = 'NONE' })
+-- Will mix with "function" group
+hl(0, '@function.builtin',      { fg = 'Red',      bg = 'NONE',   nocombine = true, blend = 10 })
 
 -- hi! Function    ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
 hl(0, 'Function',               { fg = 'Teal',     bg = 'NONE' })
@@ -290,25 +307,26 @@ hl(0, 'shExpr',                 { fg = '#6f7378',  bg = 'NONE' })
 hl(0, 'shFunctionOne',          { fg = '#6f7378',  bg = 'NONE' })
 hl(0, 'Statement',              { fg = '#6f7378',  bg = 'NONE' })
 -- htmlItalic
--- htmlItalic     xxx cterm=italic gui=italic
+-- htmlItalic     xxx   cterm=italic gui=italic
 -- vimwiki uses it
 -- hl(0, 'htmlItalic',          { fg = 'Blue', bg = 'NONE' })
 hl(0, 'htmlItalic',             { fg = 'Orange',   bg = 'NONE' })
 
--- :highlight! Cursor gui=reverse guifg=NONE guibg=NONE
+-- :highlight! Cursor   gui=reverse guifg=NONE guibg=NONE
 -- hl(0, 'Cursor',              { fg = 'NONE',     bg = 'NONE', reverse = true, blend = 0, nocombine = true })
 -- hl(0, 'Cursor',              { fg = 'White',    bg = '#c0c0c0', blend = 10, nocombine = true })
-hl(0, 'Cursor',                 { fg = 'NONE',     bg = '#c0c0c0', blend = 10, nocombine = true })
+-- hl(0, 'Cursor',              { fg = 'NONE',     bg = '#c0c0c0', blend = 10, nocombine = true })
+hl(0, 'Cursor',                 { fg = 'NONE',     bg = 'NONE',    reverse = true, blend = 80, nocombine = true })
 
--- hi! TermCursor     guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
--- hi! lCursor        guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
--- hi! Cursor2        guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
-hl(0, 'TermCursor',             { fg = 'NONE',     bg = 'NONE', reverse = true, blend = 10, nocombine = true })
-hl(0, 'lCursor',                { fg = 'NONE',     bg = 'NONE', reverse = true, blend = 10, nocombine = true })
-hl(0, 'Cursor2',                { fg = 'NONE',     bg = 'NONE', reverse = true, blend = 10, nocombine = true })
+-- hi! TermCursor       guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+-- hi! lCursor          guifg=NONE guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+-- hi! Cursor2          guifg=red  guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+hl(0, 'TermCursor',             { fg = 'NONE',     bg = 'NONE',    reverse = true, blend = 80, nocombine = true })
+hl(0, 'lCursor',                { fg = 'NONE',     bg = 'NONE',    reverse = true, blend = 80, nocombine = true })
+hl(0, 'Cursor2',                { fg = 'NONE',     bg = 'NONE',    reverse = true, blend = 80, nocombine = true })
 
 -- indent_blankline::highlight_empty
--- Whitespace     xxx guifg=#615e5e
+-- Whitespace     xxx   guifg=#615e5e
 -- hl(0, 'Whitespace',          { fg = 'NONE', })
 
 hl(0, 'Whitespace',             { fg = 'NONE',     bg = 'NONE' })
@@ -347,7 +365,7 @@ hl(0, 'Extmarksf',              { bg = 'Teal',     fg = 'White' })
 -- @variable
 -- " @variable.builtin  cterm=italic gui=italic guifg=#56b6c2
 -- hi @variable.builtin cterm=NONE gui=NONE guifg=#56b6c2 guibg=NONE
--- @variable      xxx guifg=#dcdfe4
+-- @variable      xxx   guifg=#dcdfe4
 -- hl(0, '@variable',           { fg = 'White',    bg = 'NONE' })
 hl(0, '@variable',              { fg = 'White',    bg = 'NONE' })
 hl(0, '@variable.builtin',      { fg = 'White',    bg = 'NONE' })
@@ -396,6 +414,9 @@ hl(0, '@symbol',                { fg = '#22aa77',  bg = 'NONE' })
 -- " @text.emphasis     cterm=italic gui=italic guifg=#61afef
 -- hi @text.emphasis    cterm=NONE gui=NONE guifg=#22aa77 guibg=NONE
 hl(0, '@text.emphasis',         { fg = '#22aa77',  bg = 'NONE' })
+-- hl(0, '@spell',              { fg = '#22aa77',  bg = 'NONE' })
+-- Will change comment foreground color
+hl(0, '@spell',                 { fg = 'NONE',     bg = 'NONE' })
 
 
 -- Does not exist

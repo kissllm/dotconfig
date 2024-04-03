@@ -57,26 +57,30 @@ local map = U.map
 
 -- Use jj to exit insert mode
 map("i", "jj", "<Esc>")
-map("n", "-", "g_")
+map("n", "-",  "g_")
 
 -- use leader-nt to toggle the NvimTree plugin's visibility in normal mode
 map("n", "<leader>nt", ":NvimTreeToggle<CR>")
-map("n", "<leader>nq", ":NvimTreeClose<CR>")
-map("", "<leader>n", ":bn<CR>")
-map("", "<leader>p", ":bp<CR>")
+-- map("n", "<leader>nq", ":NvimTreeClose<CR>")
+map("n", "<leader>nq", ":Neotree close<CR>")
+-- map("n", "t", ":Neotree toggle<CR>")
+map("n", "\\", ":NvimTreeToggle<cr>")
+-- map("n", "t", ":Neotree<cr>")
+map("",  "<leader>n",  ":bn<CR>")
+map("",  "<leader>p",  ":bp<CR>")
 --
 -- map("t", "<ESC>",        "<C-\\><C-n>")
 --
-map("n", "[g", vim.diagnostic.goto_prev, { silent = true })
-map("n", "]g", vim.diagnostic.goto_next, { silent = true })
-map("", "<C-/><C-/>", "<C-_><C-_>", { noremap = true })
-map("", "<C-_><C-_>", "cc", { noremap = true })
-map("v", "<C-_><C-_>", "gc", { noremap = true })
-map("n", "<leader>t", ":TestNearest<CR>", { silent = true })
-map("n", "<leader>T", ":TestFile<CR>", { silent = true })
-map("n", "<leader>A", ":TestSuite<CR>", { silent = true })
-map("n", "<leader>l", ":TestLast<CR>", { silent = true })
-map("n", "<leader>g", ":TestVisit<CR>", { silent = true })
+map("n", "[g",         vim.diagnostic.goto_prev, { silent  = true })
+map("n", "]g",         vim.diagnostic.goto_next, { silent  = true })
+map("",  "<C-/><C-/>", "<C-_><C-_>",             { noremap = true })
+map("",  "<C-_><C-_>", "cc",                     { noremap = true })
+map("v", "<C-_><C-_>", "gc",                     { noremap = true })
+map("n", "<leader>t",  ":TestNearest<CR>",       { silent  = true })
+map("n", "<leader>T",  ":TestFile<CR>",          { silent  = true })
+map("n", "<leader>A",  ":TestSuite<CR>",         { silent  = true })
+map("n", "<leader>l",  ":TestLast<CR>",          { silent  = true })
+map("n", "<leader>g",  ":TestVisit<CR>",         { silent  = true })
 --
 map("n", ",", "<PageDown>")
 map("n", "m", "<PageDown>")
@@ -97,7 +101,14 @@ vim.cmd([[
 
 -- https://www.reddit.com/r/vim/comments/19sm9v/replace_all_instances_of_currently_highlighted/
 -- nnoremap * *<c-o>
-map("n", "*", "*<c-o>")
+-- vim.cmd([[
+-- let key = maparg('*', 'n', v:false)
+-- if key != ""
+-- 	unmap *
+-- 	endif
+-- ]])
+-- map("n", "*", "*<c-o>")
+--
 -- nnoremap <c-n> :%s///g<left><left>
 map("n", "<c-n>", ":%s///gIc<left><left><left><left>")
 
@@ -145,8 +156,8 @@ map("n", "<A-k>", ":exe 'resize ' . (winheight(0) + 5)<cr>")
 -- map("i", "[ ", "{")
 
 map("n", "<leader>[", "m`O<Esc>``")
-map("n", '{', "m`O<Esc>``")
-map("n", "<S-CR>", "m`O<Esc>``")
+map("n", '{',         "m`O<Esc>``")
+map("n", "<S-CR>",    "m`O<Esc>``")
 
 
 -- map("n", '] ', "m`o<Esc>``")
@@ -154,13 +165,13 @@ map("n", "<S-CR>", "m`O<Esc>``")
 -- Hard to input }, you need to wait for a while
 -- map("i", "] ", "}")
 
-map("n", "<leader>]", "m`o<Esc>``")
-map("n", '}', "m`o<Esc>``")
-map("n", "<C-CR>", "m`o<Esc>``")
+map("n", "<leader>]",    "m`o<Esc>``")
+map("n", '}',            "m`o<Esc>``")
+map("n", "<C-CR>",       "m`o<Esc>``")
 map("n", "<leader><CR>", "m`o<Esc>``")
 
 map("n", "<F5>", ':let _s=@/<bar>:%s/\\s\\+$//e<bar>:let @/=_s<bar><cr>')
-map("c", "s!!", ':let _s=@/<bar>:%s/\\s\\+$//e<bar>:let @/=_s<bar><cr>')
+map("c", "s!!",  ':let _s=@/<bar>:%s/\\s\\+$//e<bar>:let @/=_s<bar><cr>')
 -- map("n", "<F7>",         ":set list!<cr>")
 -- map("i", "<F7>",         "<C-o>:set list!<cr>")
 -- map("c", "<F7>",         "<C-c>:set list!<cr>")
@@ -172,24 +183,7 @@ map("n", "<leader>/", ":nohlsearch | diffupdate<CR>", { silent = true })
 -- map("n", "<esc>",        ":nohlsearch | diffupdate<cr>",     { silent = true })
 --
 map("n", "<F2>", ":TagbarToggle<cr>")
-map("n", "t", ":NvimTreeToggle<cr>")
 -- map("n", "<F3>",         ":ls<cr>:b<space>")
--- map("n", "<F3>",         ":BuffergatorToggle<cr>")
--- Won't work correctly
--- map("n", "<Esc>",        "if exists(\"b:is_gt_buffer\") <bar> :BuffergatorClose<CR> <bar> endif")
---
--- map("n", "<leader>l",    ":BuffergatorToggle<cr>")
-local cwd = require("lazy.core.config").options.root
--- :nnoremap <Leader>pp :lua require'telescope.builtin'.buffers{}
--- No resizing -- can not full-screen
--- map("n", "<leader>l",    ":lua require'telescope.builtin'.buffers{}<cr>")
--- map("n", "<leader>l",    ": Telescope find_files<cr>")
-map("n", "<leader>l", ":lua require'telescope.builtin'.buffers({ cwd = cwd })<cr>")
-map("n", "<leader>f", ":lua require'telescope.builtin'.find_files({ cwd = cwd })<cr>")
--- No resizing -- can not full-screen
--- map("n", "<leader>j",    ":lua require'telescope.builtin'.grep_string()<cr>")
--- map("n", "<leader>j",    ": Telescope grep_string<cr>")
-map("n", "<leader>j", ":lua require'telescope.builtin'.grep_string({ cwd = cwd })<cr>")
 
 map("n", "<Leader>d", ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q", ":Bdelete<CR>", { silent = true })
@@ -234,6 +228,11 @@ elseif U.is_mac() then
 	map("n", "gx", "<Cmd>call jobstart(['open', expand('<cfile>')])<CR>")
 end
 
+-- map("n", "<leader>cd", ':lua vim.api.nvim_command("colorscheme onehalf-lush-dark")<cr>')
+map("n", "<leader>cd", ":lua vim.opt.background = 'dark'<cr>")
+-- map("n", "<leader>cl", ':lua vim.api.nvim_command("colorscheme onehalf-lush")<cr>')
+map("n", "<leader>cl", ":lua vim.opt.background = 'light'<cr>")
+
 -- map('n', "w", "<Cmd>call boot#write_generic()<cr>")
 -- vim.keymap.set("ca", 'w', ":getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
 vim.cmd("ca w getcmdtype() == ':' && getcmdline() == 'w' ? 'W' : 'w'")
@@ -242,39 +241,150 @@ map("n", "<leader>qt", ":Tclose!<CR>", { silent = true })
 
 map("n", "ea", "<Plug>(EasyAlign)")
 map("x", "ea", "<Plug>(EasyAlign)")
+
 --  Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 map("v", "<Enter>", "<Plug>(EasyAlign)", { noremap = true })
 -- Start interactive EasyAlign for a motion/text object (e.g. gaip)
-map("n", "ga", "<Plug>(EasyAlign)", { noremap = true })
+map("n", "ga",      "<Plug>(EasyAlign)", { noremap = true })
 
 -- https://superuser.com/questions/41378/how-to-search-for-selected-text-in-vim
 vim.cmd(
-[[vnoremap // :<c-u>let temp_variable=@"<CR>gvy:<c-u>let @/='\V<C-R>=escape(@",'/\')<CR>'<CR>:let @"=temp_variable<CR>:<c-u>set hlsearch<CR>]])
+	[[vnoremap // :<c-u>let temp_variable=@"<CR>gvy:<c-u>let @/='\V<C-R>=escape(@",'/\')<CR>'<CR>:let @"=temp_variable<CR>:<c-u>set hlsearch<CR>]])
+
+--
+-- Won't work correctly
+-- map("n", "<Esc>",        "if exists(\"b:is_gt_buffer\") <bar> :BuffergatorClose<CR> <bar> endif")
+--
+-- map("n", "<F3>",         ":BuffergatorToggle<cr>")
+-- map("n", "<leader>l",    ":BuffergatorToggle<cr>")
+local cwd = require("lazy.core.config").options.root
+-- :nnoremap <Leader>pp :lua require'telescope.builtin'.buffers{}
+-- No resizing -- can not full-screen
+-- map("n", "<leader>l",    ":lua require'telescope.builtin'.buffers{}<cr>")
+-- map("n", "<leader>l",    ": Telescope find_files<cr>")
+
+map("n", "<leader>l", ":lua require'telescope.builtin'.buffers   ({ cwd = cwd })<cr>")
+map("n", "<leader>f", ":lua require'telescope.builtin'.find_files({ cwd = cwd })<cr>")
+
+if USE_TELESCOPE_GOTO ~= nil then
+	vim.cmd([[
+	let key = maparg('gd', 'n', v:false)
+	if key != ""
+	unmap gd
+	endif
+]])
+	map("n", "gd", [[
+<cmd>lua require'telescope.builtin'.lsp_definitions
+({ cwd = cwd })<cr>
+]], { noremap = true, silent = true })
+	map("n", "gr", ":lua require'telescope.builtin'.lsp_references \
+({ cwd = cwd })<cr>", { noremap = true, silent = true })
+else
+	-- map('n',  'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', { noremap = true, silent = true })
+	map('n',  'gd', function() vim.lsp.buf.definition ({ cwd = cwd }) end, { noremap = true, silent = true })
+	map('n',  'gr', '<cmd>lua vim.lsp.buf.references()<cr>', { noremap = true, silent = true })
+end
+
+-- No resizing -- can not full-screen
+-- map("n", "<leader>j",    ":lua require'telescope.builtin'.grep_string()<cr>")
+-- map("n", "<leader>j",    ": Telescope grep_string<cr>")
+
+map("n", "<leader>j", ":lua require'telescope.builtin'.grep_string({ cwd = cwd })<cr>")
 
 vim.api.nvim_create_autocmd('LspAttach', {
+	desc = 'LSP actions',
 	group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
 	pattern = "*",
-	callback = function(ev)
-		local opts = { buffer = ev.buf }
+	callback = function(args)
+		local opts = { buffer = args.buf }
+		local U = require('utils')
+		local map = U.map
 		map("n", "<leader>a", vim.lsp.buf.code_action, opts)
 
-		local builtin = require("telescope.builtin")
-		local cwd = require("lazy.core.config").options.root
+		if USE_TELESCOPE_GOTO ~= nil then
+			local builtin = require("telescope.builtin")
+			local cwd = require("lazy.core.config").options.root
+			-- Defined in telescope.lua
+			map("n", "gd", function() builtin.lsp_definitions     ({ cwd = cwd }) end, opts)
+			map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, opts)
+			map("n", "gr", function() builtin.lsp_references      ({ cwd = cwd }) end, opts)
 
-		map("n", "gd", function() builtin.lsp_definitions({ cwd = cwd }) end, opts)
-		map("n", "gy", function() builtin.lsp_type_definitions({ cwd = cwd }) end, opts)
-		map("n", "gr", function() builtin.lsp_references({ cwd = cwd }) end, opts)
-
-		map("n", "<leader>ff", function() builtin.find_files({ cwd = cwd }) end, opts)
-		map("n", "<leader>fg", function() builtin.live_grep({ cwd = cwd }) end, opts)
-		map("n", "<leader>fb", function() builtin.buffers({ cwd = cwd }) end, opts)
-		map("n", "<leader>fh", function() builtin.help_tags({ cwd = cwd }) end, opts)
-
+			map("n", "<leader>ff", function() builtin.find_files  ({ cwd = cwd }) end, opts)
+			map("n", "<leader>fg", function() builtin.live_grep   ({ cwd = cwd }) end, opts)
+			map("n", "<leader>fb", function() builtin.buffers     ({ cwd = cwd }) end, opts)
+			map("n", "<leader>fh", function() builtin.help_tags   ({ cwd = cwd }) end, opts)
+		end
 		map({ "n", "x" }, "<leader>f", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
 		map({ "n", "x" }, "gq", function() vim.lsp.buf.format({ async = false, timeout_ms = 10000 }) end, opts)
 		map("n", "K", vim.lsp.buf.hover, opts)
 		map("i", "<C-k>", vim.lsp.buf.signature_help, opts)
 		map("n", "<leader>r", vim.lsp.buf.rename, opts)
+
+-- 		local bufnr = args.buf
+-- 		-- local bufnr = vim.fn.winbufnr(0)
+-- 		-- local client = args.client
+-- 		-- local client = vim.lsp.buf_get_clients()
+--         local client = vim.lsp.get_client_by_id(args.data.client_id)
+-- 		-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+-- 		local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+-- 
+-- 		buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+-- 
+-- 		local opts = { buffer = bufnr }
+-- 		vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
+-- 		-- vim.keymap.set('n',  '<leader>d',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+-- 		vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+-- 		vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
+-- 		vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
+-- 		vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+-- 		-- vim.keymap.set('n',  '<leader>r',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+-- 		vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+-- 		vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
+-- 		vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
+-- 		vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
+-- 
+-- 		vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+-- 
+-- 		vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+-- 		vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
+-- 		vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
+-- 
+-- 		-- Set some keybinds conditional on server capabilities
+-- 		-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+-- 		-- if client.resolved_capabilities.document_formatting then
+-- 		if client.server_capabilities.documentFormattingProvider then
+-- 			-- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+-- 			-- elseif client.resolved_capabilities.document_range_formatting then
+-- 		elseif client.server_capabilities.documentRangeFormattingProvider then
+-- 			-- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+-- 		end
+-- 
+-- 		-- Set autocommands conditional on server_capabilities
+-- 		-- if client.resolved_capabilities.document_highlight then
+-- 		if client.server_capabilities.documentHighlightProvider then
+-- 			vim.api.nvim_exec([[
+-- augroup lsp_document_highlight
+-- 	autocmd! * <buffer>
+-- 	autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+-- 	autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+-- augroup END
+-- ]], false)
+-- 		end
+-- 
+-- 		local caps = client.server_capabilities
+-- 		if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+-- 			local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
+-- 			vim.api.nvim_create_autocmd("TextChanged", {
+-- 				group = augroup,
+-- 				buffer = bufnr,
+-- 				callback = function()
+-- 					vim.lsp.buf.semantic_tokens_full()
+-- 				end,
+-- 			})
+-- 			-- fire it first time on load as well
+-- 			-- vim.lsp.buf.semantic_tokens_full()
+-- 		end
+
 	end,
 })
 
@@ -291,3 +401,33 @@ vim.keymap.set("n", "<leader>ua", "<cmd>lua vim.g.cmptoggle = not vim.g.cmptoggl
 -- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 -- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+
+vim.cmd([[
+" https://github.com/shyun3/nvimrc/blob/98813267db761db51f59ecfccfed463cb3960f55/init.vim
+function! s:CheckHighlight(lineNum, colNum)
+    let mode = "name"
+
+    " Highest highlighting group: name of syntax keyword, match or region
+    let hi = synIDattr(synID(a:lineNum, a:colNum, 1), mode)
+
+    " For transparent groups, the group it's in
+    let trans = synIDattr(synID(a:lineNum, a:colNum, 0), mode)
+
+    " Lowest group: basic highlighting spec such as a default highlighting group
+    let lo = synIDattr(synIDtrans(synID(a:lineNum, a:colNum, 1)), mode)
+
+    echo 'hi<' . hi . '> ' . 'trans<' . trans . '> ' . 'lo<' . lo . '> '
+    CocCommand semanticTokens.inspect
+endfunction
+
+command! CheckHighlightUnderCursor call <SID>CheckHighlight(line('.'), col('.'))
+]])
+
+
+
+
+
+
+
+
+

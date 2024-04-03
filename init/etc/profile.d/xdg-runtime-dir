@@ -12,6 +12,12 @@ SCRIPT_NAME="xdg-runtime-dir" && export SCRIPT_NAME
 	exit 0
 }
 
+case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*)
+	IS_KISS= && export IS_KISS
+esac
+
+[ -z "${IS_KISS+x}" ] || export DONT_USE_GREET=
+
 # : ${UID="$(id -u)"} && export UID
 // env_reset UID "$(id -u)"
 [ -n "${UID:+x}" ] || printf '%s %s\n' '$UID' "${UID-}"
@@ -78,6 +84,7 @@ esac
 # export DBUS_SESSION_BUS_ADDRESS
 // env_reset DBUS_SESSION_BUS_ADDRESS "unix:path=$XDG_RUNTIME_DIR/bus"
 
+[ ! -z "${DONT_USE_GREET+x}" ] ||
 [ -z "$(id -u "_greeter" 2> /dev/null)" ] || {
 	[ -d "/var/cache/tuigreet" ] ||
 	doas \mkdir -p /var/cache/tuigreet

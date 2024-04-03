@@ -120,11 +120,11 @@ SCRIPT_NAME="share" && export SCRIPT_NAME
 }
 
 [ -n "${SHELL##*"zsh"*}" ] || {
-	ln -sf $SHARE_PREFIX/init/shell/zsh          $HOME/.zinit
-	ln -sf $SHARE_PREFIX/init/shell/zsh/zshrc    $HOME/.zshrc
-	ln -sf $SHARE_PREFIX/init/shell/zsh/zshenv   $HOME/.zshenv
-	ln -sf $SHARE_PREFIX/init/shell/zsh/zlogin   $HOME/.zlogin
-	ln -sf $SHARE_PREFIX/init/shell/zsh/zprofile $HOME/.zprofile
+	$cmd_link -- $SHARE_PREFIX/init/shell/zsh          $HOME/.zinit
+	$cmd_link -- $SHARE_PREFIX/init/shell/zsh/zshrc    $HOME/.zshrc
+	$cmd_link -- $SHARE_PREFIX/init/shell/zsh/zshenv   $HOME/.zshenv
+	$cmd_link -- $SHARE_PREFIX/init/shell/zsh/zlogin   $HOME/.zlogin
+	$cmd_link -- $SHARE_PREFIX/init/shell/zsh/zprofile $HOME/.zprofile
 }
 
 prompt() {
@@ -253,7 +253,7 @@ link_correct() {
 		[ "$(readlink -fn "$anchor")" = "$(readlink -fn "$target")" ] &&
 		return 0 || {
 			\rm -f "$anchor"
-			\ln -sf -- "$target" "$anchor"
+			$cmd_link -- "$target" "$anchor"
 			return 0
 		}
 
@@ -355,9 +355,16 @@ link_correct() {
 	# Redefine anchor from $anchor_dir
 	anchor="$anchor_dir/$anchor_name"
 
-	# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
-	# \ln -sTf -- "$target" "$anchor"
-	\ln -sf -- "$target" "$anchor" || {
+	[ ! -z "${cmd_link:+x}" ] || {
+		local cmd_link
+		# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
+		# \ln -sTf -- "$target" "$anchor"
+		command ln 2>&1 | grep -q "\-T" && cmd_link="command ln -sfT" || {
+		command ln 2>&1 | grep -q "\-h" && cmd_link="command ln -sfh"; } ||
+		cmd_link="command ln -sf"
+	}
+
+	$cmd_link -- "$target" "$anchor" || {
 		prompt '$target' "$target"
 		prompt '$anchor' "'$anchor' as a link has not been created successfully"
 	}
@@ -453,24 +460,12 @@ init_file_overwrite() {
 [ -L "$HOME/.xdg-runtime-dir" ] ||
 	printf '%s %s\n' "$HOME/.xdg-runtime-dir" "creating failed"
 
-// env_reset MNGR_ROOT      "/working/os/kiss"
+// env_reset KISS_TMPDIR    "/tmp/$USER/kiss"
+// env_reset MNGR_ROOT      "$SHARE_PREFIX/os/kiss"
 // env_reset REPO_ROOT      "/var/db/kiss"
 // env_reset REPO_ROOT_IMPL "/opt/${REPO_ROOT#*/}"
 // env_reset DEST_ROOT      "/working/kiss"
 // env_reset DOTCONFIG      "/mnt/init"
-
-[ ! -f "/etc/hostname" ] ||
-# : ${os_name:="$(cat /etc/hostname 2> /dev/null)"}
-// env_reset os_name "$(cat /etc/hostname 2> /dev/null)"
-
-# : ${os_name:="$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release)"}
-# : ${os_pretty_name:="$(awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release)"}
-# // env_reset os_pretty_name "$(awk -F = "\$1 == \"PRETTY_NAME\" {print \$2}" < /etc/os-release | tr -d "\"")"
-// env_reset id "$(awk -F = '$1 == "ID" {print $2}' < /etc/os-release |
-	tr '[A-Z]' '[a-z]')"
-// env_reset os_pretty_name "$(
-awk -F = '$1 == "PRETTY_NAME" {print $2}' < /etc/os-release | tr -d "\"" |
-	tr '[A-Z]' '[a-z]')"
 
 case "${id-} ${os_name-} ${os_pretty_name-}" in *"kiss"*)
 	IS_KISS= && export IS_KISS
@@ -611,7 +606,7 @@ folder_parser="${XDG_DATA_HOME}/nvim/site/parser"
 
 # [ ! -L $XDG_CONFIG_HOME/coc ] ||
 #     \rm -f $XDG_CONFIG_HOME/coc
-# \ln -sf $SHARE_PREFIX/init/editor/coc $XDG_CONFIG_HOME/coc
+# $cmd_link -- $SHARE_PREFIX/init/editor/coc $XDG_CONFIG_HOME/coc
 
 export loaded_share=
 

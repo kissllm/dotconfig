@@ -1,20 +1,5 @@
 
 
-local function on_attach(bufnr)
-	local api = require "nvim-tree.api"
-
-	local function opts(desc)
-		return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-	end
-
-	-- default mappings
-	api.config.mappings.default_on_attach(bufnr)
-
-	-- custom mappings
-	vim.keymap.set('n', '<C-t>', api.tree.change_root_to_parent, opts('Up'))
-	vim.keymap.set('n', '?',     api.tree.toggle_help,           opts('Help'))
-end
-
 return {
 	{
 		"trailblazing/vim-repeat",
@@ -30,119 +15,22 @@ return {
 				-- or leave it empty to use the default settings
 				-- refer to the configuration section below
 			}
-		end
-	},
-
-	{
-		-- https://gitee.com/kongjun18/nvim-tree.lua
-		"kyazdani42/nvim-tree.lua",
-		dependencies = {
-			"kyazdani42/nvim-web-devicons" ,
-			-- https://stackoverflow.com/questions/71346431/neovim-nvim-tree-doesnt-open-current-directory-only-the-parent-directory-with-g
-			"ahmedkhalf/project.nvim",
-		},
-		cmd = "NvimTreeToggle",
-		-- config = true,
-		config = function()
-			-- https://github.com/nvim-tree/nvim-tree.lua/issues/777
-			-- update_focused_file.enable = true
-			-- https://www.reddit.com/r/neovim/comments/rqb0xv/nvimtree_setting_cwd_to_where_current_file_was/
-			vim.g.nvim_tree_respect_buf_cwd = 1
-			--
-			-- disable netrw at the very start of your init.lua
-			vim.g.loaded_netrw = 1
-			vim.g.loaded_netrwPlugin = 1
-
-			-- set termguicolors to enable highlight groups
-			vim.opt.termguicolors = true
-			require("nvim-tree").setup({
-				disable_netrw      = true,
-				hijack_netrw       = true,
-				-- open_on_setup       = false,
-				-- ignore_ft_on_setup = {},
-				-- auto_close          = false,
-				open_on_tab        = false,
-				hijack_cursor      = false,
-				-- update_cwd      = false,
-				sync_root_with_cwd = true,
-				update_cwd = true,
-				-- update_to_buf_dir    = {
-				--  enable = true,
-				--  auto_open = true,
-				-- },
-				diagnostics = {
-					enable = false,
-					icons = {
-						-- hint    = "",
-						hint       = "~",
-						-- info    = "",
-						info       = "?",
-						-- warning = "",
-						warning    = "!",
-						-- error   = "",
-						error      = "x",
-					}
-				},
-				update_focused_file = {
-					enable        = true,
-					update_cwd    = true,
-					-- enable     = false,
-					-- update_cwd = false,
-					ignore_list   = {}
-				},
-				system_open = {
-					cmd  = nil,
-					args = {}
-				},
-				filters = {
-					-- dotfiles = false,
-					dotfiles = true,
-					custom = {"^\\.git"},
-					-- custom = {}
-				},
-				git = {
-					enable  = true,
-					ignore  = true,
-					timeout = 500,
-				},
-				-- [NvimTree] unknown option: view.mappings
-				-- | [NvimTree] unknown option: view.height
-				-- | [NvimTree] unknown option: update_to_buf_dir
-				-- | [NvimTree] unknown option: auto_close
-				-- | [NvimTree] unknown option: open_on_setup
-				-- | see :help nvim-tree-opts for available configuration options
-
-				view = {
-					width = 50,
-					-- height = 30,
-					-- hide_root_folder = false,
-					side = 'left',
-					-- auto_resize = false,
-					-- mappings = {
-					--  custom_only = false,
-					--  list = {}
-					-- },
-					number = false,
-					relativenumber = false,
-					signcolumn = "yes"
-				},
-				trash = {
-					cmd = "trash",
-					require_confirm = true
-				},
-				sort_by = "case_sensitive",
-				renderer = {
-					group_empty = true,
-				},
-				actions = {
-					open_file = {
-						window_picker = { enable = false },
-					},
-				},
-				on_attach = on_attach,
-			})
 		end,
 	},
+
+	-- Moved to file
+	-- {
+	--  -- https://gitee.com/kongjun18/nvim-tree.lua
+	--  "kyazdani42/nvim-tree.lua",
+	--  dependencies = {
+	--      "kyazdani42/nvim-web-devicons" ,
+	--      -- https://stackoverflow.com/questions/71346431/neovim-nvim-tree-doesnt-open-current-directory-only-the-parent-directory-with-g
+	--      "ahmedkhalf/project.nvim",
+	--  },
+	--  cond = false,
+	--  -- cond = true,
+	--  cmd  = "NvimTreeToggle",
+	-- },
 
 	{
 		"tpope/vim-surround",
@@ -173,13 +61,14 @@ return {
 		event = { "BufReadPost", "BufNewFile" }
 	},
 
-	-- {
-	--     "neoclide/coc.nvim",
-	--     event = "VeryLazy",
-	--     branch = 'release',
-	--     build =
-	--     ':CocInstall coc-json coc-yaml coc-snippets coc-ultisnips coc-css coc-eslint coc-prettier coc-tsserver coc-vetur coc-pyright coc-rust-analyzer coc-elixir coc-diagnostic coc-stylelint coc-flutter'
-	-- },
+	{
+		"neoclide/coc.nvim",
+		cond   = false,
+		event  = "VeryLazy",
+		branch = 'release',
+		build  =
+			':CocInstall coc-json coc-yaml coc-snippets coc-ultisnips coc-css coc-eslint coc-prettier coc-tsserver coc-vetur coc-pyright coc-rust-analyzer coc-elixir coc-diagnostic coc-stylelint coc-flutter'
+	},
 
 	{
 		"JoosepAlviste/nvim-ts-context-commentstring",
@@ -283,45 +172,32 @@ return {
 	--  -- config = function() require("telescope").setup() end,
 	-- },
 
+
 	{
-		"vimwiki/vimwiki",
-		dependencies = {
-			{'Konfekt/FastFold'},
-		},
-		-- "lervag/wiki.vim",
-		-- https://www.reddit.com/r/neovim/comments/ksyydr/how_to_convert_vimwiki_list_variable_to_lua/
-		config = function()
-			vim.g.vimwiki_global_ext = 0
-
-			local wiki = {}
-
-			wiki.path = '~/.wiki/'
-			wiki.syntax = 'markdown'
-			wiki.ext = '.md'
-
-			local wiki_personal = {}
-			wiki_personal.path = '~/.vimwiki_personal/'
-			wiki_personal.syntax = 'markdown'
-			wiki_personal.ext = '.md'
-
-			vim.g.vimwiki_list = {
-				wiki, wiki_personal
-				-- {
-				--  path = '~/.wiki/',
-				--  syntax = 'markdown',
-				--  ext = '.md',
-				-- },
-				-- {
-				--  path = '~/.vimwiki_personal/',
-				--  syntax = 'markdown',
-				--  ext = '.md',
-				-- },
-			}
-			-- https://stackoverflow.com/questions/65549814/setting-vimwiki-list-in-a-lua-init-file
-			vim.g.vimwiki_ext2syntax = {['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown'}
-		end,
+		'renerocksai/telekasten.nvim',
+		dependencies = {'nvim-telescope/telescope.nvim'},
 		event = "VeryLazy",
 		lazy  = true,
+		config = function()
+			require('telekasten').setup({
+				-- home = vim.fn.expand("~/zettelkasten"), -- Put the name of your notes directory here
+				home = vim.fn.expand("~/.wiki"), -- Put the name of your notes directory here
+			})
+		end,
+	},
+
+	{
+		-- "lervag/wiki.vim",
+		"lervag/wiki.vim",
+		event   = "VeryLazy",
+		-- lazy = false,
+		lazy    = true,
+		config  = function()
+			vim.g.wiki_root = "~/.wiki"
+			vim.cmd([[
+			let g:wiki_root = '~/.wiki'
+			]])
+		end,
 	},
 
 	{
@@ -338,8 +214,8 @@ return {
 		"tadmccorkle/markdown.nvim",
 		event = "VeryLazy",
 		lazy  = true,
-		ft = "markdown", -- or 'event = "VeryLazy"'
-		opts = {
+		ft    = "markdown", -- or 'event = "VeryLazy"'
+		opts  = {
 			-- configuration here or empty for defaults
 		},
 	},
@@ -371,11 +247,16 @@ return {
 		lazy  = true,
 	},
 
-	-- Always report error
-	-- RetabIndent
 	{
-		"Thyrum/vim-stabs",
+		-- Always report error
+		-- RetabIndent
+		-- Insert "0" at the beginning of the next line when inputting <Enter>
+		-- "Thyrum/vim-stabs",
+		-- RetabIndent
+		-- Does not insert "0" at the beginning of the next line when inputting <Enter>
+		"rhlobo/vim-super-retab",
 		-- cond  = false,
+		cond  = true,
 		event = "VeryLazy",
 		lazy  = true,
 	},
@@ -400,9 +281,10 @@ return {
 	-- Void session_auto saved old session -- restart a brand new session
 	{
 		"roxma/vim-tmux-clipboard",
-		dependencies = {
-			{'tmux-plugins/vim-tmux-focus-events'},
-		},
+		-- Update: this plugin is now obsolete and no longer needed as both neovim and vim (since version 8.2.2345) have native support for this functionality.
+		-- dependencies = {
+		--  {'tmux-plugins/vim-tmux-focus-events'},
+		-- },
 		opts     = {},
 		-- event = "VeryLazy",
 		lazy     = false,
@@ -447,14 +329,17 @@ return {
 		end
 	},
 
-	{
-		"j-hui/fidget.nvim",
-		-- event  = "VeryLazy",
-		-- lazy   = true,
-		opts = {
-			-- options
-		},
-	},
+	-- {
+	-- 	"j-hui/fidget.nvim",
+	-- 	-- event  = "VeryLazy",
+	-- 	-- lazy   = true,
+	-- 	dependencies = { "rcarriga/nvim-notify" },
+	-- 	config = function()
+	-- 		require'fidget'.setup {
+	-- 			-- You configuration here
+	-- 		}
+	-- 	end,
+	-- },
 
 	{
 		"ggandor/leap.nvim",
@@ -538,24 +423,42 @@ return {
 		lazy   = true,
 		config = function()
 			require("numb").setup {
-				show_numbers = true, -- Enable 'number' for the window while peeking
-				show_cursorline = true, -- Enable 'cursorline' for the window while peeking
+				show_numbers         = true, -- Enable 'number' for the window while peeking
+				show_cursorline      = true, -- Enable 'cursorline' for the window while peeking
 				hide_relativenumbers = true, -- Enable turning off 'relativenumber' for the window while peeking
-				number_only = false, -- Peek only when the command is only a number instead of when it starts with a number
-				centered_peeking = true, -- Peeked line will be centered relative to window
+				number_only          = false, -- Peek only when the command is only a number instead of when it starts with a number
+				centered_peeking     = true, -- Peeked line will be centered relative to window
 			}
 		end
 	},
 
 	{
 		"catppuccin/nvim",
-		name = "catppuccin",
+		name     = "catppuccin",
 		priority = 1000,
+		event    = "VeryLazy",
+		lazy     = true,
+	},
+
+	{
+		'aymericbeaumet/vim-symlink',
+		cond   = false,
+		dependencies = { 'moll/vim-bbye' },
+		-- event  = "VeryLazy",
+		lazy   = false,
+	},
+
+	{
+		"lambdalisue/suda.vim",
+		-- cond   = false,
 		event  = "VeryLazy",
 		lazy   = true,
 	},
 
-
-
+	{
+		"tadhg-ohiggins/vim-tmux-send",
+		event  = "VeryLazy",
+		lazy   = true,
+	},
 
 }

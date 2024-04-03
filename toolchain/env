@@ -1,11 +1,49 @@
-#!/bin/sh
+#! /bin/sh
+# This file is just a thought, the real applied version depends on
+# /mnt/init/etc/profile.d/kiss-env
+# /usr/bin/kiss-cmake-config
+# /working/os/kiss/usr/bin/kiss
+# /opt/var/db/kiss/lm/underconstruction/llvm/build
+
+alias /='eval'
+alias //='lineno="$LINENO"'
+newline="
+"
+
+SCRIPT_NAME="kiss-env" && export SCRIPT_NAME
+
+[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
+[ ! -z "${SHARE_PREFIX:+x}" ] ||
+{
+	[ -f "/mnt/init/include/route" ] &&
+	. /mnt/init/include/route
+} || {
+	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
+	exit 0
+}
 
 set -efE
 # trap 'Wont handle the "$FUNCNAME" at line "$LINENO"' ERR
 trap 'Wont handle the ERROR at line "$LINENO"' ERR
 
-# Host toolchain root
-HOST_ROOT=/usr
+: ${KISS_ROOT="/opt/kiss"} && export KISS_ROOT
+[ -d "$KISS_ROOT" ] || \mkdir -p "$KISS_ROOT"
+
+# share folder initialization
+// env_reset SHARE_PREFIX_DEV "/opt"
+# [ ! -z "${SHARE_PREFIX+x}" ] || {
+#     if [ -d "/mnt/init" ]; then
+#         export SHARE_PREFIX="/mnt"
+#     elif [ -d "/opt/init" ]; then
+#         export SHARE_PREFIX="/opt"
+#     fi
+# }
+
+export XBUILD_PREFIX=/usr
+# Host toolchain root prefix
+export HOST_ROOT="$KISS_ROOT/$XBUILD_PREFIX"
+export XHOST_PREFIX="$HOST_ROOT"
+
 extend=":$PATH:"
 [ -z "${extend##*:${HOST_ROOT}:*}" ] || eval "export PATH=${HOST_ROOT}\${PATH:+\":\$$PATH\"}"
 
@@ -14,14 +52,6 @@ CXXFLAGS=""
 CPPFLAGS=""
 LDFLAGS=""
 
-# share folder initialization
-[ ! -z "${SHARE_PREFIX+x}" ] || {
-    if [ -d "/mnt/init" ]; then
-        export SHARE_PREFIX="/mnt"
-    elif [ -d "/opt/init" ]; then
-        export SHARE_PREFIX="/opt"
-    fi
-}
 
 export ARCH=x86_64
 export HOST=x86_64
@@ -29,16 +59,17 @@ export TARGET="x86_64-linux-musl"
 export CROSS_COMPILE=${TARGET}
 
 # Target toolchain root
-export SYSROOT=${SHARE_PREFIX}/${TARGET}/sysroot
+export SYSROOT=${SHARE_PREFIX_DEV}/${TARGET}/sysroot
 [ -d ${SYSROOT} ] || doas mkdir -p ${SYSROOT}
 
-export INITRAMFS=${SHARE_PREFIX}/${TARGET}/initramfs
+export INITRAMFS=${SHARE_PREFIX_DEV}/${TARGET}/initramfs
 [ -d ${INITRAMFS} ] || doas mkdir -p ${INITRAMFS}
 
-export DISTDIR=${SHARE_PREFIX}/${TARGET}/make
+export DISTDIR=${SHARE_PREFIX_DEV}/${TARGET}/make
 [ -d ${DISTDIR} ] || doas mkdir -p ${DISTDIR}
+export MAKE_DIR="$DISTDIR"
 
-export XDG_BIN=${SHARE_PREFIX}/local/bin
+export XDG_BIN=${SHARE_PREFIX_DEV}/local/bin
 extend=":$PATH:"
 [ -z "${extend##*:${XDG_BIN}:*}" ] || eval "export PATH=${XDG_BIN}\${PATH:+\":\$$PATH\"}"
 
@@ -51,55 +82,78 @@ doas ln -sf `which clang++` $XDG_BIN/${CROSS_COMPILE}-c++
 doas ln -sf `which clang++` $XDG_BIN/${CROSS_COMPILE}-g++
 doas ln -sf `which clang++` $XDG_BIN/${CROSS_COMPILE}-clang++
 
-for i in ar nm objcopy objdump ranlib strip;do
-    doas ln -sf `which llvm-$i` $XDG_BIN/${CROSS_COMPILE}-$i
+for i in ar nm objcopy objdump ranlib strip; do
+	doas ln -sf `which llvm-$i` $XDG_BIN/${CROSS_COMPILE}-$i
 done
 
+: ${cc:="${CC:-"$( \
+	command -v $(which cc)   ||
+	command -v /usr/lib/ccache/bin/cc ||
+	command -v /usr/bin/cc
+)"}"} || // die 'cc' "compiler not found"
+export cc
+
+: ${cxx:="${CXX:-"$( \
+	command -v $(which c++)   ||
+	command -v /usr/lib/ccache/bin/c++ ||
+	command -v /usr/bin/c++
+)"}"} || // die 'c++' "compiler not found"
+export cxx
+
+export         CC="$cc"
+export        CXX="$cxx"
+
 LDFLAGS="-fuse-ld=lld $LDFLAGS"
-export LD=${HOST_ROOT}/bin/ld.lld
-export HOSTLD=${HOST_ROOT}/bin/ld.lld
+export         LD=${HOST_ROOT}/bin/ld.lld
+export     HOSTLD=${HOST_ROOT}/bin/ld.lld
 
-export CC=${HOST_ROOT}/bin/clang
-export CXX=${HOST_ROOT}/bin/clang++
+export         CC=${HOST_ROOT}/bin/clang
+export        CXX=${HOST_ROOT}/bin/clang++
 
 
-export HOSTCC=${HOST_ROOT}/bin/clang
-export HOSTCXX=${HOST_ROOT}/bin/clang++
+export     HOSTCC=${HOST_ROOT}/bin/clang
+export    HOSTCXX=${HOST_ROOT}/bin/clang++
 
-export AS=${HOST_ROOT}/bin/llvm-as
-export HOSTAS=${HOST_ROOT}/bin/llvm-as
+export         AS=${HOST_ROOT}/bin/llvm-as
+export     HOSTAS=${HOST_ROOT}/bin/llvm-as
 
-export AR=${AR:=${HOST_ROOT}/bin/llvm-ar}
-export HOSTAR=${HOST_ROOT}/bin/llvm-ar
+export         AR=${AR:=${HOST_ROOT}/bin/llvm-ar}
+export     HOSTAR=${HOST_ROOT}/bin/llvm-ar
 
-export NM=${NM:=${HOST_ROOT}/bin/llvm-nm}
-export HOSTNM=${HOST_ROOT}/bin/llvm-nm
+export         NM=${NM:=${HOST_ROOT}/bin/llvm-nm}
+export     HOSTNM=${HOST_ROOT}/bin/llvm-nm
 
-export RANLIB=${HOST_ROOT}/bin/llvm-ranlib
+export     RANLIB=${HOST_ROOT}/bin/llvm-ranlib
 export HOSTRANLIB=${HOST_ROOT}/bin/llvm-ranlib
 
-export STRIP=${HOST_ROOT}/bin/llvm-strip
+export      STRIP=${HOST_ROOT}/bin/llvm-strip
 
-export OBJCOPY=${HOST_ROOT}/bin/llvm-objcopy
+export    OBJCOPY=${HOST_ROOT}/bin/llvm-objcopy
 
-export OBJDUMP=${HOST_ROOT}/bin/llvm-objdump
+export    OBJDUMP=${HOST_ROOT}/bin/llvm-objdump
 
-export READELF=${HOST_ROOT}/bin/llvm-readelf
+export    READELF=${HOST_ROOT}/bin/llvm-readelf
 
-# llvm-ranlib -> llvm-ar*
-# llvm-lib -> llvm-ar*
-# llvm-dlltool -> llvm-ar*
-# llvm-strip -> llvm-objcopy*
-# llvm-otool -> llvm-objdump*
-# llvm-install-name-tool -> llvm-objcopy*
-# llvm-bitcode-strip -> llvm-objcopy*
-# llvm-windres -> llvm-rc*
-# llvm-readelf -> llvm-readobj*
-# llvm-addr2line -> llvm-symbolizer*
+# llvm-ranlib             -> llvm-ar*
+# llvm-lib                -> llvm-ar*
+# llvm-dlltool            -> llvm-ar*
+# llvm-strip              -> llvm-objcopy*
+# llvm-otool              -> llvm-objdump*
+# llvm-install-name-tool  -> llvm-objcopy*
+# llvm-bitcode-strip      -> llvm-objcopy*
+# llvm-windres            -> llvm-rc*
+# llvm-readelf            -> llvm-readobj*
+# llvm-addr2line          -> llvm-symbolizer*
 
 # https://docs.kernel.org/kbuild/llvm.html
 export LLVM_IAS=1
 export LLVM=1
+export LLVM_DEFAULT_TARGET_TRIPLE="$KISS_XBUILD_TRIPLE"
+# compiler_version="$($cc --version | grep version | awk -F " " '{print $NF}')"
+toolchain_version="$($XBUILD_PREFIX/bin/llvm-config --version | tr -d '[:alpha:]')"
+
+export C_INCLUDE_PATH="$XBUILD_PREFIX/lib/clang/$toolchain_version/include:$XBUILD_PREFIX/include"
+export CPLUS_INCLUDE_PATH="$XBUILD_PREFIX/include/$LLVM_DEFAULT_TARGET_TRIPLE/c++/v1/:$XBUILD_PREFIX/include/c++/v1/:$XBUILD_PREFIX/lib/clang/$toolchain_version/include:$XBUILD_PREFIX/include"
 
 export LLVM_BIN=${LLVM_BIN:=$(${HOST_ROOT}/bin/llvm-config --bindir)}
 COMPILER_RESOURCE_DIR=$("$CC" --print-resource-dir)
@@ -131,10 +185,10 @@ CXXFLAGS="$CFLAGS"
 
 HOST_LLVM_VERSION=$(llvm-config --version)
 # Don't worry, it is hard coded in LLVM
-CXX_STANDARD_VER=c++20
+CXX_STANDARD_VER=c++23
 
-[ ! -z "${CC+x}" ]  || CC=/usr/bin/clang
-[ ! -z "${CXX+x}" ] || CXX=/usr/bin/clang++
+# [ ! -z "${CC+x}" ]  || CC=/usr/bin/clang
+# [ ! -z "${CXX+x}" ] || CXX=/usr/bin/clang++
 
 search_config="/usr/include/c++/v1/__config"
 [ ! -f "$search_config" ] ||
@@ -145,24 +199,24 @@ search_config="$(find /usr/include -type f -name "__config" | grep -v "experimen
 # /usr/include/c++/v1/experimental/__config
 # /usr/include/c++/v1/__config
 for config_file in $search_config; do
-    [ ! -f "$config_file" ] || {
-        _LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" |
-        $CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " |
-        awk '{print $3}');
-        [ -z "${_LIBCPP_VERSION+x}" ] || {
-            export _LIBCPP_VERSION="$_LIBCPP_VERSION"
-            break
-        }
-    }
+	[ ! -f "$config_file" ] || {
+		_LIBCPP_VERSION=$(printf "#include <$config_file>\nint main () { return 0;}" |
+		$CC -E -stdlib=libc++ -x c++ -dM - | grep " _LIBCPP_VERSION " |
+		awk '{print $3}');
+		[ -z "${_LIBCPP_VERSION+x}" ] || {
+			export _LIBCPP_VERSION="$_LIBCPP_VERSION"
+			break
+		}
+	}
 done
 # HAS_LIBCXX=$(printf "#include <ciso646>\nint main () {}" | $CC -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}')
 # HAS_LIBCXX=$(printf "#include <__config>\nint main () {}" | $CXX -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION | awk '{print $2}')
 
 if [ ! -z "${_LIBCPP_VERSION+x}" ]; then
-    LLVM_ENABLE_LIBCXX="ON"
-    LLVM_ENABLE_LIBCXXABI="ON"
-    LIBCXX_PREFIX=""
-    CXXFLAGS="-D_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE=1 $CXXFLAGS"
+	LLVM_ENABLE_LIBCXX="ON"
+	LLVM_ENABLE_LIBCXXABI="ON"
+	LIBCXX_PREFIX=""
+	CXXFLAGS="-D_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE=1 $CXXFLAGS"
 LDFLAGS="${LDFLAGS} \
 -lc++ \
 -lc++abi \
@@ -170,7 +224,7 @@ LDFLAGS="${LDFLAGS} \
 -unwindlib=libunwind \
 "
 else
-    LIBCXX_PREFIX="std"
+	LIBCXX_PREFIX="std"
 fi
 
 CXXFLAGS="$CXXFLAGS -stdlib=lib${LIBCXX_PREFIX}c++"
@@ -223,7 +277,7 @@ LDFLAGS="${LDFLAGS} \
 -nodefaultlibs \
 -lpthread \
 -no-pie \
--Wl,-rpath-link ${HOST_LLVM_LIBDIR} \
+-Wl,-rpath ${HOST_LLVM_LIBDIR} \
 -Wl,-rpath=${HOST_ROOT}/lib \
 -Wl,-L ${HOST_LLVM_LIBDIR} \
 -L${HOST_ROOT}/lib \
@@ -264,10 +318,10 @@ export LDFLAGS="${LDFLAGS}"
 # # export CPPFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
 # # export CFLAGS+=-resource-dir=$("$CC" --print-resource-dir)
 # # declare -A CML
-#     CMLFS=${SHARE_PREFIX}/cmlfs
-#     CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
+#     CMLFS=${SHARE_PREFIX_DEV}/cmlfs
+#     CML_BIN_DIR=${SHARE_PREFIX_DEV}/cmlfs
 #     export CMLFS=${CMLFS}
-#     export CML_BIN_DIR=${SHARE_PREFIX}/cmlfs
+#     export CML_BIN_DIR=${SHARE_PREFIX_DEV}/cmlfs
 #     [ -d ${CML_BIN_DIR} ] || doas mkdir -p ${CML_BIN_DIR}
 # 
 #     CML_BUILD_DIR=${BUILD_PREFIX}/toolchain/cmlfs

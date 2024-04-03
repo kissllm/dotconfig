@@ -8,6 +8,26 @@ alias //='lineno="$LINENO"'
 
 SCRIPT_NAME="functions" && export SCRIPT_NAME
 
+: "${DELIMITER:="$newline"}" && export DELIMITER
+
+is_link() {
+	[ -e "$1" ] && [ -h "$1" ]
+}
+
+is_file() {
+	[ -f "$1" ] && [ ! -h "$1" ]
+}
+
+is_folder() {
+	[ -d "$1" ] && [ ! -h "$1" ]
+}
+
+# -T is GNU specific (BusyBox's "ln" doesn't support -h), while -n doesn't work
+# \ln -sTf -- "$target" "$anchor"
+command ln 2>&1 | grep -q "\-T" && cmd_link="command ln -sfT" || {
+command ln 2>&1 | grep -q "\-h" && cmd_link="command ln -sfh"; } ||
+cmd_link="command ln -sf"
+
 case "$(type env_reset > /dev/null 2>&1 && type env_reset)" in *"function"*|*"alias"*) ;;
 	*)
 	_env_reset() {
@@ -178,6 +198,53 @@ type_include() {
 	return $result
 }
 
+# https://stackoverflow.com/questions/12162010/posix-sh-equivalent-for-bash-s-printf-q
+# Modified to trim single quotes -- moving it ot see()
+# Usage:
+# // log '$@' "$(esceval "$@")"
+esceval() {
+	local level=-1
+	[ "$level" -eq "-1" ] ||
+	_level_2
+	# case $# in 0) return 0; esac
+	[ "$#" -ne "0" ] || return 0
+	local item result=
+	local index=0
+	while :
+	do
+		item="$1"
+		# if null "$result"; then
+		#   result="'"
+		# else
+			# result="$result'$(printf "%-$(tabstop_remainder ${#result})s" "")${DELIMITER}'"
+			# result="$result$(printf "%-$(tabstop_remainder ${#result})s" "")${DELIMITER}"
+		# fi
+		: $((index += 1))
+		# // debug "$scope \$@ \$$index" "$1"
+		case "$item" in
+			'') result="$result$(printf '%s' "")" ;;
+			*)
+				# case "$1" in
+				#   "'"*"'"|\"*\")
+				[ ! -z "${item##\"*\"}" ] && [ ! -z "${item##\'*\'}" ] ||
+					item="$(printf '%s' "$item" | sed -e "s/^\([\"']\)\(.*\)\1\$/\2/g")"
+				# esac
+				result="$result$(printf '%s' "$item" | sed "s/'/'\\\\''/g")"
+		esac
+		# result="$result$(printf "%-$(tabstop_remainder ${#item})s" "")${DELIMITER}"
+		result="$result${DELIMITER}"
+		shift
+		# case $# in 0) break; esac
+		[ "$#" -ne "0" ] || break
+	done
+	# result="$result'"
+	# Because it's a delegate() dependency, "$RS%s" is not used here
+	# That is, you can't use "$(// delegate -- esceval "$@")"
+	# So, if you wnat debug this function, print errors to special output, please
+	printf '%s' "$result"
+}
+
+
 # https://en.wikipedia.org/wiki/C0_and_C1_control_codes#Field_separators
 # FS       : field separator of awk
 # ETX      : end of text in ASCII
@@ -195,15 +262,15 @@ type_include() {
 # but which function has a "returned" string
 # This delegation makes it sure of only getting the printf content after the last \n,
 # which content comes from a function like
-# function_name() { printf "\n%s$FSs" "$field_00" "$field_01"; }
-# local var="$(delegate function_name "$@")"
-# local var="$(delegate -- function_name "$@")"
-# local var="$(// delegate -- function_name "$@")"
+# delegated_function() { printf "$RS%s$FSs" "$field_00" "$field_01"; }
+# Actually the returned content began with an "$RS"
+# local var="$(   delegate    delegated_function "$@")"
+# local var="$(   delegate -- delegated_function "$@")"
+# local var="$(// delegate -- delegated_function "$@")"
 # Usage on newline_delimitered_list (a vector of vectors)
-# function_name() { printf "\n%s$RS%s" "$vector_00" "$vector_01"; }
-# function_name() { printf "\n%s" "$vector_00$RS$vector_01"; }
-# If function_name prints a "$RS" delimitered list
-# local newline_delimitered_list="$(// delegate "\n" function_name "$@")"
+# delegated_function() { printf "$RS%s$FS%s" "$vector_00" "$vector_01"; }
+# Generating a $newline delimitered list
+# local newline_delimitered_list="$(// delegate "\n" delegated_function "$@")"
 delegate() {
 	# _level_1 will let you lose error scenario
 	# _level_1
@@ -227,7 +294,11 @@ delegate() {
 	# "$@" won't lose any empty arguments
 	# Version 3 -- \n as $RS
 	# newline_leading=$("$@") && {
-	line=$("$@" | tr -d "$newline") && {
+
+	# line=$("$@" | tr -d "$newline") && {
+	line="$("$@" | tr -d "$newline")"
+    local status=$?
+
 		# Version 4 -- using $RS as string
 		# local line="${newline_leading##*${newline}}"
 
@@ -244,7 +315,7 @@ delegate() {
 			# If user forgot to use the [printf '\n%s'] format to a return string
 			# Adding a leading "\n" make EOF happy
 			# [ "$(printf '%c' "$newline_leading" | od -b | awk '{print $2}')" = "012" ] ||
-			# 	newline_leading="$(printf '\n%s' "$newline_leading")"
+			#   newline_leading="$(printf '\n%s' "$newline_leading")"
 
 
 			# "$@" | tail -n 1
@@ -283,22 +354,27 @@ delegate() {
 			#
 			# "$@" | awk 'BEGIN { RS = '\n' } END { print }' | awk " $sub { print }"
 		# } || {
-		# 	# Version 3 -- \n as $RS
-		# 	printf '%s' "$line"
-		# 	return 0
+		#   # Version 3 -- \n as $RS
+		#   printf '%s' "$line"
+		#   return 0
 		# }
 		#
 		# Version 4 -- using $RS as string
 		# printf '%s' "${newline_leading##*${sub}}"
 		# return 0
-	} || {
-		// war '$#' "$# [delegate] [functions]"
-		// war '$@' "$(esceval "$@")"
-		# printf '\n'
-		printf ''
+
+	# } || {
+    [ "$status" -eq "0" ] || {
+		// war '$#' "$# [delegate] [functions]" &
+		// war '$@' "$(esceval "$@")" &
+
+		# # printf '\n'
+		# printf ''
+
 		# interrupt
-		return 1
+		# return 1
 	}
+    return $status
 }
 
 : "${FUNCTIONS=""}" && export FUNCTIONS

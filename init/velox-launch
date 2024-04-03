@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#! /bin/sh
 
 printf '%s %s\n' '$tty_num' "$tty_num [velox-launch]"
 

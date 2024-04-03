@@ -3,6 +3,8 @@
 
 alias /='eval'
 alias //='lineno="$LINENO"'
+newline="
+"
 
 SCRIPT_NAME="kiss-env" && export SCRIPT_NAME
 
@@ -40,130 +42,76 @@ SCRIPT_NAME="kiss-env" && export SCRIPT_NAME
 #       . "$_functions"
 # }
 
+# kiss_root         : "$1"
+# kiss_repo_local   : "$2"
+# repo_root         : "$3"
+# repo_main_source  : "$4"
+repo_main() {
+
+	# local kiss_repo_name="$1"
+	# shift 1
+	# local kiss_root="${1:?"Fake root can not be empty"}"
+	# Empty means the local host
+	local kiss_root="$1"
+	# In kiss_repo_name="$1" version, if you use "kiss_repo" as local variable name,
+	# it will localize the output name "kiss_repo"
+	local kiss_repo_local="$2"
+	local repo_root="$3"
+	local repo_main_source="$4"
+	local repo_main_auchor="$kiss_root/${kiss_repo_local#*/}"
+	[ -d "$kiss_root/${repo_root#*/}" ] ||  \mkdir -p "$kiss_root/${repo_root#*/}"
+
+	[ ! -e "$repo_main_source" ] &&
+		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' [for $kiss_root/${kiss_repo_local#*/}] does not exist" ||
+	[ -d "$repo_main_auchor" ] || {
+		[ -L "$repo_main_auchor" ] ||
+		[ -h "$repo_main_auchor" ]
+	} || {
+		[ "$(readlink -fn "$repo_root")" != "$(readlink -fn "$REPO_ROOT_IMPL")" ] || {
+			printf '%s %s\n' '$repo_root' "'$repo_root' has local settings and can not be same as '$REPO_ROOT_IMPL'"
+			printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
+			# exit 1
+			return 0
+		}
+		[ ! -L "$repo_main_auchor" ] &&
+		$cmd_link -- "$repo_main_source" "$repo_main_auchor" ||
+		[ "$(readlink -fn "$repo_main_auchor")" = "$(readlink -fn "$repo_main_source")" ] || {
+			\rm -f "$repo_main_auchor" || {
+				printf '%s %s\n' '$repo_root/main' "'$repo_root/main' modification failed"
+				# exit 1
+				return 0
+			}
+
+			$cmd_link -- "$repo_main_source" "$repo_main_auchor"
+		}
+	}
+	# / $kiss_repo_name="$repo_main_source"
+	printf "$RS%s" "$repo_main_source"
+}
+
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
 // env_reset LOGNAME "$(id -nu)"
+: ${KISS_TMPDIR:="/tmp/$USER/kiss"} && export KISS_TMPDIR
+// env_reset SYS_OUTPUT   "$KISS_TMPDIR/logs/sys.log"
+[ -d "${SYS_OUTPUT%/*}" ] || \mkdir -p "${SYS_OUTPUT%/*}"
 
-KISS_PATH=''
+# If you insist to update local system
+# KISS_ROOT= && export KISS_ROOT
+# Or if unset, kiss package manager will set it to '/'
+# [ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
+#
+# By default use a target address (/opt/kiss or /mnt/kiss)
+# /mnt/kiss might be a mount point of /dev/nvme0n1p3 ... something
+# /opt/kiss normally has larger size (20 GB is recommended) on plain local filesystem
+# Thiese two values are put to prevent from ruining local systemm by accident
+# export KISS_ROOT="/opt/kiss" BOOTSTRAP=
+: ${KISS_ROOT="/opt/kiss"} && export KISS_ROOT
+[ -d "$KISS_ROOT" ] || \mkdir -p "$KISS_ROOT"
 
 // env_reset SHARE_PREFIX_DEV "/opt"
 
 : "${REPO_ROOT:="/var/db/kiss"}" && export REPO_ROOT
 : "${REPO_ROOT_IMPL:="$SHARE_PREFIX_DEV/${REPO_ROOT#*/}"}" && export REPO_ROOT_IMPL
-
-[ -z "${KISS_DEBUG+x}" ] || {
-	# Later ones have higher priority
-	if [ -z "${KISS_PATH:+x}" ]; then
-		KISS_PATH=$REPO_ROOT/kiss-repo-repos
-	else
-		KISS_PATH=$REPO_ROOT/kiss-repo-repos:$KISS_PATH
-	fi
-
-	KISS_PATH=$REPO_ROOT/repos/flatpak/flatpak:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/cemkeylan/personal:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/cemkeylan/editors:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/repos/containers:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/libs:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/garbage:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/gfx:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/java:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/lxqt:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/office:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/python:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/science:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/themes:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/eudaldgr/video:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/repos/periish/audio:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/cmd-utils:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/containers:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/dbus:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/misc:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/ricing:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/periish/xfce4:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/noir/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/noir/testing:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/noir/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/noir/core:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/sauzer/xorg:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/sauzer/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/sauzer/core:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/dm/im:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/dm/kernel:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/dm/site:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/repos/fonts/kiss-fonts:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/himmalerin/modified:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/himmalerin/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/dumpsterfire/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/dumpsterfire/desktop:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/dumpsterfire/xorg:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/dumpsterfire/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/dumpsterfire/core:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/kiss-somethingsomethingstatic/bin:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/kiss-somethingsomethingstatic/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/kiss-somethingsomethingstatic/community:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/kiss-somethingsomethingstatic/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/kiss-somethingsomethingstatic/core:$KISS_PATH
-
-	# KISS_PATH=$REPO_ROOT/repo/wayland:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/repo/testing:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/repo/extra:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/repo/core:$KISS_PATH
-
-	# KISS_PATH=$REPO_ROOT/repos/mmatongo:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/jedahan:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/ioraff/modified:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/ioraff/dbus:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/ioraff/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/games/equipment:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/games/games:$KISS_PATH
-
-	# KISS_PATH=$REPO_ROOT/repos/lang:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/lang/testing:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/lang/languages:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/lang/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/talyn:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/kiss-repo/dbus:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/kiss-repo/extra:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/kiss-repo/modified:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/kiss-repo/old:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/repos/community/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/community/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/repos/community/core:$KISS_PATH
-
-	# KISS_PATH=$REPO_ROOT/glasnost/modules/community/community:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/glasnost/modules/repo/wayland:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/glasnost/modules/repo/extra:$KISS_PATH
-	# KISS_PATH=$REPO_ROOT/glasnost/modules/repo/core:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/community/community:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/boost/community:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/wyverkkiss/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/wyverkkiss/gnu:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/wyverkkiss/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/wyverkkiss/core:$KISS_PATH
-
-	KISS_PATH=$REPO_ROOT/dilyn/wayland:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/dilyn/gpl:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/dilyn/extra:$KISS_PATH
-	KISS_PATH=$REPO_ROOT/dilyn/core:$KISS_PATH
-
-	if [ -z "${KISS_PATH:+x}" ]; then
-		KISS_PATH=$REPO_ROOT/kiss-llvm
-	else
-		KISS_PATH=$REPO_ROOT/kiss-llvm:$KISS_PATH
-	fi
-
-}
 
 
 # : "${KISS_REPO="$REPO_ROOT/lm"}" && export KISS_REPO
@@ -174,61 +122,144 @@ KISS_PATH=''
 # Actually it is a recommended way to avoid maintaining a seperate repo
 repo_main_source="$REPO_ROOT_IMPL/lm"
 
-newline="
-"
-repo_main() {
+# repo_main "kiss_repo" "$KISS_ROOT" "$KISS_REPO" "$REPO_ROOT" "$repo_main_source"
+kiss_repo="$(// delegate -- repo_main "$KISS_ROOT" "$KISS_REPO" "$REPO_ROOT" "$repo_main_source")"
+printf '%s %s\n' '$kiss_repo' "$kiss_repo" >> "$SYS_OUTPUT"
+KISS_PATH=''
 
-	# local kiss_root="${1:?"Fake root can not be empty"}"
-	# Empty means the local host
-	local kiss_root="${1-}"
-	local repo_main_target="$kiss_root/${KISS_REPO#*/}"
-	[ -d "$kiss_root/${REPO_ROOT#*/}" ] ||  \mkdir -p "$kiss_root/${REPO_ROOT#*/}"
+[ -z "${KISS_DEBUG+x}" ] || {
+	# Later ones have higher priority
+	[ -z "${KISS_PATH:+x}" ] &&
+		KISS_PATH=$REPO_ROOT_IMPL/kiss-repo-repos ||
+		KISS_PATH=$REPO_ROOT_IMPL/kiss-repo-repos:$KISS_PATH
 
-	[ ! -e "$repo_main_source" ] &&
-		printf '%s %s\n' '$repo_main_source' "'$repo_main_source' [for $kiss_root/${KISS_REPO#*/}] does not exist" ||
-	[ -d "$repo_main_target" ] || {
-		[ -L "$repo_main_target" ] ||
-		[ -h "$repo_main_target" ]
-	} || {
-		[ "$(readlink -fn "$REPO_ROOT")" != "$(readlink -fn "$REPO_ROOT_IMPL")" ] || {
-			printf '%s %s\n' '$REPO_ROOT' "'$REPO_ROOT' has local settings and can not be same as '$REPO_ROOT_IMPL'"
-			printf '%s %s\n' '$LAYOUT_INIT' "'$LAYOUT_INIT' has the details"
-			# exit 1
-			return 0
-		}
-		[ ! -L "$repo_main_target" ] &&
-		\ln -sf "$repo_main_source" "$repo_main_target" ||
-		[ "$(readlink -fn "$repo_main_target")" = "$(readlink -fn "$repo_main_source")" ] || {
-			\rm -f "$repo_main_target" || {
-				printf '%s %s\n' '$REPO_ROOT/main' "'$REPO_ROOT/main' modification failed"
-				# exit 1
-				return 0
-			}
+	KISS_PATH=$REPO_ROOT_IMPL/repos/flatpak/flatpak:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/cemkeylan/personal:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/cemkeylan/editors:$KISS_PATH
 
-			\ln -sf "$repo_main_source" "$repo_main_target"
-		}
-	}
+	KISS_PATH=$REPO_ROOT_IMPL/repos/containers:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/libs:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/garbage:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/gfx:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/java:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/lxqt:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/office:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/python:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/science:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/themes:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/eudaldgr/video:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/audio:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/cmd-utils:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/containers:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/dbus:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/misc:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/ricing:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/periish/xfce4:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/noir/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/noir/testing:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/noir/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/noir/core:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/sauzer/xorg:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/sauzer/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/sauzer/core:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/dm/im:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/dm/kernel:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/dm/site:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/repos/fonts/kiss-fonts:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/himmalerin/modified:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/himmalerin/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/dumpsterfire/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/dumpsterfire/desktop:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/dumpsterfire/xorg:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/dumpsterfire/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/dumpsterfire/core:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-somethingsomethingstatic/bin:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-somethingsomethingstatic/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-somethingsomethingstatic/community:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-somethingsomethingstatic/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-somethingsomethingstatic/core:$KISS_PATH
+
+	# KISS_PATH=$REPO_ROOT_IMPL/repo/wayland:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/repo/testing:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/repo/extra:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/repo/core:$KISS_PATH
+
+	# KISS_PATH=$REPO_ROOT_IMPL/repos/mmatongo:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/jedahan:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/ioraff/modified:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/ioraff/dbus:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/ioraff/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/games/equipment:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/games/games:$KISS_PATH
+
+	# KISS_PATH=$REPO_ROOT_IMPL/repos/lang:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/lang/testing:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/lang/languages:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/lang/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/talyn:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-repo/dbus:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/kiss-repo/extra:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/kiss-repo/modified:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/kiss-repo/old:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/repos/community/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/community/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/repos/community/core:$KISS_PATH
+
+	# KISS_PATH=$REPO_ROOT_IMPL/glasnost/modules/community/community:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/glasnost/modules/repo/wayland:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/glasnost/modules/repo/extra:$KISS_PATH
+	# KISS_PATH=$REPO_ROOT_IMPL/glasnost/modules/repo/core:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/community/community:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/boost/community:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/wyverkkiss/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/wyverkkiss/gnu:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/wyverkkiss/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/wyverkkiss/core:$KISS_PATH
+
+	KISS_PATH=$REPO_ROOT_IMPL/dilyn/wayland:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/dilyn/gpl:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/dilyn/extra:$KISS_PATH
+	KISS_PATH=$REPO_ROOT_IMPL/dilyn/core:$KISS_PATH
+
+	if [ -z "${KISS_PATH:+x}" ]; then
+		KISS_PATH=$REPO_ROOT_IMPL/kiss-llvm
+	else
+		KISS_PATH=$REPO_ROOT_IMPL/kiss-llvm:$KISS_PATH
+	fi
+
 }
 
-repo_main
+path_prepend KISS_PATH "$kiss_repo/extra"
+# [ -z "${KISS_PATH:+x}" ] &&
+# 	KISS_PATH=$kiss_repo/extra ||
+# 	KISS_PATH=$kiss_repo/extra:$KISS_PATH
 
-if [ -z "${KISS_PATH:+x}" ]; then
-	KISS_PATH=$KISS_REPO/extra
-else
-	KISS_PATH=$KISS_REPO/extra:$KISS_PATH
-fi
-
-KISS_PATH=$KISS_REPO/fonts:$KISS_PATH
-KISS_PATH=$KISS_REPO/wayland:$KISS_PATH
-KISS_PATH=$KISS_REPO/system:$KISS_PATH
-KISS_PATH=$KISS_REPO/core:$KISS_PATH
+path_prepend KISS_PATH "$kiss_repo/fonts"
+# KISS_PATH=$kiss_repo/fonts:$KISS_PATH
+path_prepend KISS_PATH "$kiss_repo/wayland"
+# KISS_PATH=$kiss_repo/wayland:$KISS_PATH
+path_prepend KISS_PATH "$kiss_repo/system"
+# KISS_PATH=$kiss_repo/system:$KISS_PATH
+path_prepend KISS_PATH "$kiss_repo/core"
+# KISS_PATH=$kiss_repo/core:$KISS_PATH
 
 # Static version will remove dynamic libraries
-# KISS_PATH=$KISS_REPO/static/bin:$KISS_PATH
-# KISS_PATH=$KISS_REPO/static/community:$KISS_PATH
-# KISS_PATH=$KISS_REPO/static/wayland:$KISS_PATH
-# KISS_PATH=$KISS_REPO/static/extra:$KISS_PATH
-# KISS_PATH=$KISS_REPO/static/core:$KISS_PATH
+# KISS_PATH=$kiss_repo/static/bin:$KISS_PATH
+# KISS_PATH=$kiss_repo/static/community:$KISS_PATH
+# KISS_PATH=$kiss_repo/static/wayland:$KISS_PATH
+# KISS_PATH=$kiss_repo/static/extra:$KISS_PATH
+# KISS_PATH=$kiss_repo/static/core:$KISS_PATH
 
 export KISS_PATH
 
@@ -261,20 +292,6 @@ export KISS_PATH
 # : "${CBUILD:="${KISS_XBUILD_TRIPLE}"}" && export CBUILD
 // env_reset CBUILD "${KISS_XBUILD_TRIPLE}"
 
-# If you insist to update local system
-# KISS_ROOT= && export KISS_ROOT
-# Or if unset, kiss package manager will set it to '/'
-# [ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
-#
-# By default use a target address (/opt/kiss or /mnt/kiss)
-# /mnt/kiss might be a mount point of /dev/nvme0n1p3 ... something
-# /opt/kiss normally has larger size (20 GB is recommended) on plain local filesystem
-# Thiese two values are put to prevent from ruining local systemm by accident
-export KISS_ROOT="/opt/kiss" BOOTSTRAP=
-[ -d "$KISS_ROOT" ] || \mkdir -p "$KISS_ROOT"
-
-repo_main "$KISS_ROOT"
-
 # : "${KISS_REMOTE_REPO="$KISS_PATH"}" && export KISS_REMOTE_REPO
 // env_reset KISS_REMOTE_REPO "$KISS_PATH"
 # https://github.com/glasnostlinux/glasnost/releases
@@ -301,8 +318,8 @@ repo_main "$KISS_ROOT"
 
 [ -d "$DEST_ROOT" ] || \mkdir -p "$DEST_ROOT"
 # git config --global --add safe.directory "$DEST_ROOT"
-# : "${REPO_BASE:="$KISS_REPO/base"}" && export REPO_BASE
-// env_reset REPO_BASE "$KISS_REPO/base"
+# : "${REPO_BASE:="$kiss_repo/base"}" && export REPO_BASE
+// env_reset REPO_BASE "$kiss_repo/base"
 
 
 

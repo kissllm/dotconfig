@@ -28,6 +28,9 @@ package.path = package.path .. ";" .. install_path .. "/lua/lazy/?.lua"
 -- import by folder
 -- require("lazy").setup("plugins")
 -- config.defaults.lazy = true
+-- https://stackoverflow.com/questions/75616837/how-to-include-configure-lua-ls-on-lspconfig
+-- https://vi.stackexchange.com/questions/41393/how-to-include-configure-lua-ls-on-lspconfig
+-- Must do not set this version option
 -- config.defaults.version = "*"
 -- Demo
 -- https://github.com/LazyVim/starter

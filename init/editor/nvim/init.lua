@@ -2,15 +2,15 @@
 -- https://www.reddit.com/r/lua/comments/wi0bau/whats_the_correct_way_to_run_a_lua_file_that_uses/
 function add_rel_path(dir)
   local spath =
-      debug.getinfo(1,'S').source
-        :sub(2)
-        :gsub("^([^/])","./%1")
-        :gsub("[^/]*$","")
+	  debug.getinfo(1,'S').source
+		:sub(2)
+		:gsub("^([^/])","./%1")
+		:gsub("[^/]*$","")
   dir=dir and (dir.."/") or ""
   spath = spath..dir
   package.path = spath.."?.lua;"
-               ..spath.."?/init.lua"
-               ..package.path
+			   ..spath.."?/init.lua"
+			   ..package.path
 end
 add_rel_path("lua")
 local log_address = vim.fn.stdpath('config') .. "/lua/?.lua"
@@ -30,6 +30,7 @@ for _, v in ipairs(path_list) do
 end
 if found == false then
 	print("Manually append: " .. log_address)
+
 	package.path = package.path .. ";" .. log_address
 end
 
@@ -152,26 +153,30 @@ if not colors then
 	file:write("colors initialization failed")
 	return
 end
+
 -- vim.opt.rtp:prepend(packages_root)
 -- vim.opt.rtp:prepend(manager_perse_path)
 package.path = path_insert(package.path, config_root  .. "/lua/?.lua", "append")
 package.path = path_insert(package.path, config_root  .. "/lua/plugins/?.lua", "append")
 
-local runtime_path  = vim.split(package.path, ";")
+local runtime_path  = vim.split(package.path,  ";")
 local runtime_cpath = vim.split(package.cpath, ";")
+-- https://vi.stackexchange.com/questions/37896/lsp-client-failing-to-attach-as-part-of-autocmd
+-- local runtime_path = vim.split(package.path, ";")
 -- table.insert(runtime_path, "lua/?.lua")
+-- table.insert(runtime_path, "lua/?/init.lua")
 -- Oneline command: :lua print(serialize(vim.split(package.path, ";")))
 -- Does not work
 -- print("runtime_path: \n" .. serialize(runtime_path))
 print("runtime_path")
 for key, value in pairs(runtime_path) do
-    print('\t', key, value)
+	print('\t', key, value)
 end
 -- No new line for runtime_path (array like table)
 -- print( vim.inspect(runtime_path) )
 print("runtime_cpath")
 for key, value in pairs(runtime_cpath) do
-    print('\t', key, value)
+	print('\t', key, value)
 end
 
 local lazy_config = require("lazy-config")
@@ -180,12 +185,31 @@ if not lazy_config then
 	file:write("lazy_config initialization failed")
 	return
 end
+
+-- Will generate light background effect, no matter background color set
+-- vim.api.nvim_command("colorscheme onehalf-lush-dark")
+-- vim.opt.background = 'dark'
+
+-- vim.opt.background = 'dark'
+-- vim.api.nvim_command("colorscheme onehalf-lush-dark")
+
+--
 -- lazy.nvim might overwrite keybindings
-keybindings_again = require("keybindings")
-if not keybindings_again then
-	file:write("keybindings_again initialization failed")
-	return
-end
+-- It will be loaded later after lazy_config since it locates in after/plugin
+-- but if some plugins is lazy loaded, if will override the keybindings settings
+-- keybindings_again = require("keybindings")
+-- if not keybindings_again then
+-- 	file:write("keybindings_again initialization failed")
+-- 	return
+-- end
+
+-- Will set background=light
+-- But does not source "keybindings" unless setting lazy = false to some related plugins
+-- So the correct way is to use lazy settings to chieve the effect instead of after/plugin
+-- vim.cmd("RL")
+-- vim.opt.background = 'dark'
+-- vim.cmd[[set background=dark]]
+
 file:write("\n\n")
 file:flush()
 file:close()

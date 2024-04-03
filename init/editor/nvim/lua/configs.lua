@@ -10,8 +10,9 @@ local cmd      = vim.api.nvim_command -- execute Vim commands
 local fn       = vim.fn
 local hl       = vim.api.nvim_set_hl
 
-
-set.syntax     = 'false'
+-- set.syntax     = 'false'
+-- set.syntax     = 'off'
+set.syntax     = 'on'
 set.autoread   = true
 cmd[[
 set omnifunc=v:lua.vim.lsp.omnifunc
@@ -38,8 +39,9 @@ set.ignorecase   = true
 -- Default is 0 -- no limitation
 -- set.pumheight     = 10 -- maybe too big ?
 set.pumheight    = 0 -- maybe too big ?
+-- mapping delays
 -- set.timeoutlen   = 300
-set.timeoutlen   = 700
+   set.timeoutlen   = 700
 -- vim.g.mapleader      = "<Space>"
 vim.g.mapleader      = ' '
 vim.g.maplocalleader = ' '
@@ -114,8 +116,12 @@ set.hlsearch        = true
 set.shortmess       = "actWAOFS"
 set.shortmess       = set.shortmess + "c"
 -- set.shortmess:append "c"
-set.signcolumn      = "number"
--- set.signcolumn = "yes"
+--
+-- https://www.reddit.com/r/neovim/comments/1b13a69/what_is_this_extra_stuff_on_the_side/
+-- set.signcolumn   = "number"
+set.signcolumn      = "yes"
+-- set.signcolumn   = "yes:2"
+
 set.inccommand      = "split"
 
 set.autowriteall    = true
@@ -128,6 +134,11 @@ set.wrapmargin      = 0
 set.backspace       = "indent,eol,start"
 set.eadirection     = "ver"
 set.equalalways     = false
+
+-- Disable /usr/share/nvim/runtime/ftplugin.vim
+vim.g.did_load_ftplugin = 1
+-- Disable /usr/share/nvim/runtime/matchparen.vim
+vim.g.loaded_matchparen =1
 
 set.cursorline      = true
 -- set.cursorline      = false
@@ -147,7 +158,7 @@ if vim.opt_local.modifiable:get() == true then
 	set.fileencoding = 'utf-8'
 end
 set.encoding        = "utf-8"
-set.termencoding    = "utf-8"
+-- set.termencoding    = "utf-8"
 set.spelllang       = "en_us"
 -- E167: :scriptencoding used outside of a sourced file
 -- cmd([[:scriptencoding utf-8]])
@@ -162,17 +173,26 @@ set.visualbell      = false
 set.shiftround      = false
 set.spell           = false
 set.startofline     = false
-set.scrolloff       = 20
+
+-- https://groups.google.com/g/vim_dev/c/UHCX5L2GfkU
+-- set.scrolloff       = 20
+set.scrolloff       = 999
 -- set.scrolloff        = 8
 set.sidescrolloff   = 30
 -- set.sidescrolloff    = 8
 set.scrollopt       = set.scrollopt - 'ver'
 set.showcmd         = false
-set.showmatch       = true
+
+-- https://stackoverflow.com/questions/307148/vim-scrolling-slowly
+-- set.showmatch       = true
+set.showmatch       = false
+
 set.splitbelow      = true
 set.splitright      = true
 set.ttimeout        = true
+-- key code delays
 set.ttimeoutlen     = 1
+
 set.ttyfast         = true
 -- weird behavior: automatically moving cursor one character left/backward when shfit+a
 --- set.virtualedit     = "block"
@@ -286,8 +306,6 @@ set.wrapscan                   = true
 
 
 
-
-
 set.fillchars = {
 	vert       = "│", -- alternatives │
 	-- vert    = "▕", -- alternatives │
@@ -361,13 +379,28 @@ vim.api.nvim_create_user_command(
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/keybindings.lua")
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+
 		vim.opt.background = 'dark'
-		set.background = 'dark'
+		-- set.background = 'dark'
+
 		-- vim.api.nvim_win_set_options("background", "dark")
 		-- vim.api.nvim_command("colorscheme onehalf-lush-dark")
 	end,
 	{ nargs = '?', bang = true, silent }
 )
+
+-- Does not work in complex scenarioes
+vim.cmd([[
+" Retab spaced file, but only indentation
+" command! RetabIndents call RetabIndents()
+command! RI call RetabIndents()
+" Retab spaced file, but only indentation
+func! RetabIndents()
+	let saved_view = winsaveview()
+	execute '%s@^\( \{'.&ts.'}\)\+@\=repeat("\t", len(submatch(0))/'.&ts.')@'
+	call winrestview(saved_view)
+endfunc
+]])
 
 -- "Thyrum/vim-stabs",
 vim.api.nvim_create_user_command(
@@ -379,6 +412,7 @@ vim.api.nvim_create_user_command(
 			set.expandtab = false
 		end
 		vim.cmd("RetabIndent")
+
 		-- vim.cmd("write " .. vim.fn.expand('%'))
 		vim.cmd("W")
 		vim.cmd("redraw!")
@@ -387,11 +421,11 @@ vim.api.nvim_create_user_command(
 )
 
 -- vim.api.nvim_create_user_command(
--- 	"W",
--- 	function()
--- 		vim.cmd('call boot#write_generic()')
--- 	end,
--- 	{ nargs = '?', bang = true, silent }
+--  "W",
+--  function()
+--      vim.cmd('call boot#write_generic()')
+--  end,
+--  { nargs = '?', bang = true, silent }
 -- )
 
 -- Heavy operation
@@ -425,14 +459,17 @@ vim.api.nvim_create_user_command(
 )
 
 -- https://vi.stackexchange.com/questions/41798/make-colorscheme-change-when-background-change
-vim.api.nvim_create_autocmd({"OptionSet"}, {
-	pattern = {"background"},
+vim.api.nvim_create_autocmd({ "OptionSet" }, {
+	pattern = { "background" },
 	callback = function()
 		if vim.o.background == 'dark' then
 			print('late dark')
 			-- vim.cmd("colorscheme modus-vivendi")
 			--
-			vim.cmd("colorscheme onehalf-lush-dark")
+
+			-- vim.cmd("colorscheme onehalf-lush-dark")
+			vim.api.nvim_command("colorscheme onehalf-lush-dark")
+
 			-- vim.cmd("colorscheme no-clown-fiesta")
 			-- vim.cmd("colorscheme nebulous")
 
@@ -440,11 +477,15 @@ vim.api.nvim_create_autocmd({"OptionSet"}, {
 		else
 			print('late light')
 			-- vim.cmd("colorscheme modus-operandi")
-			vim.cmd("colorscheme onehalf-lush")
+
+			-- vim.cmd("colorscheme onehalf-lush")
+			vim.api.nvim_command("colorscheme onehalf-lush")
+
 			-- vim.cmd("colorscheme gruvbox")
 		end
 		-- force a full redraw:
 		vim.cmd("mode")
+		-- This line will override colorscheme
 		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
 	end
 })
@@ -506,29 +547,31 @@ set.title = true
 -- set.updatetime = 100
 set.updatetime = 1000
 
-filetype_autocmd("html",       "setlocal", "ts=4 sts=4 sw=4 omnifunc=htmlcomplete#CompleteTags")
-filetype_autocmd("xml",        "set", "omnifunc=xmlcomplete#CompleteTags")
-filetype_autocmd("javascript", "setlocal", "ts=4 sts=4 sw=4")
-filetype_autocmd("typescript", "setlocal", "ts=4 sts=4 sw=4")
+   filetype_autocmd("html",       "setlocal", "ts=4 sts=4 sw=4 omnifunc=htmlcomplete#CompleteTags")
+   filetype_autocmd("xml",        "set", "omnifunc=xmlcomplete#CompleteTags")
+   filetype_autocmd("javascript", "setlocal", "ts=4 sts=4 sw=4")
+   filetype_autocmd("typescript", "setlocal", "ts=4 sts=4 sw=4")
 -- pip install black
-filetype_autocmd("python", "setlocal", "ts=4 sts=4 sw=4 formatprg=black\\ -q\\ -")
-filetype_autocmd("yaml",   "setlocal", "ts=2 sts=2 sw=2")
-filetype_autocmd("cmake",  "setlocal", "ts=2 sts=2 sw=2 et")
-filetype_autocmd("css",    "setlocal", "ts=4 noet sw=4")
-filetype_autocmd("scss",   "setlocal", "ts=4 noet sw=4 omnifunc=csscomplete#CompleteCSS")
-filetype_autocmd("vue",    "syntax", "sync fromstart")
-filetype_autocmd("elixir", "setlocal", "formatprg=mix\\ format\\ -")
-buffer_autocmd("*.coffee",         "set", "ft=coffee")
-buffer_autocmd("*.less",           "set", "ft=less")
-buffer_autocmd("*.md",             "set", "ft=markdown")
-buffer_autocmd("Cakefile",         "set", "ft=coffee")
-buffer_autocmd("*.pp",             "set", "ft=ruby")
-buffer_autocmd("*.conf",           "set", "ft=dosini")
-buffer_autocmd("*.tsx",            "set", "ft=typescript.tsx")
-buffer_autocmd("*.cls",            "set", "ft=apex syntax=java")
-buffer_autocmd("*.trigger",        "set", "ft=apex syntax=java")
-buffer_autocmd("*.nomad.template", "set", "ft=hcl")
-buffer_autocmd("*.txt",            "set", "ft=cmake")
+   filetype_autocmd("python", "setlocal", "ts=4 sts=4 sw=4 formatprg=black\\ -q\\ -")
+   filetype_autocmd("yaml",   "setlocal", "ts=2 sts=2 sw=2")
+   filetype_autocmd("cmake",  "setlocal", "ts=2 sts=2 sw=2 et")
+   filetype_autocmd("css",    "setlocal", "ts=4 noet sw=4")
+   filetype_autocmd("scss",   "setlocal", "ts=4 noet sw=4 omnifunc=csscomplete#CompleteCSS")
+   filetype_autocmd("vue",    "syntax", "sync fromstart")
+   filetype_autocmd("elixir", "setlocal", "formatprg=mix\\ format\\ -")
+   buffer_autocmd("*.coffee",         "set", "ft=coffee")
+   buffer_autocmd("*.less",           "set", "ft=less")
+   buffer_autocmd("*.md",             "set", "ft=markdown")
+   buffer_autocmd("Cakefile",         "set", "ft=coffee")
+   buffer_autocmd("*.pp",             "set", "ft=ruby")
+-- buffer_autocmd("*.conf",           "set", "ft=dosini")
+   buffer_autocmd("*.conf",           "set", "ft=conf")
+   buffer_autocmd("*.tsx",            "set", "ft=typescript.tsx")
+   buffer_autocmd("*.cls",            "set", "ft=apex syntax=java")
+   buffer_autocmd("*.trigger",        "set", "ft=apex syntax=java")
+   buffer_autocmd("*.nomad.template", "set", "ft=hcl")
+   buffer_autocmd("*.txt",            "set", "ft=cmake")
+   buffer_autocmd({"*.h", "*.hpp", "*.c", "*.cpp"},  "setlocal", "ts=2 sts=2 sw=2 et")
 
 -- hold_autocmd("*", "silent call CocActionAsync('highlight')")
 
@@ -657,49 +700,97 @@ vim.g.vimwiki_filetypes = { "markdown" }
 --  )
 -- end
 
---
--- https://stackoverflow.com/questions/65549814/setting-vimwiki-list-in-a-lua-init-file
-vim.g.vimwiki_ext2syntax = {['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown'}
-vim.g.vimwiki_global_ext = 0
+-- https://github.com/stevearc/profile.nvim/blob/master/README.md
+local should_profile = os.getenv("NVIM_PROFILE")
+if should_profile then
+	require("profile").instrument_autocmds()
+	if should_profile:lower():match("^start") then
+		require("profile").start("*")
+	else
+		require("profile").instrument("*")
+	end
+end
 
+local function toggle_profile()
+local prof = require("profile")
+if prof.is_recording() then
+	prof.stop()
+	vim.ui.input({ prompt = "Save profile to:", completion = "file", default = "profile.json" }, function(filename)
+		if filename then
+			prof.export(filename)
+			vim.notify(string.format("Wrote %s", filename))
+		end
+	end)
+	else
+		prof.start("*")
+	end
+end
+vim.keymap.set("", "<f1>", toggle_profile)
+
+-- wk.register({ p = { name = "Perf Profiling" } }, { prefix = "<leader>u" })
+
+vim.keymap.set("n", "<leader>ups", function()
+	vim.cmd([[
+		:profile start /tmp/nvim-profile.log
+		:profile func *
+		:profile file *
+	]])
+end, { desc = "Profile Start" })
+
+vim.keymap.set("n", "<leader>upe", function()
+	vim.cmd([[
+		:profile stop
+		:e /tmp/nvim-profile.log
+	]])
+end, { desc = "Profile End" })
+
+M = {}
+M.blockwise_register = function(register)
+  register = register or "+"
+  print("Making " .. register .. " blockwise")
+  -- vim.cmd("call setreg('+', @+, 'b')") -- native vim way to set clipboard blockwise
+  vim.cmd("call setreg('".. register .. "', @" .. register ..", 'b')")
+end
+
+vim.api.nvim_create_user_command('BlockwiseZero',    ':lua require("core.utils").blockwise_register("0")<CR>', { nargs = '?', bang = false})
+vim.api.nvim_create_user_command('BlockwisePlus',    ':lua require("core.utils").blockwise_register("+")<CR>', { nargs = '?', bang = false})
+vim.api.nvim_create_user_command('BlockwisePrimary', ':lua require("core.utils").blockwise_register("*")<CR>', { nargs = '?', bang = false})
+vim.cmd([[cnoreab Bz BlockwiseZero]])
+vim.cmd([[cnoreab B+ BlockwisePlus]])
+vim.cmd([[cnoreab B* BlockwisePrimary]])
+
+
+
+
+-- vim.g.suda#nopass   = 1
 vim.cmd([[
-let g:restore_each_buffer_view = 1
+
+" syntax off
+" Disable /usr/share/nvim/runtime/ftplugin.vim
+  let g:did_load_ftplugin = 1
+  let did_load_ftplugin   = 1
+" Disable /usr/share/nvim/runtime/matchparen.vim
+  let g:loaded_matchparen = 1
+" https://stackoverflow.com/questions/307148/vim-scrolling-slowly
+  let loaded_matchparen   = 1
+
+  let g:suda#nopass       = 1
+  let g:restore_each_buffer_view = 1
 " echom "\$HOME = " . $HOME
-let g:buffergator_use_new_keymap = 1
+  let g:buffergator_use_new_keymap = 1
 " https://github.com/preservim/vim-markdown
-let g:tex_conceal = ""
-let g:vim_markdown_math = 1
-let g:vim_markdown_no_extensions_in_markdown = 1
+  let g:tex_conceal       = ""
+  let g:vim_markdown_math = 1
+  let g:vim_markdown_no_extensions_in_markdown = 1
 
-let g:vimwiki_markdown_link_ext = 1
-
-" https://www.reddit.com/r/vim/comments/9riu4c/using_vimwiki_with_markdown/
-" https://github.com/vimwiki/vimwiki/issues/345
-let g:vimwiki_global_ext = 0
-
-let wiki = {}
-let wiki.path = '~/.wiki/'
-let wiki.syntax = 'markdown'
-let wiki.ext = '.md'
-
-let wiki_personal = {}
-let wiki_personal.path = '~/.vimwiki_personal/'
-let wiki_personal.syntax = 'markdown'
-let wiki_personal.ext = '.md'
-
-let g:vimwiki_list = [wiki, wiki_personal]
-let g:vimwiki_ext2syntax = {'.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
-" Disable <Enter> create link behavior
-" https://github.com/vimwiki/vimwiki/issues/1088
-" let g:vimwiki_key_mappings = { 'all_maps': 0, }
 
 " let boot_load_path = stdpath("data") . '/*/pack/*/start/boot/autoload/boot.vim'
-let boot_load_path = stdpath("data") . '/lazy/boot/autoload/boot.vim'
-execute "source " . boot_load_path
+  let boot_load_path = stdpath("data") . '/lazy/boot/autoload/boot.vim'
+execute "source "   . boot_load_path
 execute "runtime! " . boot_load_path
 command! -nargs=1 -complete=help H :wincmd l | :enew | :set buftype=help | :keepalt h <args>
 
-let g:vim_tags_auto_generate               = 1
+  let g:vim_tags_auto_generate               = 1
 
 if has('nvim')
 	let g:vim_tags_ctags_binary
@@ -709,24 +800,24 @@ else
 		\  = boot#chomp(system('which ctags'))
 endif
 
-let g:vim_tags_project_tags_command
+  let g:vim_tags_project_tags_command
 	\  = "{CTAGS} -R {OPTIONS} {DIRECTORY} 2>/dev/null"
-let g:vim_tags_gems_tags_command
+  let g:vim_tags_gems_tags_command
 	\  = "{CTAGS} -R {OPTIONS} `bundle show --paths` 2>/dev/null"
-let g:vim_tags_use_vim_dispatch            = 0
-let g:vim_tags_use_language_field          = 1
-let g:vim_tags_ignore_files
+  let g:vim_tags_use_vim_dispatch            = 0
+  let g:vim_tags_use_language_field          = 1
+  let g:vim_tags_ignore_files
 	\  = ['.gitignore', '.svnignore', '.cvsignore']
-let g:vim_tags_ignore_file_comment_pattern = '^[#"]'
-let g:vim_tags_directories
+  let g:vim_tags_ignore_file_comment_pattern = '^[#"]'
+  let g:vim_tags_directories
 	\  = [".git", ".hg", ".svn", ".bzr", "_darcs", "CVS"]
-let g:vim_tags_main_file                   = 'tags'
-let g:vim_tags_extension                   = '.tags'
+  let g:vim_tags_main_file                   = 'tags'
+  let g:vim_tags_extension                   = '.tags'
 " let g:vim_tags_cache_dir                   = expand($HOME)
-let g:vim_tags_cache_dir                   = expand(stdpath('cache'))
-let g:tagbar_left                          = 1
-let g:tagbar_expand                        = 1
-let g:qf_bufname_or_text = 1
+  let g:vim_tags_cache_dir                   = expand(stdpath('cache'))
+  let g:tagbar_left                          = 1
+  let g:tagbar_expand                        = 1
+  let g:qf_bufname_or_text = 1
 
 " Only works on vim
 " :command! -nargs=0 -bang Quit :noautocmd qa!
@@ -756,10 +847,10 @@ nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> 
 \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
 
 com! CheckHighlightUnderCursor echo {l,c,n ->
-        \   'hi<'    . synIDattr(synID(l, c, 1), n)             . '> '
-        \  .'trans<' . synIDattr(synID(l, c, 0), n)             . '> '
-        \  .'lo<'    . synIDattr(synIDtrans(synID(l, c, 1)), n) . '> '
-        \ }(line("."), col("."), "name")
+		\   'hi<'    . synIDattr(synID(l, c, 1), n)             . '> '
+		\  .'trans<' . synIDattr(synID(l, c, 0), n)             . '> '
+		\  .'lo<'    . synIDattr(synIDtrans(synID(l, c, 1)), n) . '> '
+		\ }(line("."), col("."), "name")
 
 
 ]])
@@ -809,6 +900,108 @@ vim.api.nvim_create_user_command(
 --  })
 -- end)
 
+-- When using Escape as prefix and triggerd prefix-w, use ctrl-m to quit it
+vim.cmd[[
+augroup tmux_prefix_mutx_switch
+	autocmd!
+	au InsertEnter *
+		\ call system(['/usr/bin/tmux', 'unbind', 'Escape']) |
+		\ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   'Escape']) |
+		\ call system(['/usr/bin/tmux', 'set', 'prefix', 'None'])
+		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'prefix', '`']) |
+		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   '`']) |
+		" \ call system(['/usr/bin/tmux', 'set', 'prefix', 'None'])
+
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix', '`', 'send-keys', '`']) |
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',   '`', 'send-keys', '`'])
+
+
+		" \ call system(['/usr/bin/tmux', 'bind-key', 'Escape', 'switch-client', '-T', 'prefix']) |
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',   'Escape', 'switch-client', '-T', 'prefix']) |
+		" \ call system(['/usr/bin/tmux', 'set', '-g', 'prefix', 'Escape']) |
+	au InsertLeave *
+		\ call system(['/usr/bin/tmux', 'source-file', $SHARE_PREFIX . '/init/terminal/tmux.conf'])
+
+		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'prefix', '`']) |
+		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   '`']) |
+		" \ call system(['/usr/bin/tmux', 'set', '-g', 'prefix', '`']) |
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix', '`', 'send-prefix']) |
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',   '`', 'switch-client', '-T', 'prefix']) |
+
+		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix', '`', 'send-prefix']) |
+
+augroup end
+]]
+
+-- http://kflu.github.io/2021/05/24/2021-05-24-tmux-tricks/
+-- Does not work
+-- vim.api.nvim_create_autocmd({ "InsertEnter", "InsertLeave" }, {
+-- 	group = vim.api.nvim_create_augroup("tmux_prefix_mutx", { clear = true }),
+-- 	pattern = { "*" },
+-- 	callback = function(args)
+-- 		if vim.api.nvim_eval('v:insertmode') == 'i' then
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'root',   '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'set', '-sg', 'prefix', 'None' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'prefix', '\\`', 'send-keys', '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'root',   '\\`', 'send-keys', '\\`' }
+-- 		else
+-- 			-- local log = require("log")
+-- 			-- log.os_execute('/usr/bin/tmux set -s prefix \\` ENTER')
+-- 			-- local output = vim.fn.system { '/usr/bin/tmux', 'set', '\\-s', 'prefix', 'None', ';',
+-- 			-- 	'/usr/bin/tmux', 'unbind', '\\`', ';', '/usr/bin/tmux', 'bind', '-T', 'root', '\\`', 'send-keys', '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'root',   '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'set', 'prefix', '\\`' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'prefix', '\\`', 'send-prefix' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'root',   '\\`', 'switch-client', '-T', 'prefix' }
+-- 			local output = vim.fn.system { '/usr/bin/tmux', 'source-file', '/mnt/init/terminal/tmux.conf' }
+-- 			-- vim.cmd[[
+-- 			-- call system(['/usr/bin/tmux', 'unbind', '`'])
+-- 			-- call system(['/usr/bin/tmux', 'unbind', '-T', 'root', '`'])
+-- 			-- call system(['/usr/bin/tmux', 'set', 'prefix', '\`'])
+-- 			-- call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix', '\`', 'send-prefix'])
+-- 			-- call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',   '\`', 'switch-client', '-T', 'prefix'])
+-- 			-- call system(['/usr/bin/tmux', 'source-file', '/mnt/init/terminal/tmux.conf'])
+-- 			-- ]]
+-- 		end
+-- 	end,
+-- })
+
+-- vim.api.nvim_create_autocmd({ "InsertEnter" }, {
+-- 	group = vim.api.nvim_create_augroup("tmux_prefix_mutx", { clear = true }),
+-- 	pattern = { "*" },
+-- 	callback = function(args)
+-- 		-- vim.cmd[[
+-- 		-- call system(['/usr/bin/tmux', 'unbind', '`'])
+-- 		-- call system(['/usr/bin/mux', 'unbind', '-T', 'root', '`'])
+-- 		-- call system(['/usr/bin/mux', 'set-option', 'prefix', 'None'])
+-- 		-- call system(['/usr/bin/mux', 'bind-key', '\`', 'send-keys', '\`'])
+-- 		-- call system(['/usr/bin/mux', 'bind-key', '-T', 'root', '\`', 'send-keys', '\`'])
+-- 		-- ]]
+--
+-- 		-- local log = require("log")
+-- 		-- log.os_execute('/usr/bin/tmux -t . set -s prefix None ENTER')
+--
+-- 		-- os.execute('/usr/bin/tmux -t . set -s prefix None ENTER')
+-- 		-- os.execute('/usr/bin/tmux -t . unbind \\` ENTER')
+-- 		-- os.execute('/usr/bin/tmux -t . unbind -T root \\` ENTER')
+-- 		-- os.execute('/usr/bin/tmux -t . bind -T root \\` send-keys \\` ENTER')
+--
+-- 		-- local job = vim.fn.jobstart(' \
+-- 		-- /usr/bin/tmux set -s prefix None ENTER; \
+-- 		-- /usr/bin/tmux unbind \\` ENTER; \
+-- 		-- /usr/bin/tmux bind -T root \\` send-keys \\` ENTER \
+-- 		-- ')
+-- 		-- local output = vim.fn.system { '/usr/bin/tmux set -s prefix None ENTER;', '/usr/bin/tmux unbind \\` ENTER;', '/usr/bin/tmux bind -T root \\` send-keys \\` ENTER' }
+-- 		local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
+-- 		local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'root',   '\\`' }
+-- 		local output = vim.fn.system { '/usr/bin/tmux', 'set', 'prefix', 'None' }
+-- 		local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'prefix', '\\`', 'send-keys', '\\`' }
+-- 		local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'root',   '\\`', 'send-keys', '\\`' }
+-- 	end,
+-- })
+
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp_attach_auto_diag", { clear = true }),
 	callback = function(args)
@@ -834,6 +1027,79 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		})
 	end,
 })
+
+-- vim.api.nvim_create_autocmd("LspAttach", {
+--  desc = 'LSP actions',
+--  -- callback = function(args)
+--  callback = function(event)
+--      local bufnr = event.buf
+--      local opts = { buffer = event.buf }
+--      local client = vim.lsp.get_client_by_id(event.data.client_id)
+--      -- Ignore marksman items
+--      if client.name == "marksman" then return end
+--      -- these will be buffer-local keybindings
+--      -- because they only work if you have an active language server
+--      -- set some keymap here, or put anything you want to set after attach ls
+--      -- vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, { buffer = bufnr })
+--      vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+--
+--      vim.keymap.set('n', 'K',          '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
+--      vim.keymap.set('n', 'gd',         '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+--      vim.keymap.set('n', 'gD',         '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+--      vim.keymap.set('n', 'gi',         '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+--      vim.keymap.set('n', 'go',         '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+--      vim.keymap.set('n', 'gr',         '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+--      vim.keymap.set('n', 'gs',         '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+--      vim.keymap.set('n', '<F2>',       '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+--      vim.keymap.set({'n', 'x'},        '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+--      vim.keymap.set('n', '<F4>',       '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+--
+--      vim.api.nvim_create_autocmd("LspTokenUpdate", {
+--          buffer = event.buf,
+--          callback = show_unconst_caps,
+--      })
+--  end
+-- })
+
+-- https://github.com/neovim/nvim-lspconfig
+-- Global mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+-- Use LspAttach autocommand to only map the following keys
+-- after the language server attaches to the current buffer
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+	callback = function(ev)
+		-- Enable completion triggered by <c-x><c-o>
+		vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+		-- Buffer local mappings.
+		-- See `:help vim.lsp.*` for documentation on any of the below functions
+		local opts = { buffer = ev.buf }
+		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+		vim.keymap.set('n', '<space>wl', function()
+			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+		end, opts)
+		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+		vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+		vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+		vim.keymap.set('n', '<space>f', function()
+			vim.lsp.buf.format { async = true }
+		end, opts)
+	end,
+})
+
 
 -- https://www.reddit.com/r/neovim/comments/usltce/how_to_disable_completion_for_command_line_window/
 -- autocmd CmdWinEnter * lua require('cmp').setup({enabled = false})

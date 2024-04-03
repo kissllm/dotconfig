@@ -1,0 +1,4 @@
+[submodule "init/kiss"]
+	path = init/kiss
+	url = https://github.com/kissllm/kiss.git
+	branch = master

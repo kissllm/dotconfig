@@ -2981,7 +2981,7 @@ hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 				"     \ | highlight clear CursorColumn
 				"     \ | silent! execute ':hi CursorColumn' . g:hl_insert_inverse
 				"     \ | highlight clear Visual
-				"     \ i silent! execute ':hi Visual'. g:hl_insert_inverse
+				"     \ | silent! execute ':hi Visual'. g:hl_insert_inverse
 				"     \ | highlight clear lCursor
 				"     \ | silent! execute ':hi lCursor' . g:hl_insert_inverse
 				"     \ | highlight clear CursorLine
@@ -3004,7 +3004,7 @@ hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 					" \ | endif
 				" This operation will erase Visual settings, including selection highlight
 					" \ | highlight clear Visual
-					" \ i silent! execute ':hi Visual'. g:hl_normal_inverse
+					" \ | silent! execute ':hi Visual'. g:hl_normal_inverse
 
 			augroup END
 		else

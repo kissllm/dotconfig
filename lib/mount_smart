@@ -91,7 +91,8 @@ mount_smart () {
 	local src="${2:?"Must not empty"}"
 	[ -d "$target" ] || {
 		mkdir -p "$target"
-		chmod --quiet 0755 "$target"
+		# chmod --quiet 0755 "$target"
+		chmod 0755 "$target"
 	}
 	src_mounted "$src" || { mount $src $target; return 0; }
 	dev_mounted_target "$target" "$src" || {

@@ -2,7 +2,7 @@
 # doas root /mnt/alpine /bin/ash
 des="${1:?"Must give a target path"}"
 
-[ -z "${IS_KISS+x}"] && set -e || {
+[ -z "${IS_KISS+x}" ] && set -e || {
 	set -eE
 	trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
 }

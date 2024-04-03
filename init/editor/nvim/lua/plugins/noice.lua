@@ -2,8 +2,9 @@
 return {
 	"trailblazing/noice.nvim",
 	event = "VeryLazy",
-	-- cond = false,
-	opts = {
+	-- cond  = false,
+	cond  = true,
+	opts  = {
 		-- add any options here
 	},
 	dependencies = {
@@ -16,6 +17,9 @@ return {
 	},
 	-- module = "nui",
 	module = "noice",
+	after = {
+		'telescope.nvim',
+	},
 	config = function()
 		require("notify").setup({
 			background_colour = "#000000",
@@ -723,6 +727,7 @@ return {
 					backend  = "notify",
 					anchor   = "SE",
 					relative = "editor",
+					border   = nil,
 					win_options = {
 						winblend     = 10,
 						winhighlight = "Normal:Normal,FloatBorder:FloatBorder",

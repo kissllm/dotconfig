@@ -70,7 +70,7 @@ copy_folder() {
 		exit 1
 	}
 
-	[ -d "${BACKUP_ROOT}/${folder_dir#*/}" ] || \mkdir -p "${BACKUP_ROOT}/${folder_dir#*/}"
+	[ -d "${BACKUP_ROOT}/${folder_dir#*/}" ] || doas \mkdir -p "${BACKUP_ROOT}/${folder_dir#*/}"
 
 	if ! eval '$copy_way "$real_folder_dir/." "${BACKUP_ROOT}/${folder_dir#*/}/"'; then
 		echo "Failed to copy '$folder_dir'"
@@ -82,10 +82,10 @@ copy_folder() {
 
 echo "\$REPO_ROOT/installed = '$REPO_ROOT/installed'"
 copy_folder "$REPO_ROOT/installed"
-echo "\$MNG_ROOT = '$MNG_ROOT'"
-copy_folder "$MNG_ROOT"
-echo "\$REPO_ROOT_DEV/system = '$REPO_ROOT_DEV/system'"
-copy_folder "$REPO_ROOT_DEV/system"
+echo "\$MNGR_ROOT = '$MNGR_ROOT'"
+copy_folder "$MNGR_ROOT"
+echo "\$REPO_ROOT_IMPL/lm = '$REPO_ROOT_IMPL/lm'"
+copy_folder "$REPO_ROOT_IMPL/lm"
 echo "\$DOTCONFIG = '$DOTCONFIG'"
 copy_folder "$DOTCONFIG"
 

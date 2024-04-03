@@ -1,11 +1,20 @@
 local M = {}
 
 function M.setup()
-	local lspzero = require('lsp-zero')
+	local lspzero = require('lspconfig.lsp-zero')
 	return {
-		lsp = lspzero.preset({}),
-		cmp_action = lspzero.cmp_action(),
+		-- lsp = lspzero.preset({}),
+		lsp = lspzero["lsp"],
+		-- cmp_action = lspzero.cmp_action(),
+		cmp_action = lspzero["cmp_action"],
 	}
 end
 
 return M
+
+
+
+
+
+
+

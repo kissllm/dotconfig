@@ -1,30 +1,36 @@
+# /etc/inittab
 # id:3:initdefault:
-# ::sysinit:/lib/init/rc.boot
+
+::sysinit:/lib/init/rc.boot
 ::sysinit:/etc/s6-linux-init/current/scripts/rc.init
 ::restart:/sbin/init
-# ::shutdown:/lib/init/rc.shutdown
+::shutdown:/lib/init/rc.shutdown
+
 ::shutdown:/etc/s6-linux-init/current/scripts/rc.shutdown
 ::respawn:runsvdir -P /var/service 'log: ................................................................................................................................................................................................................................................................'
+
 # ::askfirst:-/bin/sh
-tty1::respawn:/sbin/getty 38400 tty1 TERM-with-256-colors 2>&1
+# tty1::respawn:/sbin/getty 38400 tty1 terminal-which-support-256-colors 2>&1
+tty1::respawn:/sbin/getty 38400 tty1 2>&1
 # tty2::askfirst:-/bin/sh
-tty2::respawn:/sbin/getty 38400 tty2 TERM-with-256-colors 2>&1
+tty2::respawn:/sbin/getty 38400 tty2 2>&1
 
 # Uncomment to enable more gettys. "stty -a" shows the parameters like baud rate
-tty3::respawn:/sbin/getty 38400 tty3 TERM-with-256-colors 2>&1
-tty4::respawn:/sbin/getty 38400 tty4 TERM-with-256-colors 2>&1
-tty5::respawn:/sbin/getty 38400 tty5 TERM-with-256-colors 2>&1
-tty6::respawn:/sbin/getty 38400 tty6 TERM-with-256-colors 2>&1
+tty3::respawn:/sbin/getty 38400 tty3 2>&1
+tty4::respawn:/sbin/getty 38400 tty4 2>&1
+tty5::respawn:/sbin/getty 38400 tty5 2>&1
+tty6::respawn:/sbin/getty 38400 tty6 2>&1
 
 # Login directly as a user and bypass the login prompt.
 # NOTE: This bypasses the use of a getty altogether.
-#		The 'agetty' command from util-linux has support
-#		for auto-login without the above drawback.
+#       The 'agetty' command from util-linux has support
+#       for auto-login without the above drawback.
 # tty1::respawn:/bin/login -f username_here
-tty7::respawn:/bin/login -f ei
 
 # Run a one-shot command during boot.
 # ::once:/bin/modprobe iwlwifi
+::once:/bin/modprobe iwlwifi
 
 # Run a one-shot command during shutdown.
 # ::shutdown:/bin/umount -a -r
+::shutdown:/bin/umount -a -r
