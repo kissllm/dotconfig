@@ -22,9 +22,9 @@ set.omnifunc   = "v:lua.vim.lsp.omnifunc"
 -- set.clipboard     = "unnamed,unnamedplus"
 --
 -- E353: Nothing in register "
--- set.clipboard = "unnamed"
--- set.clipboard = "unnamed"
--- set.clipboard = set.clipboard + "unnamedplus"
+-- "" is the unnamed register. (:h quotequote)
+   set.clipboard = "unnamed"
+   set.clipboard = set.clipboard + "unnamedplus"
 -- set.clipboard  = "unnamedplus"
 --
 -- set.guicursor    = ""
@@ -34,7 +34,8 @@ set.omnifunc   = "v:lua.vim.lsp.omnifunc"
 set.guicursor = "n-v-c-sm:block,i-ci-ve:ver25-Cursor,r-cr-o:hor20"
 -- set.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
 -- set.gcr       = ""
-set.ignorecase   = true
+-- set.ignorecase   = true
+set.ignorecase   = false
 -- https://github.com/hrsh7th/nvim-cmp/blob/51260c02a8ffded8e16162dcf41a23ec90cfba62/lua/cmp/view/custom_entries_view.lua#L152
 -- Default is 0 -- no limitation
 -- set.pumheight     = 10 -- maybe too big ?
@@ -294,7 +295,8 @@ vim.cmd([[let &t_Ce = "\e[4:0m"]])
 -- https://github.com/vimwiki/vimwiki/issues/1197
 vim.api.nvim_set_var('vimwiki_folding', 'expr:quick')
 
-set.foldenable      = false
+-- set.foldenable      = false
+set.foldenable      = true
 
 
 
@@ -375,10 +377,10 @@ autocmd("BufEnter", {
 vim.api.nvim_create_user_command(
 	"RL",
 	function()
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/configs.lua")
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/keybindings.lua")
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
+		vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/lua' .. "/configs.lua")
+		vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/after/plugin' .. "/colors.lua")
+		vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/after/plugin' .. "/keybindings.lua")
+		vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/lua/plugins' .. "/indent-blankline.lua")
 
 		vim.opt.background = 'dark'
 		-- set.background = 'dark'
@@ -486,7 +488,7 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 		-- force a full redraw:
 		vim.cmd("mode")
 		-- This line will override colorscheme
-		vim.cmd.source(os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/after/plugin' .. "/colors.lua")
+		vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/after/plugin' .. "/colors.lua")
 	end
 })
 
@@ -788,6 +790,10 @@ vim.cmd([[
   let boot_load_path = stdpath("data") . '/lazy/boot/autoload/boot.vim'
 execute "source "   . boot_load_path
 execute "runtime! " . boot_load_path
+  let keys_load_path = stdpath("data") . '/lazy/keys/after/plugin/keys.vim'
+execute "source "   . keys_load_path
+execute "runtime! " . keys_load_path
+
 command! -nargs=1 -complete=help H :wincmd l | :enew | :set buftype=help | :keepalt h <args>
 
   let g:vim_tags_auto_generate               = 1
@@ -902,12 +908,57 @@ vim.api.nvim_create_user_command(
 
 -- When using Escape as prefix and triggerd prefix-w, use ctrl-m to quit it
 vim.cmd[[
+
+function! s:tmux_esc_cancel()
+	call system(['/usr/bin/tmux', 'unbind', 'Escape'])
+	call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',         'Escape'])
+	call system(['/usr/bin/tmux', 'set', 'prefix', 'None'])
+	call system(['/usr/bin/tmux', 'set', '-g', 'window-active-style', 'fg=default,bg=terminal'])
+endfunction
+function! s:tmux_esc_reenable()
+	call system(['/usr/bin/tmux', 'set', 'prefix',                  'Escape'])
+	call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix',       'Escape',
+		\ 'send-keys',  'Escape',  '\;',
+		\ 'set', '-g', 'window-active-style', '"fg=default,bg=\#{prefixground}"', '\;',
+		\ 'display-panes', '-N', '\;',
+		\ 'set', '-g', 'window-active-style', 'fg=default,bg=terminal'])
+		" \ 'display-panes', '-N'])
+		" \ 'set', '-g', 'window-active-style', 'fg=default,bg=terminal', '\;',
+	call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',         'Escape',
+		\ 'send-keys',  'Escape',  '\;',
+		\ 'set', '-g', 'window-active-style', '"fg=default,bg=\#{prefixground}"', '\;',
+		\ 'display-panes', '-N', '\;',
+		\ 'set', '-g', 'window-active-style', 'fg=default,bg=terminal'])
+		" \ 'display-panes', '-N'])
+		" \ 'display-panes', '-N', '\;',
+		" \ 'set', '-g', 'window-active-style', 'fg=default,bg=terminal'])
+		" \ 'switch-client',  '-T', 'prefix', '\;',
+	call system(['/usr/bin/tmux', 'bind-key', '-T', 'copy-mode-vi', 'Escape',
+		\ 'switch-client',  '-T', 'prefix', '\;',
+		\ 'set', '-g', 'window-active-style', '"fg=default,bg=\#{prefixground}"', '\;',
+		\ 'display-panes', '-N', '\;',
+		\ 'set', '-g', 'window-active-style', 'fg=default,bg=terminal'])
+endfunction
+
+" https://stackoverflow.com/questions/43691961/does-vim-have-a-trigger-or-event-which-is-fired-whenever-a-command-is-typed
+" function! s:command_callback()
+" 	let last_command = @:
+"
+" 	" if last_command =~ 'tabnew'
+" 	" 	echomsg "Tabnew was called"
+" 	" endif
+" 	" call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
+"
+" 	call <sid>tmux_esc_reenable()
+" 	echohl WarningMsg
+" 		echomsg "tmux_esc_reenable() was called"
+" 	echohl None
+" endfunction
+" cnoremap <silent> <cr> <cr>:call <sid>command_callback()<cr>
+
 augroup tmux_prefix_mutx_switch
 	autocmd!
-	au InsertEnter *
-		\ call system(['/usr/bin/tmux', 'unbind', 'Escape']) |
-		\ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   'Escape']) |
-		\ call system(['/usr/bin/tmux', 'set', 'prefix', 'None'])
+	au InsertEnter,CmdlineEnter * :call <sid>tmux_esc_cancel()
 		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'prefix', '`']) |
 		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   '`']) |
 		" \ call system(['/usr/bin/tmux', 'set', 'prefix', 'None'])
@@ -919,8 +970,8 @@ augroup tmux_prefix_mutx_switch
 		" \ call system(['/usr/bin/tmux', 'bind-key', 'Escape', 'switch-client', '-T', 'prefix']) |
 		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'root',   'Escape', 'switch-client', '-T', 'prefix']) |
 		" \ call system(['/usr/bin/tmux', 'set', '-g', 'prefix', 'Escape']) |
-	au InsertLeave *
-		\ call system(['/usr/bin/tmux', 'source-file', $SHARE_PREFIX . '/init/terminal/tmux.conf'])
+	au InsertLeave,CmdlineLeave * :call <sid>tmux_esc_reenable()
+		" \ call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
 
 		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'prefix', '`']) |
 		" \ call system(['/usr/bin/tmux', 'unbind',   '-T', 'root',   '`']) |
@@ -930,6 +981,16 @@ augroup tmux_prefix_mutx_switch
 
 		" \ call system(['/usr/bin/tmux', 'bind-key', '-T', 'prefix', '`', 'send-prefix']) |
 
+	au ModeChanged *:[trcvV\x16]* :call <sid>tmux_esc_cancel()
+
+	" au ModeChanged [is]*:n* :call <sid>tmux_esc_reenable()
+		" \ call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
+	" au ModeChanged [c\x16]*:n* :call <sid>tmux_esc_reenable()
+		" \ call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
+	" au ModeChanged [trcvV\x16]*:n* :call <sid>tmux_esc_reenable()
+		" \ call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
+	au ModeChanged *:n* :call <sid>tmux_esc_reenable()
+		" \ call system(['/usr/bin/tmux', 'source-file', $DOT_CONFIG . '/terminal/tmux.conf'])
 augroup end
 ]]
 
@@ -1213,16 +1274,19 @@ augroup END
 " command! -nargs=0 W call boot#write_generic()
 :cnoreabbrev <expr> w! getcmdtype() == ":" && getcmdline() == 'w!' ? 'W' : 'w'
 
+" "roxma/vim-tmux-clipboard",
+" let g:vim_tmux_clipboard#loadb_option = '-w'
 ]])
 
 
 vim.api.nvim_create_autocmd('FileType', {
-	pattern = 'sh',
+	-- pattern = 'sh',
+	pattern = 'bash',
 	callback = function()
 		vim.lsp.start({
-			name = 'bash-language-server',
-			-- cmd = { 'bash-language-server', 'start' },
-			cmd = { 'bash-language-server', 'stop' },
+			name    = 'bash-language-server',
+			cmd     = { 'bash-language-server', 'start' },
+			-- cmd  = { 'bash-language-server', 'stop' },
 		})
 	end,
 })

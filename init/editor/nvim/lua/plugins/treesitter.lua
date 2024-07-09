@@ -52,7 +52,17 @@ return {
 			-- indent = { enable = false },
 			-- indent = { enable = true, disable = { "yaml" } },
 			indent = {
-				enable = true,
+				-- enable = true,
+				-- Shell scripts ruined by indent
+				-- https://www.reddit.com/r/neovim/comments/oo8jcu/is_it_possible_to_disable_lsp_formatting/
+				-- https://www.reddit.com/r/neovim/comments/183n4mn/how_to_disable_aligning_text_to_opening/
+				-- set indentkeys
+				-- set formatoptions
+				-- set eventignore=BufWritePre
+				-- verbose set indexexpr?
+				-- set (no)autoindent
+				-- https://stackoverflow.com/questions/7053550/disable-all-auto-indentation-in-vim
+				enable = false,
 			},
 			--
 			-- https://medium.com/@shaikzahid0713/rainbow-parenthesis-and-indentation-in-neovim-dd379f4e516f

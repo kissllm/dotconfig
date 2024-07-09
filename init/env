@@ -3,39 +3,41 @@
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
 
-SCRIPT_NAME="env" && export SCRIPT_NAME
+script_scope=${SCRIPT_SCOPE:-${SCRIPT_NAME:-"$0"}}
+SCRIPT_SCOPE="${SCRIPT_NAME:-"$0"}"
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
-[ ! -z "${SHARE_PREFIX:+x}" ] ||
-{
-	[ -f "/mnt/init/include/route" ] &&
-	. /mnt/init/include/route
-} || {
-	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
-	exit 0
-}
+type "script_name" > /dev/null 2>&1 ||
+	# shellcheck source=/usr/include/kiss/name
+	. "${MNGR_ROOT-}/usr/include/kiss/name"
+SCRIPT_NAME="$(script_name)"
 
-// env_reset "IFS" " $(printf '%s' "t" | tr 't' "\\t")${newline}"
+# enable colors:
+force_color_prompt=yes
 
-# env_reset() {
-#   local env_key_name="${1:?"Must give a key"}"
-#   local env_value="${2:?"Must give a value"}"
-#   / "[ \"\${$env_key_name-}\" = \"$env_value\" ]" || {
-#       / "echo \"Original \\$\$env_key_name = \${$env_key_name-}\""
-#       / "$env_key_name=$env_value" && / 'export $env_key_name'
-#   }
+type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
+	# shellcheck source=/usr/include/kiss/func
+	. "${MNGR_ROOT-}/usr/include/kiss/func"
+
+script_name="$(script_name)"
+[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+# unset script_name
+
+env_reset DOT_CONFIG "$(dot_config)"
+
+# Should be inside ${MNGR_ROOT-}
+# [ ! -f "$DOT_CONFIG/toolchain/env" ] || {
+# 	. "$DOT_CONFIG/toolchain/env"
+#
+# 	script_name="$(script_name)"
+# 	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+# 	# unset script_name
 # }
-
-# compiler_version="$($cc --version | grep version | awk -F " " '{print $NF}')"
-compiler_version="$(llvm-config --version | tr -d '[:alpha:]')"
-export C_INCLUDE_PATH="/usr/lib/clang/$compiler_version/include:/usr/include"
-export CPLUS_INCLUDE_PATH="/usr/include/c++/v1/:/usr/lib/clang/$compiler_version/include:/usr/include"
 
 # user="$(id -nu)"
 # [ "$USER" = "$user" ] || USER="$user" && export USER
-// env_reset USER "$(id -nu)"
+env_reset LOGNAME "$(id -nu)"
 
-path_prepend PATH "$SHARE_PREFIX/init"
+path_prepend PATH "$DOT_CONFIG"
 
 # echo "\$TERM = $TERM"
 #
@@ -45,7 +47,8 @@ set_font() {
 # If you want to change font in tmux, just detach it and attach again
 	# { [ "$TERM" = "linux" ] || [ -z "${TERM##*"vt"*}" ]; } || return 0
 	# [ -z "${TMUX+x}" ] || return 0
-	case "$(tty)" in
+	# case "$(tty)" in
+	case "${TTY:="$(tty)"}" in
 		*"tty"*)
 			# This case doesn't mean it is realy a tty, jist can run setfont on it
 			# Bright(and fat face)  Normal
@@ -113,8 +116,7 @@ path_prepend PATH "/usr/lib/ccache/bin"
 # # For chroot tools I put it there
 # path_prepend PATH "/mnt"
 
-path_prepend PATH "${SHARE_PREFIX}/local/bin"
-
+path_prepend PATH "/mnt/local/bin"
 
 export SRC_PREFIX="/working"
 export BUILD_PREFIX="/build"
@@ -124,19 +126,19 @@ export HISTSIZE="640000"
 export SAVEHIST="${HISTSIZE}"
 
 # export EDITOR="/usr/bin/nvim"
-export TMP="$HOME/tmp"
-export TEMP="$TMP"
+export    TMP="$HOME/tmp"
+export   TEMP="$TMP"
 export TMPDIR="$TMP"
 
 # Locales!
-export LANG="en_US.UTF-8"
-export LC_COLLATE="en_US.UTF-8"
-export LC_CTYPE="en_US.UTF-8"
+export        LANG="en_US.UTF-8"
+export  LC_COLLATE="en_US.UTF-8"
+export    LC_CTYPE="en_US.UTF-8"
 export LC_MESSAGES="en_US.UTF-8"
 export LC_MONETARY="en_US.UTF-8"
-export LC_NUMERIC="en_US.UTF-8"
-export LC_TIME="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
+export  LC_NUMERIC="en_US.UTF-8"
+export     LC_TIME="en_US.UTF-8"
+export      LC_ALL="en_US.UTF-8"
 
 export LESS="${LESS-} -RX"
 
@@ -165,12 +167,11 @@ path_prepend PATH "${HOME}/.emacs.d/bin"
 # For npm
 path_prepend PATH "${HOME}/node/bin"
 
-SHARE_PREFIX_REFINED=$(echo "${SHARE_PREFIX}" | sed 's#/#\\/#g' | \
-		sed 's#\.#\\.#g')
+SHARE_PREFIX_REFINED=$(echo "$DOT_CONFIG" | sed 's#/#\\/#g' | sed 's#\.#\\.#g')
 
-[ ! -d "${SHARE_PREFIX}/deno/bin" ] || {
-	export DENO_INSTALL="${SHARE_PREFIX}/deno"
-	path_prepend PATH "${SHARE_PREFIX}/deno/bin"
+[ ! -d "/mnt/deno/bin" ] || {
+	export DENO_INSTALL="/mnt/deno"
+	path_prepend PATH "/mnt/deno/bin"
 }
 
 export RUSTFLAGS="-Clink-arg=-Wl,--dynamic-linker=/usr/lib/libc.so"
@@ -194,9 +195,9 @@ export RUSTFLAGS="-Clink-arg=-Wl,--dynamic-linker=/usr/lib/libc.so"
 ! command -v /usr/bin/luarocks > /dev/null 2>&1 || {
 	[ -d "${HOME}/.cache/luarocks" ] || mkdir -p "${HOME}/.cache/luarocks"
 	# https://github.com/luarocks/luarocks/wiki/Using-LuaRocks
-	# eval $(luarocks path)
-	# eval "$(luarocks-5.1 path --bin)"
-	eval '$(/usr/bin/luarocks path --append --bin)'
+	# / $(luarocks path)
+	# / "$(luarocks-5.1 path --bin)"
+	/ '$(/usr/bin/luarocks path --append --bin)'
 
 	# echo "double quote" "$(/usr/bin/luarocks path --append --bin)"
 	# echo 'single quote' '$(/usr/bin/luarocks path --append --bin)'
@@ -214,8 +215,8 @@ export RUSTFLAGS="-Clink-arg=-Wl,--dynamic-linker=/usr/lib/libc.so"
 
 }
 
+path_prepend PATH "$HOME/.local/share/nvim/mason/bin"
 # Without this, source functions will not work
-path_prepend PATH "."
 
 # : "${USE_ENV=}"
 # [ -z "${USE_ENV+x}" ] || {
@@ -225,23 +226,25 @@ path_prepend PATH "."
 # Neither the log folder nor the pipes are created at this moment.
 # So don't use the log functions until user_output and pipes/listeners are ready
 
-# [ "$KISS_TMPDIR" = "/tmp/$USER/kiss" ] || KISS_TMPDIR="/tmp/$USER/kiss" && export KISS_TMPDIR
-: ${KISS_TMPDIR:="/tmp/$USER/kiss"} && export KISS_TMPDIR
-# : "${ERR_OUTPUT:="$KISS_TMPDIR/logs/err.log"}"      && export ERR_OUTPUT
-// env_reset ERR_OUTPUT   "$KISS_TMPDIR/logs/err.log"
-# : "${INIT_OUTPUT:="$KISS_TMPDIR/logs/init.log"}"  && export INIT_OUTPUT
-// env_reset INIT_OUTPUT  "$KISS_TMPDIR/logs/init.log"
-# : "${USER_OUTPUT:="$KISS_TMPDIR/logs/build.log"}" && export USER_OUTPUT
-// env_reset USER_OUTPUT  "$KISS_TMPDIR/logs/build.log"
-# [ "$CACHE_ROOT" = "/tmp" ] || CACHE_ROOT="/tmp" && export CACHE_ROOT
-# // env_reset CACHE_ROOT "/dev/shm"
+# [ "$KISS_TMPDIR" = "/tmp/$LOGNAME/kiss" ] || KISS_TMPDIR="/tmp/$LOGNAME/kiss" && export KISS_TMPDIR
+  : ${KISS_TMPDIR:="/tmp/$SESSION_USER/kiss"}           && export KISS_TMPDIR
+  : ${LOG_DIR:="$KISS_TMPDIR/logs/${TTY##*/}"}          && export LOG_DIR
+  : ${ERRO_OUTPUT:="$LOG_DIR/erro.log"}                 && export ERRO_OUTPUT
+# env_reset ERRO_OUTPUT  "$LOG_DIR/erro.log"
+  : ${INIT_OUTPUT:="$LOG_DIR/init.log"}                 && export INIT_OUTPUT
+# env_reset INIT_OUTPUT  "$LOG_DIR/init.log"
+  : ${USER_OUTPUT:="$LOG_DIR/make.log"}                 && export USER_OUTPUT
+  : ${PIPE_OUTPUT:="$LOG_DIR/pipe.log"}                 && export PIPE_OUTPUT
+# env_reset USER_OUTPUT  "$LOG_DIR/make.log"
+# [ "$CACHE_ROOT" = "/tmp" ] || CACHE_ROOT="/tmp"       && export  CACHE_ROOT
+# env_reset CACHE_ROOT "/dev/shm"
 [ ! -z "${MNGR_ROOT:+x}" ] ||
-// env_reset MNGR_ROOT    "$SHARE_PREFIX/os/kiss"
+env_reset MNGR_ROOT    "/mnt/os/kiss"
 # : "${DEBUG_AT_BACKGROUND=}"
 # [ -d "$KISS_TMPDIR" ] || mkdir -p "$KISS_TMPDIR"
 # log_dir="$KISS_TMPDIR/logs"
 # [ -d "$log_dir" ] || mkdir -p "$log_dir"
-# : "${USER_OUTPUT:="$KISS_TMPDIR/logs/build.log"}" && export USER_OUTPUT
+# : "${USER_OUTPUT:="$LOG_DIR/make.log"}" && export USER_OUTPUT
 # # [ -z "${USE_SAY_PIPE+x}" ] || unset USE_SAY_PIPE
 # [ -z "${INNER_PIPE_ID+x}" ] || unset INNER_PIPE_ID
 # [ -z "${mute_err+x}" ] || unset mute_err
@@ -250,12 +253,12 @@ path_prepend PATH "."
 # [ ! -f "/usr/include/kiss-share" ] ||
 # . /usr/include/kiss-share > /dev/null 2>&1
 # # exec 1023>&2
-# exec 2>"$ERR_OUTPUT"
+# exec 2>"$ERRO_OUTPUT"
 # . /working/test/shell/subshell
 # # alias kiss='. /usr/bin/kiss'
 # kiss() { (. /usr/bin/kiss "$@"); }
 # kiss() { ENV=/usr/include/kiss-share $SHELL; }
-// env_reset SHELL_OPTIONS $(printf '%s' $-)
+env_reset SHELL_OPTIONS $(printf '%s' $-)
 export USE_SAY_PIPE=
 export KISS_AS_LIBRARY=
 
@@ -269,7 +272,10 @@ export KISS_AS_LIBRARY=
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-; } ||
 
 	# alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" ' ||
-	alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" '
+
+	# alias kiss=' (kiss-kill "$@" && clear && reset) || :; KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-i "$@" '
+	  alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-si "$@" '
+	# alias kiss=' KISS_AS_LIBRARY= SHELL_OPTIONS=$-i ENV=/usr/bin/kiss $SHELL -$-l "$@" '
 
 	# kiss() { ENV=/usr/bin/kiss $SHELL -$-l; }
 
@@ -373,7 +379,7 @@ fi
 alias ls='ls --color=always -h -F' ||
 alias ls='ls --color=always -h --group-directories-first -F'
 
-# "parm_index" needs to be removed from terminfo -L1 screen-256color (look into "$SHARE_PREFIX/init/ashrc")
+# "parm_index" needs to be removed from terminfo -L1 screen-256color (look into "$DOT_CONFIG/ashrc")
 # [ ! -z "${TMUX+x}" ] && {
 # # alias ll='ls --color=auto --human-readable --group-directories-first --classify -l'
 #     case "$(type "ll" 2>/dev/null)" in *"alias"*) unalias ll ;; esac
@@ -449,15 +455,17 @@ export QT_SCALE_FACTOR=1
 }
 
 # https://forum.obarun.org/viewtopic.php?id=855
-[ "$DBUS_SESSION_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
+# [ "${DBUS_SESSION_ADDRESS-}" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
 # export DBUS_SESSION_ADDRESS=unix:path=/run/usr/${UID}/bus
-DBUS_SESSION_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus &&
-	export DBUS_SESSION_ADDRESS
+# : ${DBUS_SESSION_ADDRESS:="unix:path=$XDG_RUNTIME_DIR/bus"} &&
+#   export DBUS_SESSION_ADDRESS
+env_reset DBUS_SESSION_ADDRESS "unix:path=$XDG_RUNTIME_DIR/bus"
 
-[ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
+# [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$XDG_RUNTIME_DIR/bus" ] ||
 	# export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${UID}/bus
-DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus" &&
-	export DBUS_SESSION_BUS_ADDRESS
+# : ${DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"} &&
+#   export DBUS_SESSION_BUS_ADDRESS
+env_reset DBUS_SESSION_BUS_ADDRESS "unix:path=$XDG_RUNTIME_DIR/bus"
 
 export KWIN_DRM_USE_EGL_STREAMS=1
 
@@ -499,7 +507,7 @@ export XDG_PICTURES_DIR=$HOME/pictures/screenshots
 
 # # https://voidlinux.miraheze.org/wiki/GNOME/Keyring_-
 # [ -z "${DESKTOP_SESSION:+x}" ] || {
-#     eval $(gnome-keyring-daemon --start)
+#     / $(gnome-keyring-daemon --start)
 #     export SSH_AUTH_SOCK
 # }
 
@@ -519,6 +527,8 @@ _busybox="$(which busybox)"
 	_nvi="$(which nvi)"
 	[ -z "${_nvi:+x}" ] || { export _nvi; alias vi="$_nvi"; }
 }
+
+export MANPAGER='nvim +Man!'
 
 [ ! -z "${manpager:+x}" ] ||
 ! command -v vi  > /dev/null 2>&1      || export manpager="vi"
@@ -569,7 +579,7 @@ case "$manpager" in
 				-c "+Man! $*"
 				# -c "Man $*"
 			}
-		esac
+esac
 
 export MANWIDTH=999
 
@@ -596,11 +606,11 @@ export XKB_DEFAULT_OPTIONS=grp:win_space_toggle
 
 
 # vim/nvim init
-export VINIT_HOME_DIR="${SHARE_PREFIX}/init/editor"
+export VINIT_HOME_DIR="$DOT_CONFIG/editor"
 
-# [ ! -d "${SHARE_PREFIX}/.void-packages" ] ||
+# [ ! -d "$DOT_CONFIG/.void-packages" ] ||
 [ ! -d "${HOME}/.void-packages" ] ||
-# export XBPS_DISTDIR="${SHARE_PREFIX}/.void-packages"
+# export XBPS_DISTDIR="$DOT_CONFIG/.void-packages"
 export XBPS_DISTDIR="${HOME}/.void-packages"
 
 
@@ -619,24 +629,35 @@ export XBPS_DISTDIR="${HOME}/.void-packages"
 #     fi
 # }
 # alias vi=_vi
-export EDITOR=nvim
+# export EDITOR=nvim
+# export EDITOR=vi
+env_reset EDITOR vi
 
-export INITRAMFS=/build/os/initramfs
+# export INITRAMFS=/build/os/initramfs
 export PIP_CERT=$HOME/.cert/python-cert.pem
 
 [ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
 WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
 export WAYLAND_CONFIG_HOME
-[ ! -f "${SHARE_PREFIX}/init/etc/chrome_dev.conf" ] || {
+
+# PRIVATE_PREFIX point to real users' private information
+[ -z "${PRIVATE_PREFIX:+x}" ] ||
+[ ! -f "$PRIVATE_PREFIX/etc/profile.d/chrome.conf" ] || {
 	set -a
-	. "${SHARE_PREFIX}/init/etc/chrome_dev.conf"
+	. "$PRIVATE_PREFIX/etc/profile.d/chrome.conf"
 	set +a
+}
+
+: ${WAYL_OUTPUT:="${WAYLAND_CONFIG_HOME}/.autolauncher.log"} && export WAYL_OUTPUT
+
+wayland_display() {
+	wl-info | grep WAYLAND_DISPLAY | awk -F = '{print $2}' | xargs
 }
 
 sway_socket() {
 	local launcher="${1-}"
 	[ -z "${launcher:+x}" ] ||
-	printf '%s %s\n' '$launcher' "$launcher [$LINENO : ashrc]"
+	print '$launcher' "$launcher [$LINENO : env]" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
 	# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
 	#   grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
 	# sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
@@ -645,9 +666,11 @@ sway_socket() {
 	# for sock_id in $sock_id_list; do
 	#    break
 	# done
+	# wl-info returns WAYLAND_DISPLAY
+	# wl-info | grep WAYLAND | awk -F= -v OFS="=" '{gsub(/[[:blank:]]/, "", $NF); print $NF}'
 	[ -z "${WAYLAND_DISPLAY+x}" ] || {
-		printf '%s %s\n' '$SHLVL' "$SHLVL" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-		printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" >> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
 		export WAYLAND_DISPLAY
 		printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
 		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
@@ -661,18 +684,22 @@ sway_socket() {
 	done)"
 
 	[ -n "${sock_id:+x}" ] || { printf '\n'; return 0; }
-
+	# I3SOCK has the same value
 	SWAY_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$UID.$sock_id.sock"
 	[ ! -S "$SWAY_SOCK" ] || {
 		export SWAY_SOCK
 		[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
 		printf '%s' "${SWAY_SOCK}" > /tmp/wayland/.socket
 
-		printf '%s %s\n' '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)"
+		print '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
 	}
 	[ -z "${DISPLAY+x}" ] || unset DISPLAY
-	printf "$RS%s" "$SWAY_SOCK"
+	# printf "$RS%s" "$SWAY_SOCK"
+	printf '%s' "$SWAY_SOCK"
 }
+
+SCRIPT_NAME="$SCRIPT_SCOPE"
+SCRIPT_SCOPE="$script_scope"
 
 # set ts=4 sw=4 tw=0 noet :
 

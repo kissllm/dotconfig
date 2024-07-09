@@ -557,7 +557,7 @@ let g:vim_packages_use['nathanaelkane/vim-indent-guides']                 = { 't
 " Just work on vim, not neovim
 let g:vim_packages_use['janlazo/vim-bang-terminal']                       = { 'type' : 'opt' }
 " can't deal with writable permission issues
-" The sessions directory '$SHARE_PREFIX/init/editor/vim/pack/packager/start/' isn't writable!
+" The sessions directory '$DOT_CONFIG/editor/vim/pack/packager/start/' isn't writable!
 " let g:vim_packages_use['xolox/vim-session']                          = { 'type' : 'opt' }
 
 if has("cscope")
@@ -585,11 +585,11 @@ let g:vim_packages_use['joshdick/onedark.vim']                            = { 't
 let g:vim_packages_use['liuchengxu/vim-clap']                             = { 'type' : 'opt', 'do': ':Clap install-binary' }  " File format
 
 " " https://github.com/christoomey/vim-tmux-navigator
-" $SHARE_PREFIX/init/editor/vim/pack/packager/start/keys/after/plugin/keys.vim
+" $DOT_CONFIG/editor/vim/pack/packager/start/keys/after/plugin/keys.vim
 " "     silent! execute(a:navigate[a:direction])
-" $SHARE_PREFIX/tinit/tmux.conf
+" $DOT_CONFIG/tinit/tmux.conf
 " set -g @plugin 'christoomey/vim-tmux-navigator'
-" $SHARE_PREFIX/init/editor/nvim/init.vim
+" $DOT_CONFIG/editor/nvim/init.vim
 let g:vim_packages_use['trailblazing/session_auto']                       = { 'type' : 'opt', 'requires' : 'trailblazing/boot' }
 let g:vim_packages_use['christoomey/vim-tmux-navigator']                  = { 'type' : 'opt' }
 let g:vim_packages_use['prabirshrestha/vim-lsp']                          = { 'type' : 'opt' }
@@ -2353,7 +2353,7 @@ set autowriteall
 " cmap w!! silent! :SudoWrite<CR>
 
 " https://github.com/tpope/vim-eunuch
-" v +SudoEdit $SHARE_PREFIX/gentoo/root/test.cpp
+" v +SudoEdit $DOT_CONFIG/gentoo/root/test.cpp
 " https://github.com/lambdalisue/suda.vim  " removed
 " " Will erase buffers (not just current one) automatically if you don't have write permission
 " let g:suda_smart_edit = 1  " for suda.vim
@@ -2531,7 +2531,7 @@ if 'linux' == $TERM || $TERM =~? '256color'
 	endif
 else
 	if exists("g:_use_terminal_transparent")
-		" $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+		" $DOT_CONFIG/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
 		" :let _rock        = '#181320'
 		" let g:gui_bg_normal   = '#181320'
 		" let g:gui_bg_normal   = '#82868a'
@@ -2577,7 +2577,7 @@ let g:hl_insert =
 	\ . ' cterm=NONE gui=NONE term=NONE'
 
 " For CursorLine, ColorColumn
-" $SHARE_PREFIX/init/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
+" $DOT_CONFIG/editor/vim/pack/packager/start/awesome-vim-colorschemes/colors/lucid.vim
 " :let _cloud       = '#e4e0ed'
 let g:hl_normal_inverse =
 	\ ' guifg=' . g:gui_bg_normal . ' guibg=' . g:gui_fg_normal

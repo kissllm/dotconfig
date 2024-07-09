@@ -1,81 +1,223 @@
 #! /bin/sh
 # set -x
+# shellcheck shell=sh
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
-#
-[ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.profile"
-#
+# Variables will be inherited but functions not
 
-# [ ! -z "${loaded_share+x}" ] ||
-# [ ! -f "${SHARE_PREFIX}/init/share" ] || . "${SHARE_PREFIX}/init/share"
+# shellcheck source=/usr/include/kiss/option
+# [ ! -z "${OPTION+x}" ] ||
+#   . "${MNGR_ROOT-}/usr/include/kiss/option"
 
-# In busybox, default SHELL=-ash
-# Change default shell to busybox
-current_sh="${SHELL##*/}"
-current_sh="${current_sh##"-"}"
-# expect_ash="/usr/bin/ash"
-expect_ash="/bin/sh"
-[ -f "$expect_ash" ] || [ -h "$expect_ash" ] || expect_ash="$(which sh)"
-{
-	[ -z "${expect_ash:+x}" ] ||
-	! command -v "$expect_ash" > /dev/null 2>&1
-} &&
-	printf '%s\n' "Install posix compatible shell, please" ||
-command -v "${SHELL}" > /dev/null 2>&1 &&
-[ -z "${expect_ash##*"${current_sh}"*}" ] || {
-	printf '%s %s\n' '$current_sh' "$current_sh"
-	# [ "${SHELL}" = "${0}"] || export SHELL=$0
-	app_name="${0##*/}"
-	app_name="${app_name##"-"}"
-	command -v "$app_name" > /dev/null 2>&1 &&
-		[ "$app_name" = "ash" ] || [ "$app_name" = "sh" ] ||
-		"$expect_ash" || :
+script_scope=${SCRIPT_SCOPE:-${SCRIPT_NAME:-"$0"}}
+SCRIPT_SCOPE="${SCRIPT_NAME:-"$0"}"
 
-	export SHELL="$expect_ash"
-	export _PATH_BSHELL="$expect_ash"
-	printf '%s %s\n' '$SHELL' "$SHELL"
+# shellcheck source=/usr/include/kiss/name
+type "script_name" > /dev/null 2>&1 ||
+	. "${MNGR_ROOT-}/usr/include/kiss/name"
+SCRIPT_NAME="$(script_name)"
+
+# shellcheck source=/usr/include/kiss/see
+type "print" > /dev/null 2>&1 && [ ! -z "${SEE+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/see"
+
+tty="$(tty | grep -v not || :)"
+# [ ! -z "${TTY+x}" ] ||
+[ -z "${tty:+x}" ] ||
+! TTY="$tty" || export TTY
+# ! : "${TTY:="$(tty | grep -v not || :)"}" || export TTY
+unset tty
+
+# shellcheck source=/usr/include/kiss/init
+type "env_reset" > /dev/null 2>&1 && [ ! -z "${INIT+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/init"
+
+# UID -- LOGNAME -- TTY -- KISS_TMPDIR -- LOG_DIR
+[ ! -z "${KISS_TMPDIR:+x}" ] &&
+	[ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
+	{ [ -z "${TTY:+x}" ] || [ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ]; } ||
+	! exec &> /dev/tty ||
+	init
+
+script_name="$(script_name)"
+[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+# unset script_name
+
+update_script_name() {
+	[ "$1" = "$script_name" ] || {
+		print '$script_name' "$script_name [$1]" >> "$SYST_OUTPUT" # got /dev/tty
+		script_name="$1"
+		SCRIPT_NAME="$script_name"
+	}
 }
 
-SCRIPT_NAME="profile" && export SCRIPT_NAME
+update_script_name "$HOME/.profile"
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
-[ ! -z "${SHARE_PREFIX:+x}" ] ||
+[ -e "$HOME/.repo" ] &&
 {
-	[ -f "/mnt/init/include/route" ] &&
-	. /mnt/init/include/route
-} || {
-	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
-	exit 0
+	set -a
+	. "$HOME/.repo"
+	set +a
+} ||
+{
+	! URL_CONF="https://github.com/kissllm/dotconfig.git" || export URL_CONF
+	! URL_MNGR="https://github.com/kissllm/kiss.git"      || export URL_MNGR
+	! URL_REPO="https://github.com/kissllm/lm.git"        || export URL_REPO
+	# print '$HOME/.repo' "$HOME/.repo has not been created"
+	# interrupt
 }
+
+# echo "\$loaded_profile = $loaded_profile"
+[ ! -e /etc/profile ] ||
+[ ! -z "${loaded_profile+x}" ] ||
+{
+	print 'sourcing' "/etc/profile"
+	# shellcheck source=/etc/profile
+	. "/etc/profile"
+}
+
+update_script_name "$HOME/.profile"
+
+[ -z "${SHELL_DEBUG+x}" ] || print "$HOME/.profile" "sourced"
+
+tty="$(tty | grep -v not || :)"
+# [ ! -z "${TTY+x}" ] ||
+[ -z "${tty:+x}" ] ||
+! TTY="$tty" || export TTY
+# ! : "${TTY:="$(tty | grep -v not || :)"}" || export TTY
+unset tty
+# env_update "TTY" "$(tty | grep -v not || :)"
+[ ! -z "${TTY:+x}" ] &&
+[ ! -z "${KISS_TMPDIR:+x}" ] &&
+[ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
+[ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ] ||
+{
+	env_reset LOG_DIR "$KISS_TMPDIR/logs/${TTY##*/}"
+	# LOG_DIR="$KISS_TMPDIR/logs/${TTY##*/}"
+
+	# [ ! -z "${TTY+x}" ] ||
+	# ! : "${TTY:="$(tty | grep -v not || :)"}" || export TTY
+
+		# [ ! -z "${KISS_TMPDIR:+x}" ] &&
+		# [ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
+		# { [ -z "${TTY:+x}" ] || [ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ]; } ||
+		# ! exec &> /dev/tty ||
+		init
+}
+readonly LOG_DIR
+
+# shellcheck source=/usr/include/kiss/func
+type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/func"
+
+	script_name="$(script_name)"
+	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+	# unset script_name
+
+update_script_name "$HOME/.profile"
+
+# init_log
+# # print '$_' "$_"
+# # print '$0' "$0"
+# # print '$ENV' "$ENV"
+# log_touch "syst" "SESSION_PID" "ss"
+# log_touch "date" "SESSION_PID" "dt"
+# log_touch "erro" "SESSION_PID" "er"
+# log_touch "init" "SESSION_PID" "ii"
+# log_touch "user" "SESSION_PID" "lg"
+# log_touch "pipe" "SESSION_PID" "pr"
+# log_touch "kiss" "KISS_PID"
+
+# shellcheck source=/usr/include/kiss/log
+type "pipe_kill"  > /dev/null 2>&1 &&
+type "out_direct" > /dev/null 2>&1 && [ ! -z "${LOG+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/log"
+
+
+# # ! : "${ERRO_OUTPUT:="$KISS_TMPDIR/logs/${TTY##*/}/erro.log"}"  || export ERRO_OUTPUT
+# #   : > "$ERRO_OUTPUT" 2>/dev/null
+# [ "${ERRO_OUTPUT-}" = "$LOG_DIR/erro.log" ] ||
+# # [ -n "${ERRO_OUTPUT:+x}" ] && [ -z "${ERRO_OUTPUT##*"$SESSION_USER"*}" ] ||
+#   env_reset ERRO_OUTPUT "$LOG_DIR/erro.log"
+# readonly ERRO_OUTPUT
+#
+# # ! : "${INIT_OUTPUT:="$KISS_TMPDIR/logs/${TTY##*/}/init.log"}" || export INIT_OUTPUT
+# #   : > "$INIT_OUTPUT" 2>/dev/null
+#
+# [ "${INIT_OUTPUT-}" = "$LOG_DIR/init.log" ] ||
+# # [ -n "${INIT_OUTPUT:+x}" ] && [ -z "${INIT_OUTPUT##*"$SESSION_USER"*}" ] ||
+#   env_reset INIT_OUTPUT "$LOG_DIR/init.log"
+# readonly INIT_OUTPUT
+#
+# # ! : "${USER_OUTPUT:="$KISS_TMPDIR/logs/${TTY##*/}/user.log"}"  || export USER_OUTPUT
+#
+# [ "${USER_OUTPUT-}" = "$LOG_DIR/user.log" ] ||
+# # [ -n "${USER_OUTPUT:+x}" ] && [ -z "${USER_OUTPUT##*"$SESSION_USER"*}" ] ||
+#   env_reset USER_OUTPUT "$LOG_DIR/user.log"
+# readonly USER_OUTPUT
+#
+# [ "${PIPE_OUTPUT-}" = "$LOG_DIR/pipe.log" ] ||
+#   env_reset PIPE_OUTPUT "$LOG_DIR/pipe.log"
+# readonly PIPE_OUTPUT
+
+# set -x
+# shellcheck source=/usr/include/kiss/pipe
+type pipe_boot > /dev/null 2>&1 &&
+[ ! -z "${PIPE+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/pipe"
+// silent_state || pipe_boot
+# set +x
+
+# // pipe_init "$TTY" "$USER_OUTPUT"
+# // pipe_init "$TTY" "$ERRO_OUTPUT"
+# unset ERRO_PIPE
+# ! pipe_state "$TTY" "$USER_OUTPUT" || export USER_PIPE
+# ! pipe_state "$TTY" "$ERRO_OUTPUT" || export ERRO_PIPE
+# // init_info "$TTY"
+# [ -z "${ERRO_PIPE+x}" ] || exec 2>"$erro_pipe"
+# print '$ERRO_PIPE' "$ERRO_PIPE"
+
+# tty="$(tty | grep -v not || :)"
+# [ ! -z "${tty+x}" ] &&
+# [ ! -z "${TTY+x}" ] && [ "$TTY" = "$tty" ] &&
+# print 'id : user : TTY' "$SESSION_PID <- $(pid_parent "$SESSION_PID") : $SESSION_USER : $TTY" | tee -a "$SYST_OUTPUT" ||
+# # print '$TTY' "$TTY" | tee -a "$SYST_OUTPUT" ||
+# {
+#   [ -z "${tty+x}" ] ||
+#   ! TTY="$tty" || export TTY
+#   # print '$TTY' "$TTY" | tee -a "$SYST_OUTPUT"
+#   print 'id : user : TTY' "$SESSION_PID <- $PPID : $SESSION_USER : $TTY" | tee -a "$SYST_OUTPUT"
+# }
+# unset tty
+  ! : ${DOT_CONFIG="/mnt/init"} && interrupt || export DOT_CONFIG
+  [ -z "${DOT_CONFIG:+x}" ] ||
+  [ -d "$DOT_CONFIG/" ] || \mkdir -p "$DOT_CONFIG/"
+  type is_git > /dev/null 2>&1 ||
+  {
+	  print 'is_git' "not defined"
+	  interrupt
+  }
+  is_git "$DOT_CONFIG" ||
+  {
+	  ! empty "$DOT_CONFIG" &&
+	  {
+		  print "$DOT_CONFIG" "is not empty and not a git repo"
+		  interrupt
+	  }
+  } ||
+	  as_own "$DOT_CONFIG" git clone --recursive "$URL_CONF" "$DOT_CONFIG" # & progress "config" "$!" "config cloning"
+# . s deploy all the profile
+# env_reset DOT_CONFIG   "/mnt/init"
+# share_prefix() deduces DOT_CONFIG from $HOME/.profile and returns the linkage's target
+# link_correct "$DOT_CONFIG" "$HOME/.share_prefix"
+# [ ! -z "${DOT_CONFIG:+x}" ] ||
+# env_reset DOT_CONFIG "$(share_prefix)"
 
 # alias /='eval'
 # # bash does not recognize //
 # alias //='lineno="$LINENO"'
-#
-# SCRIPT_NAME="profile" && export SCRIPT_NAME
-#
-# # share folder initialization
-# [ ! -z "${SHARE_PREFIX:+x}" ] || {
-#   [ -d "/mnt/init" ] &&
-#   { SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-#       [ -d "/opt/init" ] &&
-#       { SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-#       printf '%s %s\n' '$SHARE_PREFIX' "not found"
-#   }
-# }
-#
-# _functions="/usr/include/kiss/functions"
-# [ -f "$_functions" ] ||
-# _functions="$SHARE_PREFIX/init/include/functions"
-# [ ! -f "$_functions" ] && {
-#   printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-#   exit 0
-# } || {
-#   env_reset_type="$(type "env_reset" > /dev/null 2>&1 && type "env_reset")" || :
-#   [ ! -z "${env_reset_type:+x}" ] ||
-#       . "$_functions"
-# }
 
+env_reset UID "$(id -u)"
 
 # : "${LOGNAME:="$(id -nu)"}" && export LOGNAME
 env_reset LOGNAME "$(id -nu)"
@@ -85,27 +227,19 @@ env_reset LOGNAME "$(id -nu)"
 # }
 
 # : "${HOME:="$(/usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"}" && export HOME
-env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" \
-	"\$1 == v {print \$6}" /etc/passwd)"
-
-# home="$( \
-#   /usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
-# [ -z "${home:+x}" ] && {
-#   printf '%s %s\n' '$HOME' "$HOME [profile]"
-#   exit 1
-# } || [ "$home" = "$HOME" ] || {
-#   HOME="$home" && export HOME
-#   # echo "Fixed \$HOME = $HOME in profile"
-#   printf '%s %s\n' '$HOME' "$HOME [profile]"
-# }
+env_reset HOME "$(/usr/bin/awk -F : -v v="${LOGNAME}" "\$1 == v {print \$6}" /etc/passwd)"
 
 # : "${LLVM_IAS=1}" && export LLVM_IAS
 env_reset LLVM_IAS 1
 # : "${LLVM=1}" && export LLVM
 env_reset LLVM 1
 
-# : "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
-env_reset SSL_CERT_FILE "$HOME/.cert/cacert.pem"
+[ ! -z "${SSL_CERT_FILE:+x}" ] || {
+	[ ! -e "$HOME/.cert/cacert.pem" ] &&
+	printf '%s %s\n' '$HOME/.cert/cacert.pem' "does not exist" ||
+	# : "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
+	env_reset SSL_CERT_FILE "$HOME/.cert/cacert.pem"
+}
 
 # awesome-vim-colorschemes
 # : "${HOMEBREW_GITHUB_API_TOKEN="$SSL_CERT_FILE"}" &&
@@ -115,11 +249,234 @@ env_reset HOMEBREW_GITHUB_API_TOKEN "$SSL_CERT_FILE"
 # For Chimera Linux development
 # [ -z "${USE_CHIMERA+x}" ] || export BOOTSTRAP_ROOT="sysroot"
 
-# echo "\$loaded_profile = $loaded_profile"
-[ ! -z "${loaded_profile+x}" ] ||
-[ ! -e /etc/profile ] || . /etc/profile
+[ -z "${USE_SHELDON:+x}" ] || {
+	[ -d ${SHELDON_CONFIG_DIR} ] || \mkdir -p ${SHELDON_CONFIG_DIR}
 
-[ ! -f $HOME/.ashrc ] || . $HOME/.ashrc
+	[ -d ${SHELDON_DATA_DIR} ] || {
+		\mkdir -p ${SHELDON_DATA_DIR}
+
+		[ -d ${SHELDON_DATA_DIR}/repos ] || \mkdir -p ${SHELDON_DATA_DIR}/repos
+
+		[ -d ${SHELDON_DATA_DIR}/downloads ] ||
+			\mkdir -p ${SHELDON_DATA_DIR}/downloads
+	}
+}
+
+[ -n "${SHELL##*"zsh"*}" ] || {
+	$cmd_link -- $DOT_CONFIG/shell/zsh          $HOME/.zinit
+	$cmd_link -- $DOT_CONFIG/shell/zsh/zshrc    $HOME/.zshrc
+	$cmd_link -- $DOT_CONFIG/shell/zsh/zshenv   $HOME/.zshenv
+	$cmd_link -- $DOT_CONFIG/shell/zsh/zlogin   $HOME/.zlogin
+	$cmd_link -- $DOT_CONFIG/shell/zsh/zprofile $HOME/.zprofile
+}
+
+env_reset XDG_INIT "/etc/profile.d/xdg-runtime-dir"
+
+{
+	[ -n "${XDG_CONFIG_HOME:+x}" ] && [ -d "$XDG_CONFIG_HOME" ] &&
+	[ -n "${XDG_DATA_HOME:+x}" ]   && [ -d "$XDG_DATA_HOME" ]   &&
+	[ -n "${XDG_CACHE_HOME:+x}" ]  && [ -d "$XDG_CACHE_HOME" ]  &&
+	[ -n "${XDG_RUNTIME_DIR:+x}" ] && [ -d "$XDG_RUNTIME_DIR" ] &&
+	[ "${XDG_RUNTIME_DIR}" = "/run/user/$(id -u)" ]
+} || . "$XDG_INIT"
+
+{
+	[ -n "${XDG_CONFIG_HOME:+x}" ] && [ -d "$XDG_CONFIG_HOME" ] &&
+	[ -n "${XDG_DATA_HOME:+x}" ]   && [ -d "$XDG_DATA_HOME" ]   &&
+	[ -n "${XDG_CACHE_HOME:+x}" ]  && [ -d "$XDG_CACHE_HOME" ]  &&
+	[ -n "${XDG_RUNTIME_DIR:+x}" ] && [ -d "$XDG_RUNTIME_DIR" ] &&
+	[ "${XDG_RUNTIME_DIR}" = "/run/user/$(id -u)" ]
+} || {
+	prompt '$XDG_CONFIG_HOME' "$XDG_CONFIG_HOME"
+	prompt '$XDG_CACHE_HOME'  "$XDG_CACHE_HOME"
+	prompt '$XDG_DATA_HOME'   "$XDG_DATA_HOME"
+	prompt '$XDG_RUNTIME_DIR' "$XDG_RUNTIME_DIR"
+	exit 1
+}
+
+link_correct "$XDG_INIT" "$HOME/.xdg-runtime-dir"
+[ -L "$HOME/.xdg-runtime-dir" ] ||
+	print "$HOME/.xdg-runtime-dir" "creating failed"
+
+# If you insist to update local system
+# KISS_ROOT= && export KISS_ROOT
+# Or if unset, kiss package manager will set it to '/'
+# [ -z "${KISS_ROOT+x}" ] || unset KISS_ROOT
+#
+# By default use a target address (/opt/kiss or /mnt/kiss)
+# /mnt/kiss might be a mount point of /dev/nvme0n1p3 ... something
+# /opt/kiss normally has larger size (20 GB is recommended) on plain local filesystem
+# The following two values are put to prevent from ruining local systemm by accident
+# export KISS_ROOT="/opt/kiss" BOOTSTRAP=
+  ! : ${KISS_ROOT="/opt/kiss"} && interrupt || export KISS_ROOT
+  [ -z "${KISS_ROOT:+x}" ] ||
+  {
+	  [ -d "$KISS_ROOT/" ] || \mkdir -p "$KISS_ROOT/"
+	  link_correct "$KISS_ROOT" "$HOME/.kiss_root"
+  }
+
+# ! : ${SHARE_PREFIX="/opt"} && interrupt || export SHARE_PREFIX
+  env_reset SHARE_PREFIX "/opt"
+  [ -z "${SHARE_PREFIX:+x}" ] ||
+  {
+	  [ -d "$SHARE_PREFIX/" ] || \mkdir -p "$SHARE_PREFIX/"
+	  link_correct "$SHARE_PREFIX" "$HOME/.share_prefix"
+  }
+# Moved to /etc/profile.d/env
+#   ! : ${REPO_ROOT:="/var/db/kiss"} || export REPO_ROOT
+# # ! : ${repo_root:="$SHARE_PREFIX/${REPO_ROOT#*/}"} || export repo_root
+#   env_reset repo_root "$SHARE_PREFIX/${REPO_ROOT#"${REPO_ROOT%%[!/]*}"}"
+#   [ -d "$repo_root" ] || \mkdir -p "$repo_root"
+#   repo_main_source="$repo_root/lm"
+#   link_correct "$repo_main_source" "$REPO_ROOT/main"
+
+# repo_root not defined
+# env_reset LAYOUT_FILES    "$repo_root/core/baselayout/files"
+
+  ! : ${MNGR_ROOT="/mnt/os/kiss"} && interrupt || export MNGR_ROOT
+  [ -z "${MNGR_ROOT:+x}" ] ||
+  {
+	  [ -d "$MNGR_ROOT" ] || \mkdir -p "$MNGR_ROOT"
+	  is_git "$MNGR_ROOT" ||
+	  {
+		  ! empty "$MNGR_ROOT" &&
+		  {
+			  print "$MNGR_ROOT" "is not empty and not a git repo"
+			  interrupt
+		  }
+	  } ||
+		  as_own "$MNGR_ROOT" git clone --recursive "$URL_MNGR" "$MNGR_ROOT" # & progress "config" "$!" "config cloning"
+  }
+# env_reset MNGR_ROOT        "/mnt/os/kiss"
+# 1. $MNGR_ROOT/deploy create the link $HOME/.mngr_root
+# 2. mngr_root() read the link $HOME/.mngr_root
+# 3. /etc/profile.d/env generate the default MNGR_ROOT
+# Don't need the following line, this might do wrong things if MNGR_ROOT was out of date
+# link_correct "$MNGR_ROOT" "$HOME/.mngr_root"
+
+  ! : ${SHARE_ROOT="/working/kiss"} && interrupt || export SHARE_ROOT
+  [ -z "${SHARE_ROOT:+x}" ] ||
+  [ -d "$SHARE_ROOT/" ] || \mkdir -p "$SHARE_ROOT/"
+# init_dirs() checks the linkages
+# env_reset SHARE_ROOT       "/working/kiss"
+
+# : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} &&
+env_reset WAYLAND_CONFIG_HOME "${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
+export WAYLAND_CONFIG_HOME
+link_correct "$DOT_CONFIG/wayland/env" "${WAYLAND_CONFIG_HOME}/"
+
+# insert_or_link "$DOT_CONFIG/repo"    "$HOME/.repo"
+  link_correct   "$DOT_CONFIG/repo"    "$HOME/.repo"
+# insert_or_link "$DOT_CONFIG/see"     "$HOME/.see"
+  link_correct   "$DOT_CONFIG/see"     "$HOME/.see"
+# [ -f "$HOME/.profile" ] && {
+#   diff -bwurB "$HOME/.profile" "$DOT_CONFIG/profile" > /dev/null 2>&1 ||
+#   grep -q '$DOT_CONFIG/profile' ||
+#   printf '\n%s\n%s\n' '[ ! -f "$DOT_CONFIG/profile" ] ||' \
+#   '. "$DOT_CONFIG/profile"' >> "$HOME/.profile"
+# } ||
+# link_correct "$DOT_CONFIG/profile" "$HOME/.profile"
+# Must define. share_prefix() needs this
+# insert_or_link "$DOT_CONFIG/profile" "$HOME/.profile"
+  link_correct   "$DOT_CONFIG/profile" "$HOME/.profile"
+
+  link_correct   "$DOT_CONFIG/ashrc"   "$HOME/.ashrc"
+# insert_or_link "$DOT_CONFIG/ashrc"   "$HOME/.ashrc"
+
+link_correct "$DOT_CONFIG/inputrc"                  "$HOME/.inputrc"
+link_correct "$DOT_CONFIG/terminal/tmux.conf"       "$HOME/.tmux.conf"
+link_correct "$DOT_CONFIG/terminal/foot/foot.ini"   "$XDG_CONFIG_HOME/foot/"
+link_correct "$DOT_CONFIG/wayland/river/init"       "$XDG_CONFIG_HOME/river/"
+link_correct "$DOT_CONFIG/wayland/sway/config"      "$XDG_CONFIG_HOME/sway/"
+link_correct "$DOT_CONFIG/wayland/sway/colorscheme" "$XDG_CONFIG_HOME/sway/"
+# Keep $DOT_CONFIG as just a configuration location
+folder_tmux="$HOME/.tmux"
+[ -L "$folder_tmux" ] && \rm -f "$folder_tmux"
+[ -d "$folder_tmux" ] || \mkdir -p "$folder_tmux"
+# link_correct "$DOT_CONFIG/terminal/tmux"       "$HOME/.tmux"
+link_correct "$DOT_CONFIG/editor/vim/init.vim" "$HOME/.vimrc"
+folder_vim="$HOME/.vim"
+[ -L "$folder_vim" ] && \rm -f "$folder_vim"
+[ -d "$folder_vim" ] || \mkdir -p "$folder_vim"
+
+[ ! -e  "$DOT_CONFIG/editor/vim/after" ] ||
+link_correct "$DOT_CONFIG/editor/vim/after"  "$HOME/.vim/"
+[ ! -e  "$DOT_CONFIG/editor/vim/indent" ] ||
+link_correct "$DOT_CONFIG/editor/vim/indent" "$HOME/.vim/"
+link_correct "$DOT_CONFIG/editor/nvim"       "$XDG_CONFIG_HOME/"
+[ ! -e  "${DOT_CONFIG%/*}/wiki" ] ||
+link_correct "${DOT_CONFIG%/*}/wiki"         "$HOME/.wiki"
+#
+# Folder maintenance
+folder_nvim="${XDG_DATA_HOME}/nvim"
+[ -L "$folder_nvim" ] && \rm -f "$folder_nvim"
+[ -d "$folder_nvim" ] || mkdir -p "$folder_nvim"
+
+folder_site="${XDG_DATA_HOME}/nvim/site"
+[ -L "$folder_site" ] && \rm -f "$folder_site"
+[ -d "$folder_site" ] || \mkdir -p "$folder_site"
+
+# Default editor packages is based on musl libc on current system
+# Since I use lazy.nvim, don't need to maintain this link
+# link_correct "$DOT_CONFIG/editor/nvim/site/pack" \
+#   "${XDG_DATA_HOME}/nvim/site/pack"
+#
+# If you have additional musl libc builds of the editor
+# ! expr "$KISS_XHOST_ABI" : "musl" > /dev/null 2>&1 ||
+# link_correct "$DOT_CONFIG/editor/nvim/site/pack-musl" \
+#     "${XDG_DATA_HOME}/nvim/site/pack"
+#
+folder_parser="${XDG_DATA_HOME}/nvim/site/parser"
+[ -L "$folder_parser" ] && \rm -f "$folder_parser"
+[ -d "$folder_parser" ] || \mkdir -p "$folder_parser"
+
+# [ ! -L $XDG_CONFIG_HOME/coc ] ||
+#     \rm -f $XDG_CONFIG_HOME/coc
+# $cmd_link -- $DOT_CONFIG/editor/coc $XDG_CONFIG_HOME/coc
+
+case "$-" in *"i"*)
+	[ ! -f $HOME/.ashrc ] || . $HOME/.ashrc
+esac
 
 # rustup doesn't work on llvm-musl
 # . "$HOME/.local/share/cargo/env"
+
+# {
+#   type "cross_flags"  > /dev/null 2>&1 &&
+#   type "_init_dirs"   > /dev/null 2>&1 &&
+#   type "_env_init"    > /dev/null 2>&1 &&
+#   [ ! -z "${ppwd:+x}" ] &&
+#   # set | grep -q _level > /dev/null &&
+#   # [ -n "${-##*x*}" ]
+#   [ ! -z "${HEADER+x}" ]
+# } || {
+#   # print 'share' "including" | tee -a "$USER_OUTPUT" > "$TTY"
+#   # Outdated option: shellcheck source=/dev/null
+#   # shellcheck source=/usr/include/kiss/share
+#   # . "${MNGR_ROOT-}/usr/include/kiss/share" ""
+#   . "${MNGR_ROOT-}/usr/include/kiss/share"
+#   # . /usr/include/kiss/share > /dev/null 2>&1
+# 
+#   # unset script_name
+# 
+#   [ -t 0 ] || die 'fd 0' "does not work"
+#   # export $(cut -d= -f1 /usr/include/kiss/share)
+# 
+#   # -ash: //: Permission denied -- // is not defined
+#   # war '$HEADER' "$HEADER"
+# 
+#   # export HEADER=
+# 
+# }
+
+SCRIPT_NAME="$SCRIPT_SCOPE"
+SCRIPT_SCOPE="$script_scope"
+
+
+
+
+
+
+
+
+

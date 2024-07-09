@@ -74,7 +74,7 @@ permition () {
 	# echo "\${1}: "${1}
 	local packages_path="${1}"
 	echo "packages_path = ${packages_path}"
-	# for packages_path in "${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+	# for packages_path in "$DOT_CONFIG/../.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
 	# for packages_path in "${working_path[@]}"
 	# for packages_path in "${working_path}"
 	# do
@@ -317,7 +317,7 @@ if [ "$SHELL" = "${SHELL/zsh/}" ]; then
 	# # command doas \chown -R -f --quiet root:vinit "${VINIT[HOME_DIR]}"
 	# # command doas \chown -R -f --quiet root:tinit "${TINIT[HOME_DIR]}"
 
-	# find "${SHARE_PREFIX}/.git" -type f -name "*" -print -exec \chmod --quiet g+r {} +
+	# find "$DOT_CONFIG/../.git" -type f -name "*" -print -exec \chmod --quiet g+r {} +
 	if [ -n "${ZPFX}" ] && [ -d "${ZPFX}" ]; then
 		command doas chmod -R go+rx "${ZPFX}/bin"
 	fi
@@ -331,11 +331,11 @@ if [ -d "${1}" ]; then
 else
 	echo "${1}, No such file or directory [$0]"
 #     if [ $SHELL = "zsh" ]; then
-#         working_path="${SHARE_PREFIX}/.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
+#         working_path="$DOT_CONFIG/../.git" "${ZINIT[HOME_DIR]}" "${VINIT[HOME_DIR]}" "${TINIT[HOME_DIR]}"
 #     else
-#         working_path='"${SHARE_PREFIX}/.git" "${VINIT_HOME_DIR}" "${TINIT_HOME_DIR}"'
+#         working_path='"$DOT_CONFIG/../.git" "${VINIT_HOME_DIR}" "${TINIT_HOME_DIR}"'
 #
-#         permition "${SHARE_PREFIX}/.git"
+#         permition "$DOT_CONFIG/../.git"
 #         permition "${VINIT_HOME_DIR}"
 #         permition "${TINIT_HOME_DIR}"
 #     fi

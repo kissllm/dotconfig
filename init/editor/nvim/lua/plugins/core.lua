@@ -1,16 +1,19 @@
 
 
 return {
+	-- Does not work
 	{
 		"trailblazing/vim-repeat",
-		-- event = "VeryLazy",
-		lazy   = false,
+		cond  = false,
+		event = "VeryLazy",
+		lazy  = true,
+		-- lazy  = false,
 	},
 
 	{
 		"ahmedkhalf/project.nvim",
 		config = function()
-			require("project_nvim").setup {
+			return require("project_nvim").setup {
 				-- your configuration comes here
 				-- or leave it empty to use the default settings
 				-- refer to the configuration section below
@@ -32,26 +35,35 @@ return {
 	--  cmd  = "NvimTreeToggle",
 	-- },
 
+	-- Does not work
+	{
+		"tpope/vim-unimpaired",
+		cond  = false,
+		event = "VeryLazy",
+		lazy  = true,
+	},
+
 	{
 		"tpope/vim-surround",
+		cond  = false,
 		event = { "BufReadPost", "BufNewFile" }
 	},
 
 	{
 		"tpope/vim-fugitive",
-		event = "VeryLazy"
+		event = "VeryLazy",
 	},
 
 	{
 		"tpope/vim-eunuch",
-		event = "VeryLazy"
+		event = "VeryLazy",
 	},
 
 	"thinca/vim-localrc",
 
 	{
 		"simnalamburt/vim-mundo",
-		event = "VeryLazy"
+		event = "VeryLazy",
 	},
 
 	-- Tons of errors puped up
@@ -72,12 +84,12 @@ return {
 
 	{
 		"JoosepAlviste/nvim-ts-context-commentstring",
-		lazy = true
+		lazy = true,
 	},
 
 	{
 		"junegunn/vim-easy-align",
-		event = "VeryLazy"
+		event = "VeryLazy",
 	},
 
 	{
@@ -169,7 +181,7 @@ return {
 	--  },
 	--  cmd = 'Telescope',
 	--  module = "telescope",
-	--  -- config = function() require("telescope").setup() end,
+	--  -- config = function() return require("telescope").setup() end,
 	-- },
 
 
@@ -179,7 +191,7 @@ return {
 		event = "VeryLazy",
 		lazy  = true,
 		config = function()
-			require('telekasten').setup({
+			return require('telekasten').setup({
 				-- home = vim.fn.expand("~/zettelkasten"), -- Put the name of your notes directory here
 				home = vim.fn.expand("~/.wiki"), -- Put the name of your notes directory here
 			})
@@ -275,6 +287,7 @@ return {
 		lazy   = true,
 	},
 
+	-- E353: Nothing in register " especially in tty
 	-- Copy from nvim to tmux [TextYankPost]
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- [TextYankPost], needs "lazy = false,"
@@ -285,13 +298,67 @@ return {
 		-- dependencies = {
 		--  {'tmux-plugins/vim-tmux-focus-events'},
 		-- },
+		-- https://github.com/roxma/vim-tmux-clipboard/issues/7
+		cond     = false,
 		opts     = {},
-		-- event = "VeryLazy",
+		-- event    = "VeryLazy",
+		event     = "TextYankPost",
+		-- lazy     = true,
 		lazy     = false,
-		config   = function() end,
+		config   = function()
+			vim.cmd([[
+			" let g:vim_tmux_clipboard#loadb_option = '-w'
+			]])
+		end,
 	},
 
-	-- proper syntax highlighting
+	-- E353: Nothing in register " especially in tty
+	-- Copy from nvim to tmux ? [TextYankPost]
+	-- As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
+	-- set.clipboard = set.clipboard + "unnamedplus"
+	-- "show-buffer -s" error
+	{
+		"aserowy/tmux.nvim",
+		cond      = false,
+		opts      = {
+			copy_sync = {
+				-- enable = false,
+				enable = true,
+				-- redirect_to_clipboard = false,
+				redirect_to_clipboard = true,
+			},
+			navigation = {
+				-- enable_default_keybindings = true,
+				enable_default_keybindings = false,
+			},
+		},
+		-- event  = "VeryLazy",
+		event     = "TextYankPost",
+		-- lazy   = true,
+		lazy      = false,
+		config = function()
+			return require("tmux").setup({
+				copy_sync = {
+					-- enable = false,
+					enable = true,
+					-- redirect_to_clipboard = false,
+					redirect_to_clipboard = true,
+				},
+				navigation = {
+					-- enable_default_keybindings = true,
+					enable_default_keybindings = false,
+				},
+			})
+		end,
+	},
+
+	{
+		"bfredl/nvim-miniyank",
+		lazy     = true,
+		config   = true,
+	},
+
+	-- proper syntax highlighting when editing .tmux.conf
 	-- commentstring - so that plugins like vim-commentary work as intended
 	-- K - jumps to the *exact* place in man tmux where the word under cursor is explained (a helluva time saver). This should work correctly on practically anything in .tmux.conf.
 	-- :make - invokes tmux source .tmux.conf and places all the errors (if any) in quicklist
@@ -304,41 +371,28 @@ return {
 		config   = true,
 	},
 
-	-- Copy from nvim to tmux ? [TextYankPost]
-	-- As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
-	-- set.clipboard = set.clipboard + "unnamedplus"
-	-- "show-buffer -s" error
-	{
-		"aserowy/tmux.nvim",
-		cond   = false,
-		opts   = {},
-		event  = "VeryLazy",
-		lazy   = true,
-		config = function() return require("tmux").setup() end,
-	},
-
 	{
 		"vigoux/notifier.nvim",
 		cond   = false,
 		event  = "VeryLazy",
 		lazy   = true,
 		config = function()
-			require'notifier'.setup {
+			return require'notifier'.setup {
 				-- You configuration here
 			}
 		end
 	},
 
 	-- {
-	-- 	"j-hui/fidget.nvim",
-	-- 	-- event  = "VeryLazy",
-	-- 	-- lazy   = true,
-	-- 	dependencies = { "rcarriga/nvim-notify" },
-	-- 	config = function()
-	-- 		require'fidget'.setup {
-	-- 			-- You configuration here
-	-- 		}
-	-- 	end,
+	--  "j-hui/fidget.nvim",
+	--  -- event  = "VeryLazy",
+	--  -- lazy   = true,
+	--  dependencies = { "rcarriga/nvim-notify" },
+	--  config = function()
+	--      return require'fidget'.setup {
+	--          -- You configuration here
+	--      }
+	--  end,
 	-- },
 
 	{
@@ -349,7 +403,7 @@ return {
 			},
 		},
 		config = function ()
-			require('leap').create_default_mappings()
+			return require('leap').create_default_mappings()
 		end,
 		event  = "VeryLazy",
 		lazy   = true,
@@ -368,7 +422,7 @@ return {
 	--  event = { "VeryLazy" },
 	--  build = "deno task --quiet build:fast",
 	--  config = function()
-	--      require("peek").setup({
+	--      return require("peek").setup({
 	--          auto_load = true,         -- whether to automatically load preview when
 	--          -- entering another markdown buffer
 	--          close_on_bdelete = true,  -- close preview window on buffer delete
@@ -422,12 +476,12 @@ return {
 		event  = "VeryLazy",
 		lazy   = true,
 		config = function()
-			require("numb").setup {
-				show_numbers         = true, -- Enable 'number' for the window while peeking
-				show_cursorline      = true, -- Enable 'cursorline' for the window while peeking
-				hide_relativenumbers = true, -- Enable turning off 'relativenumber' for the window while peeking
-				number_only          = false, -- Peek only when the command is only a number instead of when it starts with a number
-				centered_peeking     = true, -- Peeked line will be centered relative to window
+			return require("numb").setup {
+				show_numbers         = true,   -- Enable 'number' for the window while peeking
+				show_cursorline      = true,   -- Enable 'cursorline' for the window while peeking
+				hide_relativenumbers = true,   -- Enable turning off 'relativenumber' for the window while peeking
+				number_only          = false,  -- Peek only when the command is only a number instead of when it starts with a number
+				centered_peeking     = true,   -- Peeked line will be centered relative to window
 			}
 		end
 	},
@@ -461,4 +515,52 @@ return {
 		lazy   = true,
 	},
 
+	-- outline
+	{
+		"hedyhli/outline.nvim",
+		lazy = true,
+		cmd = { "Outline", "OutlineOpen" },
+		keys = { -- Example mapping to toggle outline
+		{ "<leader>tt", "<cmd>Outline<CR>", desc = "Toggle outline" },
+		},
+		opts = {
+			-- Your setup opts here
+		},
+	},
+
+	-- outline
+	{
+		'stevearc/aerial.nvim',
+		opts = {},
+		-- Optional dependencies
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons"
+		},
+		event  = "VeryLazy",
+		lazy   = true,
+	},
+
+	{
+		"christoomey/vim-tmux-navigator",
+		cond   = false,
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
+
+	{
+
+	},
 }

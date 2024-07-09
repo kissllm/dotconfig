@@ -10,6 +10,22 @@
 
 doas modprobe intel_powerclamp
 doas modprobe intel_rapl_common
-# doas modprobe processor_thermal_rapl
+  doas modprobe processor_thermal_rapl
 # doas modprobe processor_thermal_device
 doas modprobe intel_rapl_msr
+# [RESPONDED] [Excessive CPU thermal(?) throttling on 12th-gen](https://community.frame.work/t/responded-excessive-cpu-thermal-throttling-on-12th-gen/21569)
+# [CPU throttling in Linux (SOLVED)](https://forum.cockos.com/showthread.php?t=269937)
+echo -n performance | doas tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
+# https://github.com/erpalma/throttled
+# git clone https://github.com/erpalma/throttled.git
+# sudo ./throttled/install.sh
+
+
+
+
+
+
+
+
+

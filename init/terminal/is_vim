@@ -1,0 +1,76 @@
+#! /bin/sh
+# Usage: is_vim.sh <tty>
+#   tty: Specify tty to check for vim process.
+set -x
+tty="$1"
+alias /='eval'
+list_length() {
+	local index=0
+	local item=
+	for item do
+		: $((index += 1))
+	done
+	printf "%s" $index
+}
+# Construct process tree.
+# children=
+# busybox does not support -t
+# pids="$(ps -o pid= -t "$tty")"
+pids="$(ps -o pid=)"
+
+pid_list=
+for pid in $pids; do
+	pid_list="${pid_list:+"${pid_list}|"}$pid"
+done
+children_build() {
+	local children_name=
+	while read -r pid ppid
+	do
+		[ ! -z "$pid" ] && [ "$pid" -ne "$ppid" ] &&
+		{
+			/ "children_name=\"children_$ppid\""
+			# / "children_$ppid=\"$pid\""
+			/ "children_name=\"${children_name:+\"${children_name}|\"}$pid\""
+		} || continue
+	done < <(ps -Ao pid=,ppid=)
+}
+children_build
+# Get all descendant pids of processes in $tty with BFS
+query_relative() {
+	local pid index=0
+	local ifs="$IFS"
+	local children_name=
+	local IFS=$'|'
+	for pid in $pid_list
+	# while [ "$(list_length pids)" -gt "$index" ]
+	do
+		[ "$(IFS=$'|' list_length $pid_list)" -gt "$index" ] || break
+		# pid=${pids[index++]}
+		: $((index += 1))
+		printf '%s %s\n' '$pid' "$pid" > "$TTY"
+		/ "children_name=\"children_$pid\""
+		/ "[ ! -z \"\${children_name+x}\" ]" || continue
+		# / "child_value=\"\$${children_$pid-}\""
+		/ "child_value=\"\$${children_name-}\""
+		printf '%s %s\n' '$child_value' "$child_value" > "$TTY"
+		# / "pid_list=\"${pid_list:+\"${pid_list}|\"}\$${children_$pid-}\""
+		/ "pid_list=\"${pid_list:+\"${pid_list}|\"}$child_value\""
+	done
+}
+query_relative
+# Check whether any child pid_list are vim
+# state -> stat, -p -> ''
+# ps -o state=,comm= -p "$pid_list" | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'
+ps -o pid=,stat=,comm= | egrep "^(PID| *$pid_list )" | awk '{print $(NF - 1) " " $NF}' | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'
+set +x
+exit $?
+# [ is_vim does not detect vim running in a subshell #295 ](https://github.com/christoomey/vim-tmux-navigator/issues/295)
+
+
+
+
+
+
+
+
+

@@ -335,8 +335,9 @@ mode "nag" {
 # Basics:
 #
 	# Start a terminal
+	# bindsym $mod+return exec $term -o shell="/usr/bin/ash -l"
 	bindsym $mod+return exec $term
-	bindsym $mod+shift+return exec alacritty
+	bindsym $mod+shift+return exec alacritty -o shell="/usr/bin/ash -l"
 	# $bindsym $mod+shift+return exec st
 
 	# If you happened to trigger this key combination in tmux, $mod+shift+q in wayland will save you
@@ -344,10 +345,12 @@ mode "nag" {
 	# How to quickly switch fonts of terminal?
 	# $mod+shift+q will kill current window but tmux keeps it. Open it in tmux again and the fonts changed
 	# One hand operations
-	# bindsym $mod+t exec $term -o shell="/usr/bin/doas -u root -- /usr/bin/ash -l"
-	bindsym $mod+t exec $term /usr/bin/doas -u root -- /usr/bin/ash -l
+	# SHLVL == 3
+	bindsym $mod+t exec $term -o shell="/usr/bin/doas -u root -- /usr/bin/ash -l"
+	# SHLVL == 5
+	# bindsym $mod+t exec $term /usr/bin/doas -u root -- /usr/bin/ash -l
 	# alt + t
-	bindsym $alt_mod+t exec $term
+	bindsym $alt_mod+t exec $term -o shell="/usr/bin/ash -l"
 
 	# Kill focused window
 	bindsym $mod+shift+q kill

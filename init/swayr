@@ -1,6 +1,6 @@
 #! /bin/sh
 set -e
-printf '%s %s\n' '$tty_num' "$tty_num [swayr]"
+print '$TTY_NUM' "$TTY_NUM [swayr]" >> "$WAYL_OUTPUT"
 
 # https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
 # SWAY_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/sway"

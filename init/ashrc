@@ -1,22 +1,28 @@
-#! /bin/Sh
+#! /bin/sh
 # set -x
 # Definition sequence
 # doas.conf->share->/etc/profile->login shell->.profile->.ashrc->env
 
-SCRIPT_NAME="ashrc" && export SCRIPT_NAME
+script_scope=${SCRIPT_SCOPE:-${SCRIPT_NAME:-"$0"}}
+SCRIPT_SCOPE="${SCRIPT_NAME:-"$0"}"
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
-[ ! -z "${SHARE_PREFIX:+x}" ] ||
-{
-	[ -f "/mnt/init/include/route" ] &&
-	. /mnt/init/include/route
-} || {
-	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
-	exit 0
-}
+# shellcheck source=/usr/include/kiss/name
+type "script_name" > /dev/null 2>&1 ||
+	. "${MNGR_ROOT-}/usr/include/kiss/name"
+SCRIPT_NAME="$(script_name)"
+
+# shellcheck source=/usr/include/kiss/func
+type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
+	. "${MNGR_ROOT-}/usr/include/kiss/func"
+
+	script_name="$(script_name)"
+	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+	# unset script_name
+
+env_reset DOT_CONFIG "$(dot_config)"
 
 # : ${UID="$(id -u)"} && export UID
-// env_reset UID "$(id -u)"
+env_reset UID "$(id -u)"
 
 reset_cursor_shape() {
 
@@ -224,15 +230,15 @@ reset_cursor_shape() {
 	# infocmp -L1 screen-256color > /mnt/screen-256color.info
 	# Comment out parm_index, maybe parm_rindex also
 	# tic /mnt/screen-256color.info
-	# [ "$USER" = "root" ] ||
-	# rsync -aqzL /home/$USER/.terminfo/. /root/.terminfo/
+	# [ "$LOGNAME" = "root" ] ||
+	# rsync -aqzL /home/$LOGNAME/.terminfo/. /root/.terminfo/
 	# Add TERM=screen-256color to tmux env
 
 	# infocmp -L1 linux > /mnt/linux.info
 	# max_colors#0x8 -> max_colors#0x100
 	# tic /mnt/linux.info
-	# [ "$USER" = "root" ] ||
-	# rsync -aqzL /home/$USER/.terminfo/. /root/.terminfo/
+	# [ "$LOGNAME" = "root" ] ||
+	# rsync -aqzL /home/$LOGNAME/.terminfo/. /root/.terminfo/
 	# Remove TERM=screen-256color from tmux env
 
 	# Frequency of cursor blinking
@@ -378,20 +384,32 @@ reset_cursor_shape() {
 # [ -z "${TERM##*tmux*}" ] ||
 reset_cursor_shape
 
-[ -z "${SHELL_DEBUG+x}" ] || echo "In $HOME/.ashrc"
+[ -z "${SHELL_DEBUG+x}" ] || print "inside" "$HOME/.ashrc"
+
+# shellcheck source=/usr/include/kiss/prompt
+type "prompt" > /dev/null 2>&1 || {
+	. "${MNGR_ROOT-}/usr/include/kiss/prompt"
+
+	script_name="$(script_name)"
+	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+	# unset script_name
+}
 
 # tabstop
 tabs -4
 LESS="-x4" && export LESS
 
-[ ! -d "${SHARE_PREFIX}/init" ] || {
-	[ ! -f "${SHARE_PREFIX}/init/env" ] ||
-		. ${SHARE_PREFIX}/init/env
+[ ! -f "$DOT_CONFIG/env" ] || {
+	. $DOT_CONFIG/env
 
-	[ -z "${IS_KISS:+x}" ] ||
-	[ ! -f "${SHARE_PREFIX}/init/kiss-env" ] ||
-		. ${SHARE_PREFIX}/init/kiss-env
+	script_name="$(script_name)"
+	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+	# unset script_name
 }
+
+# Moved to /etc/profile.d
+# [ -z "${IS_KISS:+x}" ] ||
+# [ ! -f "$DOT_CONFIG/etc/profile.d/kiss-env" ] || . $DOT_CONFIG/etc/profile.d/kiss-env
 
 
 [ -z "${IS_KISS+x}" ] || export DONT_USE_GREET=
@@ -399,62 +417,59 @@ LESS="-x4" && export LESS
 designate_tty=7
 
 # [ ! -z "${DONT_USE_GREET+x}" ] && designate_tty=7 || {
-[ ! -z "${DONT_USE_GREET+x}" ] ||
+[ ! -z "${DONT_USE_GREET+x}" ] &&
+	launcher=$(which swc-launch 2> /dev/null || :) ||
 	launcher="greeter" # designate_tty=1
 
 sock_sway=
 
-# sway_socket() was put into ${SHARE_PREFIX}/init/env
+# sway_socket() was put into $DOT_CONFIG/env
 # Otherwise you will get "sway_socket: not found" in sway-launch
 #
 # printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY"
 # printf '%s %s\n' '$DISPLAY' "$DISPLAY"
 
-# /dev/pts/? on $TERM == foot/alacritty
-# /dev/tty? on $TERM == linux
-# tty_nme might not a number on pts
-tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
-# export tty_num
-
 # Initialize wayland
 # [ "$XDG_SESSION_TYPE" = "wayland" ] ||
-[ ! -d "${SHARE_PREFIX}/init" ] ||
+[ ! -d "$DOT_CONFIG" ] ||
 # [ ! -z "${DISPLAY+x}" ] ||
 {
-	[ ! -z "${WAYLAND_DISPLAY+x}" ] &&
-	[ ! -z "${WAYLAND_ENV+x}" ]
+	# wl-info | grep WAYLAND | awk -F= -v OFS="=" '{gsub(/[[:blank:]]/, "", $NF); print $NF}'
+	[ ! -z "${WAYLAND_DISPLAY+x}" ] && [ ! -z "${WAYLAND_ENV+x}" ]
 } ||
-[ "$designate_tty" != "$tty_num" ] || {
+[ "$designate_tty" != "$TTY_NUM" ] ||
+{
 # sway can boot as root
 # [ "$UID" -eq "0" ] || { # [ "$(id -nu)" = "root" ] || {
 	# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
 	# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
 	# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
-	# XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in ${SHARE_PREFIX}/init/env
+	# XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in $DOT_CONFIG/env
 	# [ "$UID" -eq "0" ] || {
 	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
 	# [ -e "/tmp/wayland/.display" ] || touch "/tmp/wayland/.display"
-	[ -n "${WAYLAND_CONFIG_HOME:+x}" ] || {
-		WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
-		export WAYLAND_CONFIG_HOME
-	}
-	printf '%s %s\n' '$SHLVL' "$SHLVL" |
-		tee -a ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+	[ ! -z "${WAYLAND_CONFIG_HOME:+x}" ] ||
+		{ : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} && export WAYLAND_CONFIG_HOME; }
+	print '$SHLVL' "$SHLVL" | tee $WAYL_OUTPUT 2>&1
 	# }
 
 	# sway_socket
 	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] ||
 	#   cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(// delegate -- sway_socket "$launcher")"
+	sock_sway="$(sway_socket "$launcher")"
+
+	print '$sock_sway' "$sock_sway"
 
 	{
 		[ -z "${sock_sway:+x}" ] ||
 		[ ! -S "$sock_sway" ]
 	} &&
-	# ${SHARE_PREFIX}/init/velox-launch
-	# { . ${SHARE_PREFIX}/init/sway-launch; sock_sway=sway_socket "$launcher"; } ||
-	. ${SHARE_PREFIX}/init/sway-launch ||
+	# $DOT_CONFIG/velox-launch
+		# { . $DOT_CONFIG/sway-launch; sock_sway="$(sway_socket "$launcher")"; } ||
+	. $DOT_CONFIG/sway-launch ||
 	swaymsg -s "$sock_sway" reload
+
+	print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" 2>&1
 
 	[ -z "${sock_sway:+x}" ] ||
 	[ "$sock_sway" = "$SWAY_SOCK" ] ||
@@ -469,12 +484,10 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 #     [ "$UID" -ne "0" ]; then
 
 # [ "$UID" -eq "0" ] ||
-[ "$designate_tty" != "$tty_num" ] || {
+[ "$designate_tty" != "$TTY_NUM" ] || {
 	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
-	[ -n "${WAYLAND_CONFIG_HOME:+x}" ] || {
-		WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
-		export WAYLAND_CONFIG_HOME
-	}
+	[ ! -z "${WAYLAND_CONFIG_HOME:+x}" ] ||
+		{ : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} && export WAYLAND_CONFIG_HOME; }
 
 	# [ ! -z "${WAYLAND_DISPLAY+x}" ] || {
 	#   WAYLAND_DISPLAY="$(cat /tmp/wayland/.display 2> /dev/null)"
@@ -490,8 +503,7 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 	[ ! -z "${display_wayland:+x}" ] &&
 	[ "$display_wayland" = "$WAYLAND_DISPLAY" ] || {
 		WAYLAND_DISPLAY="$display_wayland"
-		printf '%s %s\n' '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" |
-		tee -a ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
+		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a $WAYL_OUTPUT 2>&1
 		export WAYLAND_DISPLAY
 		printf '%s\n' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
 		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
@@ -504,26 +516,26 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 
 	# Reading SWAY_SOCK from file
 	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] || cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(// delegate -- sway_socket "$launcher")"
+	sock_sway="$(sway_socket "$launcher")"
 	# Try again
 	# {
 	#   # [ -f "/tmp/wayland/.socket" ] &&
 	#   # [ -n "$(cat /tmp/wayland/.socket 2> /dev/null)" ] &&
 	#   [ ! -z "${sock_sway:+x}" ] && [ -S "$sock_sway" ]
 	# } || # sway_socket
-	#   # { . ${SHARE_PREFIX}/init/sway-launch; sock_sway=sway_socket "$launcher"; } || :
-	#   . ${SHARE_PREFIX}/init/sway-launch || :
+	#   # { . $DOT_CONFIG/sway-launch; sock_sway=sway_socket "$launcher"; } || :
+	#   . $DOT_CONFIG/sway-launch || :
 
 	[ -z "${sock_sway:+x}" ] ||
 	[ "$sock_sway" = "$SWAY_SOCK" ] ||
 		{ SWAY_SOCK="$sock_sway"; export SWAY_SOCK; }
 	# }
 	[ ! -z "${WAYLAND_ENV+x}" ] ||
-		[ ! -f "${WAYLAND_CONFIG_HOME}/env" ] || {
-		printf '%s %s\n' "${WAYLAND_CONFIG_HOME}/env" "sourced"
+		[ ! -f "$WAYLAND_CONFIG_HOME/env" ] || {
+		print "$WAYLAND_CONFIG_HOME/env" "sourced"
 			set -a
 			# shellcheck disable=SC1090
-			. "${WAYLAND_CONFIG_HOME}/env"
+			. "$WAYLAND_CONFIG_HOME/env"
 			set +a
 		}
 }
@@ -534,8 +546,8 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 # fi
 
 # [ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
-
-# [ ! -f "${SHARE_PREFIX}/toolchain/env" ] || . ${SHARE_PREFIX}/toolchain/env
+# Moved to $DOT_CONFIG/env
+# [ ! -f "$DOT_CONFIG/toolchain/env" ] || . $DOT_CONFIG/toolchain/env
 
 # Default wireless link might be not what you want
 # [ "$UID" -eq "0" ] ||
@@ -546,12 +558,12 @@ tty_num="$(tty | sed -e 's/.*tty\(.*\)/\1/')"
 #
 
 # tmux init
-export TINIT_HOME_DIR="${SHARE_PREFIX}/init/terminal"
-export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
+  export TINIT_HOME_DIR="$DOT_CONFIG/terminal"
+  export TMUX_PLUGIN_MANAGER_PATH=${TINIT_HOME_DIR}/tmux/plugins
 # export TMUX_DIR=$HOME/.tmux
-export TMUX_DIR=${SHARE_PREFIX}/init/terminal
+  export TMUX_DIR=$DOT_CONFIG/terminal
 
-: "${HOSTNAME="$( \
+: ${HOSTNAME="$( \
 [ ! -f "/etc/hostname" ] && {
 	[ ! -f "/etc/os-release" ] || {
 		awk -F = '$1 == "ID" {print $2}' < /etc/os-release | tr '[A-Z]' '[a-z]'
@@ -565,13 +577,19 @@ export TMUX_DIR=${SHARE_PREFIX}/init/terminal
 	exit 0
 } ||
 cat /etc/hostname
-)"}" && export HOSTNAME
+)"} && export HOSTNAME
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$UID"
-export TMUX_TMPDIR="${TMPDIR}-${HOSTNAME}"
+  export TMUX_TMPDIR="${TMPDIR}/${HOSTNAME}"
 # export TMUX_TMPDIR="${TMPDIR}"
 # If tmux boot operation failed, run: rm -rf $HOME/tmp/tmux-*
+# export VISUAL="vi" \
+#   EDITOR="vi" \
+#   TERM="linux" \
+#   COLORTERM="truecolor" \
+#   TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
+#   WAYLAND_DISPLAY="${WAYLAND_DISPLAY-}"
 _tmux() {
 	command rm -f "$HOME/tmux*.log"
 	[ -d "${TMUX_TMPDIR}" ] || command mkdir -p "${TMUX_TMPDIR}"
@@ -605,17 +623,22 @@ _tmux() {
 
 	# TERM == tmux version
 	# TERM="tmux-256color" \
-		# TINIT_HOME_DIR="$TINIT_HOME_DIR" \
-		# TMUX_DIR="$TMUX_DIR" \
-		# TMUX_TMPDIR="${TMUX_TMPDIR}" \
-	exec env \
+	# TINIT_HOME_DIR="$TINIT_HOME_DIR" \
+	# TMUX_DIR="$TMUX_DIR" \
+	# TMUX_TMPDIR="${TMUX_TMPDIR}" \
+	# Not set currently
+	# TMUX="$TMUX" \
+	# Not set currently
+	# TERM_PROGRAM="$TERM_PROGRAM" \
+	# TERM="screen-256color" \
+	exec \
+		env \
 		VISUAL="vi" \
+		EDITOR="vi" \
 		TERM="linux" \
 		COLORTERM="truecolor" \
 		TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
-		TMUX="$TMUX" \
-		TERM_PROGRAM="$TERM_PROGRAM" \
-		WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+		WAYLAND_DISPLAY="${WAYLAND_DISPLAY-}" \
 		\tmux -T UTF-8 -T 256 new -As . 2>&1 || :
 	#     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
 	# ENV=$HOME/.profile sh -$-l > /dev/tty
@@ -634,7 +657,7 @@ alias tmux='_tmux'
 
 # https://stackoverflow.com/questions/5687446/how-can-i-shortern-my-command-line-prompts-current-directory
 # : "${PWD_LENGTH:=13}" && export PWD_LENGTH
-// env_reset PWD_LENGTH 13
+env_reset PWD_LENGTH 13
 
 # TRIMMED='tmux source-file ${HOME}/.tmux.conf; tmux select-pane -T "#{pane_title}";
 # printf "%s" $PWD | sed -re "s|(~?/[^/]*/).*(.{$PWD_LENGTH})|\1...\2|"'
@@ -738,13 +761,17 @@ esac
 printf %s "$color"
 '
 export back_ground_user
-#
+
 # In GUI, their terminal settings will change the behavior
 # https://andidittrich.com/2019/10/busybox-fancy-cli-color-prompt-ps1.html
 # If not running interactively, don't do anything
-[ ! -z "${PS1+x}" ] || return
+case "$-" in *"i"*) ;;
+# [ -z "${-##*i*}" ]  || return
+*) return
+esac
+# [ ! -z "${PS1+x}" ] || return
 # set a fancy prompt (non-color, overwrite the one in /etc/profile)
-if [ "$UID" -eq "0" ]; then
+[ "$UID" -eq "0" ] &&
 	# root user
 	# export PS1='\n\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
 	# export PS1='\e[31m\e[1m\u@\h\e[0m \e[94m\w\n \e[31m\e[1m#\e[0m\e[0m\e[39m\e[49m '
@@ -785,10 +812,9 @@ if [ "$UID" -eq "0" ]; then
 	# export PS1='\[\033[1;101m\]#$(environment_prompt
 	# )\[\033[m\]\[\033[1;101m\]\u@${HOSTNAME}:\[\033[m\]\[\033[1;101m\]\w \[\033[m\]\n'
 
-	export PS1='\[$(eval "$back_ground_root")\]#$(eval "$environment_prompt"
-	)\[\033[m\]\[$(eval "$back_ground_root")\]\u@${HOSTNAME}:\[\033[m\]\[$(eval "$back_ground_root")\]\w \[\033[m\]\n'
+	export PS1='\[$(eval "$back_ground_root")\]$TTY_NUM$(eval "$environment_prompt"
+	)\[\033[m\]\[$(eval "$back_ground_root")\]\u@${HOSTNAME}:\[\033[m\]\[$(eval "$back_ground_root")\]\w \[\033[m\]\n' ||
 
-else
 	# non root
 	# export PS1='\n\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
 	# export PS1='\e[92m\e[1m\u@\h\e[0m \e[94m\w\n \e[92m\e[1m$\e[0m\e[0m\e[39m\e[49m '
@@ -819,12 +845,12 @@ else
 	# export PS1='\[\033[1;121m\]#$(environment_prompt
 	# )\[\033[m\]\[\033[1;121m\]\u@${HOSTNAME}:\[\033[m\]\[\033[1;121m\]\w \[\033[m\]\n'
 
-	export PS1='\[$(eval "$back_ground_user")\]#$(eval "$environment_prompt"
+	export PS1='\[$(eval "$back_ground_user")\]$TTY_NUM$(eval "$environment_prompt"
 	)\[\033[m\]\[$(eval "$back_ground_user")\]\u@${HOSTNAME}:\[\033[m\]\[$(eval "$back_ground_user")\]\w \[\033[m\]\n'
 
-fi
 
-parent_is_tmux() {
+is_child_of() {
+	local process_name="$1"
 	local result=1
 	local parent_id="$PPID"
 	while [ "$parent_id" -ne "1" ]
@@ -835,7 +861,7 @@ parent_is_tmux() {
 		# process_name="$(ps -efo pid,args | awk "\$1 == $parent_id {print}")"
 		process_name="$(ps ax -o pid,args | awk "\$1 == $parent_id {print}")"
 
-		[ ! -z "${process_name##*tmux*}" ] || { result=0; break; }
+		[ ! -z "${process_name##*$process_name*}" ] || { result=0; break; }
 		# parent_id=$(IFS=$'\n'; for item in $(ps ax -o pid,ppid | grep $parent_id); do
 		#     IFS=$' ' read -r _1 _2 < <(echo $item); [ "$_2" = "$parent_id" ] || echo $_2; done)
 		# Works both on void and kiss
@@ -844,23 +870,30 @@ parent_is_tmux() {
 	return $result
 }
 
+is_pts() {
+	case "$1" in *"pts"*) return 0;;
+		*) return 1
+	esac
+}
+
 # Function keys doesn't work when using tmux/screen as TERM
 # In tmux.conf
 # set-option -g default-command "env TERM=linux ${SHELL} -l"
-# echo "\$tty_num = $tty_num"
+# print '$TTY_NUM' "$TTY_NUM"
 # read -r
 
-[ ! -z "${-:+x}" ] && [ ! -z "${-##*i*}" ] ||
+# [ ! -z "${-:+x}" ] && [ ! -z "${-##*i*}" ] ||
 [ "$UID" -eq "0" ] ||
-[ -z "${tty_num:+x}" ] || [ "1" = "$tty_num" ] ||
-[ "${TERM_PROGRAM-}" = "tmux" ] || parent_is_tmux ||
+# { [ ! -z "${TTY_NUM:+x}" ] && [ "1" = "$TTY_NUM" ] && ! is_child_of "foot"; } ||
+{ [ ! -z "${TTY_NUM:+x}" ] && [ "1" = "$TTY_NUM" ] && ! is_pts "$TTY"; } ||
+[ "${TERM_PROGRAM-}" = "tmux" ] || is_child_of "tmux" ||
 is_chrooted ||
-# [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] ||
+# [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $DOT_CONFIG/.tmux_lock)" ] ||
 #   {
 #       {
 #           [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]
 #       } &&
-#           [ $tty_num = "1" ]
+#           [ $TTY_NUM = "1" ]
 #       } ||
 
 _tmux
@@ -913,14 +946,18 @@ _tmux
 
 # [ -d "/tmp/tmux" ] || mkdir -p "/tmp/tmux"
 # [ -e "/tmp/tmux/.lock" ] || touch "/tmp/tmux/.lock"
-# if [ ! -z "${TMUX+x}" ] && [ -z "$(cat $SHARE_PREFIX/.tmux_lock)" ]; then
-#     printf '%s' "${TMUX}" > $SHARE_PREFIX/.tmux_lock
-# elif [ -n "$(cat $SHARE_PREFIX/.tmux_lock)" ] && [ -z ${TMUX+x} ]; then
-#     export TMUX="$(cat $SHARE_PREFIX/.tmux_lock)"
+# if [ ! -z "${TMUX+x}" ] && [ -z "$(cat $DOT_CONFIG/.tmux_lock)" ]; then
+#     printf '%s' "${TMUX}" > $DOT_CONFIG/.tmux_lock
+# elif [ -n "$(cat $DOT_CONFIG/.tmux_lock)" ] && [ -z ${TMUX+x} ]; then
+#     export TMUX="$(cat $DOT_CONFIG/.tmux_lock)"
 # fi
 
 # [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
 #
+
+SCRIPT_NAME="$SCRIPT_SCOPE"
+SCRIPT_SCOPE="$script_scope"
+
 # set ts=4 sw=4 tw=0 noet :
 #
 #
@@ -929,3 +966,4 @@ _tmux
 #
 #
 #
+

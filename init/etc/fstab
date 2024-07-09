@@ -3,42 +3,36 @@
 
 # <file system> <dir> <type> <options> <dump> <pass>
 
-proc            /proc           proc        rw,nosuid,nodev,noexec,relatime 0 0
-run             /run            tmpfs       rw,nosuid,nodev,relatime,mode=755,inode64 0 0
+  proc      /proc           proc        rw,nosuid,nodev,noexec,relatime               0 0
+  run       /run            tmpfs       rw,nosuid,nodev,relatime,mode=755,inode64     0 0
 
-# tmpfs   /tmp        tmpfs   defaults,nosuid,nodev               0   0
-# tmpfs   /tmp        tmpfs   rw,nodev,nosuid,size=64G            0   0
-tmpfs           /tmp            tmpfs       rw,nosuid,nodev,relatime,size=67108864k,inode64 0 0
-devtmpfs        /dev            devtmpfs    rw,nosuid,relatime,size=32837964k,nr_inodes=8209491,mode=755,inode64 0 0
-devpts          /dev/pts        devpts      rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
-shm             /dev/shm        tmpfs       rw,nosuid,nodev,relatime,inode64 0 0
+# tmpfs     /tmp            tmpfs       defaults,nosuid,nodev                         0 0
+# tmpfs     /tmp            tmpfs       rw,nodev,nosuid,size=64G                      0 0
+  tmpfs     /tmp            tmpfs       rw,nosuid,nodev,relatime,size=67108864k,inode64 0 0
+  devtmpfs  /dev            devtmpfs    rw,nosuid,relatime,size=32837964k,nr_inodes=8209491,mode=755,inode64 0 0
+  devpts    /dev/pts        devpts      rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
+  shm       /dev/shm        tmpfs       rw,nosuid,nodev,relatime,inode64              0 0
 
 # https://www.linuxquestions.org/questions/slackware-14/how-come-i-have-efivarfs-mounted-as-sys-firmware-efi-vars-in-slackware-4175702231/page2.html
-# sysfs           /sys            sysfs       defaults    0 0
-sys             /sys            sysfs       rw,nosuid,nodev,noexec,relatime 0 0
+# sysfs     /sys            sysfs       defaults    0 0
+  sys       /sys            sysfs       rw,nosuid,nodev,noexec,relatime               0 0
 
 # efivarfs - Unified Extensible Firmware Interface, variables, filesystem (void sysfs)
-# efivarfs        /sys/firmware/efi/efivars   efivarfs    ro          0   0
-# efivarfs        /sys/firmware/efi/efivars   efivarfs    rw,nosuid,nodev,noexec  0 0
-efivarfs        /sys/firmware/efi/efivars   efivarfs    rw,nosuid,nodev,noexec,relatime 0 0
+# efivarfs  /sys/firmware/efi/efivars   efivarfs    ro                                0 0
+# efivarfs  /sys/firmware/efi/efivars   efivarfs    rw,nosuid,nodev,noexec            0 0
+  efivarfs  /sys/firmware/efi/efivars   efivarfs    rw,nosuid,nodev,noexec,relatime   0 0
 
 # /dev/nvme1n1p3
-UUID=ff27c9e9-abc8-4b6b-a85c-1101404512c6   /           ext4        rw,relatime 0 1
-
-# /dev/nvme1n1p4 LABEL=HOME
-UUID=372d3b8e-ec22-4375-8333-c3c2727598d7   /share      ext4        rw,relatime 0 2
-
-# /dev/nvme0n1p6 LABEL=OPT
-UUID=743f2297-b206-47b4-a96d-28d0820c32b1   /opt        ext4        rw,relatime 0 2
+  UUID=ff27c9e9-abc8-4b6b-a85c-1101404512c6   /           ext4        rw,relatime     0 1
 
 # /dev/nvme1n1p2
-UUID=9d3fc198-e130-493e-99e5-8198cbfbf1ca   /boot       ext4        rw,relatime 0 2
+  UUID=9d3fc198-e130-493e-99e5-8198cbfbf1ca   /boot       ext4        rw,relatime     0 2
 
 # /dev/nvme1n1p1 LABEL=BOOTEFI
 # FAT-fs (nvme1n1p1): IO charset iso8859-1 not found
 # UUID=8621-90C8  /boot/efi       vfat        rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro 0 2
 # UUID=8621-90C8  /boot/efi       vfat        rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0 2
-UUID=8621-90C8  /boot/efi       vfat        rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro 0 2
+  UUID=8621-90C8  /boot/efi       vfat        rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=utf8,shortname=mixed,errors=remount-ro 0 2
 
 # Framework for providing access to resource outside of the sandbox
 # portal
@@ -48,22 +42,32 @@ UUID=8621-90C8  /boot/efi       vfat        rw,relatime,fmask=0022,dmask=0022,co
 # gvfsd-fuse
 # gvfsd-fuse            /run/user/1000/gvfs fuse.gvfsd-fuse rw,nosuid,nodev,user_id=1000,group_id=100   0 0
 
-# /share/eli/working
-/share/eli/working                          /working    none        rw,bind     0 0
+# /dev/nvme1n1p4 LABEL=HOME
+  UUID=372d3b8e-ec22-4375-8333-c3c2727598d7   /share      ext4        rw,relatime     0 2
 
-# /share/eli/build
-/share/eli/build                            /build      none        rw,bind     0 0
+# /dev/nvme0n1p6 LABEL=OPT
+  UUID=743f2297-b206-47b4-a96d-28d0820c32b1   /opt        ext4        rw,relatime     0 2
+
+# /share/working
+  /share/working                              /working    none        rw,bind         0 0
+
+# /share/build
+  /share/build                                /build      none        rw,bind         0 0
 
 # /dev/nvme1n1p5 LABEL=MNT
-UUID=c96be9ad-1403-496e-9a5a-89d4caf7cf9d   /mnt        ext4        rw,relatime 0 2
+# UUID=c96be9ad-1403-496e-9a5a-89d4caf7cf9d   /mnt        ext4        rw,relatime     0 2
+  UUID=b2a78449-0991-42fe-b555-876d243c3340   /mnt        ext4        rw,relatime     0 2
 
 # /dev/nvme0n1p4 LABEL=HOME
-UUID=77806114-e094-4030-b2e0-6cba2a73e0c7   /home       ext4        rw,relatime 0 2
+  UUID=77806114-e094-4030-b2e0-6cba2a73e0c7   /home       ext4        rw,relatime     0 2
 
 # /dev/nvme1n1p7:  TYPE="swap"
-UUID=fef4c4c2-f0dc-4511-92c2-2c32d45494d1   none        swap        defaults,pri=-2 0 0
+  UUID=fef4c4c2-f0dc-4511-92c2-2c32d45494d1   none        swap        defaults,pri=-2 0 0
 
 # /dev/cdrom      /media/cdrom    iso9660 noauto,ro 0 0
 # /dev/fd0        /media/floppy   vfat    noauto  0 0
 # /dev/usbdisk    /media/usb      vfat    noauto  0 0
+
+# vim:  set ts=4 sw=4 tw=0 noet :
+# nvim: set ts=4 sw=4 tw=0 noet :
 

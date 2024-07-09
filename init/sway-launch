@@ -1,178 +1,136 @@
 #! /bin/sh
 set -a
 
-printf '%s %s\n' '$tty_num' "$tty_num [enter sway-launch]"
+script_scope=${SCRIPT_SCOPE:-${SCRIPT_NAME:-"$0"}}
+SCRIPT_SCOPE="${SCRIPT_NAME:-"$0"}"
 
-SCRIPT_NAME="sway-launch" && export SCRIPT_NAME
+type "script_name" > /dev/null 2>&1 ||
+	# shellcheck source=/usr/include/kiss/name
+	. "${MNGR_ROOT-}/usr/include/kiss/name"
+SCRIPT_NAME="$(script_name)"
 
-[ ! -z "$(type "env_reset" > /dev/null && type "env_reset")" ] &&
-[ ! -z "${SHARE_PREFIX:+x}" ] ||
-{
-	[ -f "/mnt/init/include/route" ] &&
-	. /mnt/init/include/route
-} || {
-	printf '%s %s\n' '$env_reset' "'$env_reset' could not get defined"
-	exit 0
-}
+print '$TTY_NUM' "$TTY_NUM [enter sway-launch]" >> "$WAYL_OUTPUT"
+
+type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
+	# shellcheck source=/usr/include/kiss/func
+	. "${MNGR_ROOT-}/usr/include/kiss/func"
+
+	script_name="$(script_name)"
+	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+	# unset script_name
+
+env_reset DOT_CONFIG "$(dot_config)"
 
 # alias /='eval'
 # # bash does not recognize //
 # alias //='lineno="$LINENO"'
 #
-# SCRIPT_NAME="sway-launch" && export SCRIPT_NAME
-#
-# # share folder initialization
-# [ ! -z "${SHARE_PREFIX:+x}" ] || {
-#   [ -d "/mnt/init" ] &&
-#   { SHARE_PREFIX="/mnt" && export SHARE_PREFIX; } || {
-#       [ -d "/opt/init" ] &&
-#       { SHARE_PREFIX="/opt" && export SHARE_PREFIX; } ||
-#       printf '%s %s\n' '$SHARE_PREFIX' "not found"
-#   }
-# }
-#
-# _functions="/usr/include/kiss/functions"
-# [ -f "$_functions" ] ||
-# _functions="$SHARE_PREFIX/init/include/functions"
-# [ ! -f "$_functions" ] && {
-#   printf '%s %s\n' '$_functions' "'$_functions' does not exist"
-#   exit 0
-# } || {
-#   env_reset_type="$(type "env_reset" > /dev/null && type "env_reset")" || :
-#   [ ! -z "${env_reset_type:+x}" ] ||
-#       . "$_functions"
-# }
-
-# delegate() {
-#   [ "$1" != "--" ] || shift 1
-#   local value=
-#   # "$@" won't lose any empty arguments
-#   value="$("$@")" || { printf '\n'; exit 1; }
-#   # "$@" | tail -n 1
-#   # "$@" | awk 'END{print}'
-#
-#   # Works
-#   # "$@" | awk 'BEGIN { RS = '\n' } END { print }'
-#   # printf '%s\n' "$value" | awk 'BEGIN { RS = '\n' } END { print }'
-#   printf '%s\n' "$(awk 'BEGIN { RS = "\n" } END { print; print "\n" }' << EOF || :
-# $value
-# EOF
-# )"
-# }
 
 # https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
-[ -n "${WAYLAND_CONFIG_HOME:+x}" ] ||
-WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
-export WAYLAND_CONFIG_HOME
-[ -d "${WAYLAND_CONFIG_HOME}" ] || mkdir -p "$WAYLAND_CONFIG_HOME"
+[ ! -z "${WAYLAND_CONFIG_HOME:+x}" ] ||
+	{ : ${WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} && export WAYLAND_CONFIG_HOME; }
+[ -d "$WAYLAND_CONFIG_HOME" ] || mkdir -p "$WAYLAND_CONFIG_HOME"
 
-# "${SHARE_PREFIX}/init/share" has the file structure
+# "$DOT_CONFIG/share" has the file structure
 # sway specific environment
-[ ! -f "${WAYLAND_CONFIG_HOME}/env" ] || {
-	printf '%s %s\n' "${WAYLAND_CONFIG_HOME}/env" "sourced"
+[ ! -f "$WAYLAND_CONFIG_HOME/env" ] || {
+	print "$WAYLAND_CONFIG_HOME/env" "sourced" >> "$WAYL_OUTPUT"
 	set -a
 	# shellcheck disable=SC1090
-	. "${WAYLAND_CONFIG_HOME}/env"
+	. "$WAYLAND_CONFIG_HOME/env"
 	set +a
 }
-
-insure_groups() {
-	has_group() { $(grep $1 /etc/group | awk -F : '{print $1}' | { while read -r line; do [ "$line" != "$1" ] || { return 0; }; done; return 1; }); return $?; }
-
-	command -v  "/usr/bin/adduser" > /dev/null 2>&1 && {
-		# doas addgroup -S dbus
-		has_group $1 || doas adduser --user-group $1
-		# doas adduser -S -H -G dbus dbus
-		[ ! -z "$(id -u "$1" 2> /dev/null)" ] ||
-		doas adduser --system --no-create-home -g $1 $1
-		[ ! -z "$(groups $LOGNAME | grep $1)" ] || doas adduser -G $1 $LOGNAME
-	} || {
-		command -v  "/usr/bin/useradd" > /dev/null 2>&1 && {
-			has_group $1 || doas groupadd -r $1
-			# has_group dbus || doas groupadd -r dbus
-			# has_group _seatd || doas groupadd -r _seatd
-			# has_group _greeter || doas groupadd -r _greeter
-			[ ! -z "$(id -u "$1" 2> /dev/null)" ] ||
-			doas useradd -r -M -g $1 $1
-			# [ ! -z "$(id -u dbus 2> /dev/null)" ] ||
-			# doas useradd -r -M -g dbus dbus
-			# [ ! -z "$(id -u _seatd 2> /dev/null)" ] ||
-			# doas useradd -r -M -g _seatd _seatd
-			# [ ! -z "$(id -u _greeter 2> /dev/null)" ] ||
-			# doas useradd -r -M -g _greeter _greeter
-			#
-			# usermod -aG $1 "$LOGNAME"
-			# usermod -aG _seatd   "$LOGNAME"
-			# usermod -aG dbus     "$LOGNAME"
-			# usermod -aG _greeter "$LOGNAME"
-			[ ! -z "$(groups $LOGNAME | grep $1)" ] || doas useradd -G $1 $LOGNAME
-			# [ ! -z "$(groups $LOGNAME | grep dbus)" ] || doas useradd -G dbus $LOGNAME
-			# [ ! -z "$(groups $LOGNAME | grep _greeter)" ] || doas useradd -G _greeter $LOGNAME
-			# [ ! -z "$(groups $LOGNAME | grep _seatd)" ] || doas useradd -G _seatd $LOGNAME
-		}
-	}
-}
+	print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" 2>&1
 
 # [ ! -z "${sock_sway+x}" ] ||
 # sock_sway=
 
 [ -z "${DONT_USE_GREET+x}" ] && {
-	[ ! -z "${launcher+x}" ] ||
-	launcher="greeter"
+	[ ! -z "${launcher+x}" ] || launcher="greeter"
 	insure_groups "dbus"
 	insure_groups "_seatd"
 	# [ ! -z "${IS_KISS+x}" ] ||
 	insure_groups "_greeter"
 } || {
 	# Reference implementation:
-	# /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-	# exec /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-
-	# swc-launch is used in preference to dbus
-	launcher=$(which swc-launch 2> /dev/null || :)
-	printf '%s %s\n' '$launcher' "$launcher [$LINENO : sway-launch]"
-	{ [ ! -z "${launcher:+x}" ] ||
-	command -v "$launcher" > /dev/null 2>&1; } && {
-		# printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
-		# exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
-		eval "nohup \"$launcher\" -t /dev/tty7 -- /usr/bin/sway -d \
-			> ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &"
-			# > ${WAYLAND_CONFIG_HOME}/.autolauncher.log && sway_socket "$launcher" 2>&1 &
-			sock_sway="$(// delegate -- sway_socket "$launcher")"
-	} || {
-		launcher=$(which dbus-run-session 2> /dev/null || :)
-		printf '%s %s\n' '$launcher' "$launcher [$LINENO : sway-launch]"
+	/usr/bin/sway -d > $WAYL_OUTPUT 2>&1
+	# exec /usr/bin/sway -d > $WAYL_OUTPUT 2>&1
+	sock_sway="$(sway_socket "$launcher")"
+	[ ! -z "${sock_sway:+x}" ] || {
+		launcher=$(which sway 2> /dev/null || :)
+		print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
 		[ -z "${launcher:+x}" ] ||
-		command -v  "$launcher" > /dev/null 2>&1 && {
-			# https://github.com/microsoft/WSL/issues/7915
-			# doas killall dbus-daemon &&
-			#
-			# https://docs.voidlinux.org/config/graphical-session/graphics-drivers/intel.html
-			# https://www.reddit.com/r/voidlinux/comments/mc24te/starting_sway_problem/
-			# dbus-elogind/elogind/pam_rundir/mesa-dri
-			# [ ! -z "$(id -u dbus 2> /dev/null)" ] || {
-			insure_groups "dbus"
-			insure_groups "_seatd"
-			# }
-			doas -u dbus dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS \
-				--nofork --nopidfile --syslog-only &&
-			# dbus-launch --sh-syntax --exit-with-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1
-			# exec will not give sock_sway opportunities to run
-			# exec  "$launcher" /usr/bin/sway -d \
-			eval "nohup \"$launcher\" /usr/bin/sway -d |
-				tee ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &"
-				# > ${WAYLAND_CONFIG_HOME}/.autolauncher.log && sway_socket "$launcher" 2>&1 &
-			# nohup dbus-run-session /usr/bin/sway -d > ${WAYLAND_CONFIG_HOME}/.autolauncher.log 2>&1 &
-			sock_sway="$(// delegate -- sway_socket "$launcher")"
+		command -v "$launcher" > /dev/null 2>&1 && {
+			export launcher
+			nohup "$launcher" -d \
+				> $WAYL_OUTPUT 2>&1 & pid=$!
+			wait $pid
+			sock_sway="$(sway_socket "$launcher")"
 		}
 	}
+
+	[ ! -z "${sock_sway:+x}" ] || {
+		# swc-launch is used in preference to dbus
+		launcher=$(which swc-launch 2> /dev/null || :)
+		print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
+		{ [ ! -z "${launcher:+x}" ] ||
+		command -v "$launcher" > /dev/null 2>&1; } && {
+			export launcher
+			# printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
+			# exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > $WAYL_OUTPUT 2>&1 &
+			# / "nohup \"$launcher\" -t /dev/tty7 -- /usr/bin/sway -d \
+			# 	> $WAYL_OUTPUT 2>&1 &"
+			nohup "$launcher" -t /dev/tty7 -- /usr/bin/sway -d \
+				> $WAYL_OUTPUT 2>&1 & pid=$!
+			wait $pid
+			# > $WAYL_OUTPUT && sway_socket "$launcher" 2>&1 &
+			sock_sway="$(sway_socket "$launcher")"
+		}
+	}
+
+	# [ ! -z "${sock_sway:+x}" ] || {
+	# 	launcher=$(which dbus-run-session 2> /dev/null || :)
+	# 	print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
+	# 	[ -z "${launcher:+x}" ] ||
+	# 	command -v "$launcher" > /dev/null 2>&1 && {
+	# 		export launcher
+	# 		# https://github.com/microsoft/WSL/issues/7915
+	# 		# doas killall dbus-daemon &&
+	# 		#
+	# 		# https://docs.voidlinux.org/config/graphical-session/graphics-drivers/intel.html
+	# 		# https://www.reddit.com/r/voidlinux/comments/mc24te/starting_sway_problem/
+	# 		# dbus-elogind/elogind/pam_rundir/mesa-dri
+	# 		# [ ! -z "$(id -u dbus 2> /dev/null)" ] || {
+	# 		insure_groups "dbus"
+	# 		insure_groups "_seatd"
+	# 		[ "$(\ls -dl "$XDG_RUNTIME_DIR" | awk '{print $3}')" = "dbus" ] ||
+	# 			doas chown -R dbus:dbus "${XDG_RUNTIME_DIR}"
+	# 		# }
+	# 		doas -u dbus dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS \
+	# 			--nofork --nopidfile --syslog-only &&
+	# 		# dbus-launch --sh-syntax --exit-with-session /usr/bin/sway -d > $WAYL_OUTPUT 2>&1
+	# 		# exec will not give sock_sway opportunities to run
+	# 		# exec  "$launcher" /usr/bin/sway -d \
+	# 		# / "nohup \"$launcher\" /usr/bin/sway -d |
+	# 		# 	tee $WAYL_OUTPUT 2>&1 &"
+	# 		nohup "$launcher" /usr/bin/sway -d \
+	# 			> $WAYL_OUTPUT 2>&1 & pid=$!
+	# 		wait $pid
+	# 			# > $WAYL_OUTPUT && sway_socket "$launcher" 2>&1 &
+	# 		# nohup dbus-run-session /usr/bin/sway -d > $WAYL_OUTPUT 2>&1 &
+	# 		sock_sway="$(sway_socket "$launcher")"
+	# 	}
+	# }
 }
 
 # [ -n "${sock_sway:+x}" ] || nohup river &
 
 [ -z "${WAYLAND_DISPLAY+x}" ] ||
 [ ! -z "${sock_sway:+x}" ] ||
-	sock_sway="$(// delegate -- sway_socket "$launcher")"
+	sock_sway="$(sway_socket "$launcher")"
+
+SCRIPT_NAME="$SCRIPT_SCOPE"
+SCRIPT_SCOPE="$script_scope"
 
 
 

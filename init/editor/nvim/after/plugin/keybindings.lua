@@ -104,8 +104,8 @@ vim.cmd([[
 -- vim.cmd([[
 -- let key = maparg('*', 'n', v:false)
 -- if key != ""
--- 	unmap *
--- 	endif
+--  unmap *
+--  endif
 -- ]])
 -- map("n", "*", "*<c-o>")
 --
@@ -131,8 +131,8 @@ map("n", "<c-n>", ":%s///gIc<left><left><left><left>")
 --  vim.cmd("undo")
 -- end, { remap = true }))
 
--- map("n", "<c-u>",        "<Undo>",                 { unique = true, noremap = true })
-map("n", "<c-u>", "<Undo>", { unique = true, noremap = true })
+-- map("n", "<c-u>", "<Undo>", { unique = true, noremap = true })
+   map("n", "<c-u>", "<Undo>", { unique = true, noremap = true })
 -- map("n", "<c-k>",        ":wincmd k<cr>")
 -- map("n", "<c-j>",        ":wincmd j<cr>")
 -- map("n", "<c-h>",        ":wincmd h<cr>")
@@ -144,8 +144,8 @@ map("n", "<c-u>", "<Undo>", { unique = true, noremap = true })
 -- map("n", "<A-Up>",       ":exe 'resize ' . (winheight(0) + 5)<cr>")
 -- map("n", "<A-Down>",     ":exe 'resize ' . (winheight(0) - 5)<cr>")
 
-map("n", "<A-h>", ":exe 'vertical resize ' . (winwidth(0) - 10)<cr>")
-map("n", "<A-l>", ":exe 'vertical resize ' . (winwidth(0) + 10)<cr>")
+map("n", "<A-h>", ":exe 'vertical resize ' . (winwidth(0) - 20)<cr>")
+map("n", "<A-l>", ":exe 'vertical resize ' . (winwidth(0) + 20)<cr>")
 map("n", "<A-j>", ":exe 'resize ' . (winheight(0) - 5)<cr>")
 map("n", "<A-k>", ":exe 'resize ' . (winheight(0) + 5)<cr>")
 
@@ -179,11 +179,16 @@ map("n", "gb", ":ls<cr>:b<space>")
 --
 map("n", "<leader>/", ":nohlsearch | diffupdate<CR>", { silent = true })
 -- They are the same
--- map("n", "<C-[>",        ":nohlsearch | diffupdate<cr>",        { silent = true })
+-- map("n", "<C-[>",        ":nohlsearch | diffupdate<cr>",     { silent = true })
 -- map("n", "<esc>",        ":nohlsearch | diffupdate<cr>",     { silent = true })
 --
-map("n", "<F2>", ":TagbarToggle<cr>")
--- map("n", "<F3>",         ":ls<cr>:b<space>")
+--  map("n", "<F2>", ":TagbarToggle<cr>")
+--  [With ! cursor stays in current window](https://github.com/stevearc/aerial.nvim/issues/364)
+--  map("n", "<c-a>", "<cmd>AerialToggle!<cr>")
+	map("n", "<leader>o", "<cmd>AerialToggle<cr>")
+--  map("n", "<leader>o", ":TagbarToggle<cr>")
+--  vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
+--  map("n", "<F3>",         ":ls<cr>:b<space>")
 
 map("n", "<Leader>d", ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q", ":Bdelete<CR>", { silent = true })
@@ -193,12 +198,29 @@ map("n", "x", "\"_x")
 map("n", "X", "\"_x")
 
 -- Prevent selecting and pasting from overwriting what you originally copied.
-map("x", "p", "pgvy")
-
+-- "p" became invalid might bicause of tmux default-command sesstings
+-- map("x", "p", "pgvy")
+-- map("x", "p", "pgvy",         { noremap = true })
+-- map("x", "p", "P",            { noremap = true })
+--
+vim.cmd([[
+" https://vi.stackexchange.com/questions/25259/clipboard-is-reset-after-first-paste-in-visual-mode/25260#25260
+" now it is possible to paste many times over selected text
+  xnoremap <expr> p '""pgv"'.v:register.'y`>'
+  xnoremap <expr> P '""Pgv"'.v:register.'y`>'
+  nnoremap <leader>p m`o<ESC>p``
+  nnoremap <leader>P m`O<ESC>p``
+" xnoremap p m`o<ESC>p``
+" xnoremap P m`O<ESC>p``
+" https://stackoverflow.com/questions/1346737/how-to-paste-in-a-new-line-with-vim
+" This implementation won't insert copies
+" nmap p :pu<CR>
+" nmap P :pu!<CR>
+]])
 -- Keep cursor at the bottom of the visual selection after you yank it.
-map("v", "y", "ygv<Esc>")
-map("n", "xx", "dd")
-map("n", "X", "D")
+   map("v", "y", "ygv<Esc>")
+   map("n", "xx", "dd")
+   map("n", "X", "D")
 
 map("t", "<Esc>", "<C-\\><C-n>")
 map("t", "<A-h>", "<C-\\><C-N><C-w>h")
@@ -249,7 +271,30 @@ map("n", "ga",      "<Plug>(EasyAlign)", { noremap = true })
 
 -- https://superuser.com/questions/41378/how-to-search-for-selected-text-in-vim
 vim.cmd(
-	[[vnoremap // :<c-u>let temp_variable=@"<CR>gvy:<c-u>let @/='\V<C-R>=escape(@",'/\')<CR>'<CR>:let @"=temp_variable<CR>:<c-u>set hlsearch<CR>]])
+	[[
+	" vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
+	" E488: Trailing characters
+	" vnoremap // :<c-u>let temp_variable=@"<CR>gvy:<c-u>let @/='\V<C-R>=escape(@",'/\')<CR>'<CR>:let @"=temp_variable<CR>:<c-u>set hlsearch<CR>
+	" Works for multiple lines
+	set incsearch
+	set hlsearch
+	" set ignorecuase
+	function s:get_visual_selection()
+		let raw_search = @"
+		let @/=substitute(escape(raw_search, '\/.*$^~[]'), "\n", '\\n', "g")
+	endfunction
+	xnoremap // ""y:call <sid>get_visual_selection()<bar>:set hls<cr>
+	if has('nvim')
+		set inccommand=nosplit
+		xnoremap /s ""y:call <sid>get_visual_selection()<cr><bar>:%s/
+	else
+		xnoremap /s ""y:call <sid>get_visual_selection()<cr><bar>:%s//
+	endif
+	]])
+
+	-- Works for single line
+	-- vim.keymap.set('v', '//', "\"fy/\\V<C-R>f<CR>" )
+
 
 --
 -- Won't work correctly
@@ -320,70 +365,70 @@ vim.api.nvim_create_autocmd('LspAttach', {
 		map("i", "<C-k>", vim.lsp.buf.signature_help, opts)
 		map("n", "<leader>r", vim.lsp.buf.rename, opts)
 
--- 		local bufnr = args.buf
--- 		-- local bufnr = vim.fn.winbufnr(0)
--- 		-- local client = args.client
--- 		-- local client = vim.lsp.buf_get_clients()
+--      local bufnr = args.buf
+--      -- local bufnr = vim.fn.winbufnr(0)
+--      -- local client = args.client
+--      -- local client = vim.lsp.buf_get_clients()
 --         local client = vim.lsp.get_client_by_id(args.data.client_id)
--- 		-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
--- 		local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
--- 
--- 		buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
--- 
--- 		local opts = { buffer = bufnr }
--- 		vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
--- 		-- vim.keymap.set('n',  '<leader>d',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
--- 		vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
--- 		vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
--- 		vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
--- 		vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
--- 		-- vim.keymap.set('n',  '<leader>r',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
--- 		vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
--- 		vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
--- 		vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
--- 		vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
--- 
--- 		vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
--- 
--- 		vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
--- 		vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
--- 		vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
--- 
--- 		-- Set some keybinds conditional on server capabilities
--- 		-- :lua =vim.lsp.get_active_clients()[1].server_capabilities
--- 		-- if client.resolved_capabilities.document_formatting then
--- 		if client.server_capabilities.documentFormattingProvider then
--- 			-- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
--- 			-- elseif client.resolved_capabilities.document_range_formatting then
--- 		elseif client.server_capabilities.documentRangeFormattingProvider then
--- 			-- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
--- 		end
--- 
--- 		-- Set autocommands conditional on server_capabilities
--- 		-- if client.resolved_capabilities.document_highlight then
--- 		if client.server_capabilities.documentHighlightProvider then
--- 			vim.api.nvim_exec([[
+--      -- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+--      local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+--
+--      buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+--
+--      local opts = { buffer = bufnr }
+--      vim.keymap.set('n',  'K',    '<cmd>lua vim.lsp.buf.hover()<cr>',           opts)
+--      -- vim.keymap.set('n',  '<leader>d',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+--      vim.keymap.set('n',  'gd',   '<cmd>lua vim.lsp.buf.definition()<cr>',      opts)
+--      vim.keymap.set('n',  'gD',   '<cmd>lua vim.lsp.buf.declaration()<cr>',     opts)
+--      vim.keymap.set('n',  'gi',   '<cmd>lua vim.lsp.buf.implementation()<cr>',  opts)
+--      vim.keymap.set('n',  'go',   '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+--      -- vim.keymap.set('n',  '<leader>r',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+--      vim.keymap.set('n',  'gr',   '<cmd>lua vim.lsp.buf.references()<cr>',      opts)
+--      vim.keymap.set('n',  'gs',   '<cmd>lua vim.lsp.buf.signature_help()<cr>',  opts)
+--      vim.keymap.set('n',  '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>',          opts)
+--      vim.keymap.set('n',  '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>',     opts)
+--
+--      vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+--
+--      vim.keymap.set('n',  'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+--      vim.keymap.set('n',  '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>',  opts)
+--      vim.keymap.set('n',  ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>',  opts)
+--
+--      -- Set some keybinds conditional on server capabilities
+--      -- :lua =vim.lsp.get_active_clients()[1].server_capabilities
+--      -- if client.resolved_capabilities.document_formatting then
+--      if client.server_capabilities.documentFormattingProvider then
+--          -- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+--          -- elseif client.resolved_capabilities.document_range_formatting then
+--      elseif client.server_capabilities.documentRangeFormattingProvider then
+--          -- buf_set_keymap("n", "<leader>f", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+--      end
+--
+--      -- Set autocommands conditional on server_capabilities
+--      -- if client.resolved_capabilities.document_highlight then
+--      if client.server_capabilities.documentHighlightProvider then
+--          vim.api.nvim_exec([[
 -- augroup lsp_document_highlight
--- 	autocmd! * <buffer>
--- 	autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
--- 	autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+--  autocmd! * <buffer>
+--  autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+--  autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
 -- augroup END
 -- ]], false)
--- 		end
--- 
--- 		local caps = client.server_capabilities
--- 		if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
--- 			local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
--- 			vim.api.nvim_create_autocmd("TextChanged", {
--- 				group = augroup,
--- 				buffer = bufnr,
--- 				callback = function()
--- 					vim.lsp.buf.semantic_tokens_full()
--- 				end,
--- 			})
--- 			-- fire it first time on load as well
--- 			-- vim.lsp.buf.semantic_tokens_full()
--- 		end
+--      end
+--
+--      local caps = client.server_capabilities
+--      if caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+--          local augroup = vim.api.nvim_create_augroup("SemanticTokens", {})
+--          vim.api.nvim_create_autocmd("TextChanged", {
+--              group = augroup,
+--              buffer = bufnr,
+--              callback = function()
+--                  vim.lsp.buf.semantic_tokens_full()
+--              end,
+--          })
+--          -- fire it first time on load as well
+--          -- vim.lsp.buf.semantic_tokens_full()
+--      end
 
 	end,
 })
@@ -405,22 +450,91 @@ vim.keymap.set("n", "<leader>ua", "<cmd>lua vim.g.cmptoggle = not vim.g.cmptoggl
 vim.cmd([[
 " https://github.com/shyun3/nvimrc/blob/98813267db761db51f59ecfccfed463cb3960f55/init.vim
 function! s:CheckHighlight(lineNum, colNum)
-    let mode = "name"
+	let mode = "name"
 
-    " Highest highlighting group: name of syntax keyword, match or region
-    let hi = synIDattr(synID(a:lineNum, a:colNum, 1), mode)
+	" Highest highlighting group: name of syntax keyword, match or region
+	let hi = synIDattr(synID(a:lineNum, a:colNum, 1), mode)
 
-    " For transparent groups, the group it's in
-    let trans = synIDattr(synID(a:lineNum, a:colNum, 0), mode)
+	" For transparent groups, the group it's in
+	let trans = synIDattr(synID(a:lineNum, a:colNum, 0), mode)
 
-    " Lowest group: basic highlighting spec such as a default highlighting group
-    let lo = synIDattr(synIDtrans(synID(a:lineNum, a:colNum, 1)), mode)
+	" Lowest group: basic highlighting spec such as a default highlighting group
+	let lo = synIDattr(synIDtrans(synID(a:lineNum, a:colNum, 1)), mode)
 
-    echo 'hi<' . hi . '> ' . 'trans<' . trans . '> ' . 'lo<' . lo . '> '
-    CocCommand semanticTokens.inspect
+	echo 'hi<' . hi . '> ' . 'trans<' . trans . '> ' . 'lo<' . lo . '> '
+	CocCommand semanticTokens.inspect
 endfunction
 
 command! CheckHighlightUnderCursor call <SID>CheckHighlight(line('.'), col('.'))
+
+" https://gist.github.com/MaienM/1258015
+inoremap <silent> = =<Esc>:call <SID>ealign()<CR>
+" https://stackoverflow.com/questions/10572996/passing-command-range-to-a-function
+" command! -range TL '<,'>:call <SID>ealign()<CR>
+
+function! s:ealign()
+	let p = '^.*=\s.*$'
+	if exists(':Tabularize') && getline('.') =~# '^.*=' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+		let column   = strlen(substitute(getline('.')[0:col('.')],'[^=]','','g'))
+		let position = strlen(matchstr(getline('.')[0:col('.')],'.*=\s*\zs.*'))
+		Tabularize/=/r1
+		normal! 0
+		call search(repeat('[^=]*=',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+	endif
+
+endfunction
+
+" https://stackoverflow.com/questions/8964953/align-text-on-an-equals-sign-in-vim
+inoremap <silent> :   :<Esc>:call <SID>align(':')<CR>a
+inoremap <silent> =   =<Esc>:call <SID>align('=')<CR>a
+command! -range TL '<,'>:call <SID>align('=')<CR>
+
+function! s:align(aa)
+  let p = '^.*\s'.a:aa.'\s.*$'
+  if exists(':Tabularize') && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+	let column = strlen(substitute(getline('.')[0:col('.')],'[^'.a:aa.']','','g'))
+	let position = strlen(matchstr(getline('.')[0:col('.')],'.*'.a:aa.':\s*\zs.*'))
+	exec 'Tabularize/'.a:aa.'/l1'
+	normal! 0
+	call search(repeat('[^'.a:aa.']*'.a:aa,column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+  endif
+endfunction
+
+" "roxma/vim-tmux-clipboard",
+let g:vim_tmux_clipboard#loadb_option = '-w'
+
+" unmap <c-h>
+" unmap <c-l>
+" unmap <c-j>
+" unmap <c-k>
+" nnoremap <unique> <silent> <c-h> :call keys#tmux_move('left',  g:navigate)
+" nnoremap <unique> <silent> <c-l> :call keys#tmux_move('right', g:navigate)
+" nnoremap <unique> <silent> <c-j> :call keys#tmux_move('down',  g:navigate)
+" nnoremap <unique> <silent> <c-k> :call keys#tmux_move('up',    g:navigate)
+
+" Moved to keys.vim
+" [is_vim does not detect vim running in a subshell #295](https://github.com/christoomey/vim-tmux-navigator/issues/295)
+" function! s:set_is_vim()
+"   " call s:TmuxCommand("set-option -p @is_vim yes")
+"   call system("tmux set-option -p @is_vim \"on\"")
+" endfunction
+"
+" function! s:unset_is_vim()
+"   " call s:TmuxCommand("set-option -p -u @is_vim")
+"   call system("tmux set-option -p -u @is_vim")
+" endfunction
+"
+" augroup tmux_navigator_is_vim
+"   au!
+"   autocmd VimEnter * call <SID>set_is_vim()
+"   autocmd VimLeave * call <SID>unset_is_vim()
+"   if exists('##VimSuspend')
+"       autocmd VimSuspend * call <SID>unset_is_vim()
+"       autocmd VimResume * call <SID>set_is_vim()
+"   endif
+" augroup END
+
+
 ]])
 
 

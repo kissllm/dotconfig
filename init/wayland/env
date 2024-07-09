@@ -1,6 +1,6 @@
 
-
-UID="$(id -u)"
+# Won't work
+# UID="$(id -u)"
 
 XDG_RUNTIME_DIR="/run/user/$UID"
 

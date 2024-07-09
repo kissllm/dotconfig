@@ -14,7 +14,7 @@ function add_rel_path(dir)
 end
 add_rel_path("lua")
 local log_address = vim.fn.stdpath('config') .. "/lua/?.lua"
--- local log_address = os.getenv("SHARE_PREFIX") .. '/init/editor/nvim/lua' .. "/?.lua"
+-- local log_address = os.getenv("DOT_CONFIG") .. '/editor/nvim/lua' .. "/?.lua"
 -- if not string.find(package.path, log_address) then
 -- if not string.match("*;" .. package.path .. ";*", "*;" .. log_address .. ";*") then
 --  print("Manually append: " .. log_address)

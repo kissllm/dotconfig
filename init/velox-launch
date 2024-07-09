@@ -1,6 +1,6 @@
 #! /bin/sh
 
-printf '%s %s\n' '$tty_num' "$tty_num [velox-launch]"
+printf '%s %s\n' '$TTY_NUM' "$TTY_NUM [velox-launch]" >> "$WAYL_OUTPUT"
 
 # https://www.reddit.com/r/voidlinux/comments/mor7n5/getting_libseat_errors_when_starting_sway/
 # WAYLAND_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"
