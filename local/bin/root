@@ -9,44 +9,63 @@ des="${des%"${des##*[!/]}"}"
 
 [ ! -z "$des" ] ||
 {
-	printf '%s %s\n' '$des' "'$des' can not be empty"
+	print '$des' "'$des' can not be empty"
 	exit 1
 }
 [ -d "$des" ] ||
 {
-	printf '%s %s\n' '$des' "'$des' does not exist"
+	print '$des' "'$des' does not exist"
 	exit 1
 }
 
 # echo "In chroot.sh, \$des = $des"
+shell=
+[ -z "${2:+x}" ] ||
+{
+	try_shell="${2%"${2##*[!/]}"}"
+	[ -e "$des/${try_shell#/}" ] &&
+	shell="$try_shell" ||
+	user="$try_shell"
 
-[ -z "${2:+x}" ] || shell="$2"
+	unset try_shell
+}
+
+[ -z "${3:+x}" ] || user="$3"
+[ ! -z "${user:+x}" ] || user="$(id -nu)"
+
+set --
+[ "$(id -u)" -eq 0 ] || set -- doas -u root --
 
 smart_rbind() {
-	dir=$1
-	[ -d  "$des/$dir" ] || \mkdir -p  "$des/$dir"
+	dir="$1"
+	[ -d  "$des/$dir" ] || "$@" \mkdir -p "$des/$dir"
+
+	set --
+	[ "$(id -u)" -eq 0 ] || set -- doas -u root --
+
 	# echo "In smart_rbind, \$des = $des"
 	# target_exists "$des/$dir" || [ ! -d "/$dir" ] ||
 	{
 	# [ ! -d "$des/$dir" ] && {
-		mount --rbind /$dir $des/$dir
-		mount --make-rslave $des/$dir
+		"$@" mount --rbind       "/$dir" "$des/$dir"
+		"$@" mount --make-rslave "$des/$dir"
 	}
 }
 
-# cp -L /etc/resolv.conf $des/etc/
-[ -d "$des/proc" ] || \mkdir -p " $des/proc"
+"$@" cp -fL /etc/resolv.conf $des/etc/
+
+[ -d "$des/proc" ] || "$@" \mkdir -p "$des/proc"
 # mount -t proc /proc $des/proc
-		mount --rbind /proc $des/proc
-		mount --make-rslave $des/proc
+"$@" mount --rbind /proc "$des/proc"
+"$@" mount --make-rslave "$des/proc"
 
 # [ $(target_exists "$des/tmp") -eq 0 ] && {
 #     mount --rbind /tmp $des/tmp
 #     mount --make-rslave $des/tmp
 # }
 
-for I in sys sys/kernel/security sys/dev/block dev dev/pts dev/shm run; do
-	smart_rbind "$I"
+for item in sys sys/kernel/security sys/dev/block dev dev/pts dev/shm run; do
+	smart_rbind "$item"
 done
 
 # Will point to host "root_partition/tmp" if root does not have a seperate tmp device
@@ -61,22 +80,22 @@ done
 # mount --rbind /dev/pts $des/dev/pts
 # mount --make-rslave $des/dev/pts
 
-# test -L /dev/shm && rm /dev/shm && mkdir /dev/shm
+# test -L /dev/shm && "$@" rm /dev/shm && "$@" \mkdir /dev/shm
 
 # Out of date:
 # mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm
 
-mount -t tmpfs -o nosuid,nodev,noexec shm /dev/shm
-chmod 1777 /dev/shm
+"$@" mount -t tmpfs -o nosuid,nodev,noexec shm /dev/shm
+"$@" chmod 1777 /dev/shm
 
 # mount --rbind /dev/shm $des/dev/shm
 # mount --make-rslave $des/dev/shm
 
 # mount --rbind /run $des/run
 # mount --make-rslave $des/run
-[ -d "$des/sys/firmware/efi/efivars" ] || \mkdir -p "$des/sys/firmware/efi/efivars"
-mount --rbind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
-mount --make-rslave $des/sys/firmware/efi/efivars
+[ -d "$des/sys/firmware/efi/efivars" ] || "$@" \mkdir -p "$des/sys/firmware/efi/efivars"
+"$@" mount --rbind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
+"$@" mount --make-rslave $des/sys/firmware/efi/efivars
 # mount -o bind /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
 # mount -t efivarfs /sys/firmware/efi/efivars $des/sys/firmware/efi/efivars
 # smart_mount $des/sys/firmware/efi/efivars /sys/firmware/efi/efivars
@@ -88,13 +107,20 @@ mount --make-rslave $des/sys/firmware/efi/efivars
 # chroot $des $SHELL
 # chroot $des /bin/env -i TERM=$TERM /bin/bash
 # chroot $des /bin/env -i TERM=$TERM $SHELL
+env_variables=
+env_variables="$env_variables WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+env_variables="$env_variables XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
+home="$(awk -F : "\$1 == \"$user\" { print \$6 }" /etc/passwd)"
+env_variables="$env_variables LOGNAME=$user"
+env_variables="$env_variables HOME=$home"
 
-if [ ! -z "$shell" ]; then
-	# env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des /bin/bash
-	env -i TERM=$TERM SHELL=/bin/bash HOME=$HOME $(which chroot) $des $shell
-else
-	env -i TERM=$TERM SHELL=$(which sh) HOME=$HOME $(which chroot) $des /bin/env -i TERM=$TERM $SHELL
-fi
+# while read -r line; do env_variables="${env_variables:+"$env_variables "}${line#$}"; done < <(/mnt/local/bin/wl-info | tr -d ' ')
+
+[ ! -z "$shell" ] &&
+	"$@" env -i TERM=$TERM SHELL=$(which ash) HOME=$HOME $env_variables $(which chroot) \
+	$des doas -u $user /bin/env -i TERM=$TERM $env_variables $shell ||
+	"$@" env -i TERM=$TERM SHELL=$(which ash) HOME=$HOME $env_variables $(which chroot) \
+	$des doas -u $user /bin/env -i TERM=$TERM $env_variables $SHELL
 # . /etc/profile
 # gentoo
 # env-update && source /etc/profile

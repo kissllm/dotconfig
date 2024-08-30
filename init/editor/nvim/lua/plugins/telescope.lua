@@ -664,6 +664,10 @@ augroup END
 			},
 
 			extensions = {
+				-- https://github.com/stevearc/aerial.nvim/issues/169
+				aerial = {
+					sorting_strategy = "descending",
+				},
 				-- Your extension configuration goes here:
 				-- extension_name = {
 				--   extension_config_key = value,

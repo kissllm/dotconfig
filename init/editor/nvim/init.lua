@@ -210,6 +210,17 @@ end
 -- vim.opt.background = 'dark'
 -- vim.cmd[[set background=dark]]
 
+-- $HOME/.local/share/nvim/lazy/indent-blankline.nvim/after/plugin/commands.lua
+local ibl  = require "ibl"
+-- local conf = require "ibl.config"
+ibl.update { enabled = true }
+
+vim.cmd([[
+
+let g:indent_guides_tab_guides = 1
+" :call <sid>IndentGuidesEnable()
+]])
+
 file:write("\n\n")
 file:flush()
 file:close()

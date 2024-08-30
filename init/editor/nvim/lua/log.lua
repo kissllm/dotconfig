@@ -3,16 +3,29 @@ local log = {}
 -- local function osExecute(cmd)
 log.osExecute = function(cmd)
 	local fileHandle     = assert(io.popen(cmd, 'r'))
-	local commandOutput  = assert(fileHandle:read('*a'))
+	local commandOutput  = assert(fileHandle:read('*all'))
 	local returnTable    = {fileHandle:close()}
+	print("commandOutput:" .. commandOutput)
+	print("returnTable:" .. serialize(returnTable))
+	print("returnTable:" .. vim.inspect(returnTable) )
 	return commandOutput,returnTable[3]            -- rc[3] contains returnCode
 end
 
+function os.capture(cmd, raw)
+  	local f = assert(io.popen(cmd, 'r'))
+  	local s = assert(f:read('*all'))
+  	f:close()
+  	if raw then return s end
+  	s = string.gsub(s, '^%s+', '')
+  	s = string.gsub(s, '%s+$', '')
+  	s = string.gsub(s, '[\n\r]+', ' ')
+  	return s
+end
 -- https://stackoverflow.com/questions/9676113/lua-os-execute-return-value
 -- local function os_execute(cmd)
 log.os_execute = function (cmd)
 	local f = io.popen(cmd) -- runs command
-	local result = f:read("*a") -- read output of command
+	local result = f:read("*all") -- read output of command
 	-- print(l)
 	f:close()
 	return result

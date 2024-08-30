@@ -62,19 +62,19 @@ let g:nontext_fg_cterm  = 'NONE'
 " let g:nontext_fg_gui  = 'NONE'
 let g:nontext_fg_gui    = '#222222'
 
-silent! execute 'highlight! NonText ctermfg=' . g:nontext_fg_cterm .
-	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
-
 " indent_blankline
 " hi! IncSearch      ctermbg=NONE guibg=#56b6c2 guifg=NONE ctermfg=45
 hi! rstEmphasis      ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
 hi! manItalic        ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=45
 hi! Keyword          ctermbg=NONE guibg=NONE guifg=#22aa77 ctermfg=6
 
-silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm .
-	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+" silent! execute 'highlight! NonText ctermfg=' . g:nontext_fg_cterm .
+" 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
+" silent! execute 'highlight NonText ctermfg=' . g:nontext_fg_cterm .
+" 	\ ' ctermbg=NONE guifg=' . g:nontext_fg_gui . ' guibg=NONE'
 
-hi NvimTreeFolderIcon guibg=blue
+" hi NvimTreeFolderIcon guibg=blue
+hi NvimTreeFolderIcon guibg=gray
 
 
 hi SpellBad          cterm=underline ctermfg=9
@@ -158,15 +158,15 @@ hl(0, 'CtrlSpaceStatus',        { fg = 'NONE',     bg='Blue', reverse = true })
 -- hl(0, 'Comment',             { fg = 'DarkGray', bg = 'NONE', reverse = true })
 -- hl(0, 'Comment',             { fg = 'DarkGray', bg = 'Black', reverse = true })
 -- hl(0, 'Comment',             { fg = 'NONE',     bg='Blue' })
-hl(0, 'Comment',                { bg = 'Blue',     fg='DarkGrey' })
--- hl(0, 'Comment',             { fg = 'Black',    bg='DarkGrey' })
+-- hl(0, 'Comment',                { bg = 'Blue',     fg='DarkGrey' })
+   hl(0, 'Comment',             { fg = 'Black',    bg='DarkGrey' })
 -- hl(0, 'Comment',             { bg = 'Black',    fg='DarkGrey' })
 -- hl(0, 'Comment',             { fg = 'White',    bg='#c0c0c0' })
 -- hl(0, '@comment',            { fg = 'DarkGray', bg = 'NONE', reverse = true })
 -- hl(0, '@comment',            { fg = 'DarkGray', bg = 'Black', reverse = true })
 -- hl(0, '@comment',            { fg = 'Black',    bg='DarkGrey' })
-hl(0, '@comment',               { bg = 'Blue',     fg='DarkGrey' })
--- hl(0, '@comment',            { fg = 'Black',    bg='DarkGrey' })
+-- hl(0, '@comment',               { bg = 'Blue',     fg='DarkGrey' })
+   hl(0, '@comment',            { fg = 'Black',    bg='DarkGrey' })
 -- hl(0, '@comment',            { fg = 'White',    bg='#c0c0c0' })
 -- hi! SpecialComment    guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
 -- SpecialComment xxx    ctermfg=242 guifg=#ff4444
@@ -197,7 +197,7 @@ hl(0, 'SignColumn',             { fg = '#008080',  bg = 'NONE', })
 --                    links to WinSeparator
 
 -- hl(0, 'LineNr',              { bg = 'Black',    fg = '#606090' })
-hl(0, 'LineNr',                 { bg = 'NONE',     fg = '#444444' })
+   hl(0, 'LineNr',                 { bg = 'NONE',     fg = '#444444' })
 -- silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' .
 --  \ 'Gray' . ' guibg=NONE' . ' cterm=NONE term=NONE gui=NONE'
 --
@@ -248,15 +248,8 @@ hl(0, 'CursorColumn',           { fg = 'NONE',     bg = 'Blue',    nocombine = t
 -- hl(0, 'CursorColumn',        { fg = 'DarkBlue', bg = 'NONE',    italic = true })
 -- hl(0, 'CursorColumn',        { fg = 'Gray',     bg = 'NONE',    italic = true })
 --
--- Copied to indent-blankline.lua
--- indent_blankline
--- hl(0, 'indent_odd',          { fg = '#606090',  bg = 'NONE',    nocombine = true })
-hl(0, 'indent_odd',             { fg = 'NONE',     bg = 'NONE',    nocombine = true })
--- hl(0, 'indent_even',         { fg = 'NONE',     bg = '#909060', nocombine = true })
-hl(0, 'indent_even',            { fg = 'NONE',     bg = 'Blue',    nocombine = true })
-hl(0, 'IblIndent',              { fg = 'NONE',     bg = 'NONE',    nocombine = true })
-hl(0, 'IblScope',               { fg = 'NONE',     bg = 'Blue',    nocombine = true })
-hl(0, 'IblWhitespace',          { fg = 'NONE',     bg = 'Blue',    nocombine = true })
+--  Moved to indent-blankline.lua
+--  indent_blankline
 
 -- vim_lsp_references
 
@@ -419,6 +412,16 @@ hl(0, '@text.emphasis',         { fg = '#22aa77',  bg = 'NONE' })
 hl(0, '@spell',                 { fg = 'NONE',     bg = 'NONE' })
 
 
+-- https://vi.stackexchange.com/questions/18768/highlighting-tabs-trailing-space-and-non-breaking-space-by-colors-not-chars
+vim.cmd([[
+" set nolist
+hi  TabChar             ctermbg=1
+hi  TrailingSpaceChar   ctermbg=2
+hi  NBSP                ctermbg=3
+syn match TabChar " "
+syn match TrailingSpaceChar " *$"
+syn match NBSP " "
+]])
 -- Does not exist
 -- vim.api.nvim_command("colorscheme onehalf-lush-dark")
 

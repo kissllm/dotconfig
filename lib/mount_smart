@@ -3,21 +3,28 @@
 # mount_smart target source
 set -e
 
-trace_line() {
-	local func_name="$1"
-	local lineo="$2"
-	echo "Error on function '$func_name' at '$lineo'"
-}
+type print > /dev/null 2>&1 ||
+alias print='printf "[%6.6d] %-$((${LENGTH_HEADER:-59} - 10))s '"'"'%s'"'"'\n" "$LINENO"'
 
 [ -z "${IS_KISS+x}" ] ||
 {
 	set -E
-	trap 'trace_line "$FUNCNAME" "$LINENO"' ERR || :
+	type trap_print > /dev/null 2>&1 &&
+	trap_print | grep -q "ERR" ||
+	type trace_line > /dev/null 2>&1 ||
+	{
+		trace_err() {
+			local func_name="$1"
+			local lineo="$2"
+			echo "Error on function '$func_name' at '$lineo'"
+		}
+		trap 'trace_err "$FUNCNAME" "$LINENO"' ERR || :
+	}
 }
 
 # Usage
 # mount "$(uuid_partition "24ec11cc-cf21-4b33-97c8-3c532ba68179")" /mnt/void
-# mount_smart "$des/mnt"  "$(uuid_partition "b2a78449-0991-42fe-b555-876d243c3340")"
+# mount_smart "$target"  "$(uuid_partition "b2a78449-0991-42fe-b555-876d243c3340")"
 uuid_partition() {
 	local uuid="$1"
 	# doas blkid | grep 24ec11cc-cf21-4b33-97c8-3c532ba68179 | awk -F ":" '{print $1}'
@@ -31,38 +38,36 @@ uuid_partition() {
 }
 
 # Usage
-# target_exists "$des/working" || ...
+# target_exists "$target" || ...
 target_exists () {
-	# [ -z "${IS_KISS+x}" ] &&
-	# 	set -e || set -eE
-	# # trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
-	# local des="$1"
-	# # echo "In target_exists, \$des = $des"
-	# # alredy_mounts="$(lsblk | grep $des | rev | cut -d" " -f1 | rev | tr '\n' ' ')"
+	# [ -z "${IS_KISS+x}" ] && set -e || set -eE
+	# # trap 'trace_err "$FUNCNAME" "$LINENO"' ERR
+	# local target="$1"
+	# # echo "In target_exists, \$target = $target"
+	# # alredy_mounts="$(lsblk | grep $target | rev | cut -d" " -f1 | rev | tr '\n' ' ')"
 	# # https://stackoverflow.com/questions/9422461/check-if-directory-mounted-with-bash
 	# local found=0
-	# local result=1
-	# for I in $(mount | grep "$des" | awk "{print \$3}"); do
-	# 	[ "$I" != "$des" ] || : $(( $found += 1 ))
+	# local item result=1
+	# for item in $(mount | grep "$target" | awk "{print \$3}"); do
+	# 	[ "$item" != "$target" ] || : $(( $found += 1 ))
 	# done
 	# [ "$found" -eq "0" ] || result=0
-	# echo "$des found $found time(s)" >&2
+	# echo "$target found $found time(s)" >&2
 
 	# return $result
 
-	# set --
-	# [ "$(id -u)" -eq 0 ] || set -- doas -u root --
-	# "$@" mount | grep -qiE "$1"
-	mount | grep -qiE "$1"
+	local target="$1"
+	set --
+	[ "$(id -u)" -eq 0 ] || set -- doas -u root --
+	"$@" mount | grep -qiE "$target"
 }
 
 # "src" mounted
 # Usage
 # src_mounted "$src"
 src_mounted () {
-	# [ -z "${IS_KISS+x}" ] &&
-	# 	set -e || set -eE
-	# # trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+	# [ -z "${IS_KISS+x}" ] && set -e || set -eE
+	# # trap 'trace_err "$FUNCNAME" "$LINENO"' ERR
 	# local src="${1:?"src must be given"}"
 	# local result=1
 	# # [ -z "$src" ] && return "$result" ||
@@ -72,86 +77,126 @@ src_mounted () {
 	# 	# echo $(df ${src} | grep ${src} | awk '{print $1}')
 
 	# return $result
-	df | grep "^$1" > /dev/null 2>&1
+	local src="$1"
+	set --
+	[ "$(id -u)" -eq 0 ] || set -- doas -u root --
+	"$@" df | grep "^$src" > /dev/null 2>&1
 }
 
-# "src" mounted and target match "des"
+# "src" mounted and target match "$target"
 # Usage
 # target_mounted "$target" "$src" || ...
 target_mounted () {
-	[ -z "${IS_KISS+x}" ] &&
-		set -e || set -eE
-	# trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
-	local des="${1:?"des must be given"}"
+	# [ -z "${IS_KISS+x}" ] && set -e || set -eE
+	# trap 'trace_err "$FUNCNAME" "$LINENO"' ERR
+	local target="${1:?"target must be given"}"
 	local src="${2:?"src must be given"}"
+	set --
+	[ "$(id -u)" -eq 0 ] || set -- doas -u root --
 
-	local des_mounted=
+	local item src_mounted=
 	local result=1
-	local mapped=
+	local mapped_list=
 	# https://stackoverflow.com/questions/762631/find-out-if-a-command-exists-on-posix-system
 
-	! command -v findmnt > /dev/null ||
+	! command -v findmnt > /dev/null 2>&1 ||
 	{
-		# mapped=("${(@f)$(findmnt --kernel -n --list | \
+		# mapped_list=("${(@f)$(findmnt --kernel -n --list | \
 		# grep -v '\[' | grep $src | awk '{print $1}')}")
 		# util-linux
-		mapped="$(findmnt --kernel -n --list |
-			grep -v '\[' | grep "$src" | awk "{print \$1}" | tr '\n' ' ')"
+		mapped_list="$("$@" findmnt --kernel -n --list |
+			grep -v '\[' | grep "$src" | awk '{print $1}')"
+			# grep -v '\[' | grep "$src" | awk "{print \$1}" | tr '\n' ' ')"
 
-		for I in $mapped; do
-			[ "$des" != '$I' ] || { des_mounted="$des"; return 0; }
+		for item in $mapped_list; do
+			[ "$target" != "$item" ] ||
+			{
+				src_mounted="$target"
+				print '$src_mounted' "$src_mounted"
+				result=0
+				return $result
+			}
 		done
 	}
 
-	[ ! -z "$des_mounted" ] ||
+	[ ! -z "$src_mounted" ] ||
 	{
-		mapped="$(df 2>/dev/null |
-		# grep -v "Filesystem" |
-		grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
+		mapped_list="$("$@" df 2>/dev/null |
+			grep "${src}" | awk '{print $6}')"
+		# # grep -v "Filesystem" |
+		# grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
 
-		for I in $mapped; do
-			[ "$des" != '$I' ] || { des_mounted="$des"; return 0; }
+		for item in $mapped_list; do
+			[ "$target" != "$item" ] ||
+			{
+				src_mounted="$target"
+				print '$src_mounted' "$src_mounted"
+				result=0
+				return $result
+			}
 		done
 	}
 
-	[ "$des" != "$des_mounted" ] || result=0
+	[ "$target" != "$src_mounted" ] || result=0
+	print '$result' "$result"
 
 	return $result
 }
 
-# mount_smart "$des" "$(uuid_partition "45def029-fe2c-4813-8403-1151c5ec731e")" ||
+# mount_smart "$target" "$(uuid_partition "45def029-fe2c-4813-8403-1151c5ec731e")" ||
 mount_smart () {
-	[ -z "${IS_KISS+x}" ] &&
-		set -e || set -eE
+	# [ -z "${IS_KISS+x}" ] && set -e || set -eE
 	local result=1
-	# trap 'trace_line "$FUNCNAME" "$LINENO"' ERR
+	# trap 'trace_err "$FUNCNAME" "$LINENO"' ERR
 	local target="${1:?"target must be given"}"
 	local src="${2:?"src must be given"}"
+	# local option="${3-"-o bind"}"
+	local option="${3-}"
+	[ ! -z "$option" ] ||
+	[ -z "${src##"/dev/"*}" ] || option="-o bind"
+	# [ -z "${3:+x}" ] && local option="-o bind" || local option="${3}"
+	set --
+	[ "$(id -u)" -eq 0 ] || set -- doas -u root --
 	[ -d "$target" ] ||
 	{
-		mkdir -p "$target"
+		"$@" mkdir -p "$target"
 		# chmod --quiet 0755 "$target"
-		chmod 0755 "$target"
+		"$@" chmod 0755 "$target"
 	}
+	# src_mounted "$src" && target_exists "$target" ||
 	src_mounted "$src" ||
-	# target_exists "$src" ||
 	{
-		mount $src $target
-		printf '%s %s\n' "$src" "mounted on $target"
-		return 0
+		"$@" mount $src $target
+		print "$target <- $src" "mounted"
+		result=0
+		return $result
 	}
 	target_mounted "$target" "$src" &&
-	printf '%s %s\n' "$src" "mounted on $target" ||
 	{
-		[ -z "${3:+x}" ] && local option="-o bind" || local option="${3}"
-		local des_mounted="$(df 2>/dev/null | \
-				grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
-
-		printf '%s %s\n' '$des_mounted' "$des_mounted"
-		printf '%s %s\n' '$target' "$target"
-		printf '%s %s\n' '$src' "$src"
-		mount $option $des_mounted $target && result=$?
-		printf '%s %s\n' "target=$target <- src=$src" "binded"
+		print "$src" "mounted on $target"
+		result=0
+	} ||
+	{
+		local src_mounted_list="$("$@" df 2>/dev/null | \
+				grep "$src" | awk '{print $6}')"
+				# grep "${src}" | awk "{print \$6}" | tr '\n' ' ')"
+		local item
+		for item in $src_mounted_list; do
+			print '$src_mounted_list' "$item"
+		done
+		print '$option' "$option"
+		print '$src'    "$src"
+		print '$target' "$target"
+		case " $src_mounted_list " in
+			*" $target "*)
+				;;
+			*)
+				# mount: mounting /dev/nvme1n1p4 on /mnt/void/home failed: Not a directory
+				# when option == "-o bind" on /dev/something
+				"$@" mount $option $src $target && result=$?
+		esac
+		[ "$result" -ne 0 ] ||
+			print "target=$target <- src=$src" "binded"
 	}
 
 	return $result

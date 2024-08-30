@@ -1,7 +1,7 @@
 #! /bin/sh -efE
 
 BACKUP_ROOT="/home/kiss/lm/chroot-x86_64"
-
+[ -d "$BACKUP_ROOT" ] || \mkdir "$BACKUP_ROOT"
 if [ "${HOSTNAME}" = "kiss" ]; then
 	KISS_ROOT=""
 else
@@ -13,83 +13,84 @@ else
 	fi
 fi
 
-if [ "$(/usr/bin/whoami)" = "root" ]; then
-	copy_way="rsync -aqzX --delete-after"
-	# copy_way="/usr/bin/cp -rf"
-else
-	copy_way="doas rsync -aqzX --delete-after"
-	# copy_way="doas /usr/bin/cp -rf"
-fi
+[ "$(id -u)" -eq 0 ] &&
+{
+	cmd_copy="rsync -aqzX --delete-after"
+	# cmd_copy="/usr/bin/cp -rf"
+} ||
+	cmd_copy="doas rsync -aqzX --delete-after"
+	# cmd_copy="doas /usr/bin/cp -rf"
 
 [ -d "${BACKUP_ROOT}" ] || \mkdir -p "${BACKUP_ROOT}"
 [ -d "${BACKUP_ROOT}/boot" ] || \mkdir -p "${BACKUP_ROOT}/boot"
 
-if ! eval '$copy_way "${KISS_ROOT}/boot" "${BACKUP_ROOT}/"'; then
-	echo "Failed to copy_way '${KISS_ROOT}/boot'"
+! eval '$cmd_copy "${KISS_ROOT}/boot" "${BACKUP_ROOT}/"' &&
+{
+	echo "Failed to cmd_copy '${KISS_ROOT}/boot'"
 	exit 1
-else
+} ||
 	echo "Succeeded in copying '${KISS_ROOT}/boot'"
-fi
 
 [ -d "${BACKUP_ROOT}/etc" ] || \mkdir -p "${BACKUP_ROOT}/etc"
 
-if ! eval '$copy_way "${KISS_ROOT}/etc" "${BACKUP_ROOT}/"'; then
+! eval '$cmd_copy "${KISS_ROOT}/etc" "${BACKUP_ROOT}/"' &&
+{
 	echo "Failed to copy '${KISS_ROOT}/etc'"
 	exit 1
-else
+} ||
 	echo "Succeeded in copying '${KISS_ROOT}/etc'"
-fi
 
 [ -d "${BACKUP_ROOT}/usr" ] || \mkdir -p "${BACKUP_ROOT}/usr"
 
 cd  "${KISS_ROOT}/usr"
 for dir in $(doas \ls -1 "${KISS_ROOT}/usr"); do
-	[ ! -d "$dir" ] || [ "$dir" = "src" ] || [ -L "$dir" ] || {
-		if ! eval '$copy_way "${KISS_ROOT}/usr/$dir" "${BACKUP_ROOT}/usr/"'; then
+	[ ! -d "$dir" ] || [ "$dir" = "src" ] || [ -L "$dir" ] ||
+	{
+		! eval '$cmd_copy "${KISS_ROOT}/usr/$dir" "${BACKUP_ROOT}/usr/"' &&
+		{
 			echo "Failed to copy '${KISS_ROOT}/usr/$dir'"
 			exit 1
-		else
+		} ||
 			echo "Succeeded in copying '${KISS_ROOT}/usr/$dir'"
-		fi
 	}
 done
 
 # Don't delete system database
-if [ "$(/usr/bin/whoami)" = "root" ]; then
-	copy_way="rsync -aqzX"
-else
-	copy_way="doas rsync -aqzX"
-fi
+[ "$(id -u)" -eq 0 ] &&
+	cmd_copy="rsync -aqzX" ||
+	cmd_copy="doas rsync -aqzX"
 
 copy_folder() {
 	local folder_dir="$1"
 
 	local real_folder_dir="$(readlink -fn "$folder_dir")"
-	[ -d "$real_folder_dir" ] || {
+	[ -d "$real_folder_dir" ] ||
+	{
 		printf '%s %s\n' '$real_folder_dir' "'$real_folder_dir' does not exist"
 		exit 1
 	}
 
 	[ -d "${BACKUP_ROOT}/${folder_dir#*/}" ] || doas \mkdir -p "${BACKUP_ROOT}/${folder_dir#*/}"
 
-	if ! eval '$copy_way "$real_folder_dir/." "${BACKUP_ROOT}/${folder_dir#*/}/"'; then
+	! eval '$cmd_copy "$real_folder_dir/." "${BACKUP_ROOT}/${folder_dir#*/}/"' &&
+	{
 		echo "Failed to copy '$folder_dir'"
 		exit 1
-	else
+	} ||
 		echo "Succeeded in copying '$folder_dir'"
-	fi
 }
 
-echo "\$REPO_ROOT/installed = '$REPO_ROOT/installed'"
-copy_folder "$REPO_ROOT/installed"
+echo "\$DB_ROOT/installed = '$DB_ROOT/installed'"
+copy_folder "$DB_ROOT/installed"
 echo "\$MNGR_ROOT = '$MNGR_ROOT'"
 copy_folder "$MNGR_ROOT"
-echo "\$REPO_ROOT_IMPL/lm = '$REPO_ROOT_IMPL/lm'"
-copy_folder "$REPO_ROOT_IMPL/lm"
-echo "\$DOTCONFIG = '$DOTCONFIG'"
-copy_folder "$DOTCONFIG"
+echo "\$repo_root = '$repo_root'"
+copy_folder "$repo_root"
+echo "\$DOT_CONFIG = '$DOT_CONFIG'"
+copy_folder "$DOT_CONFIG"
 
-sync
+[ "$(id -u)" -eq 0 ] &&
+sync || doas sync
 
 echo "\$BACKUP_ROOT = '${BACKUP_ROOT}'"
 echo "\$KISS_ROOT   = '${KISS_ROOT}'"

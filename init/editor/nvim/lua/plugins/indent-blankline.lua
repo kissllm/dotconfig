@@ -41,6 +41,8 @@ return {
 	},
 
 	main       = "ibl",
+	-- https://github.com/lukas-reineke/indent-blankline.nvim/discussions/692#discussioncomment-7183565
+	commit     = "29be0919b91fb59eca9e90690d76014233392bef",
 	-- opt     = true,
 	cond       = true,
 	-- cond       = false,
@@ -48,14 +50,14 @@ return {
 	-- lazy    = false,
 
 	lazy       = true,
-	-- lazy       = false,
-	-- enabled = true,
-	-- enabled = false,
-	-- cond    = false,
+	-- lazy     = false,
+	-- enabled  = true,
+	-- enabled  = false,
+	-- cond     = false,
 	--
-	-- cond    = function() return false end,
+	-- cond     = function() return false end,
 	-- Leads "RL" (reloading configurations) failure
-	-- event      = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
+	-- event    = { "BufRead", "BufReadPost", "BufNewFile", "WinEnter", "BufEnter" },
 
 	config = function()
 
@@ -142,12 +144,27 @@ return {
 		-- create the highlight groups in the highlight setup hook, so they are reset
 		-- every time the colorscheme changes
 		hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-			hl(0, 'indent_odd',             { fg = 'NONE', bg = 'NONE', nocombine = true })
-			hl(0, 'indent_even',            { fg = 'NONE', bg = 'Blue', nocombine = true })
+			--  hl(0, 'indent_odd',             { fg = '#606090',  bg = 'NONE',    nocombine = true })
+			    hl(0, 'indent_odd',             { fg = 'DarkGrey', bg = 'NONE', nocombine = true })
+			--  hl(0, 'indent_odd',             { fg = 'Black',    bg = 'DarkGrey', nocombine = true })
+			--  hl(0, 'indent_even',            { fg = 'NONE',     bg = '#909060', nocombine = true })
+			--  hl(0, 'indent_even',            { fg = 'DarkGrey', bg = 'Black',    nocombine = true })
+			    hl(0, 'indent_even',            { fg = 'NONE', bg = 'DarkGrey', nocombine = true })
+			--  hl(0, 'indent_even',            { fg = 'DarkGrey', bg = 'Black',    nocombine = true })
 			-- https://github.com/lukas-reineke/indent-blankline.nvim/blob/master/doc/indent_blankline.txt
-			hl(0, 'IblIndent',              { fg = 'NONE', bg = 'NONE', nocombine = true })
-			hl(0, 'IblScope',               { fg = 'NONE', bg = 'Blue', nocombine = true })
-			hl(0, 'IblWhitespace',          { fg = 'NONE', bg = 'Blue', nocombine = true })
+			-- https://stackoverflow.com/questions/8116728/disabling-tab-space-highlight-in-vim
+			hl(0, 'TabLine',                { fg = '#222222',  bg = 'DarkGrey', nocombine = true })
+			hl(0, 'TabLineFill',            { fg = '#222222',  bg = 'DarkGrey', nocombine = true })
+			-- https://stackoverflow.com/questions/2851094/how-to-remove-indentation-highlighting-in-vim
+			hl(0, 'NonText',                { fg = '#222222',  bg = 'NONE',     nocombine = true })
+			--  hl(0, 'IblIndent',              { fg = 'NONE',     bg = 'NONE',    nocombine = true })
+			--  hl(0, 'IblIndent',              { fg = 'DarkGrey', bg = 'Black',    nocombine = true })
+			--  hl(0, 'IblIndent',              { fg = 'NONE', bg = 'NONE', nocombine = true })
+			    hl(0, 'IblIndent',              { fg = 'DarkGrey', bg = 'NONE', nocombine = true })
+			--  hl(0, 'IblScope',               { fg = 'Black',    bg = 'DarkGrey', nocombine = true })
+			    hl(0, 'IblScope',               { fg = 'NONE', bg = 'DarkGrey', nocombine = true })
+			--  hl(0, 'IblWhitespace',          { fg = '#222222',  bg = 'DarkGrey', nocombine = true })
+			    hl(0, 'IblWhitespace',          { fg = 'NONE', bg = 'DarkGrey', nocombine = true })
 			hl(0, "RainbowRed",             { fg = "#E06C75" })
 			hl(0, "RainbowYellow",          { fg = "#E5C07B" })
 			hl(0, "RainbowBlue",            { fg = "#61AFEF" })
@@ -234,7 +251,8 @@ return {
 					--  "RainbowBlue",
 					--  "RainbowViolet",
 					-- },
-				tab_char = "│", -- "U+2502"
+				-- tab_char = "│", -- "U+2502"
+				tab_char = "", -- "U+2502"
 			},
 			-- highlight settings for scope
 			-- https://github.com/ArjunSahlot/.dotfiles/blob/main/.config/nvim/lua/arjun/lazy/indent-align.lua
@@ -348,9 +366,9 @@ return {
 		-- Version 2
 		-- local indent_blankline = require('indent_blankline')
 		-- Version 3
-		local api    = vim.api
-		local hl = api.nvim_set_hl
-		local ibl    = require('ibl')
+		local api = vim.api
+		local hl  = api.nvim_set_hl
+		local ibl = require('ibl')
 		ibl.setup(opts)
 
 		-- vim.g.show_first_indent_level = 0
@@ -367,35 +385,66 @@ return {
 		-- vim.g.rainbow_delimiters = { highlight = highlight }
 
 		api.nvim_create_autocmd("InsertEnter", {
-			pattern  = "*",
-			group    = gid,
-			command  = "IBLDisable",
+			pattern = "*",
+			group   = gid,
+			command = "IBLDisable",
 		})
 
 		api.nvim_create_autocmd("InsertLeave", {
-			pattern   = "*",
-			group     = gid,
-			callback  = function()
+			pattern    = "*",
+			group      = gid,
+			-- command = "IBLEnable",
+			callback   = function()
 				if not vim.tbl_contains(exclude_ft, vim.bo.filetype) then
 					vim.cmd([[IBLEnable]])
 				end
 			end,
 		})
 
-		vim.api.nvim_create_autocmd("ModeChanged", {
-			-- group = indent_blankline_augroup,
+		-- vim.api.nvim_create_autocmd({ "CmdlineEnter", "FocusLost", "MenuPopup" }, {
+		-- vim.api.nvim_create_autocmd({ "CmdlineEnter", "MenuPopup", "CmdwinEnter", "UIEnter", "RecordingEnter" }, {
+		vim.api.nvim_create_autocmd({ "CmdlineEnter", "MenuPopup", "CmdwinEnter", "RecordingEnter" }, {
 			group    = gid,
-			pattern  = "[vV\x16]*:*",
+			pattern  = "*",
+			command  = "IBLDisable",
+			desc     = "Enable indent-blankline when exiting command mode"
+		})
+
+		vim.api.nvim_create_autocmd({ "CmdlineLeave", "FocusGained", "CmdwinLeave", "UILeave", "RecordingLeave" }, {
+			group    = gid,
+			pattern  = "*",
+			command  = "IBLEnable",
+			desc     = "Enable indent-blankline when exiting command mode"
+		})
+
+		vim.api.nvim_create_autocmd("ModeChanged", {
+			group    = gid,
+			pattern  = "[trcvV\x16]*:*",
 			command  = "IBLEnable",
 			desc     = "Enable indent-blankline when exiting visual mode"
 		})
 
 		vim.api.nvim_create_autocmd("ModeChanged", {
-			-- group = indent_blankline_augroup,
 			group    = gid,
-			pattern  = "*:[vV\x16]*",
+			pattern  = "*:[trcvV\x16]*",
 			command  = "IBLDisable",
-			desc     = "Disable indent-blankline when exiting visual mode"
+			desc     = "Disable indent-blankline when entering visual mode"
+		})
+
+		api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
+			pattern = "*",
+			group   = gid,
+			command = "IBLEnable",
+		})
+
+		-- This will disable ibl on popup menu closing
+		-- api.nvim_create_autocmd({ "BufWinLeave" }, {
+		-- api.nvim_create_autocmd({ "BufLeave", "BufWinLeave", "WinLeave" }, {
+		api.nvim_create_autocmd({ "WinLeave" }, {
+			pattern = "*",
+			group   = gid,
+			command = "IBLDisable",
+			desc    = "Disable indent-blankline when WinLeave"
 		})
 
 	end,

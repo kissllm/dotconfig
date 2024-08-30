@@ -368,6 +368,7 @@ elif command -v colordiff > /dev/null 2>&1; then
 	alias diff='colordiff -Nuar'
 fi
 
+kill_name() { ps -ef | grep "${1:?name must given}" | grep -v grep | awk '{print $1}' | doas xargs kill -9 || :; }
 
 # # shortcuts
 # alias la='ls $LS_OPTIONS -all -h'

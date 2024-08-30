@@ -6,58 +6,84 @@
 [ ! -z "${1:+x}" ] && des="$1" || des=/mnt/kiss
 des="${des%"${des##*[!/]}"}"
 
+set --
+[ "$(id -u)" -eq 0 ] || set -- doas -u root --
+
 # [ "${des%/*}" = "" ] || des="${des%/}"
 [ ! -z "$des" ] ||
 {
-	printf '%s %s\n' '$des' "'$des' can not be empty"
+	print '$des' "'$des' can not be empty"
 	exit 1
 }
 [ -d "$des" ] ||
 {
-	printf '%s %s\n' '$des' "'$des' does not exist"
+	print '$des' "'$des' does not exist"
 	exit 1
 }
-blkid
+command -v blkid > /dev/null 2>&1 ||
+{
+	print 'blkid' "does not work"
+	exit 1
+}
 # mount /dev/nvme0n1p3      $des
 # mount_smart $des          /dev/nvme1n1p3 || :
 mount_smart "$des"          "$(uuid_partition "ff27c9e9-abc8-4b6b-a85c-1101404512c6")" ||
-	mount "$(uuid_partition "ff27c9e9-abc8-4b6b-a85c-1101404512c6")" "$des"
+	"$@" mount              "$(uuid_partition "ff27c9e9-abc8-4b6b-a85c-1101404512c6")" "$des"
 # mount /dev/nvme0n1p2      $des/boot
 # mount_smart $des/boot     /dev/nvme1n1p2
 mount_smart "$des/boot"     "$(uuid_partition "9d3fc198-e130-493e-99e5-8198cbfbf1ca")" ||
-	mount "$(uuid_partition "9d3fc198-e130-493e-99e5-8198cbfbf1ca")" "$des/boot"
+	"$@" mount              "$(uuid_partition "9d3fc198-e130-493e-99e5-8198cbfbf1ca")" "$des/boot"
 # mount /dev/nvme0n1p1      $des/boot/efi
 # mount_smart $des/boot/efi /dev/nvme0n1p1
 # mount /dev/nvme1n1p1      $des/boot/efi || :
 mount_smart "$des/boot/efi" "$(uuid_partition "8621-90C8")" ||
-	mount "$(uuid_partition "8621-90C8")" "$des/boot/efi"
+	"$@" mount              "$(uuid_partition "8621-90C8")" "$des/boot/efi"
 # mount /dev/nvme1n1p4      $des/var
 # mount_smart $des/var      /dev/nvme1n1p4
 # mount /dev/nvme1n1p5      $des/usr
 # mount /dev/nvme1n1p4      $des/home
 # mount_smart $des/home     /dev/nvme1n1p4
-mount_smart "$des/home"     "$(uuid_partition "77806114-e094-4030-b2e0-6cba2a73e0c7")"
+mount_smart "$des/home"     "$(uuid_partition "77806114-e094-4030-b2e0-6cba2a73e0c7")" ||
+	"$@" mount              "$(uuid_partition "77806114-e094-4030-b2e0-6cba2a73e0c7")" "$des/home"
 # mount /dev/nvme1n1p6      $des/root
 # mount /dev/nvme1n1p5      $des/mnt
 # mount_smart $des/mnt      /dev/nvme1n1p5
-mount_smart "$des/mnt"      "$(uuid_partition "b2a78449-0991-42fe-b555-876d243c3340")"
+mount_smart "$des/mnt"      "$(uuid_partition "b2a78449-0991-42fe-b555-876d243c3340")" ||
+	"$@" mount              "$(uuid_partition "b2a78449-0991-42fe-b555-876d243c3340")" "$des/mnt"
+
 # mount /dev/nvme1n1p6      $des/opt
 # mount_smart $des/opt      /dev/nvme1n1p6
-mount_smart "$des/opt"      "$(uuid_partition "743f2297-b206-47b4-a96d-28d0820c32b1")"
+mount_smart "$des/opt"      "$(uuid_partition "743f2297-b206-47b4-a96d-28d0820c32b1")" ||
+	"$@" mount              "$(uuid_partition "743f2297-b206-47b4-a96d-28d0820c32b1")" "$des/opt"
 
 # mount /dev/nvme0n1p4      $des/share
 # mount_smart $des/share    /dev/nvme0n1p4
-mount_smart "$des/share"    "$(uuid_partition "372d3b8e-ec22-4375-8333-c3c2727598d7")"
+mount_smart "$des/share"    "$(uuid_partition "372d3b8e-ec22-4375-8333-c3c2727598d7")" ||
+	"$@" mount              "$(uuid_partition "372d3b8e-ec22-4375-8333-c3c2727598d7")" "$des/share"
 
-target_exists "$des/working" || {
+[ -d "$des/share/working" ] ||
+{
+	print "has not been mounted" "$des/share/working"
+	exit 1
+}
+
+[ -d "$des/share/build" ] ||
+{
+	print "has not been mounted" "$des/share/build"
+	exit 1
+}
+
+target_exists "$des/working" ||
+{
 	# $(which chroot) $des mount --bind /share/working /working
-	$(which chroot) $des mount -o bind /share/working  /working
+	"$@" $(which chroot) $des mount -o bind /share/working  /working
 }
-target_exists "$des/build" || {
+target_exists "$des/build" ||
+{
 	# $(which chroot) $des mount --bind /share/build   /build
-	$(which chroot) $des mount -o bind /share/build    /build
+	"$@" $(which chroot) $des mount -o bind /share/build    /build
 }
 
-mount --make-rprivate $des
-lsblk
+"$@" mount --make-rprivate "$des"
+"$@" lsblk
 # ./chroot.sh $des

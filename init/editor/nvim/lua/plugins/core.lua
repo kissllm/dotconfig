@@ -150,6 +150,14 @@ return {
 	},
 
 	{
+		"yuntan/neovim-indent-guides",
+		cond     = false,
+		-- event = "VeryLazy",
+		event    = "VimEnter",
+		lazy     = true,
+	},
+
+	{
 		"chrisbra/vim-sh-indent",
 		cond   = false,
 		event = "VeryLazy",
@@ -224,6 +232,7 @@ return {
 	-- session_auto sent the feedkeys of <Enter>
 	{
 		"tadmccorkle/markdown.nvim",
+		cond  = false,
 		event = "VeryLazy",
 		lazy  = true,
 		ft    = "markdown", -- or 'event = "VeryLazy"'

@@ -534,7 +534,9 @@ let g:vim_tmux_clipboard#loadb_option = '-w'
 "   endif
 " augroup END
 
-
+" augroup ibl_init | au!
+" 	autocmd BufEnter * :call <sid>IBLEnable()<cr>
+" augroup END
 ]])
 
 

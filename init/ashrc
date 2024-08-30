@@ -579,6 +579,7 @@ sock_sway=
 cat /etc/hostname
 )"} && export HOSTNAME
 # Use hostname in TMUX_TMPDIR as $HOME may be on nfs.
+# tmux display -p '#{socket_path}'
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOST}-${UID}"
 # export TMUX_TMPDIR="${TMPDIR}/tmux-${HOSTNAME}-$UID"
   export TMUX_TMPDIR="${TMPDIR}/${HOSTNAME}"
