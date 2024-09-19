@@ -116,7 +116,7 @@ path_prepend PATH "/usr/lib/ccache/bin"
 # # For chroot tools I put it there
 # path_prepend PATH "/mnt"
 
-path_prepend PATH "/mnt/local/bin"
+path_append PATH "/mnt/local/bin"
 
 export SRC_PREFIX="/working"
 export BUILD_PREFIX="/build"

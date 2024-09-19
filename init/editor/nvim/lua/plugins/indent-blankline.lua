@@ -124,8 +124,8 @@ return {
 			"indent_odd",
 			-- "SignColumn",
 			-- "CursorColumn",
-			"indent_odd",
-			-- "indent_even",
+			-- "indent_odd",
+			"indent_even",
 		}
 
 		local highlight_rainbow = {
@@ -145,11 +145,13 @@ return {
 		-- every time the colorscheme changes
 		hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
 			--  hl(0, 'indent_odd',             { fg = '#606090',  bg = 'NONE',    nocombine = true })
-			    hl(0, 'indent_odd',             { fg = 'DarkGrey', bg = 'NONE', nocombine = true })
+			--  hl(0, 'indent_odd',             { fg = 'DarkGrey', bg = 'NONE', nocombine = true })
+			    hl(0, 'indent_odd',             { fg = 'Teal', bg = 'NONE', nocombine = true })
 			--  hl(0, 'indent_odd',             { fg = 'Black',    bg = 'DarkGrey', nocombine = true })
 			--  hl(0, 'indent_even',            { fg = 'NONE',     bg = '#909060', nocombine = true })
 			--  hl(0, 'indent_even',            { fg = 'DarkGrey', bg = 'Black',    nocombine = true })
-			    hl(0, 'indent_even',            { fg = 'NONE', bg = 'DarkGrey', nocombine = true })
+			--  hl(0, 'indent_even',            { fg = 'NONE', bg = 'DarkGrey', nocombine = true })
+			    hl(0, 'indent_even',            { fg = 'NONE', bg = 'Teal', nocombine = true })
 			--  hl(0, 'indent_even',            { fg = 'DarkGrey', bg = 'Black',    nocombine = true })
 			-- https://github.com/lukas-reineke/indent-blankline.nvim/blob/master/doc/indent_blankline.txt
 			-- https://stackoverflow.com/questions/8116728/disabling-tab-space-highlight-in-vim

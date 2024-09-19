@@ -15,9 +15,9 @@ SCRIPT_NAME="$(script_name)"
 type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
 	. "${MNGR_ROOT-}/usr/include/kiss/func"
 
-	script_name="$(script_name)"
-	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
-	# unset script_name
+script_name="$(script_name)"
+[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+# unset script_name
 
 env_reset DOT_CONFIG "$(dot_config)"
 
@@ -850,27 +850,6 @@ esac
 	)\[\033[m\]\[$(eval "$back_ground_user")\]\u@${HOSTNAME}:\[\033[m\]\[$(eval "$back_ground_user")\]\w \[\033[m\]\n'
 
 
-is_child_of() {
-	local process_name="$1"
-	local result=1
-	local parent_id="$PPID"
-	while [ "$parent_id" -ne "1" ]
-	do
-		# process_name="$(ps auxft | grep $parent_id | grep -v "grep")"
-		# process_name="$(ps -ef | grep $parent_id | grep -v "grep")"
-		# doesn't work for void
-		# process_name="$(ps -efo pid,args | awk "\$1 == $parent_id {print}")"
-		process_name="$(ps ax -o pid,args | awk "\$1 == $parent_id {print}")"
-
-		[ ! -z "${process_name##*$process_name*}" ] || { result=0; break; }
-		# parent_id=$(IFS=$'\n'; for item in $(ps ax -o pid,ppid | grep $parent_id); do
-		#     IFS=$' ' read -r _1 _2 < <(echo $item); [ "$_2" = "$parent_id" ] || echo $_2; done)
-		# Works both on void and kiss
-		parent_id="$(ps ax -o pid,ppid | awk "\$1 == $parent_id {print \$2}")"
-	done
-	return $result
-}
-
 is_pts() {
 	case "$1" in *"pts"*) return 0;;
 		*) return 1
@@ -884,9 +863,9 @@ is_pts() {
 # read -r
 
 # [ ! -z "${-:+x}" ] && [ ! -z "${-##*i*}" ] ||
-[ "$UID" -eq "0" ] ||
-# { [ ! -z "${TTY_NUM:+x}" ] && [ "1" = "$TTY_NUM" ] && ! is_child_of "foot"; } ||
-{ [ ! -z "${TTY_NUM:+x}" ] && [ "1" = "$TTY_NUM" ] && ! is_pts "$TTY"; } ||
+[ "$UID" -eq 0 ] ||
+# { [ ! -z "${TTY_NUM:+x}" ] && [ 1 -eq "$TTY_NUM" ] && ! is_child_of "foot"; } ||
+{ [ ! -z "${TTY_NUM:+x}" ] && [ 1 -eq "$TTY_NUM" ] && ! is_pts "$TTY"; } ||
 [ "${TERM_PROGRAM-}" = "tmux" ] || is_child_of "tmux" ||
 is_chrooted ||
 # [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $DOT_CONFIG/.tmux_lock)" ] ||
@@ -894,7 +873,7 @@ is_chrooted ||
 #       {
 #           [ -z "${WAYLAND_DISPLAY:+x}" ] || [ -z "${DISPLAY:+x}" ]
 #       } &&
-#           [ $TTY_NUM = "1" ]
+#           [ "$TTY_NUM" -eq 1 ]
 #       } ||
 
 _tmux

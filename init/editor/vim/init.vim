@@ -2883,14 +2883,14 @@ hi WinSeparator guifg=#222222 guibg=NONE cterm=NONE ctermbg=NONE ctermfg=DarkRed
 
 " hi LineNr guibg=fg
 " highlight LineNr ctermbg=0 guibg=NONE ctermfg=7 guifg=gray
-" silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' .
-"   \ 'Gray' . ' guibg=NONE' . ' cterm=NONE gui=NONE term=NONE'
+  silent! execute 'highlight LineNr ctermfg=' . '3' . ' ctermbg=NONE guifg=' .
+    \ '#999999' . ' guibg=NONE' . ' cterm=NONE gui=NONE term=NONE'
 " highlight CursorLineNr ctermbg=NONE ctermfg=15 guibg=NONE guifg=Gray
 "   \ cterm=NONE gui=NONE term=NONE
-hi! link LineNr Comment
+" hi! link LineNr Comment
 
-highlight CursorLineNr ctermbg=NONE ctermfg=DarkGray guibg=NONE guifg=#ffffff
-	\ cterm=NONE gui=NONE term=NONE
+" highlight CursorLineNr ctermbg=NONE ctermfg=DarkGray guibg=NONE guifg=#ffffff
+highlight! CursorLineNr ctermbg=NONE ctermfg=8 guibg=NONE guifg=#ffffff cterm=NONE gui=NONE term=NONE
 
 
 hi EndOfBuffer       ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE cterm=NONE
@@ -2931,9 +2931,9 @@ hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 				\ highlight Normal ctermbg=0 guibg=NONE
 				\ | highlight SignColumn ctermbg=NONE guibg=NONE
 				\ | highlight FoldColumn ctermbg=NONE guibg=NONE
-				\ | hi! link LineNr Comment
-				" \ | silent! execute 'highlight LineNr ctermfg=' . '3' .
-				" \ ' ctermbg=NONE guifg=' . 'Gray' . ' guibg=NONE'
+				\ | silent! execute 'highlight LineNr ctermfg=' . '3' .
+				\ ' ctermbg=NONE guifg=' . '#999999' . ' guibg=NONE'
+				" \ | hi! link LineNr Comment
 
 		augroup end
 
@@ -2955,7 +2955,7 @@ hi CtrlSpaceStatus          ctermfg=230  ctermbg=234  cterm=NONE
 
 		augroup CLNRSet
 			au!
-			autocmd ColorScheme * hi CursorLineNr ctermbg=NONE ctermfg=DarkGray
+			autocmd ColorScheme * hi CursorLineNr ctermbg=NONE ctermfg=8
 				\ guibg=NONE guifg=#ffffff cterm=NONE gui=NONE term=NONE
 		augroup END
 

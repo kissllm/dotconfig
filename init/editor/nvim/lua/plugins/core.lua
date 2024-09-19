@@ -56,6 +56,7 @@ return {
 
 	{
 		"tpope/vim-eunuch",
+		cond  = false, -- redefined Enter/<CR> (EunuchNewLine)
 		event = "VeryLazy",
 	},
 
@@ -289,15 +290,18 @@ return {
 		lazy  = false,
 	},
 
-	{
-		"folke/neodev.nvim",
-		opts   = {},
-		event  = "VeryLazy",
-		lazy   = true,
-	},
+	-- {
+	-- 	-- Moved to "folke/lazydev.nvim"
+	-- 	"folke/neodev.nvim",
+	-- 	cond   = false,
+	-- 	opts   = {},
+	-- 	event  = "VeryLazy",
+	-- 	lazy   = true,
+	-- },
 
-	-- E353: Nothing in register " especially in tty
+	-- The only working plugin in the list of plugins that claim to support this feature
 	-- Copy from nvim to tmux [TextYankPost]
+	-- Disappeared -- E353: Nothing in register " especially in tty
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- [TextYankPost], needs "lazy = false,"
 	-- Void session_auto saved old session -- restart a brand new session
@@ -308,7 +312,7 @@ return {
 		--  {'tmux-plugins/vim-tmux-focus-events'},
 		-- },
 		-- https://github.com/roxma/vim-tmux-clipboard/issues/7
-		cond     = false,
+		-- cond     = false,
 		opts     = {},
 		-- event    = "VeryLazy",
 		event     = "TextYankPost",
@@ -321,9 +325,9 @@ return {
 		end,
 	},
 
-	-- E353: Nothing in register " especially in tty
 	-- Copy from nvim to tmux ? [TextYankPost]
-	-- As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
+	-- E353: Nothing in register " especially in tty
+	-- Author: As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- "show-buffer -s" error
 	{
@@ -361,12 +365,18 @@ return {
 		end,
 	},
 
+	-- $XDG_DATA_HOME/nvim/lazy/nvim-miniyank/lua/miniyank.lua:15: attempt to call field 'list' (a nil value)
 	{
 		"bfredl/nvim-miniyank",
-		lazy     = true,
-		config   = true,
+		event    = "TextYankPost",
+		   lazy  = true,
+		-- lazy  = false,
+		-- config   = true,
+		config   = false,
 	},
 
+	-- Copy from nvim to tmux [TextYankPost]
+	-- Yes. It is a vim side plugin
 	-- proper syntax highlighting when editing .tmux.conf
 	-- commentstring - so that plugins like vim-commentary work as intended
 	-- K - jumps to the *exact* place in man tmux where the word under cursor is explained (a helluva time saver). This should work correctly on practically anything in .tmux.conf.
@@ -374,10 +384,29 @@ return {
 	-- g! - executes lines as tmux commands. Works on visual selection or as a motion. g!! executes just the current line.
 	{
 		"tmux-plugins/vim-tmux",
+		   cond   = false, -- manual loading required
 		opts     = {},
 		-- event = "VeryLazy",
-		lazy     = true,
-		config   = true,
+		event    = "TextYankPost",
+		   lazy  = true,
+		-- lazy   = false,
+		-- config   = true, -- lazy.nvim won't happy
+		config = function()
+			-- You configuration here
+			-- Does not work
+			vim.cmd[[
+			execute "source "   .  stdpath("data") . '/lazy/vim-tmux/autoload/tmux.vim'
+			execute "runtime! " . stdpath("data") . '/lazy/vim-tmux/autoload/tmux.vim'
+			]]
+		end
+	},
+
+	-- Not copy/paste, just send
+	{
+		"tadhg-ohiggins/vim-tmux-send",
+		   event     = "VeryLazy",
+		   lazy   = true,
+		-- lazy   = false,
 	},
 
 	{
@@ -518,12 +547,6 @@ return {
 		lazy   = true,
 	},
 
-	{
-		"tadhg-ohiggins/vim-tmux-send",
-		event  = "VeryLazy",
-		lazy   = true,
-	},
-
 	-- outline
 	{
 		"hedyhli/outline.nvim",
@@ -570,6 +593,11 @@ return {
 	},
 
 	{
+		"marklcrns/vim-smartq",
+		event  = "VeryLazy",
+		lazy   = true,
+	},
 
+	{
 	},
 }

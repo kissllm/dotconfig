@@ -168,6 +168,9 @@ return {
 			},
 		}
 		require("nvim-treesitter.configs").setup(opts)
+		-- https://github.com/neovim/neovim-snap/issues/8
+		require'nvim-treesitter.install'.compilers = {"musl-llvm"}
+		require'nvim-treesitter.parsers'.command_extra_args = {["musl-llvm"] = {"-static"}}
 	end,
 }
 

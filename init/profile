@@ -21,16 +21,11 @@ SCRIPT_NAME="$(script_name)"
 type "print" > /dev/null 2>&1 && [ ! -z "${SEE+x}" ] ||
 	. "${MNGR_ROOT-}/usr/include/kiss/see"
 
-tty="$(tty | grep -v not || :)"
-# [ ! -z "${TTY+x}" ] ||
-[ -z "${tty:+x}" ] ||
-! TTY="$tty" || export TTY
-# ! : "${TTY:="$(tty | grep -v not || :)"}" || export TTY
-unset tty
-
 # shellcheck source=/usr/include/kiss/init
 type "env_reset" > /dev/null 2>&1 && [ ! -z "${INIT+x}" ] ||
 	. "${MNGR_ROOT-}/usr/include/kiss/init"
+
+# ! : "${TTY:="$(tty)"}" || export TTY
 
 # SCRIPT_NAME="$HOME/.profile" print '$script_scope' "$script_scope"
 # SCRIPT_NAME="$HOME/.profile" print '$SCRIPT_SCOPE' "$SCRIPT_SCOPE"
@@ -40,8 +35,8 @@ type "env_reset" > /dev/null 2>&1 && [ ! -z "${INIT+x}" ] ||
 # [ ! -z "${KISS_TMPDIR:+x}" ] &&
 # [ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
 # {
-# 	[ -z "${TTY:+x}" ] ||
-# 	[ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ]
+#   [ -z "${TTY:+x}" ] ||
+#   [ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ]
 # } ||
 # ! exec &> /dev/tty ||
 # SCRIPT_SCOPE="$script_scope" SCRIPT_NAME="$HOME/.profile" init
@@ -49,17 +44,6 @@ type "env_reset" > /dev/null 2>&1 && [ ! -z "${INIT+x}" ] ||
 script_name="$(script_name)"
 [ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
 # unset script_name
-
-update_script_name() {
-	[ "$1" = "$script_name" ] ||
-	{
-		print '$script_name' "$script_name [$1]" >> "$SYST_OUTPUT" # got /dev/tty
-		script_name="$1"
-		SCRIPT_NAME="$script_name"
-	}
-}
-
-update_script_name "$HOME/.profile"
 
 # echo "\$loaded_profile = $loaded_profile"
 [ ! -e /etc/profile ] ||
@@ -70,27 +54,36 @@ update_script_name "$HOME/.profile"
 	. "/etc/profile"
 }
 
-update_script_name "$HOME/.profile"
-
 [ -z "${SHELL_DEBUG+x}" ] || print "$HOME/.profile" "sourced"
 
-tty="$(tty | grep -v not || :)"
-# [ ! -z "${TTY+x}" ] ||
-[ -z "${tty:+x}" ] ||
-! TTY="$tty" || export TTY
-# ! : "${TTY:="$(tty | grep -v not || :)"}" || export TTY
-unset tty
-# env_update "TTY" "$(tty | grep -v not || :)"
+env_update "TTY" "$(tty)"
 
+[ ! -z "${STEM_OUTPUT:+x}" ] &&
 [ ! -z "${KISS_TMPDIR:+x}" ] &&
 [ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
+[ -d "$KISS_TMPDIR" ] &&
 {
 	[ -z "${TTY:+x}" ] ||
-	[ "${LOG_DIR-}" = "$KISS_TMPDIR/logs/${TTY##*/}" ]
+	{
+		[ ! -z "${LOG_DIR:+x}" ] &&
+		[ "$LOG_DIR" = "$KISS_TMPDIR/logs/${TTY##*/}" ] &&
+		[ -d "$LOG_DIR" ]
+	}
 } ||
 # ! exec &> /dev/tty ||
 SCRIPT_SCOPE="$script_scope" SCRIPT_NAME="$HOME/.profile" init
 # readonly LOG_DIR
+
+update_script_name() {
+	[ "$1" = "$script_name" ] ||
+	{
+		print '$script_name' "$script_name [$1]" >> "$STEM_OUTPUT" # got /dev/tty
+		script_name="$1"
+		SCRIPT_NAME="$script_name"
+	}
+}
+
+update_script_name "$HOME/.profile"
 
 # shellcheck source=/usr/include/kiss/func
 type "delegate" > /dev/null 2>&1 && [ ! -z "${FUNC+x}" ] ||
@@ -154,7 +147,7 @@ type "out_direct"   > /dev/null 2>&1 && [ ! -z "${LOG+x}" ] ||
 type pipe_boot > /dev/null 2>&1 &&
 [ ! -z "${PIPE+x}" ] ||
 	. "${MNGR_ROOT-}/usr/include/kiss/pipe"
-# // silent_state || pipe_boot || :
+	// silent_state || pipe_boot || :
 # set +x
 
 # // pipe_init "$TTY" "$USER_OUTPUT"
@@ -165,19 +158,6 @@ type pipe_boot > /dev/null 2>&1 &&
 # // init_info "$TTY"
 # [ -z "${ERRO_PIPE+x}" ] || exec 2>"$erro_pipe"
 # print '$ERRO_PIPE' "$ERRO_PIPE"
-
-# tty="$(tty | grep -v not || :)"
-# [ ! -z "${tty+x}" ] &&
-# [ ! -z "${TTY+x}" ] && [ "$TTY" = "$tty" ] &&
-# print 'id : user : TTY' "$SESSION_PID <- $(pid_parent "$SESSION_PID") : $SESSION_USER : $TTY" | tee -a "$SYST_OUTPUT" ||
-# # print '$TTY' "$TTY" | tee -a "$SYST_OUTPUT" ||
-# {
-#   [ -z "${tty+x}" ] ||
-#   ! TTY="$tty" || export TTY
-#   # print '$TTY' "$TTY" | tee -a "$SYST_OUTPUT"
-#   print 'id : user : TTY' "$SESSION_PID <- $PPID : $SESSION_USER : $TTY" | tee -a "$SYST_OUTPUT"
-# }
-# unset tty
 
 # . s deploy all the profile
 # [ ! -z "${DOT_CONFIG:+x}" ] ||

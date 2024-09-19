@@ -683,19 +683,20 @@ return {
 		end
 	},
 
-	{
-		"folke/neodev.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		config = function()
-			local neodev_status_ok, neodev = pcall(require, "neodev")
+	-- {
+	-- 	-- "folke/neodev.nvim",
+	-- 	"folke/lazydev.nvim",
+	-- 	event = { "BufReadPre", "BufNewFile" },
+	-- 	config = function()
+	-- 		local neodev_status_ok, neodev = pcall(require, "neodev")
 
-			if not neodev_status_ok then
-				return
-			end
+	-- 		if not neodev_status_ok then
+	-- 			return
+	-- 		end
 
-			neodev.setup()
-		end,
-	},
+	-- 		-- neodev.setup()
+	-- 	end,
+	-- },
 
 	-- https://dx13.co.uk/articles/2023/04/24/neovim-lsp-without-plugins/
 	{
@@ -1326,15 +1327,19 @@ return {
 					end
 				end,
 			})
-			lspconfig.tsserver.setup({
-				capabilities = capabilities,
-				single_file_support = false,
-				-- on_attach = function(client, bufnr)
-				--  print('hello tsserver')
-				-- end
-				on_attach = on_attach,
-			})
-
+			-- typescript server
+			-- lua print(vim.inspect(require("lspconfig.configs").cssls))
+			-- lua print(vim.inspect(require("lspconfig").tsserver)) -- will return the setup
+			-- if lspconfig.tsserver ~= nil then
+			-- 	lspconfig.tsserver.setup({
+			-- 		capabilities = capabilities,
+			-- 		single_file_support = false,
+			-- 		-- on_attach = function(client, bufnr)
+			-- 			--  print('hello tsserver')
+			-- 			-- end
+			-- 			on_attach = on_attach,
+			-- 		})
+			-- end
 			vim.api.nvim_create_autocmd("LspTokenUpdate", {
 				pattern = {"*.md", "*.markdown"},
 				callback = show_unconst_caps,
