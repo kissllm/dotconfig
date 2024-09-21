@@ -29,7 +29,8 @@ reset_cursor_shape() {
 	[ ! -z "$TERM:+x}" ] &&
 	[ ! -z "$TERM##*"linux"*}" ] &&
 	[ ! -z "$TERM##*"tmux"*}" ] ||
-	! command -v "/usr/bin/setterm" > /dev/null 2>&1 || {
+	! command -v "/usr/bin/setterm" > /dev/null 2>&1 ||
+	{
 		# util-linux-misc
 		setterm --term "linux" --cursor on
 		# tabstop

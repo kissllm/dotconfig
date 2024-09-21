@@ -51,6 +51,7 @@ return {
 
 	{
 		"tpope/vim-fugitive",
+		-- cond  = false, -- "y" redefined in the plugin
 		event = "VeryLazy",
 	},
 
@@ -145,7 +146,7 @@ return {
 	-- The default shortcut "-" is very bad
 	{
 		'justinmk/vim-dirvish',
-		cond   = false,
+		   cond   = false,
 		event = "VeryLazy",
 		lazy  = true,
 	},
@@ -285,22 +286,46 @@ return {
 
 	{
 		"mbbill/undotree",
+		cond  = false, -- does not work for neovim
 		-- event = "VeryLazy",
 		-- lazy  = true,
 		lazy  = false,
 	},
 
+	{
+		"jiaoshijie/undotree",
+		event = "VeryLazy",
+		lazy  = true,
+		dependencies = "nvim-lua/plenary.nvim",
+		-- config = function()
+		--  require('undotree').setup({
+		--      keys = { -- load the plugin only when using it's keybinding:
+		--          { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
+		--      },
+		--  })
+		-- end,
+	},
+
+	{
+		"kevinhwang91/nvim-fundo",
+		event = "VeryLazy",
+		lazy  = true,
+	},
+
 	-- {
-	-- 	-- Moved to "folke/lazydev.nvim"
-	-- 	"folke/neodev.nvim",
-	-- 	cond   = false,
-	-- 	opts   = {},
-	-- 	event  = "VeryLazy",
-	-- 	lazy   = true,
+	--  -- Moved to "folke/lazydev.nvim"
+	--  "folke/neodev.nvim",
+	--  cond   = false,
+	--  opts   = {},
+	--  event  = "VeryLazy",
+	--  lazy   = true,
 	-- },
 
-	-- The only working plugin in the list of plugins that claim to support this feature
+	-- The two working plugins in the list of plugins that claim to support this feature
 	-- Copy from nvim to tmux [TextYankPost]
+	-- 1. When boot tmux from tty, copy to tmux clipboard -- prefix + ] or ctrl + p paste to terminal
+	-- 2. When boot tmux from wayland (gui), copy both to tmux and gui system clipboard
+	-- 3. Paste to current line when yanked a line
 	-- Disappeared -- E353: Nothing in register " especially in tty
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- [TextYankPost], needs "lazy = false,"
@@ -312,7 +337,7 @@ return {
 		--  {'tmux-plugins/vim-tmux-focus-events'},
 		-- },
 		-- https://github.com/roxma/vim-tmux-clipboard/issues/7
-		-- cond     = false,
+		   cond     = false,
 		opts     = {},
 		-- event    = "VeryLazy",
 		event     = "TextYankPost",
@@ -325,46 +350,44 @@ return {
 		end,
 	},
 
+	-- The two working plugins in the list of plugins that claim to support this feature
 	-- Copy from nvim to tmux ? [TextYankPost]
-	-- E353: Nothing in register " especially in tty
+	-- 1. When boot tmux from tty, copy to tmux clipboard -- prefix + ] or ctrl + p paste to terminal
+	-- 2. When boot tmux from wayland (gui), copy to gui system clipboard -- ctrl + shift + v to paste to terminal and
+	--       gui components
+	-- 3. Paste to a new line when yanked a line -- has internal paste definitions
+	-- Disappeared -- E353: Nothing in register " especially in tty
 	-- Author: As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- "show-buffer -s" error
 	{
-		"aserowy/tmux.nvim",
-		cond      = false,
-		opts      = {
-			copy_sync = {
-				-- enable = false,
-				enable = true,
-				-- redirect_to_clipboard = false,
-				redirect_to_clipboard = true,
-			},
-			navigation = {
-				-- enable_default_keybindings = true,
-				enable_default_keybindings = false,
-			},
-		},
+		"trailblazing/tmux.nvim",
+		-- cond      = false,
+		-- opts      = {
+		--  copy_sync = {
+		--      -- enable = false,
+		--      enable = true, -- default
+		--      sync_clipboard = true, -- default
+		--      sync_registers = true, -- default
+		--      -- No difference
+		--      -- redirect_to_clipboard = false,
+		--         redirect_to_clipboard = true, -- default
+		--  },
+		--  navigation = {
+		--      -- enable_default_keybindings = true,
+		--      enable_default_keybindings = false,
+		--  },
+		-- },
 		-- event  = "VeryLazy",
 		event     = "TextYankPost",
 		-- lazy   = true,
 		lazy      = false,
-		config = function()
-			return require("tmux").setup({
-				copy_sync = {
-					-- enable = false,
-					enable = true,
-					-- redirect_to_clipboard = false,
-					redirect_to_clipboard = true,
-				},
-				navigation = {
-					-- enable_default_keybindings = true,
-					enable_default_keybindings = false,
-				},
-			})
-		end,
+		-- config    = function()
+		--  return require("tmux").setup(opts)
+		-- end,
 	},
 
+	-- Does not work
 	-- $XDG_DATA_HOME/nvim/lazy/nvim-miniyank/lua/miniyank.lua:15: attempt to call field 'list' (a nil value)
 	{
 		"bfredl/nvim-miniyank",
@@ -384,7 +407,7 @@ return {
 	-- g! - executes lines as tmux commands. Works on visual selection or as a motion. g!! executes just the current line.
 	{
 		"tmux-plugins/vim-tmux",
-		   cond   = false, -- manual loading required
+		cond     = false, -- manual loading required but the following "config" does not work
 		opts     = {},
 		-- event = "VeryLazy",
 		event    = "TextYankPost",
@@ -401,7 +424,7 @@ return {
 		end
 	},
 
-	-- Not copy/paste, just send
+	-- Not copy / paste, just send
 	{
 		"tadhg-ohiggins/vim-tmux-send",
 		   event     = "VeryLazy",
@@ -598,6 +621,23 @@ return {
 		lazy   = true,
 	},
 
+	-- Installation failed
+	-- {
+	--  'SidOfc/carbon.nvim',
+	--  -- event  = "VeryLazy",
+	--  lazy   = false,
+	-- },
+
 	{
+		'nmac427/guess-indent.nvim',
+		event  = "VeryLazy",
+		lazy   = true,
+		config = function() require('guess-indent').setup {} end,
+	},
+
+	{
+		"tpope/vim-sleuth",
+		event  = "VeryLazy",
+		lazy   = true,
 	},
 }

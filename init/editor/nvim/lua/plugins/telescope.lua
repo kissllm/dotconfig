@@ -27,6 +27,10 @@ return {
 	cond = true,
 	-- cond = false,
 	dependencies = {
+		{
+			"nvim-telescope/telescope-file-browser.nvim",
+			dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+		},
 		{ 'nvim-lua/plenary.nvim' },
 		{ 'BurntSushi/ripgrep' },
 		-- { 'sharkdp/fd' },
@@ -75,49 +79,49 @@ return {
 		-- lspconfig.clangd.setup {}
 		-- local lua_ls = require("lspconfig.lua_ls")
 		-- lua_ls.setup {
-		-- 	-- settings = {
-		-- 	-- lspzero = lspzero,
-		-- 	lsp = lsp,
-		-- 	capabilities = lsp_capabilities,
-		-- 	lua = {
-		-- 		format = {
-		-- 			enable = true,
-		-- 			defaultConfig = {
-		-- 				indent_style = "space",
-		-- 				indent_size = "2",
-		-- 				align_continuous_assign_statement = false,
-		-- 				align_continuous_rect_table_field = false,
-		-- 				align_array_table = false
-		-- 			},
-		-- 		},
-		-- 		-- https://github.com/folke/neodev.nvim
-		-- 		completion = {
-		-- 			callSnippet = "Replace"
-		-- 		},
-		-- 		runtime = {
-		-- 			-- LuaJIT in the case of Neovim
-		-- 			version = 'LuaJIT',
-		-- 			path = vim.split(package.path, ';'),
-		-- 		},
-		-- 		diagnostics = {
-		-- 			globals = { 'vim' }
-		-- 		},
-		-- 		workspace = {
-		-- 			-- Make the server aware of Neovim runtime files
-		-- 			library = {
-		-- 				[vim.fn.expand('$VIMRUNTIME/lua')] = true,
-		-- 			[vim.fn.stdpath("config") .. "/lua"] = true,
-		-- 				[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
-		-- 			},
-		-- 		},
+		--  -- settings = {
+		--  -- lspzero = lspzero,
+		--  lsp = lsp,
+		--  capabilities = lsp_capabilities,
+		--  lua = {
+		--      format = {
+		--          enable = true,
+		--          defaultConfig = {
+		--              indent_style = "space",
+		--              indent_size = "2",
+		--              align_continuous_assign_statement = false,
+		--              align_continuous_rect_table_field = false,
+		--              align_array_table = false
+		--          },
+		--      },
+		--      -- https://github.com/folke/neodev.nvim
+		--      completion = {
+		--          callSnippet = "Replace"
+		--      },
+		--      runtime = {
+		--          -- LuaJIT in the case of Neovim
+		--          version = 'LuaJIT',
+		--          path = vim.split(package.path, ';'),
+		--      },
+		--      diagnostics = {
+		--          globals = { 'vim' }
+		--      },
+		--      workspace = {
+		--          -- Make the server aware of Neovim runtime files
+		--          library = {
+		--              [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+		--          [vim.fn.stdpath("config") .. "/lua"] = true,
+		--              [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+		--          },
+		--      },
 
-		-- 	},
-		-- 	single_file_support = false,
-		-- 	on_attach = on_attach
-		-- 	-- on_attach = function(client, bufnr)
-		-- 	--      --  print('hello world')
-		-- 	--      -- end,
-		-- 	-- },
+		--  },
+		--  single_file_support = false,
+		--  on_attach = on_attach
+		--  -- on_attach = function(client, bufnr)
+		--  --      --  print('hello world')
+		--  --      -- end,
+		--  -- },
 		-- }
 
 		lspconfig.on_attach = function(client, bufnr)
@@ -237,6 +241,7 @@ augroup END
 		-- https://github.com/nvim-telescope/telescope-live-grep-args.nvim
 		local actions_undo = require("telescope-undo.actions")
 		local lga_actions  = require("telescope-live-grep-args.actions")
+		local fb_actions   = require "telescope".extensions.file_browser.actions
 		-- $HOME/.local/share/nvim/lazy
 		local cwd          = require("lazy.core.config").options.root
 		telescope.load_extension("lsp_handlers")
@@ -248,191 +253,192 @@ augroup END
 			-- https://www.lazyvim.org/configuration/examples
 			-- https://www.reddit.com/r/neovim/comments/11m3575/howwhere_to_set_plugin_keymaps_with_lazynvim/
 			-- keys = {
-			-- 	-- add a keymap to browse plugin files
-			-- 	-- stylua: ignore
-			-- 	{
-			-- 		-- "<leader>ff",
-			-- 		"<leader>fp",
-			-- 		function() builtin.find_files({ cwd = cwd }) end,
-			-- 		desc = "Find Plugin File",
-			-- 	},
-			-- 	{
-			-- 		"<leader>fg",
-			-- 		function() builtin.live_grep({ cwd = cwd }) end,
-			-- 		desc = "Find String in Files",
-			-- 	},
-			-- 	{
-			-- 		"<leader>fb",
-			-- 		function() builtin.buffers({ cwd = cwd }) end,
-			-- 		desc = "Find String in Buffers",
-			-- 	},
-			-- 	{
-			-- 		"<leader>fh",
-			-- 		function() builtin.help_tags({ cwd = cwd }) end,
-			-- 		desc = "Find Help Tags",
-			-- 	},
-			-- 	-- https://www.reddit.com/r/neovim/comments/zko4tf/difficulty_loading_telescopenvim_lazy_or_eager/
-			-- 	{
-			-- 		"gd",
-			-- 		function() builtin.lsp_definitions({ cwd = cwd }) end,
-			-- 		desc = "Find lsp definitions",
-			-- 	},
-			-- 	{
-			-- 		"gy",
-			-- 		function() builtin.lsp_type_definitions({ cwd = cwd }) end,
-			-- 		desc = "Find lsp type definitions",
-			-- 	},
-			-- 	{
-			-- 		"gr",
-			-- 		function() builtin.lsp_references({ cwd = cwd }) end,
-			-- 		desc = "Find lsp references",
-			-- 	},
+			--  -- add a keymap to browse plugin files
+			--  -- stylua: ignore
+			--  {
+			--      -- "<leader>ff",
+			--      "<leader>fp",
+			--      function() builtin.find_files({ cwd = cwd }) end,
+			--      desc = "Find Plugin File",
+			--  },
+			--  {
+			--      "<leader>fg",
+			--      function() builtin.live_grep({ cwd = cwd }) end,
+			--      desc = "Find String in Files",
+			--  },
+			--  {
+			--      "<leader>fb",
+			--      function() builtin.buffers({ cwd = cwd }) end,
+			--      desc = "Find String in Buffers",
+			--  },
+			--  {
+			--      "<leader>fh",
+			--      function() builtin.help_tags({ cwd = cwd }) end,
+			--      desc = "Find Help Tags",
+			--  },
+			--  -- https://www.reddit.com/r/neovim/comments/zko4tf/difficulty_loading_telescopenvim_lazy_or_eager/
+			--  {
+			--      "gd",
+			--      function() builtin.lsp_definitions({ cwd = cwd }) end,
+			--      desc = "Find lsp definitions",
+			--  },
+			--  {
+			--      "gy",
+			--      function() builtin.lsp_type_definitions({ cwd = cwd }) end,
+			--      desc = "Find lsp type definitions",
+			--  },
+			--  {
+			--      "gr",
+			--      function() builtin.lsp_references({ cwd = cwd }) end,
+			--      desc = "Find lsp references",
+			--  },
 			-- },
 
-			opts = {
-				defaults = {
-					selection_strategy   = "closest",
-					-- Default configuration for telescope goes here:
-					-- config_key = value,
-					-- https://lee-phillips.org/nvimTelescopeConfig/
-					scroll_strategy      = "limit",
-					file_ignore_patterns = { ".git/[^h]" },
-					-- file_ignore_patterns = { '^node_modules/', },
-					-- prompt_prefix        = " ",
-					prompt_prefix        = "< ",
-					-- selection_caret      = " ",
-					selection_caret      = "-> ",
-					path_display         = { "smart" },
-					-- https://www.lazyvim.org/configuration/examples
-					layout_strategy      = 'horizontal',
-					-- layout_strategy      = 'vertical',
-					layout_config        = {
-						-- vertical = { width = 0.7 },
-						horizontal       = { height = 0.999 },
-						prompt_position  = 'top',
-						-- prompt_position     = 'left',
-						-- prompt_position     = 'bottom',
-						-- preview_cutoff   = 10,
-						preview_cutoff   = 0,
-						-- height              = 0.999,
+			-- opts = {
+			defaults = {
+				initial_mode = "normal", -- Open telescope buffers in normal mode -- https://www.reddit.com/r/neovim/comments/zc5fuy/open_telescope_buffers_in_normal_mode/
+				selection_strategy   = "closest",
+				-- Default configuration for telescope goes here:
+				-- config_key = value,
+				-- https://lee-phillips.org/nvimTelescopeConfig/
+				scroll_strategy      = "limit",
+				file_ignore_patterns = { ".git/[^h]" },
+				-- file_ignore_patterns = { '^node_modules/', },
+				-- prompt_prefix        = " ",
+				prompt_prefix        = "< ",
+				-- selection_caret      = " ",
+				selection_caret      = "-> ",
+				path_display         = { "smart" },
+				-- https://www.lazyvim.org/configuration/examples
+				layout_strategy      = 'horizontal',
+				-- layout_strategy      = 'vertical',
+				layout_config        = {
+					-- vertical = { width = 0.7 },
+					horizontal       = { height = 0.999 },
+					prompt_position  = 'top',
+					-- prompt_position     = 'left',
+					-- prompt_position     = 'bottom',
+					-- preview_cutoff   = 10,
+					preview_cutoff   = 0,
+					-- height              = 0.999,
 
-						-- height           = { padding = 0 },
-						-- width            = { padding = 0 },
+					-- height           = { padding = 0 },
+					-- width            = { padding = 0 },
 
-						-- height              = 1,
-						-- width               = 1,
-						preview_width    = 0.67,
-						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
-						-- width = function(_, cols, _)
-						--  if cols > 200 then
-						--      return 170
-						--  else
-						--      return math.floor(cols * 0.87)
-						--  end
-						-- end,
-						width            = function(_, max_columns)
+					-- height              = 1,
+					-- width               = 1,
+					preview_width    = 0.67,
+					-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+					-- width = function(_, cols, _)
+					--  if cols > 200 then
+					--      return 170
+					--  else
+					--      return math.floor(cols * 0.87)
+					--  end
+					-- end,
+					width            = function(_, max_columns)
+						-- local percentage = 0.95
+						local percentage = 1
+						local max = 900
+						-- return math.min(math.floor(percentage * max_columns), max)
+						return math.max(math.floor(percentage * max_columns), max)
+					end,
+					height          = function(_, _, max_lines)
+						-- local percentage = 0.95
+						local percentage = 1
+						local min = 900
+						return math.max(math.floor(percentage * max_lines), min)
+					end,
+					center = {
+						width = function(_, max_columns)
 							-- local percentage = 0.95
 							local percentage = 1
 							local max = 900
 							-- return math.min(math.floor(percentage * max_columns), max)
 							return math.max(math.floor(percentage * max_columns), max)
 						end,
-						height          = function(_, _, max_lines)
+						height = function(_, _, max_lines)
 							-- local percentage = 0.95
 							local percentage = 1
 							local min = 900
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
-						center = {
-							width = function(_, max_columns)
-								-- local percentage = 0.95
-								local percentage = 1
-								local max = 900
-								-- return math.min(math.floor(percentage * max_columns), max)
-								return math.max(math.floor(percentage * max_columns), max)
-							end,
-							height = function(_, _, max_lines)
-								-- local percentage = 0.95
-								local percentage = 1
-								local min = 900
-								return math.max(math.floor(percentage * max_lines), min)
-							end,
-						},
 					},
-					sorting_strategy     = 'ascending',
-					winblend             = 0,
+				},
+				sorting_strategy     = 'ascending',
+				winblend             = 0,
 
 
-					mappings             = {
-						i = {
-							["<C-n>"]      = actions.cycle_history_next,
-							["<C-p>"]      = actions.cycle_history_prev,
+				mappings             = {
+					i = {
+						["<C-n>"]      = actions.cycle_history_next,
+						["<C-p>"]      = actions.cycle_history_prev,
 
-							["<C-j>"]      = actions.move_selection_next,
-							["<C-k>"]      = actions.move_selection_previous,
+						["<C-j>"]      = actions.move_selection_next,
+						["<C-k>"]      = actions.move_selection_previous,
 
-							["<C-c>"]      = actions.close,
+						["<C-c>"]      = actions.close,
 
-							["<Down>"]     = actions.move_selection_next,
-							["<Up>"]       = actions.move_selection_previous,
+						["<Down>"]     = actions.move_selection_next,
+						["<Up>"]       = actions.move_selection_previous,
 
-							["<CR>"]       = actions.select_default,
-							["<C-x>"]      = actions.select_horizontal,
-							["<C-v>"]      = actions.select_vertical,
-							["<C-t>"]      = actions.select_tab,
+						["<CR>"]       = actions.select_default,
+						["<C-x>"]      = actions.select_horizontal,
+						["<C-v>"]      = actions.select_vertical,
+						["<C-t>"]      = actions.select_tab,
 
-							["<C-u>"]      = actions.preview_scrolling_up,
-							["<C-d>"]      = actions.preview_scrolling_down,
+						["<C-u>"]      = actions.preview_scrolling_up,
+						["<C-d>"]      = actions.preview_scrolling_down,
 
-							["<PageUp>"]   = actions.results_scrolling_up,
-							["<PageDown>"] = actions.results_scrolling_down,
+						["<PageUp>"]   = actions.results_scrolling_up,
+						["<PageDown>"] = actions.results_scrolling_down,
 
-							["<Tab>"]      = actions.toggle_selection + actions.move_selection_worse,
-							["<S-Tab>"]    = actions.toggle_selection + actions.move_selection_better,
-							["<C-q>"]      = actions.send_to_qflist + actions.open_qflist,
-							["<M-q>"]      = actions.send_selected_to_qflist + actions.open_qflist,
-							["<C-l>"]      = actions.complete_tag,
-							-- ["<C-_>"]      = actions.which_key, -- keys from pressing <C-/>
-						},
+						["<Tab>"]      = actions.toggle_selection + actions.move_selection_worse,
+						["<S-Tab>"]    = actions.toggle_selection + actions.move_selection_better,
+						["<C-q>"]      = actions.send_to_qflist + actions.open_qflist,
+						["<M-q>"]      = actions.send_selected_to_qflist + actions.open_qflist,
+						["<C-l>"]      = actions.complete_tag,
+						-- ["<C-_>"]      = actions.which_key, -- keys from pressing <C-/>
+					},
 
-						n = {
-							["<esc>"]      = actions.close,
-							["<CR>"]       = actions.select_default,
-							["<C-x>"]      = actions.select_horizontal,
-							["<C-v>"]      = actions.select_vertical,
-							["<C-t>"]      = actions.select_tab,
+					n = {
+						["<esc>"]      = actions.close,
+						["<CR>"]       = actions.select_default,
+						["<C-x>"]      = actions.select_horizontal,
+						["<C-v>"]      = actions.select_vertical,
+						["<C-t>"]      = actions.select_tab,
 
-							["<Tab>"]      = actions.toggle_selection + actions.move_selection_worse,
-							["<S-Tab>"]    = actions.toggle_selection + actions.move_selection_better,
-							["<C-q>"]      = actions.send_to_qflist + actions.open_qflist,
-							["<M-q>"]      = actions.send_selected_to_qflist + actions.open_qflist,
+						["<Tab>"]      = actions.toggle_selection + actions.move_selection_worse,
+						["<S-Tab>"]    = actions.toggle_selection + actions.move_selection_better,
+						["<C-q>"]      = actions.send_to_qflist + actions.open_qflist,
+						["<M-q>"]      = actions.send_selected_to_qflist + actions.open_qflist,
 
-							["j"]          = actions.move_selection_next,
-							["k"]          = actions.move_selection_previous,
-							["H"]          = actions.move_to_top,
-							["M"]          = actions.move_to_middle,
-							["L"]          = actions.move_to_bottom,
+						["j"]          = actions.move_selection_next,
+						["k"]          = actions.move_selection_previous,
+						["H"]          = actions.move_to_top,
+						["M"]          = actions.move_to_middle,
+						["L"]          = actions.move_to_bottom,
 
-							["<Down>"]     = actions.move_selection_next,
-							["<Up>"]       = actions.move_selection_previous,
-							["gg"]         = actions.move_to_top,
-							["G"]          = actions.move_to_bottom,
+						["<Down>"]     = actions.move_selection_next,
+						["<Up>"]       = actions.move_selection_previous,
+						["gg"]         = actions.move_to_top,
+						["G"]          = actions.move_to_bottom,
 
-							-- ["<C-u>"]      = actions.preview_scrolling_up,
-							["u"]          = actions.preview_scrolling_up,
-							-- ["<C-d>"]      = actions.preview_scrolling_down,
-							["m"]          = actions.preview_scrolling_down,
+						-- ["<C-u>"]      = actions.preview_scrolling_up,
+						["u"]          = actions.preview_scrolling_up,
+						-- ["<C-d>"]      = actions.preview_scrolling_down,
+						["m"]          = actions.preview_scrolling_down,
 
-							["<PageUp>"]   = actions.results_scrolling_up,
-							["<PageDown>"] = actions.results_scrolling_down,
+						["<PageUp>"]   = actions.results_scrolling_up,
+						["<PageDown>"] = actions.results_scrolling_down,
 
-							-- ["?"]          = actions.which_key,
-							-- https://www.reddit.com/r/neovim/comments/qspemc/close_buffers_with_telescope/
-							['<c-d>']      = actions.delete_buffer,
-						},
+						-- ["?"]          = actions.which_key,
+						-- https://www.reddit.com/r/neovim/comments/qspemc/close_buffers_with_telescope/
+						['<c-d>']      = actions.delete_buffer,
 					},
 				},
 			},
+			-- },
 
 			pickers = {
 				-- Default configuration for builtin pickers goes here:
@@ -444,6 +450,7 @@ augroup END
 				-- builtin picker
 				-- https://lee-phillips.org/nvimTelescopeConfig/
 				find_files = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
 					hidden          = true,
 					layout_strategy = 'horizontal',
 					-- layout_strategy      = 'vertical',
@@ -484,6 +491,7 @@ augroup END
 					},
 				},
 				grep_string = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
 					layout_strategy = 'horizontal',
 					-- layout_strategy      = 'vertical',
 					layout_config   = {
@@ -524,6 +532,7 @@ augroup END
 				},
 				-- https://www.reddit.com/r/neovim/comments/udx0fi/telescopebuiltinlive_grep_and_operator/
 				live_grep = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
 					on_input_filter_cb = function(prompt)
 						-- AND operator for live_grep like how fzf handles spaces with wildcards in rg
 						return { prompt = prompt:gsub("%s", ".*") }
@@ -568,6 +577,7 @@ augroup END
 				},
 				-- nnoremap gb :buffers<CR>:buffer<Space>
 				buffers = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
 					show_all_buffers = true,
 					-- theme = "dropdown",
 					-- previewer = false,
@@ -622,8 +632,11 @@ augroup END
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
 					},
+					-- Can not go back to indert mode ?
+					-- on_complete = { function() vim.cmd"stopinsert" end },
 				},
 				help_tags = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
 					layout_strategy  = 'horizontal',
 					-- layout_strategy      = 'vertical',
 					layout_config    = {
@@ -723,14 +736,86 @@ augroup END
 						prefix = '',
 					},
 				},
+				-- https://github.com/nvim-telescope/telescope-file-browser.nvim
+				-- No upward directories showing by default <i:ctrl-g> or backspace
+				file_browser = {
+					initial_mode = "normal", -- Open telescope buffers in normal mode
+					theme = "ivy",
+					-- disables netrw and use telescope-file-browser in its place
+					hijack_netrw = true,
+					mappings = {
+						["i"] = {
+							-- your custom insert mode mappings
+						},
+						["n"] = {
+							-- your custom normal mode mappings
+							-- ["g"] = fb_actions.goto_parent_dir,
+							["<BackSpace>"] = fb_actions.goto_parent_dir,
+							-- unmap toggling `fb_actions.toggle_browser`
+						},
+					},
 
+					layout_strategy  = 'horizontal',
+					-- layout_strategy      = 'vertical',
+					layout_config    = {
+						vertical        = { width = 0.3 },
+						prompt_position = 'top',
+						-- prompt_position     = 'left',
+						-- prompt_position     = 'bottom',
+						-- preview_cutoff   = 10,
+						preview_cutoff  = 0,
+						height          = 0.999,
+						width           = { padding = 0 },
+						-- height              = 1,
+						-- width               = 1,
+						preview_width   = 0.67,
+						-- https://www.reddit.com/r/neovim/comments/yrqm9f/comment/ivv8hoa/
+						-- width = function(_, cols, _)
+						--  if cols > 200 then
+						--      return 170
+						--  else
+						--      return math.floor(cols * 0.87)
+						--  end
+						-- end,
+						width           = function(_, max_columns)
+							-- local percentage = 0.95
+							local percentage = 1
+							local max = 900
+							-- return math.min(math.floor(percentage * max_columns), max)
+							return math.max(math.floor(percentage * max_columns), max)
+						end,
+						height          = function(_, _, max_lines)
+							-- local percentage = 0.95
+							local percentage = 1
+							local min = 900
+							return math.max(math.floor(percentage * max_lines), min)
+						end,
+					},
+					-- on_complete = { function() vim.cmd"stopinsert" end },
+				},
 			},
 		}
+		-- To get telescope-file-browser loaded and working with telescope,
+		-- you need to call load_extension, somewhere after setup function:
+		require("telescope").load_extension "file_browser"
 		-- require("telescope").load_extension("live_grep_args")
 		-- telescope.load_extension("fzf")
 		local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 		-- vim.keymap.set("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
 		map("n", "<leader>gc", live_grep_args_shortcuts.grep_word_under_cursor)
+
+		-- vim.keymap.set("n", "<leader>fb", ":Telescope file_browser<CR>")
+		-- vim.keymap.set("n", "\\", ":Telescope file_browser<CR>")
+
+		-- open file_browser with the path of the current buffer
+		-- vim.keymap.set("n", "<leader>fb", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+		   vim.keymap.set("n", "\\", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+		   vim.keymap.set("n", "<leader>\\", ":Telescope live_grep<CR>")
+
+		-- Alternatively, using lua API
+		-- vim.keymap.set("n", "<leader>fb", function()
+		--  require("telescope").extensions.file_browser.file_browser()
+		-- end)
 
 		-- USE_TELESCOPE_GOTO=1
 

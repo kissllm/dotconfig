@@ -1,4 +1,5 @@
 local U        = require("utils")
+local log      = require("log")
 -- local cmd   = vim.cmd -- execute Vim commands
 local exec     = vim.api.nvim_exec -- execute Vimscript
 local api      = vim.api           -- neovim commands
@@ -264,11 +265,52 @@ set.sessionoptions  = set.sessionoptions - 'options'
 -- This "options" will include deprecated maps
 -- set.sessionoptions   = set.sessionoptions + 'options'
 set.viewoptions     = 'folds,cursor,unix,slash'
+-- https://toddknutson.bio/posts/how-to-enable-neovim-undo-backup-and-swap-files-when-switching-linux-groups/
+-- USER = os.getenv("USER")
+-- local curr_group = vim.fn.system("id -ng 2> /dev/null | tr -d '\n'")
+-- if USER ~= 'root' then
+--  -- SWAPDIR    = "/home/" .. curr_group .. "/" .. USER .. "/nvim/swap//"
+--  SWAPDIR    = "/home/" .. USER .. "/nvim/swap//"
+--  -- BACKUPDIR  = "/home/" .. curr_group .. "/" .. USER .. "/nvim/backup//"
+--  BACKUPDIR  = "/home/" .. USER .. "/nvim/backup//"
+--  -- UNDODIR    = "/home/" .. curr_group .. "/" .. USER .. "/nvim/undo//"
+--  UNDODIR    = "/home/" .. USER .. "/nvim/undo//"
+-- else
+--  SWAPDIR    = "/" .. USER .. "/nvim/swap//"
+--  BACKUPDIR  = "/" .. USER .. "/nvim/backup//"
+--  UNDODIR    = "/" .. USER .. "/nvim/undo//"
+-- end
+SWAPDIR    = os.getenv('XDG_DATA_HOME') .. '/nvim/swap//'
+BACKUPDIR  = os.getenv('XDG_DATA_HOME') .. '/nvim/backup//'
+UNDODIR    = os.getenv('XDG_DATA_HOME') .. '/nvim/undo//'
+if vim.fn.isdirectory(SWAPDIR) == 0 then
+	vim.fn.mkdir(SWAPDIR, "p", "0o700")
+end
 
+if vim.fn.isdirectory(BACKUPDIR) == 0 then
+	vim.fn.mkdir(BACKUPDIR, "p", "0o700")
+end
+
+if vim.fn.isdirectory(UNDODIR) == 0 then
+	vim.fn.mkdir(UNDODIR, "p", "0o700")
+end
+-- Enable swap, backup, and persistant undo
+set.directory  = SWAPDIR
+set.backupdir  = BACKUPDIR
+set.undodir    = UNDODIR
 -- Do you have alternatives?
 -- set.swapfile     = false
-set.swapfile        = true
-set.undofile        = true
+set.swapfile   = true
+set.backup     = true
+set.undofile   = true
+
+-- Append backup files with timestamp
+vim.api.nvim_create_autocmd("BufWritePre", {
+	callback = function()
+		local extension = "~" .. vim.fn.strftime("%Y-%m-%d-%H%M%S")
+		vim.o.backupext = extension
+	end,
+})
 
 -- set.conceallevel = 2
 -- set.conceallevel = 1
@@ -300,7 +342,10 @@ vim.api.nvim_set_var('vimwiki_folding', 'expr:quick')
 -- set.foldenable      = false
 set.foldenable      = true
 
-
+-- https://github.com/neovim/neovim/issues/8350
+-- vim.cmd[[
+-- :autocmd WinNew * wincmd H
+-- ]]
 
 
 -- initialize global var to false -> nvim-cmp turned off per default
@@ -396,10 +441,10 @@ vim.api.nvim_create_user_command(
 -- Does not work in complex scenarioes
 -- vim.cmd([[
 -- func! s:retabindents()
--- 	let saved_view = winsaveview()
--- 	" E486: Pattern not found: ^\( \{4}\)\+
--- 	execute '%s@^\( \{'.&ts.'}\)\+@\=repeat("\t", len(submatch(0))/'.&ts.')@'
--- 	call winrestview(saved_view)
+--  let saved_view = winsaveview()
+--  " E486: Pattern not found: ^\( \{4}\)\+
+--  execute '%s@^\( \{'.&ts.'}\)\+@\=repeat("\t", len(submatch(0))/'.&ts.')@'
+--  call winrestview(saved_view)
 -- endfunc
 -- " Retab spaced file, but only indentation
 -- " command! RetabIndents call RetabIndents()
@@ -474,7 +519,7 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 
 			-- vim.cmd("colorscheme onehalf-lush-dark")
 			-- vim.api.nvim_command("colorscheme onehalf-lush-dark")
-			vim.api.nvim_command("colorscheme nord")
+			vim.api.nvim_command("colorscheme " .. vim.g.colors_name)
 
 			-- vim.cmd("colorscheme no-clown-fiesta")
 			-- vim.cmd("colorscheme nebulous")
@@ -486,7 +531,7 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 
 			-- vim.cmd("colorscheme onehalf-lush")
 			-- vim.api.nvim_command("colorscheme onehalf-lush")
-			vim.api.nvim_command("colorscheme nord")
+			vim.api.nvim_command("colorscheme " .. vim.g.colors_name)
 
 			-- vim.cmd("colorscheme gruvbox")
 		end
@@ -885,6 +930,82 @@ vim.api.nvim_create_user_command(
 	-- end,
 	{ nargs = 1, complete = help }
 )
+
+-- https://stackoverflow.com/questions/73779049/how-to-get-current-cmdline-content-in-neovim
+-- vim.api.nvim_create_autocmd({ 'CmdlineChanged', 'CmdlineEnter' },
+vim.api.nvim_create_autocmd({ 'CmdlineLeave' },
+{
+	callback = function()
+		local str, chk = vim.fn.getcmdline():gsub('', '')
+		if chk > 1 then
+			-- local fh = io.open(os.getenv('HOME') .. '/.vim.log', 'a+')
+			local fh = io.open(log.address, 'a+')
+			-- fh:write(('%s%s\n'):format(vim.fn.getcmdtype(), str:gsub(':', '')))
+			local current_cmd = ('%s'):format(str)
+			vim.g.current_cmd = current_cmd
+			-- fh:write(('%s\n'):format(str))
+			fh:write(('%s\n'):format(current_cmd))
+			fh:flush()
+			-- if current_cmd == "messages" then
+			-- 	vim.cmd[[
+			-- 	setlocal bufhidden=unload |
+			-- 	\ wincmd L |
+			-- 	\ vertical resize 100
+			-- 	]]
+			-- end
+		end
+	end
+}
+)
+
+vim.cmd[[
+" autocmd BufWinEnter <buffer> wincmd H
+augroup vertical_message
+autocmd!
+" autocmd FileType noice " Will resize all noice windows
+" autocmd WinEnter * " does not work
+" autocmd WinNew *
+" autocmd BufReadPost *
+" autocmd WinNew * autocmd BufEnter * ++once
+
+" autocmd BufWinEnter * ++nested
+  autocmd BufWinEnter,BufReadPost * ++nested
+  \ if exists('g:current_cmd') && g:current_cmd =~? '\v(mes)'
+  \ && &filetype =~? '\v(noice)' && &buftype =~? '\v(nofile)' |
+  \ setlocal bufhidden=unload |
+  \ wincmd H |
+  \ vertical resize 100 | wincmd _ | :exe 'resize ' . (winheight(0) + 9999) | :redraw | endif
+
+" Normally display when triggering command mode and quit it
+
+" \ vertical resize 100 | resize winheight(1) | endif " Does not work
+" \ vertical resize 100 | exec winheight(1) . '<C-W>_' | endif
+" \ vertical resize 100 | wincmd _ | endif
+" \ vertical resize 100 | z99<CR> | endif
+" \ vertical resize 100 | wincmd _ | endif
+" https://vi.stackexchange.com/questions/514/how-do-i-change-the-current-splits-width-and-height
+
+" Will resize all noice windows
+" autocmd FileType noice if v:insertmode !~? '\v(i)'
+" \ && exists('g:current_cmd') && g:current_cmd =~? '\v(messages)'
+" \ && &filetype =~? '\v(noice)' && &buftype =~? '\v(nofile)' |
+" \ setlocal bufhidden=unload |
+" \ wincmd H |
+" \ vertical resize 100 | wincmd _ | :exe 'resize ' . (winheight(0) + 9999) | :redraw | endif
+
+" This is the trick for messages window, when it is initializing it always has the height of one line
+" autocmd WinClosed * :0 wincmd H | if winwidth(0) < 100 | vertical resize 100 | endif |
+  autocmd WinClosed *
+  \ if exists('g:current_cmd') && g:current_cmd =~? '\v(mes)'
+  \ && &filetype =~? '\v(noice)' && &buftype =~? '\v(nofile)' |
+  \ setlocal bufhidden=unload |
+  \ :exe 'wincmd H' | if winwidth(0) < 100 | vertical resize 100 | endif |
+  \ if winheight(0) < 100 | wincmd _ | endif | endif
+
+augroup END
+
+]]
+
 --
 -- Synchronizing between the modified same files
 -- Neovim automatically supports auto read by default

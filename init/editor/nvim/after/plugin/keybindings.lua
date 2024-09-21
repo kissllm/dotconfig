@@ -59,15 +59,17 @@ local map = U.map
 map("i", "jj", "<Esc>")
 map("n", "-",  "g_")
 
+-- map('n', "\\", "<Plug>(dirvish_up)", { noremap = true })
+
 -- use leader-nt to toggle the NvimTree plugin's visibility in normal mode
-map("n", "<leader>nt", ":NvimTreeToggle<CR>")
+-- Defined in corresponding .lua
+-- map("n", "\\", ":NvimTreeToggle<cr>")
+-- map("n", "<leader>nt", ":NvimTreeToggle<CR>")
 -- map("n", "<leader>nq", ":NvimTreeClose<CR>")
-map("n", "<leader>nq", ":Neotree close<CR>")
+-- map("n", "<leader>nq", ":Neotree close<CR>")
 -- map("n", "t", ":Neotree toggle<CR>")
-map("n", "\\", ":NvimTreeToggle<cr>")
 -- map("n", "t", ":Neotree<cr>")
-map("",  "<leader>n",  ":bn<CR>")
-map("",  "<leader>p",  ":bp<CR>")
+
 --
 -- map("t", "<ESC>",        "<C-\\><C-n>")
 --
@@ -240,34 +242,50 @@ map("n", "<leader>/", ":nohlsearch | diffupdate<CR>", { silent = true })
 map("n", "<Leader>d", ":<C-U>bprevious <bar> bdelete #<cr>", { silent = true })
 map("n", "<Leader>q", ":Bdelete<CR>", { silent = true })
 
--- Prevent x from overriding what's in the clipboard.
-map("n", "x", "\"_x")
-map("n", "X", "\"_x")
-
 -- Prevent selecting and pasting from overwriting what you originally copied.
 -- "p" became invalid might bicause of tmux default-command sesstings
 -- map("x", "p", "pgvy")
 -- map("x", "p", "pgvy",         { noremap = true })
 -- map("x", "p", "P",            { noremap = true })
+-- map("x", "p", "P")
 --
-vim.cmd([[
-" https://vi.stackexchange.com/questions/25259/clipboard-is-reset-after-first-paste-in-visual-mode/25260#25260
-" now it is possible to paste many times over selected text
-  xnoremap <expr> p '""pgv"'.v:register.'y`>'
-  xnoremap <expr> P '""Pgv"'.v:register.'y`>'
-  nnoremap <leader>p m`o<ESC>p``
-  nnoremap <leader>P m`O<ESC>p``
-" xnoremap p m`o<ESC>p``
-" xnoremap P m`O<ESC>p``
-" https://stackoverflow.com/questions/1346737/how-to-paste-in-a-new-line-with-vim
-" This implementation won't insert copies
-" nmap p :pu<CR>
-" nmap P :pu!<CR>
-]])
+-- vim.cmd([[
+-- " https://vi.stackexchange.com/questions/25259/clipboard-is-reset-after-first-paste-in-visual-mode/25260#25260
+-- " Paste without delete the content in registers, and now it is possible to paste many times over selected text
+-- " xnoremap <expr> p '""pgv"' . v:register . 'y`>'
+--   xnoremap <expr> p '"' . v:register . 'pgv"' . v:register . 'y`>'
+-- " xnoremap <expr> P '""Pgv"' . v:register . 'y`>'
+--   xnoremap <expr> P '"' . v:register . 'Pgv"' . v:register . 'y`>'
+--   nnoremap <leader>p m`o<ESC>p``
+--   nnoremap <leader>P m`O<ESC>p``
+-- " xnoremap p m`o<ESC>p``
+-- " xnoremap P m`O<ESC>p``
+-- " https://stackoverflow.com/questions/1346737/how-to-paste-in-a-new-line-with-vim
+-- " This implementation won't insert copies
+-- " nmap p :pu<CR>
+-- " nmap P :pu!<CR>
+-- ]])
+
+-- map('x', 'p', vim.api.nvim_replace_termcodes('\"' .. vim.v.register .. 'pgv"' .. vim.v.register .. 'y`>', true, true, true), { expr = true, noremap = true })
+-- map('x', 'P', vim.api.nvim_replace_termcodes('\"' .. vim.v.register .. 'Pgv"' .. vim.v.register .. 'y`>', true, true, true), { expr = true, noremap = true })
+map('x', 'p', [['"' . v:register . 'pgv"' . v:register . 'y`>']], { expr = true, noremap = true })
+map('x', 'P', [['"' . v:register . 'Pgv"' . v:register . 'y`>']], { expr = true, noremap = true })
+-- map('n', '<leader>p', 'm`o<Esc>p``', { noremap = true })
+-- map('n', '<leader>P', 'm`O<Esc>p``', { noremap = true })
+map("",  "<leader>n",  ":bn<CR>")
+map("",  "<leader>p",  ":bp<CR>")
+
 -- Keep cursor at the bottom of the visual selection after you yank it.
-   map("v", "y", "ygv<Esc>")
-   map("n", "xx", "dd")
-   map("n", "X", "D")
+map("v", "y", "ygv<Esc>")
+-- https://www.reddit.com/r/neovim/comments/1b9n736/deleting_overwriting_clipboard/
+-- map({'n', 'v'}, 'x', '"_x') -- keeping the default x
+map({'n', 'v'}, 'd', '"_d')
+-- Prevent x from overriding what's in the clipboard.
+-- [Remapping x, X and Del in Vim to Not Overwrite Your Clipboard](https://nickjanetakis.com/blog/remapping-x-and-del-in-vim-to-not-overwrite-your-clipboard)
+-- map("n", "x", '"_x')
+-- map("n", "X", '"_x')
+map("n", "xx", "dd")
+map("n", "X", "D")
 
 map("t", "<Esc>", "<C-\\><C-n>")
 map("t", "<A-h>", "<C-\\><C-N><C-w>h")
@@ -695,10 +713,10 @@ end
 -- last_version --    pattern = '*',
 -- last_version --    group = augroup,
 -- last_version --    callback = function()
--- last_version --    	local is_floating = vim.api.nvim_win_get_config(0).relative ~= ""
--- last_version --    	if is_floating then
--- last_version --    		tmux_prefix_cancel()
--- last_version --    	end
+-- last_version --      local is_floating = vim.api.nvim_win_get_config(0).relative ~= ""
+-- last_version --      if is_floating then
+-- last_version --          tmux_prefix_cancel()
+-- last_version --      end
 -- last_version --    end,
 -- last_version -- )
 vim.api.nvim_create_autocmd({ "ModeChanged" }, {
@@ -860,7 +878,58 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
 	end,
 })
 
+local function win_info(id)
+	-- https://stackoverflow.com/questions/6022519/define-default-values-for-function-arguments
+	-- https://www.lua.org/manual/5.1/manual.html#pdf-setmetatable
+    setmetatable(id or {}, {__index={id=0}})
+	api                = vim.api
+	local all_options  = api.nvim_get_all_options_info()
+	local win_number
+	print('type(id): ' .. type(id))
+	if type(id) == "number" then
+	-- if type(id) ~= nil then
+		win_number   = id
+	else
+	-- if id == nil or id == "" or type(id) == 'nil' then
+		win_number   = api.nvim_get_current_win()
+	-- else
+	-- 	local win_number   = id
+	end
+	local v            = vim.wo[win_number]
+	local all_options  = api.nvim_get_all_options_info()
+	local result       = ""
+	for key, val in pairs(all_options) do
+		if val.global_local == false and val.scope == "win" then
+			result = result .. "\n" .. key .. "=" .. tostring(v[key] or "<not set>")
+		end
+	end
+	print(result)
+end
 
+local function buf_info(id)
+    setmetatable(id or {}, {__index={id=0}})
+	api                = vim.api
+	local all_options  = api.nvim_get_all_options_info()
+	local buf_number
+	if type(id) == "number" then
+	-- if type(id) ~= nil then
+		buf_number   = id
+	else
+	-- if id == nil or id == "" or type(id) == 'nil' then
+		buf_number   = api.nvim_get_current_buf()
+	-- else
+	-- 	local buf_number   = id
+	end
+	local v            = vim.bo[buf_number]
+	local all_options  = api.nvim_get_all_options_info()
+	local result       = ""
+	for key, val in pairs(all_options) do
+		if val.global_local == false and val.scope == "buf" then
+			result = result .. "\n" .. key .. "=" .. tostring(v[key] or "<not set>")
+		end
+	end
+	print(result)
+end
 --  map('i', 'tmux', "<Nope>", { noremap = true })
 --  map('i', 'tmux', "<Escape>", { noremap = true })
 --  When the map key is tmux, you can't input "tmux" quickly / normally
@@ -878,30 +947,45 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
 --  map({ 'n', 'x' }, '<Escape>', -- don't trigger copy-mode when has selections
 	map('n', '<Escape>',
 	function()
-		os.execute("tmux copy-mode")
-		-- if has_floating_window(0) == false then
-		-- 	-- if tmux_key_enabled == true then
-		-- 	-- 	tmux_key_enabled = false -- tmux_prefix_cancel()
-		-- 	-- else
-		-- 		os.execute("tmux copy-mode")
-		-- 	-- end
-		-- 	-- When the map key is Escape, don't recursively trigger it here
-		-- 	-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 'm', true)
-		-- 	-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 'm', true)
-		-- 	-- print("relative ~= \"\"")
+		-- https://stackoverflow.com/questions/73850771/how-to-get-all-of-the-properties-of-window-in-neovim
+
+		win_info()
+		buf_info()
+
+
+		-- [For vim 9.1](https://vimhelp.org/popup.txt.html)
+		-- vim.cmd[[
+		-- let id = popup_findinfo()
+		-- :call popup_clear(1)
+		-- ]]
+		-- if has_floating_window(0) then
+			require("notify").dismiss() -- popup window
 		-- else
-		-- 	-- last_version -- if tmux_key_enabled == false then
-		-- 	-- last_version -- 	-- local new_mode = vim.api.nvim_get_mode().mode
-		-- 	-- last_version -- 	tmux_key_enabled = true -- tmux_prefix_reenable(new_mode)
-		-- 	-- last_version -- 	-- When the map key is Escape, don't recursively trigger it here
-		-- 	-- last_version -- 	-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 't', true)
-		-- 	-- last_version -- 	-- os.execute("tmux copy-mode")
-		-- 	-- last_version -- else
-		-- 		-- When the map key is Escape, don't recursively trigger it here
-		-- 		-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 't', true)
-		-- 		os.execute("tmux copy-mode")
-		-- 	-- last_version -- end
-		-- 	-- print("relative == \"\"")
+			os.execute("tmux copy-mode")
+		-- end
+		-- if has_floating_window(0) == false then
+		--  -- if tmux_key_enabled == true then
+		--  --  tmux_key_enabled = false -- tmux_prefix_cancel()
+		--  -- else
+		--      os.execute("tmux copy-mode")
+		--  -- end
+		--  -- When the map key is Escape, don't recursively trigger it here
+		--  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 'm', true)
+		--  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 'm', true)
+		--  -- print("relative ~= \"\"")
+		-- else
+		--  -- last_version -- if tmux_key_enabled == false then
+		--  -- last_version --  -- local new_mode = vim.api.nvim_get_mode().mode
+		--  -- last_version --  tmux_key_enabled = true -- tmux_prefix_reenable(new_mode)
+		--  -- last_version --  -- When the map key is Escape, don't recursively trigger it here
+		--  -- last_version --  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 't', true)
+		--  -- last_version --  -- os.execute("tmux copy-mode")
+		--  -- last_version -- else
+		--      -- When the map key is Escape, don't recursively trigger it here
+		--      -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Escape>', true, false, true), 't', true)
+		--      os.execute("tmux copy-mode")
+		--  -- last_version -- end
+		--  -- print("relative == \"\"")
 		-- end
 	end, { noremap = true })
 
@@ -1170,7 +1254,7 @@ function! s:align(aa)
   endif
 endfunction
 
-" "roxma/vim-tmux-clipboard",
+" "roxma/vim-tmux-clipboard", -- 'w' for world ? target-client(tty) of tmux
 let g:vim_tmux_clipboard#loadb_option = '-w'
 
 " unmap <c-h>

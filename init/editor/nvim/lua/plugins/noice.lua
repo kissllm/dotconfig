@@ -244,8 +244,9 @@ return {
 				-- The default routes will forward notifications to nvim-notify
 				-- Benefit of using Noice for this is the routing and consistent history view
 				-- anchor = "SE",
-				enabled = true,
-				view    = "notify",
+				enabled   = true,
+				view      = "notify",
+				top_down  = false,
 			},
 			lsp = {
 				progress = {
@@ -361,23 +362,23 @@ return {
 					-- enter     = true,
 					focusable = true,
 					zindex    = 50,
-					border = nil,
-					-- border = {
-					--  enabled = false,
-					--  padding = {
-					--      top    = 0,
-					--      bottom = 0,
-					--      left   = 0,
-					--      right  = 0,
-					--  },
-					--  style = "rounded",
-					--  -- text = {
-					--  --  top          = " command output ",
-					--  --  top_align    = "center",
-					--  --  bottom       = "",
-					--  --  bottom_align = "left",
-					--  -- },
-					-- },
+					-- border = nil,
+					border = {
+						enabled = false,
+						padding = {
+							top    = 0,
+							bottom = 0,
+							left   = 0,
+							right  = 0,
+						},
+						style = "rounded",
+						-- text = {
+						--  top          = " command output ",
+						--  top_align    = "center",
+						--  bottom       = "",
+						--  bottom_align = "left",
+						--  },
+					},
 					buf_options = {
 						modifiable    = true,
 						-- modifiable = false,
@@ -395,7 +396,7 @@ return {
 				popup = {
 					-- relative = "cursor",
 					-- relative = "win",
-					anchor = "SE",
+					top_down = false, -- anchor = "SE",
 					relative = "editor",
 					position = {
 						row = 10,
@@ -522,6 +523,32 @@ return {
 					-- view    = "popupmenu",
 					view    = "notify",
 
+					size = {
+						min_width = 60,
+						min_height = 100,
+						-- min_width = 60,
+						-- width     = "auto",
+						width     = "100",
+						height    = "auto",
+					},
+
+					border = {
+						enabled = false,
+						padding = {
+							top    = 0,
+							bottom = 0,
+							left   = 0,
+							right  = 0,
+						},
+						style = "rounded",
+						-- text = {
+						--  top          = " command output ",
+						--  top_align    = "center",
+						--  bottom       = "",
+						--  bottom_align = "left",
+						-- },
+					},
+
 					-- view = "input",
 					win_options = {
 						-- winblend     = 0,
@@ -555,6 +582,7 @@ return {
 					--
 					-- -- view = "input",
 					relative = "cursor",
+					-- https://www.reddit.com/r/neovim/comments/1ahfqf4/noice_notification_placement/
 					position = {
 					 row = 10,
 					 -- row = "90%",
@@ -575,9 +603,42 @@ return {
 					-- -- enter  = true,
 					-- enter     = false,
 					-- zindex    = 200,
+					size = {
+						min_width = 100,
+						width     = "auto",
+						height    = "auto",
+					},
+					-- Fatal. Make cmdline dysfunctional
+					-- enter     = true,
+					focusable = true,
+					zindex    = 200,
+					-- border = nil,
+					border = {
+						-- style   = "rounded",
+						-- padding = { 0, 1 },
+						enabled = false,
+						padding = {
+							top    = 0,
+							bottom = 0,
+							left   = 0,
+							right  = 0,
+						},
+					},
 					-- border = {
-					--  style   = "rounded",
-					--  padding = { 0, 1 },
+					--  enabled = false,
+					--  padding = {
+					--      top    = 0,
+					--      bottom = 0,
+					--      left   = 0,
+					--      right  = 0,
+					--  },
+					--  style = "rounded",
+					--  -- text = {
+					--  --  top          = " command output ",
+					--  --  top_align    = "center",
+					--  --  bottom       = "",
+					--  --  bottom_align = "left",
+					--  -- },
 					-- },
 					-- win_options = {
 					--  winblend      = 0,
@@ -606,32 +667,6 @@ return {
 					--  -- row = 10,
 					--  row = "20%",
 					--  col = 10,
-					-- },
-					size = {
-						min_width = 100,
-						width     = "auto",
-						height    = "auto",
-					},
-					-- Fatal. Make cmdline dysfunctional
-					-- enter     = true,
-					focusable = true,
-					zindex    = 200,
-					border = nil,
-					-- border = {
-					--  enabled = false,
-					--  padding = {
-					--      top    = 0,
-					--      bottom = 0,
-					--      left   = 0,
-					--      right  = 0,
-					--  },
-					--  style = "rounded",
-					--  -- text = {
-					--  --  top          = " command output ",
-					--  --  top_align    = "center",
-					--  --  bottom       = "",
-					--  --  bottom_align = "left",
-					--  -- },
 					-- },
 					buf_options = {
 						modifiable    = true,
@@ -681,24 +716,24 @@ return {
 					-- enter     = true,
 					-- focusable = true,
 					zindex    = 50,
-					border = nil,
-					-- border = {
-					--  enabled = false,
-					--  padding = {
-					--      top    = 0,
-					--      bottom = 0,
-					--      left   = 0,
-					--      right  = 0,
-					--  },
-					--  style = "rounded",
-					--  -- style = "single",
-					--  -- text = {
-					--  --  top          = " command output ",
-					--  --  top_align    = "center",
-					--  --  bottom       = "",
-					--  --  bottom_align = "left",
-					--  -- },
-					-- },
+					-- border = nil,
+					border = {
+						enabled = false,
+						padding = {
+							top    = 0,
+							bottom = 0,
+							left   = 0,
+							right  = 0,
+						},
+						style = "rounded",
+						-- style = "single",
+						-- text = {
+							--  top          = " command output ",
+							--  top_align    = "center",
+							--  bottom       = "",
+							--  bottom_align = "left",
+							-- },
+					},
 					buf_options = {
 						modifiable    = true,
 						-- modifiable = false,
@@ -725,9 +760,18 @@ return {
 				},
 				notify = {
 					backend  = "notify",
-					anchor   = "SE",
+					top_down = false, -- anchor   = "SE",
 					relative = "editor",
 					border   = nil,
+					border = {
+						enabled = false,
+						padding = {
+							top    = 0,
+							bottom = 0,
+							left   = 0,
+							right  = 0,
+						},
+					},
 					win_options = {
 						winblend     = 10,
 						winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
@@ -756,31 +800,46 @@ return {
 				},
 			},
 			---@type NoiceRouteConfig[]
+			--- https://www.reddit.com/r/neovim/comments/11mw842/disable_messages_popups_for_noicenvim/
 			routes = {
-				{
+				-- {
 					view   = "notify",
-					filter = { event = "msg_showmode" },
-				},
-				{
 					filter = {
+						-- event = "msg_showmode"
+						-- },
+						-- },
+						-- {
+					-- filter = {
 						event = "msg_show",
 						kind  = "",
+						-- kind  = "search_count",
 						find  = "written",
+						-- },
+						-- opts = { skip = true },
+						-- },
+						-- {
+					-- filter = {
+						-- event = "msg_show",
+						-- kind  = "search_count",
 					},
 					opts = { skip = true },
-				},
-				{
-					filter = {
-						event = "msg_show",
-						kind  = "search_count",
-					},
-					opts = { skip = true },
-				},
+					-- },
 			}, --- @see section on routes
 			---@type table<string, NoiceFilter>
-			status = {}, --- @see section on statusline components
+			status = {
+				border = {
+					enabled = false,
+					padding = {
+						top    = 0,
+						bottom = 0,
+						left   = 0,
+						right  = 0,
+					},
+				},
+			}, --- @see section on statusline components
 			---@type NoiceFormatOptions
-			format = {}, --- @see section on formatting
+			format = {
+			}, --- @see section on formatting
 		})
 
 		-- :Noice last

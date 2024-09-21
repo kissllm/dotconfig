@@ -21,6 +21,9 @@ return {
 		-- $HOME/.config/nvim/lua/plugins/onehalf.lua:21: attempt to call field 'nvim_set_options' (a nil value)
 		-- vim.api.nvim_set_options("background", "dark")
 	end,
+	install = {
+		colorscheme = { "onehalf-lush-dark" },
+	},
 }
 
 
