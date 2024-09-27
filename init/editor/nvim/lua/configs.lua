@@ -101,13 +101,20 @@ set.tabstop         = 4
 set.shiftwidth      = 4
 vim.g.vim_indent_cont = vim.opt.shiftwidth:get()
 set.softtabstop     = -1
--- set.expandtab       = true
-set.expandtab       = false
+
+--  set.expandtab       = true -- easy to comment/uncoment switch lines, but display no indent line by default
+	set.expandtab       = false
 set.smarttab        = true
 set.copyindent      = true
 set.preserveindent  = true
 set.textwidth       = 120
-set.formatoptions   = "tcqrn1"
+set.formatoptions   = "tqn1"
+-- https://superuser.com/questions/271023/can-i-disable-continuation-of-comments-to-the-next-line-in-vim
+-- /usr/share/nvim/runtime/ftplugin/lua.vim line 20
+-- set.formatoptions   = "tcqrn1"
+-- set.formatoptions   = set.formatoptions - "cr"
+
+-- Does not work
 -- set.formatoptions:remove({ "c", "r", "o" })
 set.mouse           = "a"
 set.showcmd         = true
@@ -117,8 +124,12 @@ set.hidden          = true
 set.hlsearch        = true
 -- set.backspace        = "2"
 -- set.laststatus       = 2
-set.shortmess       = "actWAOFS"
-set.shortmess       = set.shortmess + "c"
+   set.shortmess       = "actWAOFS"
+   set.shortmess       = set.shortmess + "c"
+-- https://vi.stackexchange.com/questions/42366/if-i-set-cmdheight-0-i-get-the-press-enter-or-type-command-to-continue-message
+   set.shortmess       = set.shortmess + "csCFSW"
+-- https://stackoverflow.com/questions/890802/how-do-i-disable-the-press-enter-or-type-command-to-continue-prompt-in-vim
+-- set.shortmess       = ""
 -- set.shortmess:append "c"
 --
 -- https://www.reddit.com/r/neovim/comments/1b13a69/what_is_this_extra_stuff_on_the_side/
@@ -205,7 +216,8 @@ set.wildmenu        = true
 set.wildmode        = "full"
 set.paste           = false
 set.title           = true
-set.more            = true
+-- set.more            = true
+set.more            = false
 setlocal.cino       = "e-2"
 set.smartcase       = true
 set.smartindent     = true
@@ -317,6 +329,9 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 set.conceallevel    = 0
 set.fillchars       = "vert:│,horiz:_,eob: "
 set.secure          = true
+-- https://stackoverflow.com/questions/890802/how-do-i-disable-the-press-enter-or-type-command-to-continue-prompt-in-vim
+set.efm             = set.efm + '#%t#%f#%l#%c#%m#'
+
 
 -- https://github.com/numirias/security/blob/master/doc/2019-06-04_ace-vim-neovim.md
 -- set.modelineexpr = false
@@ -513,7 +528,7 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 	pattern = { "background" },
 	callback = function()
 		if vim.o.background == 'dark' then
-			print('late dark')
+			print("colorscheme", 'late dark')
 			-- vim.cmd("colorscheme modus-vivendi")
 			--
 
@@ -526,7 +541,7 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 
 			-- vim.cmd("colorscheme dracula")
 		else
-			print('late light')
+			print("colorscheme", 'late light')
 			-- vim.cmd("colorscheme modus-operandi")
 
 			-- vim.cmd("colorscheme onehalf-lush")
@@ -542,17 +557,17 @@ vim.api.nvim_create_autocmd({ "OptionSet" }, {
 	end
 })
 
-vim.api.nvim_create_autocmd({"RecordingEnter"}, {
-	callback = function()
-		vim.opt.cmdheight = 1
-	end,
-})
-
-vim.api.nvim_create_autocmd({"RecordingLeave"}, {
-	callback = function()
-		vim.opt.cmdheight = 0
-	end,
-})
+-- vim.api.nvim_create_autocmd({"RecordingEnter"}, {
+--  callback = function()
+--      vim.opt.cmdheight = 1
+--  end,
+-- })
+--
+-- vim.api.nvim_create_autocmd({"RecordingLeave"}, {
+--  callback = function()
+--      vim.opt.cmdheight = 0
+--  end,
+-- })
 
 -- https://stackoverflow.com/questions/5017009/confusion-about-vim-folding-how-to-disable
 -- " Tweak the event and filetypes matched to your liking.
@@ -639,7 +654,7 @@ vim.opt.rtp:prepend(boot_path)
 vim.g.vimwiki_filetypes = { "markdown" }
 
 -- local log_file = log
--- local result = os_execute([[
+-- local result = log.execute([[
 -- echo "\$HOME = $HOME" >> $HOME/.vim.log
 -- sed -i -e 's/b:Markdown_GetUrlForPosition/s:Markdown_GetUrlForPosition/g'
 --  "$HOME/.local/share/nvim/lazy/vim-markdown/ftplugin/mkd.vim"
@@ -799,7 +814,7 @@ end, { desc = "Profile End" })
 M = {}
 M.blockwise_register = function(register)
   register = register or "+"
-  print("Making " .. register .. " blockwise")
+  print("Making blockwise on", register)
   -- vim.cmd("call setreg('+', @+, 'b')") -- native vim way to set clipboard blockwise
   vim.cmd("call setreg('".. register .. "', @" .. register ..", 'b')")
 end
@@ -838,11 +853,10 @@ vim.cmd([[
 
 " let boot_load_path = stdpath("data") . '/*/pack/*/start/boot/autoload/boot.vim'
   let boot_load_path = stdpath("data") . '/lazy/boot/autoload/boot.vim'
-execute "source "   . boot_load_path
-execute "runtime! " . boot_load_path
-  let keys_load_path = stdpath("data") . '/lazy/keys/after/plugin/keys.vim'
-execute "source "   . keys_load_path
-execute "runtime! " . keys_load_path
+  exe 'set runtimepath+='. boot_load_path
+  exe 'set packpath+='. boot_load_path
+  execute "source "   . boot_load_path
+  execute "runtime! " . boot_load_path
 
 command! -nargs=1 -complete=help H :wincmd l | :enew | :set buftype=help | :keepalt h <args>
 
@@ -947,11 +961,11 @@ vim.api.nvim_create_autocmd({ 'CmdlineLeave' },
 			fh:write(('%s\n'):format(current_cmd))
 			fh:flush()
 			-- if current_cmd == "messages" then
-			-- 	vim.cmd[[
-			-- 	setlocal bufhidden=unload |
-			-- 	\ wincmd L |
-			-- 	\ vertical resize 100
-			-- 	]]
+			--  vim.cmd[[
+			--  setlocal bufhidden=unload |
+			--  \ wincmd L |
+			--  \ vertical resize 100
+			--  ]]
 			-- end
 		end
 	end
@@ -974,7 +988,8 @@ autocmd!
   \ && &filetype =~? '\v(noice)' && &buftype =~? '\v(nofile)' |
   \ setlocal bufhidden=unload |
   \ wincmd H |
-  \ vertical resize 100 | wincmd _ | :exe 'resize ' . (winheight(0) + 9999) | :redraw | endif
+  \ vertical resize 100 | wincmd _ | endif | if &cmdheight ==? 1 | set cmdheight=0 | endif
+" \ vertical resize 100 | wincmd _ | :exe 'resize ' . (winheight(0) + 9999) | :redraw | endif | if &cmdheight ==? 1 | set cmdheight=0 | endif
 
 " Normally display when triggering command mode and quit it
 
@@ -995,17 +1010,24 @@ autocmd!
 
 " This is the trick for messages window, when it is initializing it always has the height of one line
 " autocmd WinClosed * :0 wincmd H | if winwidth(0) < 100 | vertical resize 100 | endif |
-  autocmd WinClosed *
+" Float windows closed triggered the following event
+  autocmd WinNew,WinClosed *
   \ if exists('g:current_cmd') && g:current_cmd =~? '\v(mes)'
   \ && &filetype =~? '\v(noice)' && &buftype =~? '\v(nofile)' |
   \ setlocal bufhidden=unload |
-  \ :exe 'wincmd H' | if winwidth(0) < 100 | vertical resize 100 | endif |
-  \ if winheight(0) < 100 | wincmd _ | endif | endif
+  \ wincmd H | if winwidth(0) < 100 | vertical resize 100 | endif |
+  \ if winheight(0) < 100 | wincmd _ | endif | endif | if &cmdheight ==? 1 | set cmdheight=0 | endif
 
 augroup END
 
 ]]
 
+-- vim.api.nvim_create_autocmd("WinClosed", {
+--  group = vim.api.nvim_create_augroup("telescope_toggle", { clear = true }),
+--  callback = function(args)
+--      vim.keymap.set("n", "\\", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+--  end,
+-- })
 --
 -- Synchronizing between the modified same files
 -- Neovim automatically supports auto read by default
@@ -1033,6 +1055,7 @@ augroup END
 -- end)
 
 vim.api.nvim_create_autocmd("LspAttach", {
+	pattern = { '*' },
 	group = vim.api.nvim_create_augroup("lsp_attach_auto_diag", { clear = true }),
 	callback = function(args)
 		-- the buffer where the lsp attached
@@ -1118,7 +1141,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
 		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
 		vim.keymap.set('n', '<space>wl', function()
-			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+			print("list_workspace_folders", vim.inspect(vim.lsp.buf.list_workspace_folders()))
 		end, opts)
 		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
 		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)

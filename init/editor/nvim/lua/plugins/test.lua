@@ -1,4 +1,6 @@
+
 return {
+	cond = false, -- test
 	'janko-m/vim-test',
 	cmd = {
 		"TestNearest",

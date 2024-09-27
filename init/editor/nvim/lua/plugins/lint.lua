@@ -13,6 +13,6 @@ return {
 				},
 			},
 		},
-		config =                    function()                                    end,
+		config = function() require('lint') end,
 	},
 }

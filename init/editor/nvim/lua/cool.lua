@@ -27,31 +27,31 @@ local api = vim.api
 --         runtime_colors = {}, -- some colors name added by function add_component
 --     }
 
-local windline = require("windline")
-local helper = require("windline.helpers")
-local b_components = require("windline.components.basic")
-local vim_components = require('windline.components.vim')
-local state = _G.WindLine.state
-local utils = require('windline.utils')
-local lsp_comps = require("windline.components.lsp")
-local git_comps = require("windline.components.git")
-local animation = require("wlanimation")
-local effects = require('wlanimation.effects')
+local windline        = require("windline")
+local helper          = require("windline.helpers")
+local b_components    = require("windline.components.basic")
+local vim_components  = require('windline.components.vim')
+local state           = _G.WindLine.state
+local utils           = require('windline.utils')
+local lsp_comps       = require("windline.components.lsp")
+local git_comps       = require("windline.components.git")
+local animation       = require("wlanimation")
+local effects         = require('wlanimation.effects')
 
 local state = _G.WindLine.state
 
 local hl_list = {
-	Black = { "white", "black" },
-	White = { "black", "white" },
-	Inactive = { "InactiveFg", "InactiveBg" },
-	Active = { "ActiveFg", "ActiveBg" },
+	Black     = { "white",      "black" },
+	White     = { "black",      "white" },
+	Inactive  = { "InactiveFg", "InactiveBg" },
+	Active    = { "ActiveFg",   "ActiveBg" },
 }
 
 local basic = {}
 
 local breakpoint_width = 90
-basic.divider = { b_components.divider, "" }
-basic.bg = { " ", "StatusLine" }
+basic.divider  = { b_components.divider, "" }
+basic.bg       = { " ", "StatusLine" }
 
 -- stylua: ignore
 utils.change_mode_name({
@@ -88,16 +88,16 @@ utils.change_mode_name({
 })
 
 local colors_mode = {
-	Normal = { "red", "black" },
-	Insert = { "green", "black" },
-	Visual = { "yellow", "black" },
-	Replace = { "blue_light", "black" },
-	Command = { "magenta", "black" },
+	Normal   = { "red",        "black" },
+	Insert   = { "green",      "black" },
+	Visual   = { "yellow",     "black" },
+	Replace  = { "blue_light", "black" },
+	Command  = { "magenta",    "black" },
 }
 
 basic.vi_mode = {
-	name = "vi_mode",
-	hl_colors = colors_mode,
+	name       = "vi_mode",
+	hl_colors  = colors_mode,
 	text = function()
 		return { { "  ", state.mode[2] } }
 	end,
@@ -113,9 +113,9 @@ basic.square_mode = {
 basic.file = {
 	name = "file",
 	hl_colors = {
-		default = hl_list.Black,
-		white = { "white", "black" },
-		magenta = { "magenta", "black" },
+		default  = hl_list.Black,
+		white    = { "white",   "black" },
+		magenta  = { "magenta", "black" },
 	},
 	text = function(_, _, width)
 		if width > breakpoint_width then
@@ -141,9 +141,9 @@ basic.file = {
 }
 basic.file_right = {
 	hl_colors = {
-		default = hl_list.Black,
-		white = { "white", "black" },
-		magenta = { "magenta", "black" },
+		default  = hl_list.Black,
+		white    = { "white",   "black" },
+		magenta  = { "magenta", "black" },
 	},
 	text = function(_, _, width)
 		if width < breakpoint_width then
@@ -156,8 +156,8 @@ basic.file_right = {
 }
 
 basic.lsp_name = {
-	width = breakpoint_width,
-	name = "lsp_name",
+	width  = breakpoint_width,
+	name   = "lsp_name",
 	hl_colors = {
 		magenta = { "magenta", "black" },
 	},
@@ -220,9 +220,9 @@ basic.lsp_diagnos = {
 		red_text = { "red", "transparent" },
 	},
 	hl_colors = {
-		red = { "red", "black" },
-		yellow = { "yellow", "black" },
-		blue = { "blue", "black" },
+		red     = { "red",    "black" },
+		yellow  = { "yellow", "black" },
+		blue    = { "blue",   "black" },
 	},
 	width = large_width,
 	text = function(bufnr, winid, width)
@@ -255,9 +255,9 @@ basic.lsp_diagnos = {
 basic.git = {
 	name = "git",
 	hl_colors = {
-		green = { "green", "black" },
-		red = { "red", "black" },
-		blue = { "blue", "black" },
+		green  = { "green", "black" },
+		red    = { "red",   "black" },
+		blue   = { "blue",  "black" },
 	},
 	width = breakpoint_width,
 	text = function(bufnr)
@@ -324,8 +324,8 @@ local quickfix = {
 		{ "🧛 ", { "white", "black" } },
 	},
 
-	always_active = true,
-	show_last_status = true,
+	always_active     = true,
+	show_last_status  = true,
 }
 
 basic.explorer_name = {
@@ -380,9 +380,9 @@ local function rgb_str2num(rgb_color_str)
 	if rgb_color_str:find("#") == 1 then
 		rgb_color_str = rgb_color_str:sub(2, #rgb_color_str)
 	end
-	local red = tonumber(rgb_color_str:sub(1, 2), 16)
-	local green = tonumber(rgb_color_str:sub(3, 4), 16)
-	local blue = tonumber(rgb_color_str:sub(5, 6), 16)
+	local red    = tonumber(rgb_color_str:sub(1, 2), 16)
+	local green  = tonumber(rgb_color_str:sub(3, 4), 16)
+	local blue   = tonumber(rgb_color_str:sub(5, 6), 16)
 	return { red = red, green = green, blue = blue }
 end
 
@@ -395,8 +395,8 @@ end
 -- returns brightness lavel of color in range 0 to 1
 -- arbitary value it's basicaly an weighted average
 local function get_color_brightness(rgb_color)
-	local color = rgb_str2num(rgb_color)
-	local brightness = (color.red * 2 + color.green * 3 + color.blue) / 6
+	local color       = rgb_str2num(rgb_color)
+	local brightness  = (color.red * 2 + color.green * 3 + color.blue) / 6
 	return brightness / 256
 end
 
@@ -421,27 +421,27 @@ end
 -- changes braghtness of rgb_color by percentage
 local function brightness_modifier(rgb_color, parcentage)
 	local color  = rgb_str2num(rgb_color)
-	color.red    = clamp(color.red + (color.red * parcentage / 100), 0, 255)
+	color.red    = clamp(color.red   + (color.red   * parcentage / 100), 0, 255)
 	color.green  = clamp(color.green + (color.green * parcentage / 100), 0, 255)
-	color.blue   = clamp(color.blue + (color.blue * parcentage / 100), 0, 255)
+	color.blue   = clamp(color.blue  + (color.blue  * parcentage / 100), 0, 255)
 	return rgb_num2str(color)
 end
 
 -- changes contrast of rgb_color by amount
 local function contrast_modifier(rgb_color, amount)
 	local color  = rgb_str2num(rgb_color)
-	color.red    = clamp(color.red + amount, 0, 255)
+	color.red    = clamp(color.red   + amount, 0, 255)
 	color.green  = clamp(color.green + amount, 0, 255)
-	color.blue   = clamp(color.blue + amount, 0, 255)
+	color.blue   = clamp(color.blue  + amount, 0, 255)
 	return rgb_num2str(color)
 end
 
 -- Changes brightness of foreground color to achive contrast
 -- without changing the color
 local function apply_contrast(highlight)
-	local hightlight_bg_avg = get_color_avg(highlight.bg)
-	local contrast_threshold_config = clamp(contrast_threshold, 0, 0.5)
-	local contranst_change_step = 5
+	local hightlight_bg_avg          = get_color_avg(highlight.bg)
+	local contrast_threshold_config  = clamp(contrast_threshold, 0, 0.5)
+	local contranst_change_step      = 5
 	if hightlight_bg_avg > 0.5 then
 		contranst_change_step = -contranst_change_step
 	end
@@ -677,9 +677,9 @@ basic.file_name = {
 		}
 	end),
 	hl_colors = {
-		dir = { "white_light", "blue" },
-		path = { "white", "blue" },
-		git = { "red", "blue" },
+		dir   = { "white_light", "blue" },
+		path  = { "white",       "blue" },
+		git   = { "red",         "blue" },
 	},
 }
 
@@ -719,11 +719,11 @@ local default = {
 		basic.vi_mode_sep,
 		{ " ", "" },
 		-- basic.file_name,
-		{ "[", { "red", "transparent" } },
+		{ "[",  { "red", "transparent" } },
 		{ "%f", { "orange", "transparent" } },
-		{ "]", { "red", "transparent" } },
+		{ "]",  { "red", "transparent" } },
 		-- wave_left,
-		{ " ", { "orange", "transparent" } },
+		{ " ",  { "orange", "transparent" } },
 		{ vim_components.search_count() },
 		basic.divider,
 		-- wave_right,
@@ -793,18 +793,18 @@ windline.setup({
 
 		-- print(vim.inspect(colors))
 		-- ADD MORE COLOR HERE ----
-		colors.transparent = "none" -- this is the issue
-		colors.grey = "#3d3d3d"
+		colors.transparent  = "none" -- this is the issue
+		colors.grey         = "#3d3d3d"
 		-- colors.orange    = "#d8a657"
 		colors.debug_yellow = "#eae611"
-		colors.debug_red = "#ff6902"
+		colors.debug_red    = "#ff6902"
 
 		-- copied from rakr/vim-two-firewatch
-		colors.orange = "#c8ae9d"
+		colors.orange       = "#c8ae9d"
 
-		colors.white_light = "none"
-		colors.black_light = "none"
-		colors.black = "none"
+		colors.white_light  = "none"
+		colors.black_light  = "none"
+		colors.black        = "none"
 
 		colors.wavedefault = colors.black
 
@@ -985,9 +985,9 @@ animation.animation({
 			{ "FilenameBg",  effects.rainbow() },
 			{ "FilenameBg",  effects.blackwhite() },
 		},
-		timeout = 10,
-		delay = 200,
-		interval = 100,
+		timeout   = 10,
+		delay     = 200,
+		interval  = 100,
 	})
 
 -- copied from wlanimation.effects

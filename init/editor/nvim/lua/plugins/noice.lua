@@ -4,6 +4,7 @@ return {
 	event = "VeryLazy",
 	-- cond  = false,
 	cond  = true,
+	-- Will not be catched by config function -- for no config function version
 	opts  = {
 		-- add any options here
 	},
@@ -581,7 +582,9 @@ return {
 					backend   = "popup",
 					--
 					-- -- view = "input",
-					relative = "cursor",
+					-- relative = "editor",
+					   relative = "cursor",
+					-- relative = "win",
 					-- https://www.reddit.com/r/neovim/comments/1ahfqf4/noice_notification_placement/
 					position = {
 					 row = 10,

@@ -7,7 +7,7 @@ return {
 		local colors = require("nebulous.functions").get_colors("midnight") -- < variant name
 		-- if you want to get the colors of the current variant use the function without arguments
 		--Put this lines inside your vimrc to set the colorscheme
-		require("nebulous").setup {
+		require("nebulous").setup({
 			variant = "midnight",
 			disable = {
 				background       = true,
@@ -29,7 +29,7 @@ return {
 				LspDiagnosticsDefaultError  = { bg = "#E11313" },
 				TSTagDelimiter              = { style = "bold,italic" },
 			},
-		}
+		})
 
 		vim.cmd("colorscheme nebulous")
 		local setmap   = vim.api.nvim_set_keymap

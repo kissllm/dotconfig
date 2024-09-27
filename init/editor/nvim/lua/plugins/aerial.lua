@@ -1,7 +1,6 @@
 return {
 
 	'stevearc/aerial.nvim',
-	opts = {},
 	-- Optional dependencies
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter",
@@ -10,8 +9,7 @@ return {
 	event  = "VeryLazy",
 	lazy   = true,
 	config = function()
-		-- Call the setup function to change the default behavior
-		require("aerial").setup({
+		opts = {
 			-- Priority list of preferred backends for aerial.
 			-- This can be a filetype map (see :help aerial-filetype-map)
 			backends = { "treesitter", "lsp", "markdown", "asciidoc", "man" },
@@ -369,6 +367,8 @@ return {
 				-- How long to wait (in ms) after a buffer change before updating
 				update_delay = 300,
 			},
-		})
+		}
+		-- Call the setup function to change the default behavior
+		require("aerial").setup(opts)
 	end,
 }

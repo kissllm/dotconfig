@@ -244,9 +244,6 @@ augroup END
 		local fb_actions   = require "telescope".extensions.file_browser.actions
 		-- $HOME/.local/share/nvim/lazy
 		local cwd          = require("lazy.core.config").options.root
-		telescope.load_extension("lsp_handlers")
-		telescope.load_extension("live_grep_args")
-		telescope.load_extension("undo")
 		-- require("telescope").setup()
 		telescope.setup {
 
@@ -296,7 +293,7 @@ augroup END
 
 			-- opts = {
 			defaults = {
-				initial_mode = "normal", -- Open telescope buffers in normal mode -- https://www.reddit.com/r/neovim/comments/zc5fuy/open_telescope_buffers_in_normal_mode/
+				-- initial_mode = "normal", -- Open telescope buffers in normal mode -- https://www.reddit.com/r/neovim/comments/zc5fuy/open_telescope_buffers_in_normal_mode/
 				selection_strategy   = "closest",
 				-- Default configuration for telescope goes here:
 				-- config_key = value,
@@ -371,6 +368,7 @@ augroup END
 
 				mappings             = {
 					i = {
+						["\\"] = [[close]],
 						["<C-n>"]      = actions.cycle_history_next,
 						["<C-p>"]      = actions.cycle_history_prev,
 
@@ -402,6 +400,7 @@ augroup END
 					},
 
 					n = {
+						["\\"] = [[close]],
 						["<esc>"]      = actions.close,
 						["<CR>"]       = actions.select_default,
 						["<C-x>"]      = actions.select_horizontal,
@@ -450,7 +449,7 @@ augroup END
 				-- builtin picker
 				-- https://lee-phillips.org/nvimTelescopeConfig/
 				find_files = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					hidden          = true,
 					layout_strategy = 'horizontal',
 					-- layout_strategy      = 'vertical',
@@ -489,9 +488,17 @@ augroup END
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
 					},
+					mappings         = {
+						n = {
+							["\\"] = [[close]],
+						},
+						i = {
+							["\\"] = [[close]],
+						},
+					},
 				},
 				grep_string = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					layout_strategy = 'horizontal',
 					-- layout_strategy      = 'vertical',
 					layout_config   = {
@@ -529,10 +536,18 @@ augroup END
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
 					},
+					mappings         = {
+						n = {
+							["\\"] = [[close]],
+						},
+						i = {
+							["\\"] = [[close]],
+						},
+					},
 				},
 				-- https://www.reddit.com/r/neovim/comments/udx0fi/telescopebuiltinlive_grep_and_operator/
 				live_grep = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					on_input_filter_cb = function(prompt)
 						-- AND operator for live_grep like how fzf handles spaces with wildcards in rg
 						return { prompt = prompt:gsub("%s", ".*") }
@@ -574,10 +589,18 @@ augroup END
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
 					},
+					mappings         = {
+						n = {
+							["\\"] = [[close]],
+						},
+						i = {
+							["\\"] = [[close]],
+						},
+					},
 				},
 				-- nnoremap gb :buffers<CR>:buffer<Space>
 				buffers = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					show_all_buffers = true,
 					-- theme = "dropdown",
 					-- previewer = false,
@@ -588,12 +611,14 @@ augroup END
 						n = {
 							["d"] = "delete_buffer",
 							-- :lua vim.api.nvim_buf_delete(term_bufnr, { force = true })).
+							["\\"] = [[close]],
 						},
 						i = {
 							-- ["<c-d>"]  = "delete_buffer",
 							["<c-d>"] = actions.delete_buffer + actions.move_to_top,
 							["<C-j>"] = actions.move_selection_next,
 							["<C-k>"] = actions.move_selection_previous,
+							["\\"] = [[close]],
 						},
 					},
 					layout_strategy  = 'horizontal',
@@ -636,7 +661,7 @@ augroup END
 					-- on_complete = { function() vim.cmd"stopinsert" end },
 				},
 				help_tags = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					layout_strategy  = 'horizontal',
 					-- layout_strategy      = 'vertical',
 					layout_config    = {
@@ -672,6 +697,14 @@ augroup END
 							local min = 900
 							return math.max(math.floor(percentage * max_lines), min)
 						end,
+					},
+					mappings         = {
+						n = {
+							["\\"] = [[close]],
+						},
+						i = {
+							["\\"] = [[close]],
+						},
 					},
 				},
 			},
@@ -739,19 +772,28 @@ augroup END
 				-- https://github.com/nvim-telescope/telescope-file-browser.nvim
 				-- No upward directories showing by default <i:ctrl-g> or backspace
 				file_browser = {
-					initial_mode = "normal", -- Open telescope buffers in normal mode
+					grouped = true,
+					-- initial_mode = "normal", -- Open telescope buffers in normal mode
 					theme = "ivy",
 					-- disables netrw and use telescope-file-browser in its place
 					hijack_netrw = true,
 					mappings = {
 						["i"] = {
 							-- your custom insert mode mappings
+							-- ["\\"] = fb_actions.toggle_browser,
+							   ["\\"] = [[close]],
+							-- vim.keymap.set("n", "\\", [[<cmd>lua require "telescope".extensions.file_browser.actions.toggle_browser()<cr>]])
 						},
 						["n"] = {
 							-- your custom normal mode mappings
 							-- ["g"] = fb_actions.goto_parent_dir,
 							["<BackSpace>"] = fb_actions.goto_parent_dir,
 							-- unmap toggling `fb_actions.toggle_browser`
+							-- ["f"] = fb_actions.close,
+							-- ["\\"] = fb_actions.toggle_browser,
+							   ["\\"] = [[close]],
+							-- vim.keymap.set("n", "\\", [[<cmd>lua require "telescope".extensions.file_browser.actions.toggle_browser()<cr>]])
+
 						},
 					},
 
@@ -797,7 +839,10 @@ augroup END
 		}
 		-- To get telescope-file-browser loaded and working with telescope,
 		-- you need to call load_extension, somewhere after setup function:
-		require("telescope").load_extension "file_browser"
+		telescope.load_extension("lsp_handlers")
+		telescope.load_extension("live_grep_args")
+		telescope.load_extension("undo")
+		telescope.load_extension "file_browser"
 		-- require("telescope").load_extension("live_grep_args")
 		-- telescope.load_extension("fzf")
 		local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
@@ -810,6 +855,7 @@ augroup END
 		-- open file_browser with the path of the current buffer
 		-- vim.keymap.set("n", "<leader>fb", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
 		   vim.keymap.set("n", "\\", ":Telescope file_browser path=%:p:h select_buffer=true<CR>")
+		-- vim.keymap.set("n", "\\", [[<cmd>lua require "telescope".extensions.file_browser.actions.toggle_browser()<cr>]])
 		   vim.keymap.set("n", "<leader>\\", ":Telescope live_grep<CR>")
 
 		-- Alternatively, using lua API

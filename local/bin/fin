@@ -1,0 +1,65 @@
+#! /bin/sh
+
+# How to use
+#     Keyword   path        file extension  additional find clause
+# fin "git" /var/db/kiss/lm "version"       -- -path "*/modules" -prune
+# fin resolve_path | grep -v '[[:blank:]]#'
+# fin resolve_path | grep -v '\t#'
+
+if [ -z "${1:+x}" ]; then
+	echo "Please input target to search"
+	exit 1
+else
+	# Key word
+	target="$1"
+	shift 1
+fi
+
+if [ -z "${1:+x}" ]; then
+	echo "Searching target under directory ."
+	path="."
+else
+	path="$1"
+	shift 1
+fi
+
+if [ -z "${1:+x}" ] || [ "$1" = "\*" ]; then
+	echo "Searching \"$target\" in files *"
+	# source="*"
+	source_command="-exec grep -Iq . {} + -print"
+	[ -z "$1" ] || shift 1
+else
+	[ -z "${1##*-name*}" ] &&
+		# fin cmdheight .. '\( -name "*.lua" -o -name "*.vim" \)'
+		source_command="$1 -print" ||
+		# source="$1"
+		# fin cmdheight .. "*.vim"
+		source_command="-name \"$1\" -print"
+	shift 1
+fi
+
+[ "$1" != "--" ] || shift 1
+# doas find "/mnt/os/kiss"  -not \( -path "*/.git" -type d -prune -o -path "*/.backup" -type d -prune \) -a -not \(
+# -type d -o -name '*.sw*' \) -exec grep -Hn "// log" {} +
+query="doas find \"$path\" \
+-not \( -path \"*/.git\"    -type d -prune \) \
+-not \( -path \"*/.backup\" -type d -prune \) \
+-a -not \( -type d -o -name \"*.sw*\" -o -name \"tags\" \) \
+-a -type f $source_command"
+# -a -not \( -type d -o -name \"*.sw*\" \) -print \
+# -o -type f $source_command"
+
+[ "$#" -le "0" ] || query="$query -a $@"
+
+printf '%s %s\n' '$query: ' "$query"
+# Text file only
+# doas find "$path" -type f -exec grep -Iq . {} + -print | xargs doas grep -Hn "$target"
+
+for file in $(eval $query); do
+	[ ! -f "$file" ] ||
+	doas grep -Hn "$target" "$file" || :
+done
+
+# find "$path" -type f -name "$source" -exec grep -Hn "$target" {} +
+# find . ! -path "*.git" -type f \( -name *.txt -o -name *.cmake \) -exec grep -Hn find_compiler_rt_library {} +
+#

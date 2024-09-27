@@ -20,16 +20,16 @@ local log_address = vim.fn.stdpath('config') .. "/lua/?.lua"
 --  print("Manually append: " .. log_address)
 --  package.path = package.path .. ";" .. log_address
 -- end
-local path_list = vim.split(package.path, ";")
+local path_table = vim.split(package.path, ";")
 local found = false
-for _, v in ipairs(path_list) do
+for _, v in ipairs(path_table) do
 	if v == log_address then
 		found = true
 		break
 	end
 end
 if found == false then
-	print("Manually append: " .. log_address)
+	print("Manually append",  log_address)
 
 	package.path = package.path .. ";" .. log_address
 end
@@ -42,38 +42,37 @@ if log == nil then
 else
 	-- print("log to string: \n" .. tostring(serialize(log)))
 	-- print("log: \n" .. serialize(log))
-	print("log")
-	print( vim.inspect(log) )
+	print("log", vim.inspect(log))
+	log.init()
 end
 
 if log.home == nil then
 	print("What")
 	return
 end
-log.os_execute('ls')
+log.execute('ls')
 -- print("local home: "  .. home)
 -- print("log.home: "     .. log.home)
-print("log.address: " .. log.address)
+print("log.address", log.address)
 
-local file = io.open(log.address, "w+a")
-
-file:write("\n\n")
+-- file = io.open(log.address, "w+a")
+-- file:write("\n\n")
 -- file:write("environment package.path: " .. package.path .. "\n")
-file:write("\npackage.path:\n" .. serialize(runtime_path) .. "\n")
+-- print("package.path", serialize(runtime_path_table)) -- file:write("\npackage.path:\n" .. serialize(runtime_path_table) .. "\n")
 -- file:write("environment package.cpath: " .. package.cpath .. "\n")
-file:write("\npackage.cpath:\n" .. serialize(runtime_cpath) .. "\n")
-file:write("\n")
+-- print("package.cpath", serialize(runtime_cpath_table)) -- file:write("\npackage.cpath:\n" .. serialize(runtime_cpath_table) .. "\n")
+-- file:write("\n")
 -- file:write("home:         " .. home .. "\n")
-local config_root  = vim.fn.stdpath 'config'
-file:write("config_root:  " .. config_root .. "\n")
-local cache_root   = vim.fn.stdpath("cache")
-file:write("cache_root:   " .. cache_root .. "\n")
-local data_root    = vim.fn.stdpath 'data'
-file:write("data_root:    " .. data_root .. "\n")
-local execute      = vim.api.nvim_command
-local fn           = vim.fn
-local packages_root = data_root .. "/lazy"
-file:write("packages_root: " .. packages_root .. "\n")
+local config_root        = vim.fn.stdpath 'config'
+print("config_root", config_root)     -- "file:write("config_root:  " .. config_root .. "\n")
+local cache_root         = vim.fn.stdpath("cache")
+print("cache_root", cache_root)       -- file:write("cache_root:   " .. cache_root .. "\n")
+local data_root          = vim.fn.stdpath 'data'
+print("data_root", data_root)         -- file:write("data_root:    " .. data_root .. "\n")
+local execute            = vim.api.nvim_command
+local fn                 = vim.fn
+local packages_root      = data_root .. "/lazy"
+print("packages_root", packages_root) -- file:write("packages_root: " .. packages_root .. "\n")
 local manager_perse_path = packages_root .. "/lazy.nvim"
 
 local plug_url_format = ""
@@ -159,32 +158,36 @@ end
 package.path = path_insert(package.path, config_root  .. "/lua/?.lua", "append")
 package.path = path_insert(package.path, config_root  .. "/lua/plugins/?.lua", "append")
 
-local runtime_path  = vim.split(package.path,  ";")
-local runtime_cpath = vim.split(package.cpath, ";")
+local runtime_path_table  = vim.split(package.path,  ";")
+local runtime_cpath_table = vim.split(package.cpath, ";")
 -- https://vi.stackexchange.com/questions/37896/lsp-client-failing-to-attach-as-part-of-autocmd
--- local runtime_path = vim.split(package.path, ";")
--- table.insert(runtime_path, "lua/?.lua")
--- table.insert(runtime_path, "lua/?/init.lua")
+-- local runtime_path_table = vim.split(package.path, ";")
+-- table.insert(runtime_path_table, "lua/?.lua")
+-- table.insert(runtime_path_table, "lua/?/init.lua")
 -- Oneline command: :lua print(serialize(vim.split(package.path, ";")))
 -- Does not work
--- print("runtime_path: \n" .. serialize(runtime_path))
-print("runtime_path")
-for key, value in pairs(runtime_path) do
-	print('\t', key, value)
+-- print("runtime_path_table: \n" .. serialize(runtime_path_table))
+vim.print("runtime_path_table")
+for key, value in ipairs(runtime_path_table) do
+	vim.print(string.format("%-4s", key) .. ': ' .. value)
 end
--- No new line for runtime_path (array like table)
--- print( vim.inspect(runtime_path) )
-print("runtime_cpath")
-for key, value in pairs(runtime_cpath) do
-	print('\t', key, value)
+-- No new line for runtime_path_table (array like table)
+-- print( vim.inspect(runtime_path_table) )
+vim.print("runtime_cpath_table")
+for key, value in ipairs(runtime_cpath_table) do
+	vim.print(string.format("%-4s", key) .. ': ' .. value)
 end
 
 local lazy_config = require("lazy-config")
 if not lazy_config then
-	print("lazy_config initialization failed")
-	file:write("lazy_config initialization failed")
+	vim.print("lazy_config initialization failed")
+	print("failed on", "lazy_config initialization") -- file:write("lazy_config initialization failed")
 	return
 end
+
+print("package.path in table",  serialize(runtime_path_table))
+print("package.cpath in table", serialize(runtime_cpath_table))
+
 
 -- Will generate light background effect, no matter background color set
 -- vim.api.nvim_command("colorscheme onehalf-lush-dark")
@@ -211,19 +214,21 @@ end
 -- vim.cmd[[set background=dark]]
 
 -- $HOME/.local/share/nvim/lazy/indent-blankline.nvim/after/plugin/commands.lua
-local ibl  = require "ibl"
+local r, ibl  = pcall(require, "ibl")
+if not r then ibl = nil end
+if ibl ~= nil then
 -- local conf = require "ibl.config"
 ibl.update { enabled = true }
-
+end
 vim.cmd([[
 
 let g:indent_guides_tab_guides = 1
 " :call <sid>IndentGuidesEnable()
 ]])
 
-file:write("\n\n")
-file:flush()
-file:close()
+-- file:write("\n\n")
+-- file:flush()
+-- file:close()
 -- :lua require'lazy'.install()
 -- :scriptnames
 --

@@ -419,10 +419,10 @@ designate_tty=7
 
 # [ ! -z "${DONT_USE_GREET+x}" ] && designate_tty=7 || {
 [ ! -z "${DONT_USE_GREET+x}" ] &&
-	launcher=$(which swc-launch 2> /dev/null || :) ||
-	launcher="greeter" # designate_tty=1
+	launcher=$(command -v swc-launch 2> /dev/null) ||
+	launcher=$(command -v greeter 2> /dev/null) || # designate_tty=1
 
-sock_sway=
+sway_socket=
 
 # sway_socket() was put into $DOT_CONFIG/env
 # Otherwise you will get "sway_socket: not found" in sway-launch
@@ -432,118 +432,159 @@ sock_sway=
 
 # Initialize wayland
 # [ "$XDG_SESSION_TYPE" = "wayland" ] ||
-[ ! -d "$DOT_CONFIG" ] ||
+# [ ! -d "$DOT_CONFIG" ] ||
 # [ ! -z "${DISPLAY+x}" ] ||
 {
 	# wl-info | grep WAYLAND | awk -F= -v OFS="=" '{gsub(/[[:blank:]]/, "", $NF); print $NF}'
-	[ ! -z "${WAYLAND_DISPLAY+x}" ] && [ ! -z "${WAYLAND_ENV+x}" ]
+	[ ! -z "${SWAY_SOCKET+x}" ] && [ ! -z "${WAYLAND_DISPLAY+x}" ] && [ ! -z "${WAYLAND_ENV+x}" ]
 } ||
-[ "$designate_tty" != "$TTY_NUM" ] ||
 {
-# sway can boot as root
+	[ ! -z "${SWAY_SOCKET+x}" ] && [ "$designate_tty" != "$TTY_NUM" ]
+} ||
+{
+# sway can boot as root user
 # [ "$UID" -eq "0" ] || { # [ "$(id -nu)" = "root" ] || {
 	# https://discourse.ubuntu.com/t/environment-variables-for-wayland-hackers/12750
 	# https://unix.stackexchange.com/questions/330366/how-can-i-run-a-graphical-application-in-a-container-under-wayland
 	# https://stackoverflow.com/questions/41736528/linux-wayland-display-multiple-user
 	# XDG_RUNTIME_DIR defined in $HOME/.xdg_runtime_dir and sourced in $DOT_CONFIG/env
 	# [ "$UID" -eq "0" ] || {
-	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
-	# [ -e "/tmp/wayland/.display" ] || touch "/tmp/wayland/.display"
+
+	# [ -d "/tmp/$LOGNAME/wayland" ] || \mkdir -p "/tmp/$LOGNAME/wayland"
+
+	# [ -e "/tmp/$LOGNAME/wayland/.display" ] || touch "/tmp/$LOGNAME/wayland/.display"
 	[ ! -z "${WAYLAND_CONFIG_HOME:+x}" ] ||
 		{ : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} && export WAYLAND_CONFIG_HOME; }
 	print '$SHLVL' "$SHLVL" | tee $WAYL_OUTPUT 2>&1
 	# }
 
-	# sway_socket
-	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] ||
-	#   cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(sway_socket "$launcher")"
+	# SWAY_SOCKET
+	# SWAY_SOCKET="$([ ! -f "/tmp/$LOGNAME/wayland/.socket" ] || cat "/tmp/$LOGNAME/wayland/.socket" 2> /dev/null)"
+	# SWAY_SOCKET="$(sway_socket "$launcher")"
 
-	print '$sock_sway' "$sock_sway"
+	/ `sway_socket "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` || # || printf "%s\n" "return 1"`
+		print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
+
+	print '$SWAY_SOCKET' "$SWAY_SOCKET" | tee -a "$STEM_OUTPUT" > $TTY
 
 	{
-		[ -z "${sock_sway:+x}" ] ||
-		[ ! -S "$sock_sway" ]
+		[ -z "${SWAY_SOCKET:+x}" ] ||
+		[ ! -S "$SWAY_SOCKET" ]
 	} &&
 	# $DOT_CONFIG/velox-launch
-		# { . $DOT_CONFIG/sway-launch; sock_sway="$(sway_socket "$launcher")"; } ||
+		# { . $DOT_CONFIG/sway-launch; SWAY_SOCKET="$(sway_socket "$launcher")"; } ||
 	. $DOT_CONFIG/sway-launch ||
-	swaymsg -s "$sock_sway" reload
-
+	{
+		[ ! -z "${WAYLAND_DISPLAY:+x}" ] ||
+		swaymsg -s "$SWAY_SOCKET" reload
+	}
 	print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" 2>&1
 
-	[ -z "${sock_sway:+x}" ] ||
-	[ "$sock_sway" = "$SWAY_SOCK" ] ||
-		{ SWAY_SOCK="$sock_sway"; export SWAY_SOCK; }
+	[ -z "${SWAY_SOCKET:+x}" ] &&
+	{
+		export SWAY_SOCK=
+		export WAYLAND_DISPLAY=
+		# : > $HOME/.wayland_display
+		# : > /tmp/$LOGNAME/wayland/.display
+	} # ||
+	# [ "$sway_socket" = "$SWAY_SOCK" ] ||
+	# {
+		# SWAY_SOCK="$sway_socket"
+		export SWAY_SOCK
+	# }
 
 	# WAYLAND_DISPLAY will only be assigned inside the subshell where sway exists
 	# [ -z "${WAYLAND_DISPLAY:+x}" ] || {    }
 }
 
 # if [ ! -z "${WAYLAND_DISPLAY+x}" ] &&
-#     [ -z "$(cat /tmp/wayland/.display)" ] &&
+#     [ -z "$(cat /tmp/$LOGNAME/wayland/.display)" ] &&
 #     [ "$UID" -ne "0" ]; then
 
 # [ "$UID" -eq "0" ] ||
-[ "$designate_tty" != "$TTY_NUM" ] || {
-	[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
+[ ! -z "${SWAY_SOCKET+x}" ] && [ "$designate_tty" != "$TTY_NUM" ] ||
+{
+	# [ -d "/tmp/$LOGNAME/wayland" ] || \mkdir -p "/tmp/$LOGNAME/wayland"
 	[ ! -z "${WAYLAND_CONFIG_HOME:+x}" ] ||
 		{ : ${WAYLAND_CONFIG_HOME:="${XDG_CONFIG_HOME:-$HOME/.config}/wayland"} && export WAYLAND_CONFIG_HOME; }
 
 	# [ ! -z "${WAYLAND_DISPLAY+x}" ] || {
-	#   WAYLAND_DISPLAY="$(cat /tmp/wayland/.display 2> /dev/null)"
+	#   WAYLAND_DISPLAY="$(cat /tmp/$LOGNAME/wayland/.display 2> /dev/null)"
 	#   [ -z "${WAYLAND_DISPLAY+x}" ] || export WAYLAND_DISPLAY
 	# }
 	# {
 
 	# Writting WAYLAND_DISPLAY to file
-	display_wayland="$([ ! -f "/tmp/wayland/.display" ] ||
-		cat "/tmp/wayland/.display" 2> /dev/null)"
-	# [ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
-	# [ ! -f "/tmp/wayland/.display" ] ||
-	[ ! -z "${display_wayland:+x}" ] &&
-	[ "$display_wayland" = "$WAYLAND_DISPLAY" ] || {
-		WAYLAND_DISPLAY="$display_wayland"
-		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a $WAYL_OUTPUT 2>&1
-		export WAYLAND_DISPLAY
-		printf '%s\n' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
-		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
-		printf '%s\n' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
+	# sway_socket="$([ ! -s "/tmp/$LOGNAME/wayland/.socket" ] || cat "/tmp/$LOGNAME/wayland/.socket" 2> /dev/null)"
+	# wayland_display="$([ ! -s "/tmp/$LOGNAME/wayland/.display" ] || cat "/tmp/$LOGNAME/wayland/.display" 2> /dev/null)"
+	# [ -d "/tmp/$LOGNAME/wayland" ] || mkdir -p "/tmp/$LOGNAME/wayland"
+	# [ ! -f "/tmp/$LOGNAME/wayland/.display" ] ||
+	# [ ! -z "${sway_socket:+x}" ]       &&
+	# [ "$sway_socket" = "$SWAY_SOCK" ]  &&
+	# [ ! -z "${wayland_display:+x}" ]   &&
+	# [ "$wayland_display" = "$WAYLAND_DISPLAY" ] ||
+	# {
+		[ ! -z "${SWAY_SOCK:+x}" ] &&
+		[ ! -z "${WAYLAND_DISPLAY:+x}" ] ||
+		{
 
-		[ -z "${DISPLAY+x}" ] || unset DISPLAY
-		# DISPLAY=${WAYLAND_DISPLAY}
-		# export DISPLAY
-	}
+			# Reading SWAY_SOCK from file
+			# sway_socket="$([ ! -f "/tmp/$LOGNAME/wayland/.socket" ] || cat "/tmp/$LOGNAME/wayland/.socket" 2> /dev/null)"
+			# sway_socket="$(sway_socket "$launcher")"
 
-	# Reading SWAY_SOCK from file
-	# sock_sway="$([ ! -f "/tmp/wayland/.socket" ] || cat "/tmp/wayland/.socket" 2> /dev/null)"
-	sock_sway="$(sway_socket "$launcher")"
+			/ `sway_socket  "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` || # || printf "%s\n" "return 1"`
+				print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
+
+			print '$SWAY_SOCKET' "$SWAY_SOCKET" | tee -a "$STEM_OUTPUT" > $TTY
+
+			print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a $WAYL_OUTPUT 2>&1
+			export SWAY_SOCKET
+			export WAYLAND_DISPLAY
+			# printf '%s\n' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
+			# [ -d "/tmp/$LOGNAME/wayland" ] || \mkdir -p "/tmp/$LOGNAME/wayland"
+			# printf '%s\n' "${WAYLAND_DISPLAY}" > /tmp/$LOGNAME/wayland/.display
+
+			# [ -z "${DISPLAY+x}" ] || unset DISPLAY
+			# DISPLAY=${WAYLAND_DISPLAY}
+			# export DISPLAY
+		}
+	# }
+
 	# Try again
 	# {
-	#   # [ -f "/tmp/wayland/.socket" ] &&
-	#   # [ -n "$(cat /tmp/wayland/.socket 2> /dev/null)" ] &&
-	#   [ ! -z "${sock_sway:+x}" ] && [ -S "$sock_sway" ]
+	#   # [ -f "/tmp/$LOGNAME/wayland/.socket" ] &&
+	#   # [ -n "$(cat /tmp/$LOGNAME/wayland/.socket 2> /dev/null)" ] &&
+	#   [ ! -z "${sway_socket:+x}" ] && [ -S "$sway_socket" ]
 	# } || # sway_socket
-	#   # { . $DOT_CONFIG/sway-launch; sock_sway=sway_socket "$launcher"; } || :
+	#   # { . $DOT_CONFIG/sway-launch; sway_socket=sway_socket "$launcher"; } || :
 	#   . $DOT_CONFIG/sway-launch || :
 
-	[ -z "${sock_sway:+x}" ] ||
-	[ "$sock_sway" = "$SWAY_SOCK" ] ||
-		{ SWAY_SOCK="$sock_sway"; export SWAY_SOCK; }
+	[ ! -z "${SWAY_SOCKET:+x}" ] ||
+	{
+		export SWAY_SOCK=
+		export WAYLAND_DISPLAY=
+		# : > $HOME/.wayland_display
+		# : > /tmp/$LOGNAME/wayland/.display
+	} # ||
+	# [ "$sway_socket" = "$SWAY_SOCK" ] ||
+	# 	{ SWAY_SOCK="$sway_socket"; export SWAY_SOCK; }
+
 	# }
 	[ ! -z "${WAYLAND_ENV+x}" ] ||
-		[ ! -f "$WAYLAND_CONFIG_HOME/env" ] || {
+	[ ! -f "$WAYLAND_CONFIG_HOME/env" ] ||
+	{
 		print "$WAYLAND_CONFIG_HOME/env" "sourced"
-			set -a
-			# shellcheck disable=SC1090
-			. "$WAYLAND_CONFIG_HOME/env"
-			set +a
-		}
+		set -a
+		# shellcheck disable=SC1090
+		. "$WAYLAND_CONFIG_HOME/env"
+		set +a
+	}
+	[ -z "${DISPLAY+x}" ] || unset DISPLAY
 }
 
-# elif [ -n "$(cat /tmp/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
+# elif [ -n "$(cat /tmp/$LOGNAME/wayland/.display)" ] && [ -z ${WAYLAND_DISPLAY+x} ]; then
 #     # Not a reliable operation
-#     export WAYLAND_DISPLAY="$(cat /tmp/wayland/.display)"
+#     export WAYLAND_DISPLAY="$(cat /tmp/$LOGNAME/wayland/.display)"
 # fi
 
 # [ ! -s "$HOME/.luaver/luaver" ] || . $HOME/.luaver/luaver
@@ -641,6 +682,7 @@ _tmux() {
 		COLORTERM="truecolor" \
 		TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
 		WAYLAND_DISPLAY="${WAYLAND_DISPLAY-}" \
+		XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR-}" \
 		\tmux -T UTF-8 -T 256 new -As . 2>&1 || :
 	#     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
 	# ENV=$HOME/.profile sh -$-l > /dev/tty

@@ -26,11 +26,11 @@ env_reset DOT_CONFIG "$(dot_config)"
 
 # Should be inside ${MNGR_ROOT-}
 # [ ! -f "$DOT_CONFIG/toolchain/env" ] || {
-# 	. "$DOT_CONFIG/toolchain/env"
+#   . "$DOT_CONFIG/toolchain/env"
 #
-# 	script_name="$(script_name)"
-# 	[ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
-# 	# unset script_name
+#   script_name="$(script_name)"
+#   [ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
+#   # unset script_name
 # }
 
 # user="$(id -nu)"
@@ -643,7 +643,8 @@ export WAYLAND_CONFIG_HOME
 
 # PRIVATE_PREFIX point to real users' private information
 [ -z "${PRIVATE_PREFIX:+x}" ] ||
-[ ! -f "$PRIVATE_PREFIX/etc/profile.d/chrome.conf" ] || {
+[ ! -f "$PRIVATE_PREFIX/etc/profile.d/chrome.conf" ] ||
+{
 	set -a
 	. "$PRIVATE_PREFIX/etc/profile.d/chrome.conf"
 	set +a
@@ -656,9 +657,11 @@ wayland_display() {
 }
 
 sway_socket() {
-	local launcher="${1-}"
-	[ -z "${launcher:+x}" ] ||
-	print '$launcher' "$launcher [$LINENO : env]" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+	local xdg_runtime_dir="$1"
+	# local launcher="${1-}"
+	# [ -z "${launcher:+x}" ] ||
+	# print '$launcher' "$launcher [$LINENO : env]" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+
 	# sock_id="$(ps -ef | grep "sway -d" | grep -v grep | \
 	#   grep -v swc-launch | awk "{print \$1}" | tr -d " ")"
 	# sock_id_list="$(ps -ef | grep "sway -d" | grep -v grep | \
@@ -669,34 +672,59 @@ sway_socket() {
 	# done
 	# wl-info returns WAYLAND_DISPLAY
 	# wl-info | grep WAYLAND | awk -F= -v OFS="=" '{gsub(/[[:blank:]]/, "", $NF); print $NF}'
-	[ -z "${WAYLAND_DISPLAY+x}" ] || {
-		print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
-		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
-		export WAYLAND_DISPLAY
-		printf '%s' "${WAYLAND_DISPLAY}" > $HOME/.wayland_display
-		[ -d "/tmp/wayland" ] || \mkdir -p "/tmp/wayland"
-		printf '%s' "${WAYLAND_DISPLAY}" > /tmp/wayland/.display
-	}
+
 	sock_id="$(for item in $( \
-	ps -ef | grep "sway -d" | grep -v "grep" | awk "{print \$2}" 2> /dev/null)
+		ps -eo pid=,args= | grep -v grep | grep "sway -d" | awk '{print $1}' 2> /dev/null
+		# ps -ef | grep "sway -d" | grep -v "grep" | awk "{print \$2}" 2> /dev/null
+		)
 	do
 		[ -z "$(pstree -p "$item" | grep "$item" | grep "sway" 2> /dev/null)" ] &&
 		continue || { printf '%s' "$item"; break; }
 	done)"
 
-	[ -n "${sock_id:+x}" ] || { printf '\n'; return 0; }
-	# I3SOCK has the same value
-	SWAY_SOCK="$XDG_RUNTIME_DIR/sway-ipc.$UID.$sock_id.sock"
-	[ ! -S "$SWAY_SOCK" ] || {
-		export SWAY_SOCK
-		[ -d "/tmp/wayland" ] || mkdir -p "/tmp/wayland"
-		printf '%s' "${SWAY_SOCK}" > /tmp/wayland/.socket
+	local sway_sock= wayland_display=
 
-		print '$SWAY_SOCK' "$(cat "/tmp/wayland/.socket" 2> /dev/null)" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+	[ -n "${sock_id:+x}" ] ||
+	{
+		printf "$RS%s$FS%s" "$sway_sock" "$wayland_display"
+		return 1
 	}
-	[ -z "${DISPLAY+x}" ] || unset DISPLAY
-	# printf "$RS%s" "$SWAY_SOCK"
-	printf '%s' "$SWAY_SOCK"
+
+	# [ -d "/tmp/$LOGNAME/wayland" ] || \mkdir -p "/tmp/$LOGNAME/wayland"
+
+	# I3SOCK has the same value
+	sway_sock="$xdg_runtime_dir/sway-ipc.$UID.$sock_id.sock"
+	[ ! -S "$sway_sock" ] &&
+	{
+		sway_sock=
+		wayland_display=
+		# Write file might get dead lock
+		# : > $HOME/.wayland_display
+		# : > /tmp/$LOGNAME/wayland/.display
+		printf "$RS%s$FS%s" "$sway_sock" "$wayland_display"
+		return 1
+	} #  ||
+	# {
+	# 	# export SWAY_SOCK
+	# 	[ -d "/tmp/$LOGNAME/wayland" ] || mkdir -p "/tmp/$LOGNAME/wayland"
+	# 	# Write file might get dead lock
+	# 	printf '%s\n' "$sway_sock" > /tmp/$LOGNAME/wayland/.socket
+
+	# 	# print '$sway_sock' "$([ ! -s "/tmp/$LOGNAME/wayland/.socket" ] || cat "/tmp/$LOGNAME/wayland/.socket" 2> /dev/null)" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+	# }
+	[ -z "${WAYLAND_DISPLAY+x}" ] ||
+	{
+		wayland_display="$WAYLAND_DISPLAY"
+		print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+		# export WAYLAND_DISPLAY
+		# Write file might get dead lock
+		# printf '%s\n' "${wayland_display}" > $HOME/.wayland_display
+		# printf '%s\n' "${wayland_display}" > /tmp/$LOGNAME/wayland/.display
+	}
+	# [ -z "${DISPLAY+x}" ] || unset DISPLAY
+	# printf "$RS%s" "$sway_sock"
+	printf "$RS%s$FS%s" "$sway_sock" "$wayland_display"
 }
 
 SCRIPT_NAME="$SCRIPT_SCOPE"

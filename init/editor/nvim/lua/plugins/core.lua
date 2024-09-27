@@ -1,4 +1,6 @@
 
+-- Support deleting all plugins in lua folder
+-- to get a clean neovim, but still work
 
 return {
 	-- Does not work
@@ -51,8 +53,9 @@ return {
 
 	{
 		"tpope/vim-fugitive",
+		cond     = false, -- test
 		-- cond  = false, -- "y" redefined in the plugin
-		event = "VeryLazy",
+		event    = "VeryLazy",
 	},
 
 	{
@@ -111,8 +114,11 @@ return {
 
 	{
 		-- git remote set-url origin --push "git@github.com:trailblazing/keys.git"
+		-- Functions merged into tmux.nvim
 		"trailblazing/keys",
-		-- cond  = false,
+		cond  = false,
+		-- Loading it by augroup check if "tmux_is_vim_vimenter" does not exist
+		-- cond  = true, -- test
 		event = { "VimEnter" },
 		lazy  = false,
 	},
@@ -146,9 +152,9 @@ return {
 	-- The default shortcut "-" is very bad
 	{
 		'justinmk/vim-dirvish',
-		   cond   = false,
-		event = "VeryLazy",
-		lazy  = true,
+		cond   = false,
+		event  = "VeryLazy",
+		lazy   = true,
 	},
 
 	{
@@ -162,8 +168,8 @@ return {
 	{
 		"chrisbra/vim-sh-indent",
 		cond   = false,
-		event = "VeryLazy",
-		lazy  = true,
+		event  = "VeryLazy",
+		lazy   = true,
 	},
 
 	{
@@ -198,9 +204,9 @@ return {
 	{
 		'renerocksai/telekasten.nvim',
 		dependencies = {'nvim-telescope/telescope.nvim'},
-		event = "VeryLazy",
-		lazy  = true,
-		config = function()
+		event   = "VeryLazy",
+		lazy    = true,
+		config  = function()
 			return require('telekasten').setup({
 				-- home = vim.fn.expand("~/zettelkasten"), -- Put the name of your notes directory here
 				home = vim.fn.expand("~/.wiki"), -- Put the name of your notes directory here
@@ -284,33 +290,34 @@ return {
 		lazy  = true,
 	},
 
-	{
-		"mbbill/undotree",
-		cond  = false, -- does not work for neovim
-		-- event = "VeryLazy",
-		-- lazy  = true,
-		lazy  = false,
-	},
+	-- If you don't remove the "cond  = false" here, other "undotree" will not boot !
+	-- {
+	--  "mbbill/undotree",
+	--  cond  = false, -- does not work for neovim
+	--  -- event = "VeryLazy",
+	--  -- lazy  = true,
+	--  lazy  = false,
+	-- },
 
-	{
-		"jiaoshijie/undotree",
-		event = "VeryLazy",
-		lazy  = true,
-		dependencies = "nvim-lua/plenary.nvim",
-		-- config = function()
-		--  require('undotree').setup({
-		--      keys = { -- load the plugin only when using it's keybinding:
-		--          { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
-		--      },
-		--  })
-		-- end,
-	},
+	-- {
+	--  "jiaoshijie/undotree",
+	--  event = "VeryLazy",
+	--  lazy  = true,
+	--  dependencies = "nvim-lua/plenary.nvim",
+	--  -- config = function()
+	--  --  require('undotree').setup({
+	--  --      keys = { -- load the plugin only when using it's keybinding:
+	--  --          { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
+	--  --      },
+	--  --  })
+	--  -- end,
+	-- },
 
-	{
-		"kevinhwang91/nvim-fundo",
-		event = "VeryLazy",
-		lazy  = true,
-	},
+	-- {
+	--  "kevinhwang91/nvim-fundo",
+	--  event = "VeryLazy",
+	--  lazy  = true,
+	-- },
 
 	-- {
 	--  -- Moved to "folke/lazydev.nvim"
@@ -321,11 +328,11 @@ return {
 	--  lazy   = true,
 	-- },
 
-	-- The two working plugins in the list of plugins that claim to support this feature
-	-- Copy from nvim to tmux [TextYankPost]
+	-- The two working plugins in the list of plugins that claim to support the "copy from nvim to tmux" feature
+	-- *** Copy from nvim to tmux [TextYankPost] ***
 	-- 1. When boot tmux from tty, copy to tmux clipboard -- prefix + ] or ctrl + p paste to terminal
 	-- 2. When boot tmux from wayland (gui), copy both to tmux and gui system clipboard
-	-- 3. Paste to current line when yanked a line
+	-- 3. Paste to current line when yanked a line ?
 	-- Disappeared -- E353: Nothing in register " especially in tty
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- [TextYankPost], needs "lazy = false,"
@@ -338,20 +345,22 @@ return {
 		-- },
 		-- https://github.com/roxma/vim-tmux-clipboard/issues/7
 		   cond     = false,
-		opts     = {},
+		-- cond     = true,
 		-- event    = "VeryLazy",
-		event     = "TextYankPost",
+		event    = "TextYankPost",
 		-- lazy     = true,
 		lazy     = false,
 		config   = function()
+			opts = {}
 			vim.cmd([[
 			" let g:vim_tmux_clipboard#loadb_option = '-w'
 			]])
 		end,
 	},
 
-	-- The two working plugins in the list of plugins that claim to support this feature
-	-- Copy from nvim to tmux ? [TextYankPost]
+	-- Moved to file
+	-- The two working plugins in the list of plugins that claim to support the "copy from nvim to tmux" feature
+	-- *** Copy from nvim to tmux ? [TextYankPost] ***
 	-- 1. When boot tmux from tty, copy to tmux clipboard -- prefix + ] or ctrl + p paste to terminal
 	-- 2. When boot tmux from wayland (gui), copy to gui system clipboard -- ctrl + shift + v to paste to terminal and
 	--       gui components
@@ -360,43 +369,48 @@ return {
 	-- Author: As my workflow has changed over time, I no longer use tmux. This means that while I will continue to maintain this plugin, I will no longer implement fixes, features, or maintenance. PRs are always welcome and will be merged upon review.
 	-- set.clipboard = set.clipboard + "unnamedplus"
 	-- "show-buffer -s" error
-	{
-		"trailblazing/tmux.nvim",
-		-- cond      = false,
-		-- opts      = {
-		--  copy_sync = {
-		--      -- enable = false,
-		--      enable = true, -- default
-		--      sync_clipboard = true, -- default
-		--      sync_registers = true, -- default
-		--      -- No difference
-		--      -- redirect_to_clipboard = false,
-		--         redirect_to_clipboard = true, -- default
-		--  },
-		--  navigation = {
-		--      -- enable_default_keybindings = true,
-		--      enable_default_keybindings = false,
-		--  },
-		-- },
-		-- event  = "VeryLazy",
-		event     = "TextYankPost",
-		-- lazy   = true,
-		lazy      = false,
-		-- config    = function()
-		--  return require("tmux").setup(opts)
-		-- end,
-	},
+	-- {
+	-- 	"trailblazing/tmux.nvim",
+	-- 	-- cond   = false,
+	-- 	-- event  = "VeryLazy",
+	-- 	event     = "TextYankPost",
+	-- 	lazy      = true,
+	-- 	-- lazy   = false,
+	-- 	config    = function()
+	-- 		opts      = {
+	-- 			copy_sync = {
+	-- 				-- enable = false,
+	-- 				enable = true, -- default
+	-- 				sync_clipboard = true, -- default
+	-- 				sync_registers = true, -- default
+	-- 				-- No difference
+	-- 				-- redirect_to_clipboard = false,
+	-- 				redirect_to_clipboard = true, -- default
+	-- 			},
+	-- 			navigation = {
+	-- 				-- enable_default_keybindings = true,
+	-- 				enable_default_keybindings = false,
+	-- 			},
+	-- 		}
+	-- 		logging = {
+	-- 	    	file    = "disabled",
+	-- 	    	notify  = "disabled",
+	-- 		}
+	-- 		return require("tmux").setup(opts, logging)
+	-- 	end,
+	-- },
 
 	-- Does not work
 	-- $XDG_DATA_HOME/nvim/lazy/nvim-miniyank/lua/miniyank.lua:15: attempt to call field 'list' (a nil value)
-	{
-		"bfredl/nvim-miniyank",
-		event    = "TextYankPost",
-		   lazy  = true,
-		-- lazy  = false,
-		-- config   = true,
-		config   = false,
-	},
+	-- {
+	-- 	"bfredl/nvim-miniyank",
+	-- 	   event = "VeryLazy",
+	-- 	-- event      = "TextYankPost",
+	-- 	lazy       = true,
+	-- 	-- lazy    = false,
+	-- 	-- config  = true,
+	-- 	config     = false,
+	-- },
 
 	-- Copy from nvim to tmux [TextYankPost]
 	-- Yes. It is a vim side plugin
@@ -408,17 +422,17 @@ return {
 	{
 		"tmux-plugins/vim-tmux",
 		cond     = false, -- manual loading required but the following "config" does not work
-		opts     = {},
 		-- event = "VeryLazy",
 		event    = "TextYankPost",
 		   lazy  = true,
 		-- lazy   = false,
 		-- config   = true, -- lazy.nvim won't happy
 		config = function()
+			opts = {}
 			-- You configuration here
 			-- Does not work
 			vim.cmd[[
-			execute "source "   .  stdpath("data") . '/lazy/vim-tmux/autoload/tmux.vim'
+			execute "source "  .  stdpath("data") . '/lazy/vim-tmux/autoload/tmux.vim'
 			execute "runtime! " . stdpath("data") . '/lazy/vim-tmux/autoload/tmux.vim'
 			]]
 		end
@@ -427,9 +441,10 @@ return {
 	-- Not copy / paste, just send
 	{
 		"tadhg-ohiggins/vim-tmux-send",
-		   event     = "VeryLazy",
-		   lazy   = true,
-		-- lazy   = false,
+		event    = "VeryLazy",
+		lazy     = true,
+		-- lazy  = false,
+		cond     = false, -- test
 	},
 
 	{
@@ -547,6 +562,7 @@ return {
 		end
 	},
 
+	-- Soothing pastel theme for (Neo)vim
 	{
 		"catppuccin/nvim",
 		name     = "catppuccin",
@@ -571,49 +587,49 @@ return {
 	},
 
 	-- outline
-	{
-		"hedyhli/outline.nvim",
-		lazy = true,
-		cmd = { "Outline", "OutlineOpen" },
-		keys = { -- Example mapping to toggle outline
-		{ "<leader>tt", "<cmd>Outline<CR>", desc = "Toggle outline" },
-		},
-		opts = {
-			-- Your setup opts here
-		},
-	},
+	-- {
+	--  "hedyhli/outline.nvim",
+	--  lazy  = true,
+	--  cmd   = { "Outline", "OutlineOpen" },
+	--  keys  = { -- Example mapping to toggle outline
+	--      { "<leader>tt", "<cmd>Outline<CR>", desc = "Toggle outline" },
+	--  },
+	--  opts = {
+	--      -- Your setup opts here
+	--  },
+	-- },
 
 	-- outline
-	{
-		'stevearc/aerial.nvim',
-		opts = {},
-		-- Optional dependencies
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-tree/nvim-web-devicons"
-		},
-		event  = "VeryLazy",
-		lazy   = true,
-	},
+	-- {
+	--  'stevearc/aerial.nvim',
+	--  event  = "VeryLazy",
+	--  lazy   = true,
+	--  opts   = {},
+	--  -- Optional dependencies
+	--  dependencies = {
+	--      "nvim-treesitter/nvim-treesitter",
+	--      "nvim-tree/nvim-web-devicons"
+	--  },
+	-- },
 
-	{
-		"christoomey/vim-tmux-navigator",
-		cond   = false,
-		cmd = {
-			"TmuxNavigateLeft",
-			"TmuxNavigateDown",
-			"TmuxNavigateUp",
-			"TmuxNavigateRight",
-			"TmuxNavigatePrevious",
-		},
-		keys = {
-			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-		},
-	},
+	-- {
+	-- 	"christoomey/vim-tmux-navigator",
+	-- 	cond = false,
+	-- 	cmd  = {
+	-- 		"TmuxNavigateLeft",
+	-- 		"TmuxNavigateDown",
+	-- 		"TmuxNavigateUp",
+	-- 		"TmuxNavigateRight",
+	-- 		"TmuxNavigatePrevious",
+	-- 	},
+	-- 	keys = {
+	-- 		{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+	-- 		{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+	-- 		{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+	-- 		{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+	-- 		{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+	-- 	},
+	-- },
 
 	{
 		"marklcrns/vim-smartq",
@@ -632,6 +648,7 @@ return {
 		'nmac427/guess-indent.nvim',
 		event  = "VeryLazy",
 		lazy   = true,
+		cond   = false, -- set ts=8 to lua?
 		config = function() require('guess-indent').setup {} end,
 	},
 
@@ -639,5 +656,20 @@ return {
 		"tpope/vim-sleuth",
 		event  = "VeryLazy",
 		lazy   = true,
+		cond   = false, -- set ts=8 to lua?
+	},
+
+	-- install without yarn or npm
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd  = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft   = { "markdown" },
+		build = function() vim.fn["mkdp#util#install"]() end,
+		event  = "VeryLazy",
+		lazy   = true,
+	},
+
+	{
+
 	},
 }

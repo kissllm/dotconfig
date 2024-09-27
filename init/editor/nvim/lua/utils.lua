@@ -23,7 +23,7 @@ function U.map(mode, lhs, rhs, opts)
 		vim.keymap.set(mode, lhs, rhs, options)
 	-- elseif (type(rhs) == "string") then
 	-- Does not work on most mappings
-	-- 	vim.api.nvim_set_keymap(mode, lhs, rhs, options)
+	--  vim.api.nvim_set_keymap(mode, lhs, rhs, options)
 	-- end
 end
 

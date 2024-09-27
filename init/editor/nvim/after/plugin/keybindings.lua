@@ -1,5 +1,5 @@
-local U = require('utils')
-
+local U   = require('utils')
+local log = require('log')
 -- local function map(mode, lhs, rhs, opts)
 --  local options = { }
 --  if opts then
@@ -58,7 +58,7 @@ local map = U.map
 -- Use jj to exit insert mode
 map("i", "jj", "<Esc>")
 map("n", "-",  "g_")
-
+map("n", "L",  ':vert e ' .. os.getenv('HOME') .. '/.vim.log<cr>')
 -- map('n', "\\", "<Plug>(dirvish_up)", { noremap = true })
 
 -- use leader-nt to toggle the NvimTree plugin's visibility in normal mode
@@ -277,6 +277,15 @@ map("",  "<leader>p",  ":bp<CR>")
 
 -- Keep cursor at the bottom of the visual selection after you yank it.
 map("v", "y", "ygv<Esc>")
+
+-- Demages the yanking
+-- map("n", "y",
+-- function()
+--  vim.cmd[[call feedkeys("ygv<Esc>")]]
+--  log.execute('tmux save-buffer - | wl-copy')
+-- end
+-- )
+
 -- https://www.reddit.com/r/neovim/comments/1b9n736/deleting_overwriting_clipboard/
 -- map({'n', 'v'}, 'x', '"_x') -- keeping the default x
 map({'n', 'v'}, 'd', '"_d')
@@ -330,133 +339,197 @@ map("v", "<Enter>", "<Plug>(EasyAlign)", { noremap = true })
 -- Start interactive EasyAlign for a motion/text object (e.g. gaip)
 map("n", "ga",      "<Plug>(EasyAlign)", { noremap = true })
 
+-- local log      = require("log")
 
-local log      = require("log")
-
--- print(log.os_execute("ls"))
--- print(log.os_execute("grep prefixground /mnt/init/terminal/tmux.conf | grep %hidden | awk -F = '{print $2}' | xargs"))
+-- print(log.execute("ls"))
+-- print(log.execute("grep prefixground /mnt/init/terminal/tmux.conf | grep %hidden | awk -F = '{print $2}' | xargs"))
 local tmux_key_enabled = false
-local prefixground = log.os_execute(
-"grep prefix_background " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep %hidden | awk -F = '{print $2}' | xargs | tr -d \"$IFS\"")
+local prefixground = log.execute(
+"grep 'prefix_background' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+.. "awk -v key=\"%hidden\" '$1 == key {print}' | awk -F = '{print $2}' | awk '{print $1}' | xargs | tr -d \"$IFS\""
+)
 vim.g.prefixground = prefixground
-print("prefixground : " .. vim.g.prefixground)
+print("prefixground", vim.g.prefixground)
 
-local prefix_key   = log.os_execute(
-"grep prefix_key   " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep %hidden | awk -F = '{print $2}' | xargs | tr -d \"$IFS\"")
+local prefix_key   = log.execute(
+-- "grep prefix_key   " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | awk -v key='#' '$1 != key {print}' | grep %hidden | awk -F = '{print $2}' | xargs | tr -d \"$IFS\""
+"grep 'prefix_key' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+.. "awk -v key=\"%hidden\" '$1 == key {print}' | awk -F = '{print $2}' | awk '{print $1}' | xargs | tr -d \"$IFS\""
+)
 vim.g.prefix_key   = prefix_key
-print("prefix_key   : " .. vim.g.prefix_key)
+print("prefix_key", vim.g.prefix_key)
 
---  local cmd_copy_mode_key = "/usr/bin/tmux list-keys | grep 'Escape' | awk -v key='root' '$3 == key { print }' | awk -F 'copy-mode' '{print $1}' | awk '{print $NF}'"
---  print("cmd_copy_mode_key: " .. cmd_copy_mode_key)
---  local copy_mode_key  -- = os.capture(cmd_copy_mode_key)
---  if copy_mode_key == "" then
---  copy_mode_key = log.os_execute(
---  "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear | awk -F 'copy-mode' '{print $1}' | awk '{print $NF}'")
+--  local copy_mode_key_verify_cmd = "/usr/bin/tmux list-keys | grep 'Escape' | awk -v key='copy-mode-vi' '$3 == key { print }' | awk '{print $4}"
+--  print("copy_mode_key_verify_cmd: " .. copy_mode_key_verify_cmd)
+--  local copy_mode_key_verify  = log.capture(copy_mode_key_verify_cmd)
+--  if copy_mode_key_verify ~= copy_mode_key then
+--  copy_mode_key = log.execute(
+--  "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | awk -v key='#' '$1 != key {print}' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear | awk -F 'copy-mode' '{print $1}' | awk '{print $NF}'")
 --  "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | awk -F 'if-shell' '{print $1}' | awk '{print $NF}'")
-local copy_mode_key = log.os_execute(
-	"grep copy_mode_key " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep %hidden | awk -F = '{print $2}' | xargs | tr -d \"$IFS\"")
+local copy_mode_key = log.execute(
+"grep 'copy_mode_key' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+.. "awk -v key=\"%hidden\" '$1 == key {print}' | awk -F = '{print $2}' | awk '{print $1}' | xargs | tr -d \"$IFS\""
+)
 --  end
 vim.g.copy_mode_key  = copy_mode_key
-print("copy_mode_key: " .. vim.g.copy_mode_key)
+print("copy_mode_key", vim.g.copy_mode_key)
 
--- local cmd_prefix_per_se = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key=\"prefix\" \"\\$3 == key { print }\""
-local cmd_prefix_per_se = "/usr/bin/tmux list-keys -T prefix | grep '" .. prefix_key .. "'"
+local key_table = { prefix_key = prefix_key, copy_mode_key = copy_mode_key }
+-- local prefix_per_se_cmd = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key=\"prefix\" \"\\$3 == key { print }\""
+local prefix_per_se_cmd = "/usr/bin/tmux list-keys -T prefix | grep '" .. prefix_key .. "'"
 -- https://stackoverflow.com/questions/132397/get-back-the-output-of-os-execute-in-lua
-local prefix_per_se = os.capture(cmd_prefix_per_se)
+local prefix_per_se = log.capture(prefix_per_se_cmd)
 if prefix_per_se == "" then
-	prefix_per_se = log.os_execute(
-	-- "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear")
-	"grep 'send-prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf  | grep -v '#' | grep -v 'unbind' | grep -v 'root' | grep bind | grep '\\-T'"
+	prefix_per_se = log.execute(
+	-- "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | awk -v key='#' '$1 != key {print}' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear")
+	-- Don't use grep -v '#' because it might has comments at the end of line or "#{@is_vim}" inside the statements
+	"grep 'switch-client -T prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+	.. "awk -v key='#' '$1 != key {print}' | grep -v 'unbind' | grep bind | awk -v key='prefix' '$3 == key {print}'"
 	)
-	prefix_per_se = prefix_per_se:gsub("%$prefix_key", prefix_key)
+	if prefix_per_se == "" then
+		prefix_per_se = log.execute(
+		"grep 'switch-client -T prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+		.. "awk -v key='#' '$1 != key {print}' | awk -v key='\"$prefix_key\"' '$2 == key {print}' | grep -v 'unbind' | grep bind"
+		)
+	end
+	if prefix_per_se == "" then
+		vim.notify("prefix per se statement not found\n")
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
+		-- error("`prefix_per_se` statement not found")
+		-- os.exit()
+	end
 end
+-- https://www.ibm.com/docs/en/ias?topic=manipulation-stringgsub-s-pattern-repl-n
+prefix_per_se = prefix_per_se:gsub('\\', '')
+prefix_per_se = prefix_per_se:gsub('%$prefix_key', prefix_key)
+-- prefix_per_se = string.gsub(prefix_per_se, '%$prefix_key', prefix_key)
+-- prefix_per_se = prefix_per_se:gsub("%$(w+)", prefix_key)
+-- prefix_per_se = prefix_per_se:gsub("%$(%w+)", prefix_key)
+-- prefix_per_se = prefix_per_se:gsub("%$(%w+)", key_table)
 if prefix_root ~= "" then
-	prefix_per_se = prefix_per_se:gsub('`', [['`']])
-	prefix_per_se = prefix_per_se:gsub("''", "'")
+	prefix_per_se = prefix_per_se:gsub(' ` ', [[ '`' ]])
+	-- prefix_per_se = prefix_per_se:gsub("''", "'")
+	prefix_per_se = prefix_per_se:gsub('"', "'")
+	-- prefix_per_se = prefix_per_se:gsub("\"'$prefix_key'\"", "'$prefix_key'")
 end
 -- prefix_per_se       =  string.format('%q', prefix_per_se)
 vim.g.prefix_per_se = prefix_per_se
-print("prefix_per_se: " .. vim.g.prefix_per_se)
--- -- vim.g.prefix_per_se  = log.os_execute("tmux list-keys | grep Escape | awk -v key=\"prefix\"       '$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", $(i) ; printf \"%s\", $NF ; print \"\"}'")
--- -- vim.g.prefix_per_se  = log.os_execute(
+print("prefix_per_se", vim.g.prefix_per_se)
+-- -- vim.g.prefix_per_se  = log.execute("tmux list-keys | grep Escape | awk -v key=\"prefix\"       '$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", $(i) ; printf \"%s\", $NF ; print \"\"}'")
+-- -- vim.g.prefix_per_se  = log.execute(
 -- -- "\'" .. "tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"prefix\" \"\\$3 == key { print }\"" .. "\'"
 -- -- "'tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"prefix\" \"\\$3 == key { print }\"'"
 -- -- )
--- vim.g.prefix_per_se  = log.os_execute("'" .. cmd_prefix_per_se .. "'")
+-- vim.g.prefix_per_se  = log.execute("'" .. prefix_per_se_cmd .. "'")
 -- -- vim.g.prefix_per_se  = posix.exec(
 -- -- "/usr/bin/tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"prefix\" \"\\$3 == key { print }\"", { }
 -- -- )
--- print("cmd_prefix_per_se: " .. cmd_prefix_per_se)
+-- print("prefix_per_se_cmd: " .. prefix_per_se_cmd)
 -- print("prefix_per_se: " .. vim.g.prefix_per_se)
--- local cmd_prefix_root = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key='root' '$3 == key { print }'"
-local cmd_prefix_root = "/usr/bin/tmux list-keys -T root | grep '" .. prefix_key .. "'"
--- -- vim.g.prefix_root    = log.os_execute("'" .. "tmux list-keys | grep Escape | awk -v key=\"root\" \"\$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", \$(i) ; printf \"%s\", \$NF ; print \"\"}\"" .. "'")
--- -- vim.g.prefix_root    = log.os_execute(
+-- local prefix_root_cmd = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key='root' '$3 == key { print }'"
+local prefix_root_cmd = "/usr/bin/tmux list-keys -T root | grep '" .. prefix_key .. "'"
+-- -- vim.g.prefix_root    = log.execute("'" .. "tmux list-keys | grep Escape | awk -v key=\"root\" \"\$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", \$(i) ; printf \"%s\", \$NF ; print \"\"}\"" .. "'")
+-- -- vim.g.prefix_root    = log.execute(
 -- -- "\'" .. "tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"root\"   \"\\$3 == key { print }\"" .. "\'"
 -- -- "'tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"root\"   \"\\$3 == key { print }\"'"
--- -- "'" .. cmd_prefix_root .. "'"
+-- -- "'" .. prefix_root_cmd .. "'"
 -- -- )
-print("cmd_prefix_root  : " .. cmd_prefix_root)
--- vim.g.prefix_root    = log.os_execute("'" .. cmd_prefix_root .. "'")
-local prefix_root    = os.capture(cmd_prefix_root)
-print("prefix_root  : " .. prefix_root)
+print("prefix_root_cmd", prefix_root_cmd)
+-- vim.g.prefix_root    = log.execute("'" .. prefix_root_cmd .. "'")
+local prefix_root    = log.capture(prefix_root_cmd)
+print("prefix_root", prefix_root)
 if prefix_root == "" then
-	prefix_root = log.os_execute(
-	-- "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear")
-	"grep 'send-prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf  | grep -v '#' | grep 'root' | grep -v 'unbind' | grep bind | grep '\\-T'"
+	prefix_root = log.execute(
+	-- "grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | awk -v key='#' '$1 != key {print}' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear")
+	-- "grep 'send-prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf  | awk -v key='#' '$1 != key {print}' | grep 'root' | grep -v 'unbind' | grep bind | grep '\\-T'"
+	"grep 'switch-client -T prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+	.. "awk -v key='#' '$1 != key {print}' | awk -v key='\"$prefix_key\"' '$4 == key {print}' | awk -v key='root' '$3 == key {print}' | grep -v 'unbind' | grep 'bind' | grep '\\-T'"
 	)
-	prefix_root = prefix_root:gsub("%$prefix_key", prefix_key)
+	if prefix_root == "" then
+		prefix_root = log.execute(
+		"grep 'switch-client -T prefix' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+		.. "awk -v key='#' '$1 != key {print}' | awk -v key='\"$prefix_key\"' '$3 == key {print}' | awk -v key='-n' '$2 == key {print}' | grep -v 'unbind' | grep 'bind'"
+		)
+	end
+	if prefix_root == "" then
+		vim.notify("prefix root statement not found\n")
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
+		-- error("`prefix_root` statement not found")
+		-- os.exit()
+	end
 end
+-- prefix_root = string.gsub(prefix_root, vim.api.nvim_replace_termcodes("%$prefix_key", true, true, true), prefix_key)
+prefix_root = prefix_root:gsub('\\', '')
+prefix_root = prefix_root:gsub('%$prefix_key', prefix_key)
+-- prefix_root = prefix_root:gsub("%$(%w+)", key_table)
 if prefix_root ~= "" then
-	prefix_root = prefix_root:gsub('`', [['`']])
-	prefix_root = prefix_root:gsub("''", "'")
+	prefix_root = prefix_root:gsub(' ` ', [[ '`' ]])
+	-- prefix_root = prefix_root:gsub("''", "'")
+	prefix_root = prefix_root:gsub('"', "'")
+	-- prefix_root = prefix_root:gsub("\"'$prefix_key'\"", "'$prefix_key'")
 end
 -- prefix_root       =  string.format('%q', prefix_root)
 vim.g.prefix_root    = prefix_root
 -- -- vim.g.prefix_per_se  = posix.exec(
 -- -- "/usr/bin/tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"root\"   \"\\$3 == key { print }\"", { }
 -- -- )
--- print("cmd_prefix_root: " .. cmd_prefix_root)
-print("prefix_root  : " .. vim.g.prefix_root)
--- local cmd_copy_mode_vi = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key=\"copy-mode-vi\" \"\\$3 == key { print }\""
-local cmd_copy_mode_vi  = "/usr/bin/tmux list-keys -T copy-mode-vi | grep '" .. vim.g.prefix_key .. "'"
--- local cmd_copy_mode    = "/usr/bin/tmux list-keys | grep 'Escape' | awk -v key='copy-mode'   " .. "'$3 == key { print }'"
+-- print("prefix_root_cmd: " .. prefix_root_cmd)
+print("prefix_root", vim.g.prefix_root)
+-- local copy_mode_vi_cmd = "/usr/bin/tmux list-keys | grep '" .. vim.g.prefix_key .. "' | awk -v key=\"copy-mode-vi\" \"\\$3 == key { print }\""
+local copy_mode_vi_cmd  = "/usr/bin/tmux list-keys -T copy-mode-vi | grep '" .. prefix_key .. "'"
 
--- local cmd_copy_mode     = "/usr/bin/tmux list-keys | grep '" .. copy_mode_key .. "' | awk -v key='root' '$3 == key { print }'"
-local cmd_copy_mode     = "/usr/bin/tmux list-keys -T root | grep '" .. copy_mode_key .. "'"
-
--- -- vim.g.copy_mode_vi   = log.os_execute("'" .. "tmux list-keys | grep Escape | awk -v key=\"copy-mode-vi\" \"\$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", \$(i) ; printf \"%s\", \$NF ; print \"\"}\"" .. "'")
--- -- vim.g.copy_mode_vi   = log.os_execute(
+-- -- vim.g.copy_mode_vi   = log.execute("'" .. "tmux list-keys | grep Escape | awk -v key=\"copy-mode-vi\" \"\$3 == key {for (i = 5; i < NF; i ++) printf \"%s \", \$(i) ; printf \"%s\", \$NF ; print \"\"}\"" .. "'")
+-- -- vim.g.copy_mode_vi   = log.execute(
 -- -- "\'" .. "tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"copy-mode-vi\" \"\\$3 == key { print }\"" .. "\'"
 -- -- "'tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"copy-mode-vi\" \"\\$3 == key { print }\"'"
--- -- "'" .. cmd_copy_mode_vi .. "'"
+-- -- "'" .. copy_mode_vi_cmd .. "'"
 -- -- )
-print("cmd_copy_mode    : " .. cmd_copy_mode)
--- vim.g.copy_mode_vi   = log.os_execute("'" .. cmd_copy_mode_vi .. "'")
-local copy_mode_vi   = os.capture(cmd_copy_mode_vi)
+print("copy_mode_vi_cmd", copy_mode_vi_cmd)
+-- vim.g.copy_mode_vi   = log.execute("'" .. copy_mode_vi_cmd .. "'")
+local copy_mode_vi   = log.capture(copy_mode_vi_cmd)
 if copy_mode_vi ~= "" then
-	copy_mode_vi = copy_mode_vi:gsub('`', [['`']])
+	copy_mode_vi = copy_mode_vi:gsub(' ` ', [[ '`' ]])
 	copy_mode_vi = copy_mode_vi:gsub("''", "'")
 end
 vim.g.copy_mode_vi   = copy_mode_vi
--- print("cmd_copy_mode_vi: " .. cmd_copy_mode_vi)
-print("copy_mode_vi : " .. vim.g.copy_mode_vi)
+-- print("copy_mode_vi_cmd: " .. copy_mode_vi_cmd)
+print("copy_mode_vi", vim.g.copy_mode_vi)
 
-local copy_mode      = os.capture(cmd_copy_mode)
+vim.notify("Test copy_mode statement not found\n")
+vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
+-- error("`copy_mode_vi` statement not found")
+-- local copy_mode_cmd    = "/usr/bin/tmux list-keys | grep 'Escape' | awk -v key='copy-mode'   " .. "'$3 == key { print }'"
+-- local copy_mode_cmd     = "/usr/bin/tmux list-keys | grep '" .. copy_mode_key .. "' | awk -v key='root' '$3 == key { print }'"
+local copy_mode_cmd  = "/usr/bin/tmux list-keys -T root | grep '" .. copy_mode_key .. "'"
+local copy_mode      = log.capture(copy_mode_cmd)
 if copy_mode == "" then
-	copy_mode = log.os_execute(
-	"grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | grep -v '#' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear")
-	copy_mode = copy_mode:gsub("%$copy_mode_key", copy_mode_key)
+	copy_mode = log.execute(
+	"grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+	.. "awk -v key='#' '$1 != key {print}' | awk -v key='\"$copy_mode_key\"' '$4 == key {print}' | awk -v key='root' '$3 == key {print}' | grep -v copy-mode-vi | grep -v unbind | grep '\\-T' | grep -v cancel | grep -v clear"
+	)
+	if copy_mode == "" then
+		copy_mode = log.execute(
+		"grep 'copy-mode' " .. os.getenv("DOT_CONFIG") .. "/terminal/tmux.conf | "
+		.. "awk -v key='#' '$1 != key {print}' | awk -v key='\"$copy_mode_key\"' '$3 == key {print}' | awk -v key='-n' '$2 == key {print}' | grep -v copy-mode-vi | grep -v unbind | grep -v cancel | grep -v clear"
+		)
+	end
+	if copy_mode == "" then
+		vim.notify("copy_mode statement not found\n")
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
+		-- error("`copy_mode` should start with `<Plug>`")
+		-- os.exit()
+	end
 end
+copy_mode = copy_mode:gsub("%$copy_mode_key", copy_mode_key)
 if copy_mode ~= "" then
-	copy_mode = copy_mode:gsub('`', [['`']])
+	copy_mode = copy_mode:gsub(' ` ', [[ '`' ]])
 	copy_mode = copy_mode:gsub("''", "'")
 end
 vim.g.copy_mode      = copy_mode
 -- -- vim.g.prefix_per_se  = posix.exec(
 -- -- "/usr/bin/tmux list-keys | grep " .. vim.g.prefix_key .. " | awk -v key=\"copy-mode-vi\" \"\\$3 == key { print }\"", { }
 -- -- )
-print("copy_mode    : " .. vim.g.copy_mode)
+print("copy_mode", vim.g.copy_mode)
 
 -- -- [Split a string and store in an array in lua](https://www.iditect.com/program-example/split-a-string-and-store-in-an-array-in-lua.html)
 
@@ -649,33 +722,91 @@ print("copy_mode    : " .. vim.g.copy_mode)
 -- ]]
 
 local tmux_prefix_cancel = function()
-	-- If you do not quote "prefix_key" (it might be a "`" -- backquote)
-	-- sh: syntax error: EOF in backquote substitution
-	log.os_execute("/usr/bin/tmux unbind '" .. prefix_key .. "'")
-	log.os_execute("/usr/bin/tmux set prefix None")
-	log.os_execute("/usr/bin/tmux unbind -T root '" .. prefix_key .. "'")
+	if copy_mode_key ~= '`' then
 
-	-- log.os_execute("/usr/bin/tmux unbind '" .. copy_mode_key .. "'")
-	-- log.os_execute("/usr/bin/tmux unbind -T root '" .. copy_mode_key .. "'")
+		-- vim.cmd[[
+		-- call system(['/usr/bin/tmux', 'unbind', g:prefix_key])
+		-- call system(['/usr/bin/mux', 'unbind', '-T', 'root', g:prefix_key])
+		-- call system(['/usr/bin/mux', 'set-option', 'prefix', 'None'])
+		-- call system(['/usr/bin/mux', 'bind-key', '\`', 'send-keys', '\`'])
+		-- call system(['/usr/bin/mux', 'bind-key', '-T', 'root', '\`', 'send-keys', '\`'])
+		-- ]]
 
-	log.os_execute("/usr/bin/tmux set -g window-active-style fg=default,bg=terminal")
+		-- log.execute('/usr/bin/tmux -t . set -s prefix None ENTER')
+
+		-- os.execute('/usr/bin/tmux -t . set -s prefix None ENTER')
+		-- os.execute('/usr/bin/tmux -t . unbind \\` ENTER')
+		-- os.execute('/usr/bin/tmux -t . unbind -T root \\` ENTER')
+		-- os.execute('/usr/bin/tmux -t . bind -T root \\` send-keys \\` ENTER')
+
+		-- local job = vim.fn.jobstart(' \
+		-- /usr/bin/tmux set -s prefix None ENTER; \
+		-- /usr/bin/tmux unbind \\` ENTER; \
+		-- /usr/bin/tmux bind -T root \\` send-keys \\` ENTER \
+		-- ')
+		-- local output = vim.fn.system { '/usr/bin/tmux set -s prefix None ENTER;', '/usr/bin/tmux unbind \\` ENTER;', '/usr/bin/tmux bind -T root \\` send-keys \\` ENTER' }
+
+		-- local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
+		-- local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'root',   '\\`' }
+		-- local output = vim.fn.system { '/usr/bin/tmux', 'set', 'prefix', 'None' }
+		-- local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'prefix', '\\`', 'send-keys', '\\`' }
+		-- local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'root',   '\\`', 'send-keys', '\\`' }
+
+
+		-- vim.cmd [[
+		-- function! s:tmux_prefix_cancel()
+		-- " prefix_key_1_0
+		-- call system(split('/usr/bin/tmux unbind ' . g:prefix_key))
+
+		-- " prefix_key_1_1
+		-- call system(split('/usr/bin/tmux set prefix None'))
+
+		-- " prefix_key_2_0
+		-- call system(split('/usr/bin/tmux unbind -T root ' . g:prefix_key))
+		-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'root', g:copy_mode_key])
+		-- call system(split('/usr/bin/tmux unbind ' . g:copy_mode_key))
+		-- call system(split('/usr/bin/tmux unbind -T root ' . g:copy_mode_key))
+		-- " call system('/usr/bin/tmux unbind -T root Escape')
+
+		-- " prefix_key_3_0
+		-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'copy-mode-vi', g:prefix_key])
+		-- " prefix_key_4
+		-- call system(split('/usr/bin/tmux set -g window-active-style fg=default,bg=terminal'))
+		-- endfunction
+		-- :call s:tmux_prefix_cancel()
+		-- ]]
+		-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
+		-- if string.find(prev_mode, "v") == 1 or string.find(prev_mode, "V") == 1 then
+		--  vim.cmd.normal({ bang = true, args = { "gv" } })
+		-- end
+
+		-- If you do not quote "prefix_key" (it might be a "`" -- backquote)
+		-- sh: syntax error: EOF in backquote substitution
+		log.execute("/usr/bin/tmux unbind '" .. prefix_key .. "'")
+		log.execute("/usr/bin/tmux set prefix None")
+		log.execute("/usr/bin/tmux unbind -T root '" .. prefix_key .. "'")
+
+		-- log.execute("/usr/bin/tmux unbind '" .. copy_mode_key .. "'")
+		-- log.execute("/usr/bin/tmux unbind -T root '" .. copy_mode_key .. "'")
+	end
+	log.execute("/usr/bin/tmux set -g window-active-style fg=default,bg=terminal")
 	tmux_key_enabled = false
 end
 
 local tmux_prefix_reenable = function(mode)
-	log.os_execute("/usr/bin/tmux set prefix '" .. prefix_key .. "'")
+	log.execute("/usr/bin/tmux set prefix '" .. prefix_key .. "'")
 	if prefix_per_se ~= "" then
-		log.os_execute("/usr/bin/tmux " .. prefix_per_se)
+		log.execute("/usr/bin/tmux " .. vim.api.nvim_replace_termcodes(prefix_per_se, true, true, true))
 	end
 	-- "open terminal failed: not a terminal" if prefix_per_se is empty
 	if prefix_root ~= "" then
-		log.os_execute("/usr/bin/tmux " .. prefix_root)
+		log.execute("/usr/bin/tmux " .. vim.api.nvim_replace_termcodes(prefix_root, true, true, true))
 	end
 
 	-- if copy_mode ~= "" then
 	--  -- if mode == '^[n]' or mode == "leave" then
 	--  -- if string.find(mode, "n") == 1 then
-	--  log.os_execute("/usr/bin/tmux " .. copy_mode)
+	--  log.execute("/usr/bin/tmux " .. copy_mode)
 	--  -- end
 	-- end
 
@@ -719,86 +850,7 @@ end
 -- last_version --      end
 -- last_version --    end,
 -- last_version -- )
-vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-	group = vim.api.nvim_create_augroup("tmux_prefix_modechanged", { clear = true }),
-	pattern = { "*" },
-	callback = function(prev_mode)
-		vim.defer_fn(function()
-			local new_mode = vim.api.nvim_get_mode().mode
-			if new_mode ~= prev_mode then
 
-				if has_floating_window(0) == false then
-					if string.find(new_mode, "n") == 1 then
-						tmux_prefix_reenable(new_mode)
-					end
-				end
-				if string.find(new_mode, "i") == 1 or string.find(new_mode, "[trcvV\x16]") == 1 then
-					tmux_prefix_cancel()
-					-- vim.cmd[[
-					-- function! s:tmux_prefix_cancel()
-					-- " prefix_key_1_0
-					-- call system(split('/usr/bin/tmux unbind ' . g:prefix_key))
-
-					-- " prefix_key_1_1
-					-- call system(split('/usr/bin/tmux set prefix None'))
-
-					-- " prefix_key_2_0
-					-- call system(split('/usr/bin/tmux unbind -T root ' . g:prefix_key))
-					-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'root', g:copy_mode_key])
-					-- call system(split('/usr/bin/tmux unbind ' . g:copy_mode_key))
-					-- call system(split('/usr/bin/tmux unbind -T root ' . g:copy_mode_key))
-					-- " call system('/usr/bin/tmux unbind -T root Escape')
-
-					-- " prefix_key_3_0
-					-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'copy-mode-vi', g:prefix_key])
-					-- " prefix_key_4
-					-- call system(split('/usr/bin/tmux set -g window-active-style fg=default,bg=terminal'))
-					-- endfunction
-					-- :call s:tmux_prefix_cancel()
-					-- ]]
-					-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, true, true), "n", false)
-					-- if string.find(prev_mode, "v") == 1 or string.find(prev_mode, "V") == 1 then
-					--  vim.cmd.normal({ bang = true, args = { "gv" } })
-					-- end
-				end
-				-- Resolve float window Escape quit
-				-- For float window
-				if has_floating_window(0) then
-					-- if string.find(new_mode, "n") == 1 then
-					--  tmux_prefix_reenable(new_mode)
-					-- end
-					if string.find(new_mode, "i") == 1 or string.find(new_mode, "[trcvV\x16]") == 1 then
-						-- it will trigger when input { or } ot assert new line in normal mode
-						tmux_prefix_cancel()
-					end
-					-- vim.cmd[[
-					-- function! s:tmux_prefix_cancel()
-					-- " prefix_key_1_0
-					-- call system(split('/usr/bin/tmux unbind ' . g:prefix_key))
-
-					-- " prefix_key_1_1
-					-- call system(split('/usr/bin/tmux set prefix None'))
-
-					-- " prefix_key_2_0
-					-- call system(split('/usr/bin/tmux unbind -T root ' . g:prefix_key))
-					-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'root', g:copy_mode_key])
-					-- call system(split('/usr/bin/tmux unbind ' . g:copy_mode_key))
-					-- call system(split('/usr/bin/tmux unbind -T root ' . g:copy_mode_key))
-					-- " call system('/usr/bin/tmux unbind -T root Escape')
-
-					-- " prefix_key_3_0
-					-- " call system(['/usr/bin/tmux', 'unbind',   '-T', 'copy-mode-vi', g:prefix_key])
-					-- " prefix_key_4
-					-- call system(split('/usr/bin/tmux set -g window-active-style fg=default,bg=terminal'))
-					-- endfunction
-					-- :call s:tmux_prefix_cancel()
-					-- ]]
-					-- return true
-				end
-			end
-		end, 10)
-	end
-})
 
 -- http://kflu.github.io/2021/05/24/2021-05-24-tmux-tricks/
 -- Does not work
@@ -813,7 +865,7 @@ vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 --          local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'prefix', '\\`', 'send-keys', '\\`' }
 --          local output = vim.fn.system { '/usr/bin/tmux', 'bind-key', '-T', 'root',   '\\`', 'send-keys', '\\`' }
 --      else
---          -- log.os_execute('/usr/bin/tmux set -s prefix \\` ENTER')
+--          -- log.execute('/usr/bin/tmux set -s prefix \\` ENTER')
 --          -- local output = vim.fn.system { '/usr/bin/tmux', 'set', '\\-s', 'prefix', 'None', ';',
 --          --  '/usr/bin/tmux', 'unbind', '\\`', ';', '/usr/bin/tmux', 'bind', '-T', 'root', '\\`', 'send-keys', '\\`' }
 --          local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
@@ -834,58 +886,72 @@ vim.api.nvim_create_autocmd({ "ModeChanged" }, {
 --  end,
 -- })
 
-vim.api.nvim_create_autocmd({ "InsertLeave", "CmdlineLeave" }, {
-	group = vim.api.nvim_create_augroup("tmux_prefix_leave", { clear = true }),
-	pattern = { "*" },
-	callback = function(args)
-		local new_mode = vim.api.nvim_get_mode().mode
-		tmux_prefix_reenable(new_mode)
-	end,
-})
-
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
-	group = vim.api.nvim_create_augroup("tmux_prefix_enter", { clear = true }),
-	pattern = { "*" },
-	callback = function(args)
+local function enable_conditional(new_mode)
+	if has_floating_window(0) == false then
+		if string.find(new_mode, "n") == 1 then
+			tmux_prefix_reenable(new_mode)
+		end
+	end
+	if string.find(new_mode, "i") == 1 or string.find(new_mode, "[trcvV\x16]") == 1 then
 		tmux_prefix_cancel()
-		-- vim.cmd[[
-		-- call system(['/usr/bin/tmux', 'unbind', g:prefix_key])
-		-- call system(['/usr/bin/mux', 'unbind', '-T', 'root', g:prefix_key])
-		-- call system(['/usr/bin/mux', 'set-option', 'prefix', 'None'])
-		-- call system(['/usr/bin/mux', 'bind-key', '\`', 'send-keys', '\`'])
-		-- call system(['/usr/bin/mux', 'bind-key', '-T', 'root', '\`', 'send-keys', '\`'])
-		-- ]]
+	end
+	-- Resolve float window Escape quit
+	-- For float window
+	if has_floating_window(0) then
+		-- if string.find(new_mode, "n") == 1 then
+		--  tmux_prefix_reenable(new_mode)
+		-- end
+		if string.find(new_mode, "i") == 1 or string.find(new_mode, "[trcvV\x16]") == 1 then
+			-- it will trigger when input { or } ot assert new line in normal mode
+			tmux_prefix_cancel()
+		end
+		-- return true
+	end
+end
 
-		-- log.os_execute('/usr/bin/tmux -t . set -s prefix None ENTER')
+local function prefix_toggle()
+	vim.api.nvim_create_autocmd({ "ModeChanged" }, {
+		group = vim.api.nvim_create_augroup("tmux_prefix_modechanged", { clear = true }),
+		pattern = { "*" },
+		callback = function(prev_mode)
+			vim.defer_fn(function()
+				local new_mode = vim.api.nvim_get_mode().mode
+				if new_mode ~= prev_mode then
+					enable_conditional(new_mode)
+				end
+			end, 10)
+		end
+	})
 
-		-- os.execute('/usr/bin/tmux -t . set -s prefix None ENTER')
-		-- os.execute('/usr/bin/tmux -t . unbind \\` ENTER')
-		-- os.execute('/usr/bin/tmux -t . unbind -T root \\` ENTER')
-		-- os.execute('/usr/bin/tmux -t . bind -T root \\` send-keys \\` ENTER')
+	vim.api.nvim_create_autocmd({ "InsertLeave", "CmdlineLeave", "VimLeavePre" }, {
+		group = vim.api.nvim_create_augroup("tmux_prefix_leave", { clear = true }),
+		pattern = { "*" },
+		callback = function(args)
+			local new_mode = vim.api.nvim_get_mode().mode
+			tmux_prefix_reenable(new_mode)
+			-- enable_conditional(new_mode)
+		end,
+	})
 
-		-- local job = vim.fn.jobstart(' \
-		-- /usr/bin/tmux set -s prefix None ENTER; \
-		-- /usr/bin/tmux unbind \\` ENTER; \
-		-- /usr/bin/tmux bind -T root \\` send-keys \\` ENTER \
-		-- ')
-		-- local output = vim.fn.system { '/usr/bin/tmux set -s prefix None ENTER;', '/usr/bin/tmux unbind \\` ENTER;', '/usr/bin/tmux bind -T root \\` send-keys \\` ENTER' }
+	vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+		group = vim.api.nvim_create_augroup("tmux_prefix_enter", { clear = true }),
+		pattern = { "*" },
+		callback = function(args)
+			tmux_prefix_cancel()
+		end,
+	})
+end
 
-		-- local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'prefix', '\\`' }
-		-- local output = vim.fn.system { '/usr/bin/tmux', 'unbind', '-T', 'root',   '\\`' }
-		-- local output = vim.fn.system { '/usr/bin/tmux', 'set', 'prefix', 'None' }
-		-- local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'prefix', '\\`', 'send-keys', '\\`' }
-		-- local output = vim.fn.system { '/usr/bin/tmux', 'bind', '-T', 'root',   '\\`', 'send-keys', '\\`' }
-	end,
-})
+   prefix_toggle()
 
 local function win_info(id)
 	-- https://stackoverflow.com/questions/6022519/define-default-values-for-function-arguments
 	-- https://www.lua.org/manual/5.1/manual.html#pdf-setmetatable
-    setmetatable(id or {}, {__index={id=0}})
+	setmetatable(id or {}, {__index={id=0}})
 	api                = vim.api
 	local all_options  = api.nvim_get_all_options_info()
 	local win_number
-	print('type(id): ' .. type(id))
+	print('type(id)', type(id))
 	if type(id) == "number" then
 	-- if type(id) ~= nil then
 		win_number   = id
@@ -893,7 +959,7 @@ local function win_info(id)
 	-- if id == nil or id == "" or type(id) == 'nil' then
 		win_number   = api.nvim_get_current_win()
 	-- else
-	-- 	local win_number   = id
+	--  local win_number   = id
 	end
 	local v            = vim.wo[win_number]
 	local all_options  = api.nvim_get_all_options_info()
@@ -903,11 +969,11 @@ local function win_info(id)
 			result = result .. "\n" .. key .. "=" .. tostring(v[key] or "<not set>")
 		end
 	end
-	print(result)
+	vim.print(result)
 end
 
 local function buf_info(id)
-    setmetatable(id or {}, {__index={id=0}})
+	setmetatable(id or {}, {__index={id=0}})
 	api                = vim.api
 	local all_options  = api.nvim_get_all_options_info()
 	local buf_number
@@ -918,7 +984,7 @@ local function buf_info(id)
 	-- if id == nil or id == "" or type(id) == 'nil' then
 		buf_number   = api.nvim_get_current_buf()
 	-- else
-	-- 	local buf_number   = id
+	--  local buf_number   = id
 	end
 	local v            = vim.bo[buf_number]
 	local all_options  = api.nvim_get_all_options_info()
@@ -928,8 +994,32 @@ local function buf_info(id)
 			result = result .. "\n" .. key .. "=" .. tostring(v[key] or "<not set>")
 		end
 	end
-	print(result)
+	vim.print(result)
 end
+
+-- map('i', '`', '<M-`>')
+-- map('c', 'a-`', '`')
+-- https://vim.fandom.com/wiki/Avoid_the_escape_key
+-- map('c', '`',
+-- function()
+--  -- '<cmd>lua os.execute("tmux copy-mode")'
+--  os.execute("tmux copy-mode")
+-- end, { noremap = true }
+-- )
+-- map('n', '`',
+-- function()
+--  -- '<cmd>lua os.execute("tmux copy-mode")'
+--  os.execute("tmux copy-mode")
+-- end, { noremap = true }
+-- )
+-- Does not work
+-- map('i', '<C-`>',
+--  function()
+--      -- '<cmd>lua os.execute("tmux copy-mode")'
+--      os.execute("tmux copy-mode")
+--  end, { noremap = true }
+-- )
+
 --  map('i', 'tmux', "<Nope>", { noremap = true })
 --  map('i', 'tmux', "<Escape>", { noremap = true })
 --  When the map key is tmux, you can't input "tmux" quickly / normally
@@ -945,13 +1035,16 @@ end
 	-- [Sending '<ESC>' through nvim_feedkeys?](https://github.com/neovim/neovim/issues/12312)
 --  map({ 'n', 'x' }, 'tmux',
 --  map({ 'n', 'x' }, '<Escape>', -- don't trigger copy-mode when has selections
-	map('n', '<Escape>',
+-- https://vim.fandom.com/wiki/Avoid_the_escape_key
+	map({ 'n', 'c' }, '<Escape>',
 	function()
 		-- https://stackoverflow.com/questions/73850771/how-to-get-all-of-the-properties-of-window-in-neovim
 
-		win_info()
-		buf_info()
+		-- win_info()
+		-- buf_info()
 
+			local new_mode = vim.api.nvim_get_mode().mode
+			tmux_prefix_reenable(new_mode)
 
 		-- [For vim 9.1](https://vimhelp.org/popup.txt.html)
 		-- vim.cmd[[
@@ -961,7 +1054,12 @@ end
 		-- if has_floating_window(0) then
 			require("notify").dismiss() -- popup window
 		-- else
-			os.execute("tmux copy-mode")
+		-- local mmode_status = log.capture("tmux display -p -F '#{pane_in_mmode}'")
+		-- if mmode_status == 1 then
+		--  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('jj', true, false, true), 'm', true)
+		--  return
+		-- end
+			os.execute('[ "$(tmux display -p -F \"#{pane_in_mmode}\")" = 1 ] || tmux copy-mode')
 		-- end
 		-- if has_floating_window(0) == false then
 		--  -- if tmux_key_enabled == true then
@@ -989,6 +1087,29 @@ end
 		-- end
 	end, { noremap = true })
 
+vim.cmd
+	[[
+
+	" Does not work
+	" let groups = split(execute('augroup tmux_is_vim_vimenter'))
+	" if len(groups) == 0
+
+	" Works
+	" let groups = split(execute('augroup'))
+	" [How to list autocmd groups in Vim?](https://stackoverflow.com/questions/60711037/how-to-list-autocmd-groups-in-vim)
+	" [Vimscripts: check if item in list](https://vi.stackexchange.com/questions/27232/vimscripts-check-if-item-in-list)
+	" if index(groups, 'tmux_is_vim_vimenter') == -1
+	if ! exists('#tmux_is_vim_vimenter#VimEnter')
+		let keys_load_path = stdpath("data") . '/lazy/keys/after/plugin/keys.vim'
+		exe 'set runtimepath+='.  keys_load_path
+		exe 'set packpath+='.     keys_load_path
+		execute "source "   .     keys_load_path
+		execute "runtime! " .     keys_load_path
+	else
+		" [How to enable/disable an augroup on the fly?](https://vi.stackexchange.com/questions/4120/how-to-enable-disable-an-augroup-on-the-fly)
+		augroup tmux_is_vim | au! | augroup END
+	endif
+]]
 -- https://superuser.com/questions/41378/how-to-search-for-selected-text-in-vim
 vim.cmd(
 	[[
@@ -1058,6 +1179,11 @@ local cwd = require("lazy.core.config").options.root
 
 map("n", "<leader>l", ":lua require'telescope.builtin'.buffers   ({ cwd = cwd })<cr>")
 map("n", "<leader>f", ":lua require'telescope.builtin'.find_files({ cwd = cwd })<cr>")
+-- No resizing -- can not full-screen
+-- map("n", "<leader>j",    ":lua require'telescope.builtin'.grep_string()<cr>")
+-- map("n", "<leader>j",    ": Telescope grep_string<cr>")
+
+map("n", "<leader>j", ":lua require'telescope.builtin'.grep_string({ cwd = cwd })<cr>")
 
 if USE_TELESCOPE_GOTO ~= nil then
 	vim.cmd([[
@@ -1084,11 +1210,6 @@ map('n', 'q',
 		vim.cmd("bprevious | bdelete! #")
 	end, { noremap = true, silent = true }
 )
--- No resizing -- can not full-screen
--- map("n", "<leader>j",    ":lua require'telescope.builtin'.grep_string()<cr>")
--- map("n", "<leader>j",    ": Telescope grep_string<cr>")
-
-map("n", "<leader>j", ":lua require'telescope.builtin'.grep_string({ cwd = cwd })<cr>")
 
 vim.api.nvim_create_autocmd('LspAttach', {
 	desc = 'LSP actions',
@@ -1227,13 +1348,13 @@ inoremap <silent> = =<Esc>:call <SID>ealign()<CR>
 " command! -range TL '<,'>:call <SID>ealign()<CR>
 
 function! s:ealign()
-	let p = '^.*=\s.*$'
-	if exists(':Tabularize') && getline('.') =~# '^.*=' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
-		let column   = strlen(substitute(getline('.')[0:col('.')],'[^=]','','g'))
-		let position = strlen(matchstr(getline('.')[0:col('.')],'.*=\s*\zs.*'))
-		Tabularize/=/r1
-		normal! 0
-		call search(repeat('[^=]*=',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+let p = '^.*=\s.*$'
+if exists(':Tabularize') && getline('.') =~# '^.*=' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+	let column   = strlen(substitute(getline('.')[0:col('.')],'[^=]','','g'))
+	let position = strlen(matchstr(getline('.')[0:col('.')],'.*=\s*\zs.*'))
+	Tabularize/=/r1
+	normal! 0
+	call search(repeat('[^=]*=',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
 	endif
 
 endfunction
@@ -1295,6 +1416,8 @@ let g:vim_tmux_clipboard#loadb_option = '-w'
 
 
 ]])
+
+-- vim:  set ts=2 sw=2 tw=0 et :
 
 
 
