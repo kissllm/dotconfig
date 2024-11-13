@@ -13,6 +13,9 @@ return {
 
 		local wiki = {}
 
+        vim.api.nvim_set_var('vimwiki_folding', 'expr:quick')
+        vim.g.vimwiki_filetypes = { "markdown" }
+
 		wiki.path = '~/.wiki/'
 		wiki.syntax = 'markdown'
 		-- wiki.ext = '.md'
@@ -44,7 +47,11 @@ return {
 		vim.g.vimwiki_ext2syntax = {}
 		vim.cmd([[
 		augroup vimwiki_markdown | au!
-			autocmd BufEnter,BufRead,BufNewFile *.md set filetype=markdown
+            " vimwiki markdown (filetype=vimwiki) is a virus
+			" autocmd BufEnter,BufRead,BufNewFile *.md set filetype=markdown
+            autocmd FileType vimwiki set filetype=markdown
+			autocmd BufEnter,BufReadPost,BufNewFile *.md,*.wiki set filetype=markdown
+			" autocmd BufEnter,BufReadPost,BufNewFile * if &filetype =~? '\v(vimwiki|wiki)' | set filetype=markdown | endif
 			" au BufEnter *.md set filetype=markdown
 		augroup END
 
@@ -82,4 +89,10 @@ return {
 		]])
 	end,
 }
+
+
+
+
+
+
 

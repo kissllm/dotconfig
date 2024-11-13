@@ -3,8 +3,8 @@
 
 return {
 	"j-hui/fidget.nvim",
-	cond  = false,
-	-- cond  = true,
+	    cond  = false, --  lsp warnings show always
+	--  cond  = true,
 	event = "VeryLazy",
 	lazy  = true,
 	-- branch = "main",

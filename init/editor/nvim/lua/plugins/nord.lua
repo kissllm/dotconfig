@@ -2,8 +2,8 @@ return {
 	-- 'zorgick/onehalf-lua',
 	"gbprod/nord.nvim",
 	-- disable = false,
-	-- cond = false,
-	cond = true,
+	   cond = false,
+	-- cond = true,
 	lazy = false,
 	priority = 1000,
 	dependencies = {

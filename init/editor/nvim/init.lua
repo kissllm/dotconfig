@@ -54,8 +54,9 @@ log.execute('ls')
 -- print("local home: "  .. home)
 -- print("log.home: "     .. log.home)
 print("log.address", log.address)
+vim.g.log_address = log.address
 
--- file = io.open(log.address, "w+a")
+-- file           = io.open(log.address, "w+a")
 -- file:write("\n\n")
 -- file:write("environment package.path: " .. package.path .. "\n")
 -- print("package.path", serialize(runtime_path_table)) -- file:write("\npackage.path:\n" .. serialize(runtime_path_table) .. "\n")
@@ -224,7 +225,17 @@ vim.cmd([[
 
 let g:indent_guides_tab_guides = 1
 " :call <sid>IndentGuidesEnable()
+" set background=light
+" :RL
 ]])
+
+--  vim.o.background = 'light'
+--  vim.opt.background = 'light'
+--  vim.cmd.source(os.getenv("DOT_CONFIG") .. '/editor/nvim/after/plugin' .. "/colors.lua")
+--  vim.opt.background = 'dark'
+--  vim.cmd("RL")
+
+--  vim.opt.bg = 'light'
 
 -- file:write("\n\n")
 -- file:flush()

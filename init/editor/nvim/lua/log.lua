@@ -175,6 +175,7 @@ function serialize(t, delimiter)
 	return toprint
 end
 
+--  vim.opt.rutimepath:append()
 function path_insert(path, value, position, delimiter)
 	if path == nil then return nil end
 	if value == nil then return path end

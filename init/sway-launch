@@ -55,26 +55,34 @@ env_reset DOT_CONFIG "$(dot_config)"
 	# Reference implementation:
 	/usr/bin/sway -d > $WAYL_OUTPUT 2>&1
 	# exec /usr/bin/sway -d > $WAYL_OUTPUT 2>&1
-	sock_sway="$(sway_socket "$launcher")"
-	[ ! -z "${sock_sway:+x}" ] || {
+	# sock_sway="$(sway_socket "$launcher")"
+	/ `sway_socket  "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` ||
+		print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
+	[ ! -z "${SWAY_SOCKET:+x}" ] ||
+	{
 		launcher=$(which sway 2> /dev/null || :)
 		print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
 		[ -z "${launcher:+x}" ] ||
-		command -v "$launcher" > /dev/null 2>&1 && {
+		command -v "$launcher" > /dev/null 2>&1 &&
+		{
 			export launcher
 			nohup "$launcher" -d \
 				> $WAYL_OUTPUT 2>&1 & pid=$!
 			wait $pid
-			sock_sway="$(sway_socket "$launcher")"
+			# sock_sway="$(sway_socket "$launcher")"
+			/ `sway_socket  "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` ||
+				print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
 		}
 	}
 
-	[ ! -z "${sock_sway:+x}" ] || {
+	[ ! -z "${SWAY_SOCKET:+x}" ] ||
+	{
 		# swc-launch is used in preference to dbus
 		launcher=$(which swc-launch 2> /dev/null || :)
 		print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
 		{ [ ! -z "${launcher:+x}" ] ||
-		command -v "$launcher" > /dev/null 2>&1; } && {
+		command -v "$launcher" > /dev/null 2>&1; } &&
+		{
 			export launcher
 			# printf '%s %s\n' '$launcher' "$launcher [$LINENO]"
 			# exec swc-launch -t /dev/tty7 -- /usr/bin/sway -d > $WAYL_OUTPUT 2>&1 &
@@ -84,11 +92,13 @@ env_reset DOT_CONFIG "$(dot_config)"
 				> $WAYL_OUTPUT 2>&1 & pid=$!
 			wait $pid
 			# > $WAYL_OUTPUT && sway_socket "$launcher" 2>&1 &
-			sock_sway="$(sway_socket "$launcher")"
+			# sock_sway="$(sway_socket "$launcher")"
+			/ `sway_socket  "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` ||
+				print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
 		}
 	}
 
-	# [ ! -z "${sock_sway:+x}" ] || {
+	# [ ! -z "${SWAY_SOCKET:+x}" ] || {
 	# 	launcher=$(which dbus-run-session 2> /dev/null || :)
 	# 	print '$launcher' "$launcher [$LINENO : sway-launch]" >> "$WAYL_OUTPUT"
 	# 	[ -z "${launcher:+x}" ] ||
@@ -123,11 +133,13 @@ env_reset DOT_CONFIG "$(dot_config)"
 	# }
 }
 
-# [ -n "${sock_sway:+x}" ] || nohup river &
+# [ -n "${SWAY_SOCKET:+x}" ] || nohup river &
 
 [ -z "${WAYLAND_DISPLAY+x}" ] ||
-[ ! -z "${sock_sway:+x}" ] ||
-	sock_sway="$(sway_socket "$launcher")"
+[ ! -z "${SWAY_SOCKET:+x}" ] ||
+	# sock_sway="$(sway_socket "$launcher")"
+	/ `sway_socket  "$XDG_RUNTIME_DIR" | awk -F "$FS" -v RS="$RS" '{ print "SWAY_SOCKET=\""$1"\" WAYLAND_DISPLAY=\""$2"\""}'` ||
+		print 'failed on' "sway_socket \"$XDG_RUNTIME_DIR\"" | tee -a "$STEM_OUTPUT" > $TTY
 
 SCRIPT_NAME="$SCRIPT_SCOPE"
 SCRIPT_SCOPE="$script_scope"

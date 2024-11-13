@@ -99,6 +99,7 @@ return {
 
 	{
 		"NvChad/nvim-colorizer.lua",
+		cond  = false, -- Heavy
 		event  = { "BufReadPost", "BufNewFile" },
 		config = true,
 	},
@@ -438,7 +439,7 @@ return {
 		end
 	},
 
-	-- Not copy / paste, just send
+	-- Not copy / paste, just send from vim to tmux pane
 	{
 		"tadhg-ohiggins/vim-tmux-send",
 		event    = "VeryLazy",
@@ -670,6 +671,18 @@ return {
 	},
 
 	{
-
+        "drmikehenry/vim-fixkey",
+		event  = "VeryLazy",
+		lazy   = true,
 	},
+
+    {
+        "hinell/lsp-timeout.nvim",
+        dependencies = { "neovim/nvim-lspconfig", },
+        --  "romain/vim-cool",
+		--  event  = "VeryLazy",
+		--  lazy   = true,
+    },
+
+
 }

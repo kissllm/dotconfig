@@ -5,9 +5,10 @@
 
 return {
 	"rcarriga/nvim-notify",
-	lazy    = false,
-	enable  = false,
-	-- cond = false,
+	--  lazy    = false,
+	lazy    = true,
+	--  enable  = false,
+	--  cond    = false, --  trying to disable lsp warnings
 	config  = function()
 		opts    = {
 			-- https://www.reddit.com/r/neovim/comments/rbt47s/placing_notification_popup_at_bottom_right_corner/
@@ -15,8 +16,8 @@ return {
 			-- anchor   = "SE",
 			-- https://www.reddit.com/r/neovim/comments/1e294bv/noicenotify_position_of_popup/
 			-- https://github.com/rcarriga/nvim-notify/issues/233
-			top_down = false,
-			timeout = 3000,
+			top_down   = false, --  anchor = 'SE'
+			timeout    = 3000,
 			max_height = function()
 				return math.floor(vim.o.lines * 0.75)
 			end,
@@ -26,10 +27,12 @@ return {
 			on_open = function(win)
 				vim.api.nvim_win_set_config(win, { focusable = false })
 			end,
-			render = "default",
+			--  render = "default",
+			render = "minimal",
 			stages = "fade_in_slide_out",
 			-- render = "compact",
 			-- stages = "fade",
+            background_colour = "#000000",
 		}
 		require('notify').setup(opts)
 	end

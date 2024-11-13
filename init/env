@@ -55,29 +55,35 @@ set_font() {
 			# ter-v${font_size}b.psf.gz       ter-v${font_size}n.psf.gz
 			font=
 			# terminus-font
-			if [ -f "/mnt/setfont/ter-v${font_size}n.psf.gz" ]; then
-				font="/mnt/setfont/ter-v${font_size}n.psf.gz"
-			elif [ -f "/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz" ]; then
-				font="/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz"
-			else
-				fonts_dir="$(find /mnt/setfont -type d -name \
-					"consolefonts" 2> /dev/null)"
-				[ -n "${fonts_dir:+x}" ] ||
-				# Might be permission denied
-				fonts_dir="$(find /usr/share -type d -name \
-					"consolefonts" 2> /dev/null)"
-				# fonts_dir="/usr/share/consolefonts"
-				# fonts_dir="/usr/share/kdb/consolefonts"
+			[ "$font_size" -eq 24 ] &&
+			{
+				font="/usr/share/consolefonts/spleen-12x24.psfu"
+			} ||
+			{
+				if [ -f "/mnt/setfont/ter-v${font_size}n.psf.gz" ]; then
+					font="/mnt/setfont/ter-v${font_size}n.psf.gz"
+				elif [ -f "/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz" ]; then
+					font="/mnt/setfont/consolefonts/ter-v${font_size}n.psf.gz"
+				else
+					fonts_dir="$(find /mnt/setfont -type d -name \
+						"consolefonts" 2> /dev/null)"
+					[ -n "${fonts_dir:+x}" ] ||
+					# Might be permission denied
+					fonts_dir="$(find /usr/share -type d -name \
+						"consolefonts" 2> /dev/null)"
+					# fonts_dir="/usr/share/consolefonts"
+					# fonts_dir="/usr/share/kdb/consolefonts"
 
-				[ -n "${fonts_dir:+x}" ] || return 0
-				if  [ -f "$fonts_dir/ter-v${font_size}n.psf.gz" ]; then
-					font="$fonts_dir/ter-v${font_size}n.psf.gz"
-					# font="${fonts_dir}/ter-v28b.psf.gz"
-					# Use default font
-				elif [ -f "$fonts_dir/LatGrkCyr-12x22.psfu.gz" ]; then
-					font="$fonts_dir/LatGrkCyr-12x22.psfu.gz"
+					[ -n "${fonts_dir:+x}" ] || return 0
+					if  [ -f "$fonts_dir/ter-v${font_size}n.psf.gz" ]; then
+						font="$fonts_dir/ter-v${font_size}n.psf.gz"
+						# font="${fonts_dir}/ter-v28b.psf.gz"
+						# Use default font
+					elif [ -f "$fonts_dir/LatGrkCyr-12x22.psfu.gz" ]; then
+						font="$fonts_dir/LatGrkCyr-12x22.psfu.gz"
+					fi
 				fi
-			fi
+			}
 			[ -z "${font:+x}" ] || {
 				setfont "$font" ||
 				printf 'Font %s setting failed\n' "$font"
@@ -90,7 +96,9 @@ set_font() {
 }
 
 { [ "$TERM" != "linux" ] && [ -n "${TERM##*"vt"*}" ]; } ||
-[ -n "${TMUX+x}" ] || set_font 22
+[ -n "${TMUX+x}" ] ||
+# set_font 22
+set_font 24
 
 [ ! -d "/usr/share/easy-rsa" ] ||
 path_prepend PATH "/usr/share/easy-rsa"
@@ -192,7 +200,8 @@ export RUSTFLAGS="-Clink-arg=-Wl,--dynamic-linker=/usr/lib/libc.so"
 
 # luarocks sucks when on a system with gcc
 [ -z "${LUAROCKS_DEFINED_LUA+x}" ] ||
-! command -v /usr/bin/luarocks > /dev/null 2>&1 || {
+! command -v /usr/bin/luarocks > /dev/null 2>&1 ||
+{
 	[ -d "${HOME}/.cache/luarocks" ] || mkdir -p "${HOME}/.cache/luarocks"
 	# https://github.com/luarocks/luarocks/wiki/Using-LuaRocks
 	# / $(luarocks path)
@@ -263,7 +272,8 @@ export USE_SAY_PIPE=
 export KISS_AS_LIBRARY=
 
 # kiss() { ENV=/usr/bin/kiss $SHELL -l; }
-[ -z "${KISS_AS_LIBRARY+x}" ] || {
+[ -z "${KISS_AS_LIBRARY+x}" ] ||
+{
 	# [ "$(awk '$5=="/" {print $1}' < /proc/1/mountinfo)" \
 	#   != "$(awk '$5=="/" {print $1}' < /proc/$$/mountinfo)" ] &&
 
@@ -398,9 +408,10 @@ alias la='ls --color=always -h -F -lathr' ||
 alias la='ls --color=always -h --group-directories-first -F -lathr'
 
 _vim="$(which vim)"
-_nvim="$(which nvim)"
+_nvim="env TERM=\"linux-256color\" $(which nvim)"
 
 alias   nv="[ ! -f "$HOME/.vim/"*".tmp" ] || rm -f "$HOME/.vim*.tmp"; $_nvim"
+alias   vn="[ ! -f "$HOME/.vim/"*".tmp" ] || rm -f "$HOME/.vim*.tmp"; $_nvim"
 alias nivm="[ ! -f "$HOME/.vim/"*".tmp" ] || rm -f "$HOME/.vim*.tmp"; $_nvim"
 alias nvim="[ ! -f "$HOME/.vim/"*".tmp" ] || rm -f "$HOME/.vim*.tmp"; $_nvim"
 
@@ -416,15 +427,6 @@ fi
 
 # alias history='history 1 -1'
 
-# https://stackoverflow.com/questions/3701809/how-to-detect-using-of-wildcard-asterisk-as-parameter-for-shell-script
-glob_stop() {
-	[ "$2" != "*" ] || {
-		echo "You can not use a wildcard"
-		return
-	}
-	set +f
-	"$@";
-}
 alias q='set -f; glob_stop /mnt/local/bin/q'
 
 export INPUT_METHOD=fcitx
@@ -715,8 +717,8 @@ sway_socket() {
 	[ -z "${WAYLAND_DISPLAY+x}" ] ||
 	{
 		wayland_display="$WAYLAND_DISPLAY"
-		print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
-		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a "$WAYL_OUTPUT" > /dev/null 2>&1
+		print '$SHLVL' "$SHLVL" | tee -a "$WAYL_OUTPUT" > "$TTY" 2>&1
+		print '$WAYLAND_DISPLAY' "$WAYLAND_DISPLAY" | tee -a "$WAYL_OUTPUT" > "$TTY" 2>&1
 		# export WAYLAND_DISPLAY
 		# Write file might get dead lock
 		# printf '%s\n' "${wayland_display}" > $HOME/.wayland_display

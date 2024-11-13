@@ -1,0 +1,5 @@
+[submodule "init/terminal/tmux"]
+	path = init/terminal/tmux
+	url = git@github.com:trailblazing/tmux.git
+	branch = main
+	update = rebase

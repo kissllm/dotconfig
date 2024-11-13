@@ -368,7 +368,7 @@ augroup END
 
 				mappings             = {
 					i = {
-						["\\"] = [[close]],
+						["\\"]         = [[close]],
 						["<C-n>"]      = actions.cycle_history_next,
 						["<C-p>"]      = actions.cycle_history_prev,
 
@@ -400,8 +400,9 @@ augroup END
 					},
 
 					n = {
-						["\\"] = [[close]],
-						["<esc>"]      = actions.close,
+						["\\"]         = [[close]],
+						["<Esc>"]      = actions.close,
+						["<C-c>"]      = actions.close,
 						["<CR>"]       = actions.select_default,
 						["<C-x>"]      = actions.select_horizontal,
 						["<C-v>"]      = actions.select_vertical,

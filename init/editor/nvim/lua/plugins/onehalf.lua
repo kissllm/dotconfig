@@ -1,8 +1,8 @@
 return {
 	-- 'zorgick/onehalf-lua',
 	'CodeGradox/onehalf-lush',
-	   cond = false,
-	-- cond = true,
+	-- cond = false,
+	   cond = true,
 	-- disable = false,
 	lazy = false,
 	priority = 1000,

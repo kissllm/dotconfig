@@ -1,9 +1,15 @@
--- Log address
--- lua =require('vim.lsp.log').get_filename()
--- $HOME/.local/state/nvim/lsp.log
--- https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
--- https://github.com/kabouzeid/nvim-lspinstall/wiki
--- keybindings.lua
+--
+--
+--  tsserver is deprecated,duse ts_ls instead.ic',
+--  Feature will│be removed in lspconfigp0.2.1
+--  [lspconfig] config "cmp_action" not"found. Ensure it is listed in `configs.md` or added as a custom server.
+--  Log address
+--  lua =require('vim.lsp.log').get_filename()
+--  $HOME/.local/state/nvim/lsp.log
+--  https://dev.to/vonheikemen/make-lsp-zeronvim-coexists-with-other-plugins-instead-of-controlling-them-2i80
+--  https://github.com/kabouzeid/nvim-lspinstall/wiki
+--  keybindings.lua
+
 local function on_attach(client, bufnr)
 	local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 	local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -95,7 +101,8 @@ local servers = {
 	-- pyright = {},
 	-- rust_analyzer = {},
 	-- tsserver = {},
-	"tsserver",
+	-- "tsserver",
+	"ts_ls",
 	-- html = { filetypes = { 'html', 'twig', 'hbs'} },
 	"lua_ls",
 	-- lua_ls = {},
@@ -502,7 +509,7 @@ return {
 			-- local lsp = lspconfig.preset({})
 			local lsp = lspconfig
 			-- local cmp_action = lspzero.cmp_action()
-			local cmp_action = lspconfig.cmp_action
+			-- local cmp_action = lspconfig.cmp_action
 			-- local cmp_action = lspzero["cmp_action"]
 			-- local cmp = require('cmp')
 			local cmp = require('lspconfig.cmp').setup()
@@ -530,7 +537,7 @@ return {
 				enabled = function()
 					return vim.g.cmptoggle
 				end,
-				cmp_action = cmp_action,
+				--  cmp_action = cmp_action,
 				snippet = {
 					-- REQUIRED - you must specify a snippet engine
 					-- [lsp-zero will setup for you](https://github.com/VonHeikemen/lsp-zero.nvim/blob/v2.x/doc/md/autocomplete.md#add-an-external-collection-of-snippets)
@@ -543,6 +550,9 @@ return {
 					end,
 				},
 				window = {
+                    completion = {
+                        scrollbar = false,
+                    },
 					-- completion = cmp.config.window.bordered(),
 					-- documentation = cmp.config.window.bordered(),
 					documentation = cmp.config.window.bordered(),
@@ -1389,7 +1399,7 @@ return {
 		dependencies = {
 			-- Readonly (frozen)
 			{ "williamboman/nvim-lsp-installer" },
-			{ "rcarriga/nvim-notify" },
+			{ "rcarriga/nvim-notify", enabled = false, }, --  trying to disable lsp warnings
 		},
 		config = function()
 			-- https://github.com/tamago324/nlsp-settings.nvim

@@ -45,25 +45,26 @@ script_name="$(script_name)"
 [ "$SCRIPT_NAME" = "$script_name" ] || SCRIPT_NAME="$script_name"
 # unset script_name
 
+env_update "TTY" "$(tty)"
+
 # echo "\$loaded_profile = $loaded_profile"
 [ ! -e /etc/profile ] ||
 [ ! -z "${loaded_profile+x}" ] ||
 {
-	print 'sourcing' "/etc/profile"
+	print 'sourcing' "/etc/profile" > "$TTY"
 	# shellcheck source=/etc/profile
 	. "/etc/profile"
 }
 
-[ -z "${SHELL_DEBUG+x}" ] || print "$HOME/.profile" "sourced"
+[ -z "${SHELL_DEBUG+x}" ] || print "$HOME/.profile" "sourced" > "$TTY"
 
-env_update "TTY" "$(tty)"
-
-[ ! -z "${STEM_OUTPUT:+x}" ] &&
-[ ! -z "${KISS_TMPDIR:+x}" ] &&
-[ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ] &&
-[ -d "$KISS_TMPDIR" ] &&
+[ ! -z "${STEM_OUTPUT:+x}" ]            &&
+[ -f "$STEM_OUTPUT" ]                   &&
+[ ! -z "${KISS_TMPDIR:+x}" ]            &&
+[ -z "${KISS_TMPDIR##*"$(id -nu)"*}" ]  &&
+# [ -d "$KISS_TMPDIR" ]                   &&
 {
-	[ -z "${TTY:+x}" ] ||
+	[ -z "${TTY:+x}" ] || [ "$TTY" = "/dev/null" ] ||
 	{
 		[ ! -z "${LOG_DIR:+x}" ] &&
 		[ "$LOG_DIR" = "$KISS_TMPDIR/logs/${TTY##*/}" ] &&
@@ -71,13 +72,13 @@ env_update "TTY" "$(tty)"
 	}
 } ||
 # ! exec &> /dev/tty ||
-SCRIPT_SCOPE="$script_scope" SCRIPT_NAME="$HOME/.profile" init
+SCRIPT_SCOPE="$script_scope" SCRIPT_NAME="$HOME/.profile" init "$TTY"
 # readonly LOG_DIR
 
 update_script_name() {
 	[ "$1" = "$script_name" ] ||
 	{
-		print '$script_name' "$script_name [$1]" >> "$STEM_OUTPUT" # got /dev/tty
+		print '$script_name' "$script_name [$1]" >> "$STEM_OUTPUT" # | tee -a "$STEM_OUTPUT" > "$TTY" # got /dev/tty
 		script_name="$1"
 		SCRIPT_NAME="$script_name"
 	}
@@ -147,7 +148,13 @@ type "out_direct"   > /dev/null 2>&1 && [ ! -z "${LOG+x}" ] ||
 type pipe_boot > /dev/null 2>&1 &&
 [ ! -z "${PIPE+x}" ] ||
 	. "${MNGR_ROOT-}/usr/include/kiss/pipe"
-	// silent_state || pipe_boot || :
+
+# [ -z "${monitor+x}" ] || unset monitor
+# ! opts monitor || { monitor= && set +m; }
+# set -m
+# set +m &&
+	(// silent_state || pipe_boot "$TTY" & :)
+# [ -z "${monitor+x}" ] || { set -m && unset monitor; }
 # set +x
 
 # // pipe_init "$TTY" "$USER_OUTPUT"
@@ -190,7 +197,7 @@ env_reset LLVM 1
 	{
 		# print '$HOME/.cert/cacert.pem' "does not exist"
 		[ ! -e "/etc/ssl/cert.pem" ] &&
-		print '/etc/ssl/cert.pem' "does not exist" ||
+		print '/etc/ssl/cert.pem' "does not exist" > "$TTY" ||
 		env_reset SSL_CERT_FILE "/etc/ssl/cert.pem"
 	} ||
 	# : "${SSL_CERT_FILE="$HOME/.cert/cacert.pem"}" && export SSL_CERT_FILE
@@ -231,13 +238,17 @@ env_reset HOMEBREW_GITHUB_API_TOKEN "$SSL_CERT_FILE"
 	$cmd_link -- $DOT_CONFIG/shell/zsh/zprofile $HOME/.zprofile
 }
 
-# ! : ${SHARE_PREFIX="/opt"} && interrupt || export SHARE_PREFIX
-  env_reset SHARE_PREFIX "/opt"
 # Moved to /etc/profile.d/env
-  ! : ${DB_ROOT:="/var/db/kiss"} || export DB_ROOT
-# ! : ${db_root:="$SHARE_PREFIX/${DB_ROOT#*/}"} || export db_root
-  env_reset db_root "$SHARE_PREFIX/${DB_ROOT#"${DB_ROOT%%[!/]*}"}"
+# Defined in /etc/profile.d/env and could be modified in $HOME/.profile a.k.a this file
+# ! : ${SHARE_PREFIX="/opt"} && interrupt || export SHARE_PREFIX
+  ! : "${SHARE_PREFIX:=/opt}" || export SHARE_PREFIX # env_reset SHARE_PREFIX "/opt"
+# Moved to /etc/profile.d/env
+  ! : "${DB_ROOT:="/var/db/kiss"}" || export DB_ROOT
+# Defined in /etc/profile.d/env
+  ! : "${db_root:="$SHARE_PREFIX/${DB_ROOT#"${DB_ROOT%%[!/]*}"}"}" || export db_root
+# env_reset db_root "$SHARE_PREFIX/${DB_ROOT#"${DB_ROOT%%[!/]*}"}"
   [ -d "$db_root" ] || \mkdir -p "$db_root"
+
   # repo_root defined in /etc/profile.d/env
   # folder_name="$(printf '%s' "${URL_REPO##*/}" | awk -F . '{print $1}')"
   # repo_root="$db_root/$folder_name"
@@ -270,7 +281,7 @@ env_reset XDG_INIT "$repo_root/core/baselayout/files/etc/profile.d/xdg-runtime-d
 
 link_correct "$XDG_INIT" "$HOME/.xdg-runtime-dir"
 [ -L "$HOME/.xdg-runtime-dir" ] ||
-	print "$HOME/.xdg-runtime-dir" "creating failed"
+	print "$HOME/.xdg-runtime-dir" "creating failed" > "$TTY"
 
 # If you insist to update local system
 # KISS_ROOT= && export KISS_ROOT
@@ -282,7 +293,7 @@ link_correct "$XDG_INIT" "$HOME/.xdg-runtime-dir"
 # /opt/kiss normally has larger size (20 GB is recommended) on plain local filesystem
 # The following two values are put to prevent from ruining local systemm by accident
 # export KISS_ROOT="/opt/kiss" BOOTSTRAP=
-  ! : ${KISS_ROOT="/opt/kiss"} && interrupt || export KISS_ROOT
+# ! : ${KISS_ROOT="/opt/kiss"} && interrupt || export KISS_ROOT # did it in /etc/profile.d/env
   [ -z "${KISS_ROOT:+x}" ] ||
   {
 	  [ -d "$KISS_ROOT/" ] || \mkdir -p "$KISS_ROOT/"
@@ -340,7 +351,19 @@ link_correct "$DOT_CONFIG/wayland/env" "${WAYLAND_CONFIG_HOME}/"
 # insert_or_link "$DOT_CONFIG/ashrc"   "$HOME/.ashrc"
 
 link_correct "$DOT_CONFIG/inputrc"                  "$HOME/.inputrc"
-link_correct "$DOT_CONFIG/terminal/tmux.conf"       "$HOME/.tmux.conf"
+
+link_correct "$DOT_CONFIG/terminal/tmux/tmux.conf"       "$HOME/.tmux.conf"
+is_folder "$XDG_CONFIG_HOME/tmux" ||
+{
+    \rm -rf "$XDG_CONFIG_HOME/tmux"
+    \mkdir -p "$XDG_CONFIG_HOME/tmux"
+}
+link_correct "$DOT_CONFIG/terminal/tmux/header.conf"     "$XDG_CONFIG_HOME/tmux/"
+link_correct "$DOT_CONFIG/terminal/tmux/prefix.conf"     "$XDG_CONFIG_HOME/tmux/"
+link_correct "$DOT_CONFIG/terminal/tmux/navigation.conf" "$XDG_CONFIG_HOME/tmux/"
+link_correct "$DOT_CONFIG/terminal/tmux/resize.conf"     "$XDG_CONFIG_HOME/tmux/"
+link_correct "$DOT_CONFIG/terminal/tmux/wincmd.conf"     "$XDG_CONFIG_HOME/tmux/"
+
 link_correct "$DOT_CONFIG/terminal/foot/foot.ini"   "$XDG_CONFIG_HOME/foot/"
 link_correct "$DOT_CONFIG/wayland/river/init"       "$XDG_CONFIG_HOME/river/"
 link_correct "$DOT_CONFIG/wayland/sway/config"      "$XDG_CONFIG_HOME/sway/"
