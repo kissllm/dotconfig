@@ -111,7 +111,7 @@ local function dark()
     hl(0, 'FileStyleIgnorePattern',  { bg  = 'NONE', })
     hl(0, 'NewLineWin',              { fg  = '#999999', })
 
-    hl(0, 'NonText',                 { fg  = 'NONE',     bg = 'NONE', })
+    hl(0, 'NonText',                 { fg  = 'DarkGray', bg = 'NONE', })
     hl(0, 'rstEmphasis',             { fg  = '#22aa77',  bg = 'NONE', })
     hl(0, 'manItalic',               { fg  = '#22aa77',  bg = 'NONE', })
     hl(0, 'Keyword',                 { fg  = '#22aa77',  bg = 'NONE', })
@@ -198,32 +198,6 @@ vim.cmd[[
     hl(0, 'CtrlSpaceNormal',     { fg = 'NONE',     bg='Blue', reverse = true })
     hl(0, 'CtrlSpaceSearch',     { fg = 'NONE',     bg='Blue', reverse = true })
     hl(0, 'CtrlSpaceStatus',     { fg = 'NONE',     bg='Blue', reverse = true })
-
-
---  indent_blankline::highlight_guides
---  " hi! Comment        guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
---  " hi! Comment        guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
---  " hi! Comment        guifg=#ffffff guibg=#000000 ctermfg=DarkGray ctermbg=NONE cterm=inverse term=inverse gui=inverse
---  " hi   @comment        cterm=italic gui=italic guifg=#5c6370
---  " hi   @comment        cterm=NONE gui=NONE guifg=DarkGray
---  " hi!  @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
---  " hi!  @comment       guifg=#ffffff guibg=#000000 ctermfg=45 ctermbg=NONE cterm=inverse term=inverse gui=inverse
---  hl(0, 'Comment',             { fg = 'DarkGray', bg = 'NONE', reverse = true })
---  hl(0, 'Comment',             { fg = 'DarkGray', bg = 'Black', reverse = true })
---  hl(0, 'Comment',             { fg = 'NONE',     bg = 'Blue' })
-    hl(0, 'Comment',             { fg = 'DarkGrey', bg = 'Blue',    })
---  hl(0, 'Comment',             { fg = 'Black',    bg = 'DarkGrey' })
---  hl(0, 'Comment',             { bg = 'Black',    fg = 'DarkGrey' })
---  hl(0, 'Comment',             { fg = 'White',    bg = '#c0c0c0' })
---  hl(0, '@comment',            { fg = 'DarkGray', bg = 'NONE', reverse = true })
---  hl(0, '@comment',            { fg = 'DarkGray', bg = 'Black', reverse = true })
---  hl(0, '@comment',            { fg = 'Black',    bg = 'DarkGrey' })
-    hl(0, '@comment',            { fg = 'DarkGrey', bg = 'Blue',     })
---  hl(0, '@comment',            { fg = 'Black',    bg = 'DarkGrey' })
---  hl(0, '@comment',            { fg = 'White',    bg = '#c0c0c0'  })
---  hi! SpecialComment    guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
---  SpecialComment xxx    ctermfg=242 guifg=#ff4444
-    hl(0, 'SpecialComment',      { bg = '#008080',  fg = 'NONE',  })
 
     hl(0, 'WhiteSpace',          { bg = 'Blue',     fg='DarkGrey' })
 
@@ -492,13 +466,41 @@ vim.cmd[[
 --  " @text.emphasis     cterm=italic gui=italic guifg=#61afef
 --  hi @text.emphasis    cterm=NONE gui=NONE guifg=#22aa77 guibg=NONE
     hl(0, '@text.emphasis',      { fg = '#22aa77',  bg = 'NONE' })
+    hl(0, '@text',               { fg = '#22aa77',  bg = 'NONE' })
+
+--  indent_blankline::highlight_guides
+--  " hi! Comment        guifg=DarkGrey guibg=NONE ctermfg=2 ctermbg=0 cterm=NONE gui=NONE term=NONE
+--  " hi! Comment        guifg=#444444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
+--  " hi! Comment        guifg=#ffffff guibg=#000000 ctermfg=DarkGray ctermbg=NONE cterm=inverse term=inverse gui=inverse
+--  " hi   @comment        cterm=italic gui=italic guifg=#5c6370
+--  " hi   @comment        cterm=NONE gui=NONE guifg=DarkGray
+--  " hi!  @comment       cterm=NONE gui=NONE guifg=#333344 guibg=NONE ctermfg=45 ctermbg=NONE
+--  " hi!  @comment       guifg=#ffffff guibg=#000000 ctermfg=45 ctermbg=NONE cterm=inverse term=inverse gui=inverse
+--  hl(0, 'Comment',             { fg = 'DarkGray', bg = 'NONE', reverse = true })
+--  hl(0, 'Comment',             { fg = 'DarkGray', bg = 'Black', reverse = true })
+--  hl(0, 'Comment',             { fg = 'NONE',     bg = 'Blue' })
+    hl(0, 'Comment',             { fg = 'DarkGrey', bg = 'Blue',    })
+--  hl(0, 'Comment',             { fg = 'Black',    bg = 'DarkGrey' })
+--  hl(0, 'Comment',             { bg = 'Black',    fg = 'DarkGrey' })
+--  hl(0, 'Comment',             { fg = 'White',    bg = '#c0c0c0' })
+--  hl(0, '@comment',            { fg = 'DarkGray', bg = 'NONE', reverse = true })
+--  hl(0, '@comment',            { fg = 'DarkGray', bg = 'Black', reverse = true })
+--  hl(0, '@comment',            { fg = 'Black',    bg = 'DarkGrey' })
+    hl(0, '@comment',            { fg = 'DarkGrey', bg = 'Blue',     })
+--  hl(0, '@comment',            { fg = 'Black',    bg = 'DarkGrey' })
+--  hl(0, '@comment',            { fg = 'White',    bg = '#c0c0c0'  })
+--  hi! SpecialComment    guifg=#ff4444 guibg=NONE ctermfg=DarkGray ctermbg=NONE cterm=NONE gui=NONE term=NONE
+--  SpecialComment xxx    ctermfg=242 guifg=#ff4444
+    hl(0, 'SpecialComment',      { bg = '#008080',  fg = 'NONE',  })
+
 --  hl(0, '@spell',              { fg = '#22aa77',  bg = 'NONE' })
 --  Will change comment foreground color
-    hl(0, '@spell',              { fg = 'NONE',     bg = 'NONE' })
+    hl(0, '@spell',              { fg = '#000000',  bg = 'DarkGrey' })
+
 --  vimwiki/vimwiki#116
-    hl(0, 'VimwikiCode',         { fg = 'NONE',     bg = 'NONE' })
-    hl(0, 'VimwikiPre',          { fg = 'NONE',     bg = 'NONE' })
-    hl(0, '@label',              { fg = '#c18401',    bg = 'NONE' })
+    hl(0, 'VimwikiCode',         { fg = '#c18401',  bg = 'NONE' })
+    hl(0, 'VimwikiPre',          { fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@label',              { fg = '#c18401',  bg = 'NONE' })
 --  DiagnosticInfo xxx guifg=#61afef --  noice border highlight ?
 --  hi NoiceCmdlinePopupBorder NoiceCmdlinePopupBorderxxx links to DiagnosticSignInfo
 --  hi DiagnosticSignInfo DiagnosticSignInfoxxx links to DiagnosticInfo
@@ -510,13 +512,23 @@ vim.cmd[[
 --  hi Delimiter Delimiter     xxx guifg=#dcdfe4
 --  hi NoiceCmdlinePopupTitle NoiceCmdlinePopupTitlexxx links to DiagnosticSignInfo
 --  hi NoiceCmdlinePopup NoiceCmdlinePopupxxx links to Normal
+    hl(0, '@punctuation',        { fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@punctuation.special',{ fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@punctuation.bracket',{ fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@punctuation.delimiter',
+    							 { fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@operator',           { fg = '#c18401',  bg = 'NONE' })
+    hl(0, 'Operator',            { fg = '#c18401',  bg = 'NONE' })
+    hl(0, '@property',           { fg = '#c18401',  bg = 'NONE' })
+    hl(0, 'Delimiter',           { fg = '#c18401',  bg = 'NONE' })
+
 end
 
 local function light()
 
 --  hl(0, 'Normal',              { fg = 'Black',    bg = 'Grey' })
-    hl(0, 'Normal',              { fg = '#c18401',  bg = '#8a8a8a',  nocombine = true})
-    hl(0, 'ActiveWindow',        { fg = '#c18401',  bg = 'DarkGrey', link = 'Normal', })
+    hl(0, 'Normal',              { fg = '#121212',  bg = '#8a8a8a',  nocombine = true})
+    hl(0, 'ActiveWindow',        { fg = '#121212',  bg = 'DarkGrey', link = 'Normal', })
     hl(0, 'NormalNC',            { fg = 'White',    bg = 'Blue',     nocombine = true})
     hl(0, 'InactiveWindow',      { fg = 'White',    bg = 'Blue',     link = 'NormalNC', })
     hl(0, 'Identifier',          { fg = '#00afd7',  bg = 'NONE',     nocombine = true, bold = true })
@@ -532,7 +544,7 @@ local function light()
     hl(0, 'SpecialKey',          { fg = '#444444',  bg = 'NONE',  })
     hl(0, 'SignColumn',          { fg = '#008080',  bg = 'NONE',  })
     hl(0, 'LineNr',              { fg = '#444444',  bg = 'NONE',  })
-    hl(0, 'CursorLineNr',        { fg = 'White',    bg = '#767676', bold = true })
+    hl(0, 'CursorLineNr',        { fg = '#ffffff',  bg = '#767676',  bold = true })
     hl(0, 'CursorColumn',        { fg = 'Blue',     bg = 'NONE',     reverse =true, nocombine = true, blend = 80 })
 --  hl(0, 'CursorLine',          { bg = 'NONE',     fg = 'NONE',     bold = true, reverse = true })
 --  hl(0, 'CursorLine',          { bg = '#c18401',  fg = 'NONE',     bold = true, nocombine = true })
@@ -558,7 +570,7 @@ local function light()
 
     hl(0, 'FileStyleIgnorePattern',  { bg  = 'NONE', })
     hl(0, 'NewLineWin',              { fg  = '#999999', })
-    hl(0, 'NonText',             { fg = 'NONE',     bg = 'NONE', })
+    hl(0, 'NonText',             { fg = 'DarkGray', bg = 'NONE', })
     hl(0, 'rstEmphasis',         { fg = '#22aa77',  bg = 'NONE', })
     hl(0, 'manItalic',           { fg = '#22aa77',  bg = 'NONE', })
     hl(0, 'Keyword',             { fg = '#22aa77',  bg = 'NONE', })
@@ -647,13 +659,20 @@ local function light()
     hl(0, 'LspReferenceWrite',   { fg = '#ff4444',  bg = 'NONE' })
     hl(0, '@symbol',             { fg = '#22aa77',  bg = 'NONE' })
     hl(0, '@text.emphasis',      { fg = '#22aa77',  bg = 'NONE' })
+    hl(0, '@text',               { fg = '#22aa77',  bg = 'NONE' })
 --  hl(0, '@spell',              { fg = 'White',    bg = 'NONE' })
     hl(0, '@spell',              { fg = '#808080',  bg = '#767676' })
-    hl(0, '@label',              { fg = 'Brown',    bg = 'Black' })
+    hl(0, '@label',              { fg = '#c18401',  bg = 'Black' })
     hl(0, '@punctuation',        { fg = '#c18401',  bg = 'Black' })
     hl(0, '@punctuation.special',{ fg = '#c18401',  bg = 'Black' })
     hl(0, '@punctuation.bracket',{ fg = '#c18401',  bg = 'Black' })
+    hl(0, '@punctuation.delimiter',
+    							 { fg = '#c18401',  bg = 'Black' })
     hl(0, '@operator',           { fg = '#c18401',  bg = 'Black' })
+    hl(0, 'Operator',            { fg = '#c18401',  bg = 'Black' })
+    hl(0, '@property',           { fg = '#c18401',  bg = 'Black' })
+    hl(0, 'Delimiter',           { fg = '#c18401',  bg = 'Black' })
+
 --  @punctuation.bracket
 
 
@@ -746,7 +765,7 @@ local function insert_leave()
     hl(0, 'Cursor2',         { fg = 'NONE',     bg = 'NONE',    blend = 10, nocombine = true })
     if vim.opt_local.background:get() == 'dark' then
     --  hl(0, 'CursorColumn',    { fg = 'NONE',     bg = 'Blue',    nocombine = true })
-        hl(0, 'CursorColumn',    { fg = 'NONE',     bg = 'White',   bold = true, reverse =true, nocombine = true, blend = 80 })
+        hl(0, 'CursorColumn',    { fg = 'NONE',     bg = 'Blue',   bold = true, nocombine = true, blend = 80 })
         --  Correct setting of CursorLine
     --  hl(0, 'CursorLine',      { fg = 'NONE',     bg = 'White',   bold = true, blend = 80, reverse = true,  nocombine = true })
     --  hl(0, 'CursorLine',      { fg = 'NONE',     bg = 'Yellow',  bold = true, reverse = true,  nocombine = true })
@@ -760,7 +779,8 @@ local function insert_leave()
         hl(0, 'CursorLine',      { fg = 'NONE',     bg = 'NONE',    bold = true, nocombine = true })
         hl(0, 'Comment',         { fg = '#767676',  bg = '#808080', })
         hl(0, '@comment',        { fg = '#767676',  bg = '#808080', })
-        hl(0, '@spell',          { fg = 'Black',  bg = '#808080' })
+        hl(0, '@spell',          { fg = '#808080',  bg = '#767676', })
+        hl(0, '@text',           { fg = '#808080',  bg = '#767676', })
         vim.o.winhighlight = 'Normal:InactiveWindow,NormalNC:ActiveWindow'
     end
 

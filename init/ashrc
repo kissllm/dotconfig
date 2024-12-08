@@ -747,7 +747,8 @@ _tmux() {
         TMUX_PLUGIN_MANAGER_PATH="$TMUX_PLUGIN_MANAGER_PATH" \
         WAYLAND_DISPLAY="${WAYLAND_DISPLAY-}" \
         XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR-}" \
-        \tmux -T UTF-8 -T 256 -f "$DOT_CONFIG/terminal/tmux/tmux.conf" new -As . > "$TMUX_TMPDIR/tmux.log" 2>&1 || :
+        \tmux -T UTF-8 -T 256 -f "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" new -As . > "$TMUX_TMPDIR/tmux.log" 2>&1 || :
+        #   /home/kiss/lm/chroot-x86_64/usr/bin/tmux -T UTF-8 -T 256 -f "$DOT_CONFIG/terminal/tmux/tmux.conf" new -As . > "$TMUX_TMPDIR/tmux.log" 2>&1 || :
     #   \tmux -T UTF-8,256,ccolour,clipboard,extkeys,focus,usstyle -f "$DOT_CONFIG/terminal/tmux/tmux.conf" new -As . > "$TMUX_TMPDIR/tmux.log" 2>&1 || :
     #     sh -c 'printf '%s' "$cursor_code"; \tmux -T UTF-8 -T 256 new -As .' 2>&1 || :
     # ENV=$HOME/.profile sh -$-l > /dev/tty
@@ -995,6 +996,7 @@ is_pts() {
 { [ ! -z "${TTY_NUM:+x}" ] && [ 1 -eq "$TTY_NUM" ] && ! is_pts "$TTY"; } ||
 [ "${TERM_PROGRAM-}" = "tmux" ] || is_child_of "tmux" ||
 is_chrooted ||
+# [ -z "${IS_KISS:+x}" ] ||
 # [ ! -z "${TMUX+x}" ] || # [ -n "$(cat $DOT_CONFIG/.tmux_lock)" ] ||
 #   {
 #       {

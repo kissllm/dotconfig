@@ -351,18 +351,21 @@ link_correct "$DOT_CONFIG/wayland/env" "${WAYLAND_CONFIG_HOME}/"
 # insert_or_link "$DOT_CONFIG/ashrc"   "$HOME/.ashrc"
 
 link_correct "$DOT_CONFIG/inputrc"                  "$HOME/.inputrc"
-
-link_correct "$DOT_CONFIG/terminal/tmux/tmux.conf"       "$HOME/.tmux.conf"
-is_folder "$XDG_CONFIG_HOME/tmux" ||
+! is_link "$HOME/.tmux.conf" || \rm -rf "$HOME/.tmux.conf"
+# link_correct "$DOT_CONFIG/terminal/tmux/tmux.conf"       "$HOME/.tmux.conf"
+! is_folder "$XDG_CONFIG_HOME/tmux" ||
 {
-    \rm -rf "$XDG_CONFIG_HOME/tmux"
-    \mkdir -p "$XDG_CONFIG_HOME/tmux"
+ FFFFFFFFFF   \rm -rf "$XDG_CONFIG_HOME/tmux"
+#   \mkdir -p "$XDG_CONFIG_HOME/tmux"
 }
-link_correct "$DOT_CONFIG/terminal/tmux/header.conf"     "$XDG_CONFIG_HOME/tmux/"
-link_correct "$DOT_CONFIG/terminal/tmux/prefix.conf"     "$XDG_CONFIG_HOME/tmux/"
-link_correct "$DOT_CONFIG/terminal/tmux/navigation.conf" "$XDG_CONFIG_HOME/tmux/"
-link_correct "$DOT_CONFIG/terminal/tmux/resize.conf"     "$XDG_CONFIG_HOME/tmux/"
-link_correct "$DOT_CONFIG/terminal/tmux/wincmd.conf"     "$XDG_CONFIG_HOME/tmux/"
+
+link_correct "$DOT_CONFIG/terminal/tmux"     "$XDG_CONFIG_HOME/"
+# Link entire folder instead of individual files
+# link_correct "$DOT_CONFIG/terminal/tmux/header.conf"     "$XDG_CONFIG_HOME/tmux/"
+# link_correct "$DOT_CONFIG/terminal/tmux/prefix.conf"     "$XDG_CONFIG_HOME/tmux/"
+# link_correct "$DOT_CONFIG/terminal/tmux/navigation.conf" "$XDG_CONFIG_HOME/tmux/"
+# link_correct "$DOT_CONFIG/terminal/tmux/resize.conf"     "$XDG_CONFIG_HOME/tmux/"
+# link_correct "$DOT_CONFIG/terminal/tmux/wincmd.conf"     "$XDG_CONFIG_HOME/tmux/"
 
 link_correct "$DOT_CONFIG/terminal/foot/foot.ini"   "$XDG_CONFIG_HOME/foot/"
 link_correct "$DOT_CONFIG/wayland/river/init"       "$XDG_CONFIG_HOME/river/"
@@ -440,17 +443,17 @@ esac
 #   # . "${MNGR_ROOT-}/usr/include/kiss/share" ""
 #   . "${MNGR_ROOT-}/usr/include/kiss/share"
 #   # . /usr/include/kiss/share > /dev/null 2>&1
-# 
+#
 #   # unset script_name
-# 
+#
 #   [ -t 0 ] || die 'fd 0' "does not work"
 #   # export $(cut -d= -f1 /usr/include/kiss/share)
-# 
+#
 #   # -ash: //: Permission denied -- // is not defined
 #   # war '$HEADER' "$HEADER"
-# 
+#
 #   # export HEADER=
-# 
+#
 # }
 
 SCRIPT_NAME="$SCRIPT_SCOPE"

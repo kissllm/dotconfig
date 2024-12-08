@@ -1187,7 +1187,7 @@ return {
 				-- lspzero = lspzero,
 				lsp = lsp,
 				capabilities = capabilities,
-				lua = {
+				Lua = {
 					mason = false,
 					format = {
 						enable = true,
@@ -1204,6 +1204,8 @@ return {
 						callSnippet = "Replace"
 					},
 					runtime = {
+						-- Tell the language server which version of Lua you're using
+						-- (most likely LuaJIT in the case of Neovim)
 						-- LuaJIT in the case of Neovim
 						version = 'LuaJIT',
 						path = vim.split(package.path, ';'),
@@ -1211,13 +1213,18 @@ return {
 					diagnostics = {
 						globals = { 'vim' }
 					},
+					--  https://www.reddit.com/r/neovim/comments/1dbf7qm/lsp_accessing_undefined_variable_vim/
+            		hint = {
+                		enable = true,
+                		arrayIndex = "Disable",
+            		},
 					workspace = {
 						checkThirdParty = false,
 						-- Make the server aware of Neovim runtime files
 						library = {
 							vim.env.VIMRUNTIME,
 							[vim.fn.expand('$VIMRUNTIME/lua')] = true,
-						[vim.fn.stdpath("config") .. "/lua"] = true,
+							[vim.fn.stdpath("config") .. "/lua"] = true,
 							[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
 						},
 					},
@@ -1238,15 +1245,16 @@ return {
 						client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
 							Lua = {
 								runtime = {
-									-- Tell the language server which version of Lua you're using
-									-- (most likely LuaJIT in the case of Neovim)
-									version = 'LuaJIT'
+									version = 'LuaJIT',
 								},
 								-- Make the server aware of Neovim runtime files
 								workspace = {
 									checkThirdParty = false,
 									library = {
-										vim.env.VIMRUNTIME
+										vim.env.VIMRUNTIME,
+										[vim.fn.expand('$VIMRUNTIME/lua')] = true,
+										[vim.fn.stdpath("config") .. "/lua"] = true,
+										[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
 										-- Depending on the usage, you might want to add additional paths here.
 										-- E.g.: For using `vim.*` functions, add vim.env.VIMRUNTIME/lua.
 										-- "${3rd}/luv/library"

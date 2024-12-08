@@ -6,8 +6,8 @@
 
 return {
     "trailblazing/tmux.nvim",
-    --  cond   = false, -- test
-        cond   = true,
+        --  cond   = false, -- test
+            cond   = true,
         branch = 'main',
     --  event  = "VeryLazy",
         event  = { "TextYankPost", 'VimEnter', 'VimLeave', 'VimResume', 'FocusGained', 'BufEnter', },
@@ -59,7 +59,9 @@ return {
     --  Lazy will not process the upward "opts" if the "config" function was defined, whatever setup() was triggered with or without parameters
     --  Either use the "config" and use it till the end or don't use it at all
     config = function()
+		--  local user_preferences = debug.getinfo(2, "S").source:sub(2)
         opts      = {
+			--  user_preferences = user_preferences,
             copy_sync = {
                 --  enable = false, -- default
                 --  enable = true,  -- will redefine the neovim "p"
@@ -79,7 +81,9 @@ return {
             --  "XDG_CONFIG_HOME" files might be symbolic links pointing to user's real config files
             --  tmux.nvim won't touch it if user has modified the links
             tmux    = {
-                conf    = os.getenv("HOME") .. "/.tmux.conf",
+                --  conf    = os.getenv("HOME") .. "/.tmux.conf",
+				--  Reference implementation. Not essential to this plugin
+				conf    = os.getenv("XDG_CONFIG_HOME") .. "/tmux/tmux.conf",
                 header  = os.getenv("XDG_CONFIG_HOME") .. "/tmux/header.conf",
             },
             prefix  = {
@@ -97,7 +101,7 @@ return {
 		        --  The background color value indicating entering copy-mode when nvim background is dark
                 normal_background   = "colour003",
 		        --  The background color value indicating entering prefix "mode" when vim background is light
-                prefix_bg_on_light  = "#d7d700",
+                prefix_bg_on_light  = "#d7d7ff",
 		        --  The background color value indicating entering copy-mode when nvim background is light
                 normal_bg_on_light  = "colour003",
             },

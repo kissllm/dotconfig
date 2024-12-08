@@ -203,8 +203,10 @@ return {
 
 
 	{
+		--  A Neovim (lua) plugin for working with a markdown zettelkasten / wiki and mixing it with a journal, based on telescope.nvim
 		'renerocksai/telekasten.nvim',
 		dependencies = {'nvim-telescope/telescope.nvim'},
+		cond    = false,
 		event   = "VeryLazy",
 		lazy    = true,
 		config  = function()
@@ -677,6 +679,7 @@ return {
 	},
 
     {
+		cond   = false, --  hard to download
         "hinell/lsp-timeout.nvim",
         dependencies = { "neovim/nvim-lspconfig", },
         --  "romain/vim-cool",

@@ -55,10 +55,15 @@ printf '%s %s\n' '$query: ' "$query"
 # Text file only
 # doas find "$path" -type f -exec grep -Iq . {} + -print | xargs doas grep -Hn "$target"
 
-for file in $(eval $query); do
-	[ ! -f "$file" ] ||
-	doas grep -Hn "$target" "$file" || :
-done
+while IFS= read -r file; do
+	[ -f "$file" ] || continue
+	# [Finding all "Non-Binary" files](https://unix.stackexchange.com/questions/46276/finding-all-non-binary-files)
+	# file -00 --mime-encoding -- "$file" | awk 'BEGIN{ORS=RS="\0"}{if(NR%2)f=$0;else if(!/binary/)print f}' || continue
+	[ "$(file -b --mime-encoding -- "$file")" != 'binary' ] || continue
+	# Filtering binary files
+	[ ! -z "$(file "$file" | awk -F: '/ASCII text/ {print $1}')" ] || continue
+	doas grep -HIn "$target" "$file" || :
+done < <(eval $query)
 
 # find "$path" -type f -name "$source" -exec grep -Hn "$target" {} +
 # find . ! -path "*.git" -type f \( -name *.txt -o -name *.cmake \) -exec grep -Hn find_compiler_rt_library {} +

@@ -229,6 +229,8 @@ set.incsearch       = true
 if vim.fn.exists('$TMUX') then
 	--  set.t_ut = ''
 	cmd([[set t_ut=]])
+	--  [TUI: in tmux, background color is not detected #17070](https://github.com/neovim/neovim/issues/17070)
+	vim.loop.fs_write(2, "\27Ptmux;\27\27]11;?\7\27\\", -1, nil)
 end
 set.backup          = false
 set.writebackup     = false
